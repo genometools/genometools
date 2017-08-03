@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/array_api.h"
 #include "core/compat.h"
 #include "core/disc_distri_api.h"
 #include "core/format64.h"
@@ -29,6 +30,7 @@ struct GtAssemblyStatsCalculator
   GtUword maxlength;
   GtUword genome_length;
   GtDiscDistri *lengths;
+  GtArray *nstats;
 };
 
 GtAssemblyStatsCalculator *gt_assembly_stats_calculator_new(void)
@@ -42,6 +44,7 @@ GtAssemblyStatsCalculator *gt_assembly_stats_calculator_new(void)
   asc->minlength = 0;
   asc->maxlength = 0;
   asc->genome_length = 0;
+  asc->nstats = gt_array_new(sizeof (GtUword));
   return asc;
 }
 
@@ -50,6 +53,7 @@ void gt_assembly_stats_calculator_delete(GtAssemblyStatsCalculator *asc)
   if (asc != NULL)
   {
     gt_disc_distri_delete(asc->lengths);
+    gt_array_delete(asc->nstats);
     gt_free(asc);
   }
 }
@@ -77,7 +81,7 @@ void gt_assembly_stats_calculator_set_genome_length(
 
 #define NOF_LIMITS 5
 
-#define MAX_NOF_NSTATS 4
+#define MAX_NOF_NSTATS 10
 typedef struct
 {
   char         *name[MAX_NOF_NSTATS];
@@ -94,7 +98,8 @@ typedef struct
                third_quartile,
                three_fourth_num;
   GtUword      nvalue[MAX_NOF_NSTATS],
-               lvalue[MAX_NOF_NSTATS];
+               lvalue[MAX_NOF_NSTATS],
+               val[MAX_NOF_NSTATS];
   unsigned int nofstats;
 } Nstats;
 
@@ -134,8 +139,9 @@ static void calcNstats(GtUword key, GtUint64 value,
   }
 }
 
-#define initNstat(INDEX, NAME, LENGTH)\
+#define initNstat(INDEX, NAME, VAL, LENGTH)\
   nstats.name[INDEX] = (NAME);\
+  nstats.val[INDEX] = VAL;\
   nstats.min[INDEX] = (GtUint64) (LENGTH);\
   nstats.nvalue[INDEX] = 0;\
   nstats.lvalue[INDEX] = 0;\
@@ -169,6 +175,48 @@ GtUword gt_assembly_stats_calculator_nstat(GtAssemblyStatsCalculator *asc,
   return nstats.nvalue[0];
 }
 
+int gt_assembly_stats_calculator_register_nstat(GtAssemblyStatsCalculator *asc,
+                                                GtUword n, GtError *err)
+{
+  GtUword i;
+  bool present;
+  gt_assert(asc != NULL && n > 0);
+
+  if (n > 100) {
+    gt_error_set(err, "invalid N value " GT_WU ", must be <= 100", n);
+    return -1;
+  }
+
+  if (gt_array_size(asc->nstats) == MAX_NOF_NSTATS) {
+    gt_error_set(err, "Limit of N statistics reached (%d)", MAX_NOF_NSTATS);
+    return -1;
+  }
+
+  present = false;
+  for (i = 0; i < gt_array_size(asc->nstats); i++) {
+    if ((*(GtUword*) gt_array_get(asc->nstats, i)) == n) {
+      present = true;
+      break;
+    }
+  }
+  if (!present) {
+    gt_array_add(asc->nstats, n);
+  }
+
+  return 0;
+}
+
+static int gt_assembly_stats_calculator_cmp_nstat(const void *v1,
+                                                  const void *v2) {
+  GtUword u1 = *(GtUword*) v1;
+  GtUword u2 = *(GtUword*) v2;
+  if (u1 < u2)
+    return -1;
+  if (u1 == u2)
+    return 0;
+  return 1;
+}
+
 void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
     GtLogger *logger)
 {
@@ -176,13 +224,26 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   unsigned int i;
 
   gt_assert(asc != NULL);
+
+  /* defaults are N50/N80 */
+  if (gt_array_size(asc->nstats) == 0) {
+    gt_assembly_stats_calculator_register_nstat(asc, 50, NULL);
+    gt_assembly_stats_calculator_register_nstat(asc, 80, NULL);
+  }
+
   nstats.nofstats = 0;
-  initNstat(0, "50: ", asc->sumlength * 0.5);
-  initNstat(1, "80: ", asc->sumlength * 0.8);
-  if (asc->genome_length > 0)
-  {
-    initNstat(2, "G50:", asc->genome_length * 0.5);
-    initNstat(3, "G80:", asc->genome_length * 0.8);
+  gt_array_sort_stable(asc->nstats, gt_assembly_stats_calculator_cmp_nstat);
+  for (i = 0; i < gt_array_size(asc->nstats); i++) {
+    GtUword v = *(GtUword*) gt_array_get(asc->nstats, i);
+    initNstat(i, "", v, (GtUint64) (asc->sumlength * ((float) v / 100U)));
+  }
+  if (asc->genome_length > 0) {
+    GtUword j;
+    for (j = 0; j < gt_array_size(asc->nstats); j++) {
+      GtUword v = *(GtUword*) gt_array_get(asc->nstats, j);
+      initNstat(i + j, "G", v,
+                (GtUint64) (asc->genome_length * ((float) v / 100U)));
+    }
   }
 
   initLimit(0, 500ULL);
@@ -242,17 +303,17 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   {
     if (nstats.nvalue[i] > 0)
     {
-      gt_logger_log(logger, "N%s                  "GT_WU"", nstats.name[i],
-          nstats.nvalue[i]);
-      gt_logger_log(logger, "L%s                  "GT_WU"", nstats.name[i],
-          nstats.lvalue[i]);
+      gt_logger_log(logger, "N%s%02d                "GT_WU"", nstats.name[i],
+          (int) nstats.val[i], nstats.nvalue[i]);
+      gt_logger_log(logger, "L%s%02d                "GT_WU"", nstats.name[i],
+          (int) nstats.val[i], nstats.lvalue[i]);
     }
     else
     {
-      gt_logger_log(logger, "N%s                  n.a.",
-          nstats.name[i]);
-      gt_logger_log(logger, "L%s                  n.a.",
-          nstats.name[i]);
+      gt_logger_log(logger, "N%s%02d                n.a.",
+          nstats.name[i], (int) nstats.val[i]);
+      gt_logger_log(logger, "L%s%02d                n.a.",
+          nstats.name[i], (int) nstats.val[i]);
     }
   }
 }

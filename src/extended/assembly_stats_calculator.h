@@ -18,6 +18,7 @@
 #ifndef ASSEMBLY_STATS_CALCULATOR_H
 #define ASSEMBLY_STATS_CALCULATOR_H
 
+#include "core/error_api.h"
 #include "core/logger.h"
 #include "core/types_api.h"
 
@@ -45,6 +46,10 @@ void                       gt_assembly_stats_calculator_add(
 GtUword                    gt_assembly_stats_calculator_nstat(
                                                  GtAssemblyStatsCalculator *asc,
                                                  GtUword n);
+
+int                        gt_assembly_stats_calculator_register_nstat(
+                                                 GtAssemblyStatsCalculator *asc,
+                                                 GtUword n, GtError *err);
 
 /* Set the genome length for the GtAssemblyStatsCalculator <asc>;
    this is not necessary, but if the genome length is set;
