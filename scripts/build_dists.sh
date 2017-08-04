@@ -52,6 +52,7 @@ make MACHINE=ARMv7                   \
      STRIP=arm-linux-gnueabihf-strip \
      amalgamation=yes                \
      cairo=no                        \
+     errorcheck=no                   \
      $*
 make MACHINE=ARMv7                   \
      64bit=no                        \
@@ -60,6 +61,7 @@ make MACHINE=ARMv7                   \
      STRIP=arm-linux-gnueabihf-strip \
      amalgamation=yes                \
      cairo=no                        \
+     errorcheck=no                   \
      dist > $TMPFILE
 DISTRIBUTION=`tail -n 1 $TMPFILE`
 cp -f $DISTRIBUTION $DISTDIR
@@ -77,6 +79,7 @@ make MACHINE=ARMv6              \
      amalgamation=yes           \
      64bit=no                   \
      cairo=no                   \
+     errorcheck=no              \
      $*
 make MACHINE=ARMv6              \
      CC="ccache $HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-gcc" \
@@ -85,6 +88,7 @@ make MACHINE=ARMv6              \
      amalgamation=yes           \
      64bit=no                   \
      cairo=no                   \
+     errorcheck=no              \
      dist > $TMPFILE
 DISTRIBUTION=`tail -n 1 $TMPFILE`
 cp -f $DISTRIBUTION $DISTDIR
@@ -102,6 +106,7 @@ make SYSTEM=Darwin                     \
      amalgamation=yes                  \
      64bit=no                          \
      cairo=no                          \
+     errorcheck=no                     \
      $*
 make SYSTEM=Darwin                     \
      MACHINE=i386                      \
@@ -112,6 +117,7 @@ make SYSTEM=Darwin                     \
      amalgamation=yes                  \
      64bit=no                          \
      cairo=no                          \
+     errorcheck=no                     \
      dist > $TMPFILE
 DISTRIBUTION=`tail -n 1 $TMPFILE`
 cp -f $DISTRIBUTION $DISTDIR
@@ -129,6 +135,7 @@ make SYSTEM=Darwin                     \
      STRIP=i686-apple-darwin10-strip   \
      amalgamation=yes                  \
      cairo=no                          \
+     errorcheck=no                     \
      $*
 make SYSTEM=Darwin                     \
      MACHINE=i386                      \
@@ -139,6 +146,7 @@ make SYSTEM=Darwin                     \
      STRIP=i686-apple-darwin10-strip   \
      amalgamation=yes                  \
      cairo=no                          \
+     errorcheck=no                     \
      dist > $TMPFILE
 DISTRIBUTION=`tail -n 1 $TMPFILE`
 cp -f $DISTRIBUTION $DISTDIR
