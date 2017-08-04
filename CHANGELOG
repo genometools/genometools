@@ -1,6 +1,18 @@
 changes in version 1.5.10 (2016-XX-XX)
 
 - bugfixes and cleanups
+- add Readjoiner output in GFA format
+- improve building on GCC 7
+- add arbitrary N values for `gt seqstat`
+- install gtdata into $PREFIX/share/genometools by default
+- improve robustness of test suite
+- add Travis tests for Mac OS X
+- `gt seed_extend` now speaks GFA2
+- improvements to `gt seed_extend` w.r.t. runtime and
+  output format
+- new implementation of functionality for computing
+  E-values for local alignments according to the
+  Karlin-Altschul statistics
 
 
 changes in version 1.5.9 (2016-07-21)
