@@ -45,9 +45,6 @@
                      SARR_DESTAB |\
                      SARR_SSPTAB)
 
-GT_DECLAREBufferedfiletype(GtUword);
-GT_DECLAREREADFUNCTION(GtUword);
-
 #if defined (_LP64) || defined (_WIN64)
 GT_DECLAREBufferedfiletype(uint32_t);
 GT_DECLAREREADFUNCTION(uint32_t);

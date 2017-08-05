@@ -58,4 +58,7 @@
           return 1;\
         }
 
+GT_DECLAREBufferedfiletype(GtUword);
+GT_DECLAREREADFUNCTION(GtUword);
+
 #endif
