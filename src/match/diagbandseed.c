@@ -433,13 +433,20 @@ static void gt_kmerpos_list_delete(GtKmerPosList *kmerpos_list)
   }
 }
 
+static GtCodetype gt_kmerpos_entry_code(
+                      const GtKmerPosListEncodeInfo *encode_info,
+                      GtUword value)
+{
+  return value >> encode_info->shift_code;
+}
+
 static GtDiagbandseedKmerPos gt_kmerpos_entry_decode(
                       const GtKmerPosListEncodeInfo *encode_info,
                       GtUword value)
 {
   GtDiagbandseedKmerPos dec;
 
-  dec.code = value >> encode_info->shift_code;
+  dec.code = gt_kmerpos_entry_code(encode_info,value);
   dec.seqnum = encode_info->first_seqnum +
                ((value >> encode_info->shift_seqnum) &
                 encode_info->mask_seqnum);
@@ -479,7 +486,7 @@ static void gt_kmerpos_list_add(GtKmerPosList *kmerpos_list,
         (seqnum << encode_info->shift_seqnum) |
         ((GtUword) kmerpos_entry->endpos << encode_info->shift_endpos);
     value = kmerpos_list->spaceGtUword[kmerpos_list->nextfree];
-    gt_assert((value >> encode_info->shift_code) == kmerpos_entry->code);
+    gt_assert(gt_kmerpos_entry_code(encode_info,value) == kmerpos_entry->code);
     if ((encode_info->first_seqnum +
         ((value >> encode_info->shift_seqnum) &
          encode_info->mask_seqnum)) != kmerpos_entry->seqnum)
@@ -1052,7 +1059,8 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
         gt_assert(ki->listend_struct - ki->listptr_struct ==
                   ki->listend_uword - ki->listptr_uword);
         gt_assert(ki->listptr_struct->code ==
-                  (*ki->listptr_uword >> ki->section.encode_info->shift_code));
+                  gt_kmerpos_entry_code(ki->section.encode_info,
+                                        *ki->listptr_uword));
         ki->listptr_uword++;
       }
       ki->listptr_struct++;
@@ -1077,8 +1085,8 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
     ki->section.nextfree = 0;
     code = ki->buffer_struct.code;
     gt_assert(ki->section.encode_info == NULL ||
-              code == (ki->buffer_uword >>
-                       ki->section.encode_info->shift_code));
+              code == gt_kmerpos_entry_code(ki->section.encode_info,
+                                            ki->buffer_uword));
     /* fill section list from file, stop when code changes */
     do
     {
@@ -1094,9 +1102,10 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
         int rvalU = gt_readnextfromstream_GtUword(&ki->buffer_uword,
                                                   &ki->kmerstream_uword);
 
-        gt_assert(rval == rvalU && ki->buffer_struct.code ==
-                                   (ki->buffer_uword >>
-                                    ki->section.encode_info->shift_code));
+        gt_assert(rval == rvalU &&
+                  ki->buffer_struct.code == gt_kmerpos_entry_code(
+                                                 ki->section.encode_info,
+                                                 ki->buffer_uword));
       }
       ki->section.nextfree++;
     } while (rval == 1 && code == ki->buffer_struct.code);
