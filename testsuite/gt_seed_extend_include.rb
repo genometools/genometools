@@ -27,6 +27,7 @@ seeds = [170039800390891361279027638963673934519,
          255642063275935424280602245704332672807]
 
 $SPLT_LIST = ["-splt struct","-splt ulong"]
+$KMPLT_LIST = ["struct","ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
 $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "seed.s","seed.q","seed_in_algn","s.seqlen",
@@ -192,6 +193,10 @@ Keywords "gt_seed_extend gt_seed_extend_failure"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("foo", "#{$testdata}foo.fas")
+  run_test "#{$bin}gt seed_extend -splt xx -ii foo", :retval => 1
+  grep last_stderr, /illegal parameter for option -splt/
+  run_test "#{$bin}gt seed_extend -kmplt yy -ii foo", :retval => 1
+  grep last_stderr, /illegal parameter for option -kmplt/
   run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 1
   grep last_stderr, /integer <= 8 \(length of longest sequence\)/
   run_test "#{$bin}gt seed_extend -maxfreq 1 -ii at1MB", :retval => 1
@@ -302,14 +307,17 @@ Keywords "gt_seed_extend cam"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   $SPLT_LIST.each do |splt|
-    $CAM_LIST.each do |a_cam|
-      $CAM_LIST.each do |b_cam|
-        run_test "#{$bin}gt seed_extend -extendgreedy " +
-                 "-cam #{a_cam},#{b_cam} -ii at1MB #{splt}", :retval => 0
-        run "grep -v '^#' #{last_stdout}"
-        run "sort #{last_stdout}"
-        run "mv #{last_stdout} see-ext-at1MB-#{a_cam}-#{b_cam}.matches"
-        run "diff -I '^#' see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
+    $KMPLT_LIST.each do |kmplt|
+      $CAM_LIST.each do |a_cam|
+        $CAM_LIST.each do |b_cam|
+          run_test "#{$bin}gt seed_extend -extendgreedy " +
+                   "-cam #{a_cam},#{b_cam} -ii at1MB #{splt} -kmplt #{kmplt}", 
+                   :retval => 0
+          run "grep -v '^#' #{last_stdout}"
+          run "sort #{last_stdout}"
+          run "mv #{last_stdout} see-ext-at1MB-#{a_cam}-#{b_cam}.matches"
+          run "diff -I '^#' see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
+        end
       end
     end
   end
@@ -332,7 +340,7 @@ end
 
 # Threading
 Name "gt seed_extend: threading"
-Keywords "gt_seed_extend thread"
+Keywords "gt_seed_extend thread gt_seed_extend_thread"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("fastq_long", "#{$testdata}fastq_long.fastq")
@@ -391,13 +399,15 @@ Name "gt seed_extend: small_poly, xdrop vs greedy extension"
 Keywords "gt_seed_extend extendgreedy extendxdrop small_poly"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
-  for splt in $SPLT_LIST do
-    run_test "#{$bin}gt seed_extend -extendxdrop 97 " +
-             "-l 10 -ii small_poly -verify-alignment #{splt}"
-    run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
-    run_test "#{$bin}gt seed_extend -extendgreedy 97 " +
-             "-l 10 -ii small_poly -verify-alignment #{splt}"
-    run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
+  for kmplt in $KMPLT_LIST do
+    for splt in $SPLT_LIST do
+      run_test "#{$bin}gt seed_extend -extendxdrop 97 " +
+               "-l 10 -ii small_poly -verify-alignment #{splt} -kmplt #{kmplt}"
+      run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
+      run_test "#{$bin}gt seed_extend -extendgreedy 97 " +
+               "-l 10 -ii small_poly -verify-alignment #{splt} -kmplt #{kmplt}"
+      run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
+    end
   end
 end
 
@@ -422,7 +432,7 @@ end
 
 # Filter options
 Name "gt seed_extend: diagbandwidth, mincoverage, seedlength"
-Keywords "gt_seed_extend filter diagbandwidth mincoverage memlimit"
+Keywords "gt_seed_extend filter diagbandwidth mincoverage"
 Test do
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
   for diagbandwidth in [0, 1, 5, 10] do

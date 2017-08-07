@@ -862,7 +862,7 @@ static int gt_seed_extend_runner(int argc,
     kmplt = gt_diagbandseed_base_list_get(false,
                                           gt_str_get(arguments->kmplt_string),
                                           err);
-    if ((int) splt == -1) {
+    if ((int) kmplt == -1) {
       had_err = -1;
     }
   }
