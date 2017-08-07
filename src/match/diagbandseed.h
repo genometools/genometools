@@ -32,12 +32,12 @@ typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
 typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 
 typedef enum
-{ /* keep the order consistent with gt_splt_arguments */
-  GT_DIAGBANDSEED_SPLT_STRUCT,
-  GT_DIAGBANDSEED_SPLT_ULONG,
-  GT_DIAGBANDSEED_SPLT_BYTESTRING,
-  GT_DIAGBANDSEED_SPLT_UNDEFINED
-} GtDiagbandseedPairlisttype;
+{ /* keep the order consistent with gt_base_list_arguments */
+  GT_DIAGBANDSEED_BASE_LIST_STRUCT,
+  GT_DIAGBANDSEED_BASE_LIST_ULONG,
+  GT_DIAGBANDSEED_BASE_LIST_BYTESTRING,
+  GT_DIAGBANDSEED_BASE_LIST_UNDEFINED
+} GtDiagbandseedBaseListType;
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
@@ -56,7 +56,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool norev,
                                              bool nofwd,
                                              const GtRange *seedpairdistance,
-                                             GtDiagbandseedPairlisttype splt,
+                                             GtDiagbandseedBaseListType splt,
+                                             GtDiagbandseedBaseListType kmplt,
                                              bool verify,
                                              bool verbose,
                                              bool debug_kmer,
@@ -72,8 +73,11 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
 
 const char *gt_diagbandseed_splt_comment(void);
 
-GtDiagbandseedPairlisttype gt_diagbandseed_splt_get(const char *splt_string,
-                                                    GtError *err);
+const char *gt_diagbandseed_kmplt_comment(void);
+
+GtDiagbandseedBaseListType gt_diagbandseed_base_list_get(
+                                   bool with_splt,
+                                   const char *base_list_string,GtError *err);
 
 typedef struct
 {
