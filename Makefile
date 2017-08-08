@@ -495,6 +495,7 @@ ifeq ($(amalgamation),yes)
   LIBGENOMETOOLS_PRESRC:=$(filter-out $(SQLITE3_SRC),\
                          $(LIBGENOMETOOLS_PRESRC))
   LIBGENOMETOOLS_SRC:=obj/amalgamation.c
+  GT_CFLAGS+=-Wno-strict-overflow
 else
   LIBGENOMETOOLS_SRC:=$(LIBGENOMETOOLS_PRESRC)
 endif
