@@ -690,6 +690,7 @@ static GtKmerPosListEncodeInfo *gt_kmerpos_encode_info_new(
                                        const GtSequencePartsInfo *seqranges,
                                        GtUword idx)
 {
+  return NULL;
   if (kmplt == GT_DIAGBANDSEED_BASE_LIST_STRUCT)
   {
     return NULL;
@@ -942,7 +943,7 @@ static GtKmerPosList *gt_diagbandseed_get_kmers(
   }
   gt_kmerpos_list_sort(kmerpos_list);
   kmerpos_list->longest_code_run
-    = gt_diagbandseed_longest_code_run( kmerpos_list);
+    = gt_diagbandseed_longest_code_run(kmerpos_list);
   if (verbose) {
     fprintf(stream, "# ... sorted " GT_WU " %u-mers ",
             gt_kmerpos_list_num_entries(kmerpos_list),seedlength);
@@ -968,7 +969,6 @@ typedef struct {
   /* for file based iterator */
   GtBufferedfile_GtDiagbandseedKmerPos kmerstream_struct;
   GtBufferedfile_GtUword kmerstream_uword;
-  GtDiagbandseedKmerPos buffer_struct;
   GtUword buffer_uword;
 } GtDiagbandseedKmerIterator;
 
@@ -1007,7 +1007,7 @@ static void gt_diagbandseed_kmer_iter_reset(GtDiagbandseedKmerIterator *ki)
     {
       ki->kmerstream_struct.nextread = ki->kmerstream_struct.nextfree = 0;
       fseek(ki->kmerstream_struct.fp,sizeof (GtLongestCodeRunType),SEEK_SET);
-      if (gt_readnextfromstream_GtDiagbandseedKmerPos(&ki->buffer_struct,
+      if (gt_readnextfromstream_GtDiagbandseedKmerPos(ki->listptr_struct,
                                                       &ki->kmerstream_struct)
                                                       != 1)
       {
@@ -1051,7 +1051,6 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new_file(FILE *fp,
   GtLongestCodeRunType longest_code_run;
 
   ki->original = NULL;
-  ki->listend_struct = ki->listptr_struct = NULL;
   ki->listend_uword = ki->listptr_uword = NULL;
   gt_assert(fp != NULL);
   gt_xfread(&longest_code_run,sizeof longest_code_run,1,fp);
@@ -1062,17 +1061,25 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new_file(FILE *fp,
       = gt_malloc(GT_FILEBUFFERSIZE *
                   sizeof *ki->kmerstream_uword.bufferedfilespace);
     ki->section.spaceGtUword = NULL;
+    ki->section.spaceGtDiagbandseedKmerPos
+      = gt_malloc(sizeof *ki->section.spaceGtDiagbandseedKmerPos *
+                  longest_code_run);
+    ki->listend_struct = ki->listptr_struct = NULL;
+    ki->section.allocated = longest_code_run;
   } else
   {
     ki->kmerstream_struct.fp = fp;
     ki->kmerstream_struct.bufferedfilespace
       = gt_malloc(GT_FILEBUFFERSIZE *
                   sizeof *ki->kmerstream_struct.bufferedfilespace);
+    ki->section.spaceGtDiagbandseedKmerPos
+      = gt_malloc(sizeof *ki->section.spaceGtDiagbandseedKmerPos *
+                  (longest_code_run+1));
+    ki->listptr_struct = ki->section.spaceGtDiagbandseedKmerPos;
+    ki->section.allocated = longest_code_run + 1;
+    ki->listend_struct = ki->section.spaceGtDiagbandseedKmerPos +
+                         ki->section.allocated;
   }
-  ki->section.spaceGtDiagbandseedKmerPos
-    = gt_malloc(sizeof *ki->section.spaceGtDiagbandseedKmerPos *
-                longest_code_run);
-  ki->section.allocated = longest_code_run;
   ki->section.nextfree = 0;
   ki->section.encode_info = encode_info;
   gt_diagbandseed_kmer_iter_reset(ki);
@@ -1175,16 +1182,22 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
                                              ki->buffer_uword));
     } else
     {
-      code = ki->buffer_struct.code;
+      if (ki->section.spaceGtDiagbandseedKmerPos < ki->listptr_struct)
+      {
+        ki->section.spaceGtDiagbandseedKmerPos[0] = *ki->listptr_struct;
+        ki->listptr_struct = ki->section.spaceGtDiagbandseedKmerPos;
+      }
+      code = ki->listptr_struct->code;
       do
       {
-        gt_assert(ki->section.nextfree < ki->section.allocated);
-        ki->section.spaceGtDiagbandseedKmerPos[ki->section.nextfree++]
-          = ki->buffer_struct;
-        rval = gt_readnextfromstream_GtDiagbandseedKmerPos(&ki->buffer_struct,
+        ki->listptr_struct++;
+        gt_assert(ki->listptr_struct < ki->listend_struct);
+        rval = gt_readnextfromstream_GtDiagbandseedKmerPos(ki->listptr_struct,
                                                            &ki->
                                                              kmerstream_struct);
-      } while (rval == 1 && code == ki->buffer_struct.code);
+      } while (rval == 1 && code == ki->listptr_struct->code);
+      ki->section.nextfree = (GtUword) (ki->listptr_struct -
+                                        ki->section.spaceGtDiagbandseedKmerPos);
     }
     if (rval != 1)
     {
