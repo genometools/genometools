@@ -747,20 +747,6 @@ static void gt_kmerpos_encode_info_delete(GtKmerPosListEncodeInfo *encode_info)
   }
 }
 
-static void gt_kmerpos_encode_info_show(FILE *fp,const GtKmerPosListEncodeInfo
-                                                    *encode_info)
-{
-  if (encode_info != NULL)
-  {
-    fprintf(fp, "# bits for kmer_pos: %hu\n",encode_info->bits_kmerpos);
-    fprintf(fp, "# shift for code: %d, shift for seqnum: %d, "
-                "shift for endpos: %d\n",
-            encode_info->shift_code,
-            encode_info->shift_seqnum,
-            encode_info->shift_endpos);
-  }
-}
-
 typedef GtUword GtLongestCodeRunType;
 
 static GtUword gt_diagbandseed_longest_code_run(const GtKmerPosList
@@ -861,9 +847,21 @@ static GtKmerPosList *gt_diagbandseed_get_kmers(
   }
   kmerpos_list = gt_kmerpos_list_new(kmerpos_list_len,encode_info);
   if (verbose) {
-    fprintf(stream, "# start fetching %u-mers (expect " GT_WU
-                    ", allocate %.0f MB) ...\n",
-            seedlength, kmerpos_list_len,
+    GtBitcount_type bits_kmerpos;
+
+    if (encode_info != NULL)
+    {
+      bits_kmerpos = encode_info->bits_kmerpos;
+    } else
+    {
+      bits_kmerpos = sizeof (GtDiagbandseedKmerPos) * CHAR_BIT;
+    }
+    fprintf(stream, "# start fetching %u-mers (%hu bits/" GT_WU " bytes each, "
+                    "expect " GT_WU ", allocate %.0f MB) ...\n",
+            seedlength,
+            bits_kmerpos,
+            (GtUword) gt_kmerpos_list_elem_size(kmerpos_list),
+            kmerpos_list_len,
             GT_MEGABYTES(kmerpos_list_len *
                          gt_kmerpos_list_elem_size(kmerpos_list)));
     timer = gt_timer_new();
@@ -4057,20 +4055,18 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                             arg->spacedseedweight,
                                             aseqranges,
                                             aidx);
-  bencode_info = gt_kmerpos_encode_info_new(arg->kmplt,
-                                            arg->bencseq,
-                                            arg->spacedseedweight,
-                                            bseqranges,
-                                            bidx);
-  seedpairdistance = *arg->seedpairdistance;
-  if (arg->verbose)
+  if (arg->aencseq != arg->bencseq || aseqranges != bseqranges || aidx != bidx)
   {
-    gt_kmerpos_encode_info_show(stream,aencode_info);
-    if (arg->aencseq != arg->bencseq || aidx != bidx)
-    {
-      gt_kmerpos_encode_info_show(stream,bencode_info);
-    }
+    bencode_info = gt_kmerpos_encode_info_new(arg->kmplt,
+                                              arg->bencseq,
+                                              arg->spacedseedweight,
+                                              bseqranges,
+                                              bidx);
+  } else
+  {
+    bencode_info = aencode_info;
   }
+  seedpairdistance = *arg->seedpairdistance;
   maxfreq = arg->maxfreq;
   selfcomp = (arg->bencseq == arg->aencseq &&
               gt_sequence_parts_info_overlap(aseqranges,aidx,bseqranges,bidx))
@@ -4517,7 +4513,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     gt_segment_reject_info_delete(segment_reject_info);
   }
   gt_kmerpos_encode_info_delete(aencode_info);
-  gt_kmerpos_encode_info_delete(bencode_info);
+  if (aencode_info != bencode_info)
+  {
+    gt_kmerpos_encode_info_delete(bencode_info);
+  }
   return had_err;
 }
 
@@ -4750,10 +4749,6 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                                   arg->spacedseedweight,
                                                   bseqranges,
                                                   bidx);
-        if (arg->verbose)
-        {
-          gt_kmerpos_encode_info_show(stdout,bencode_info);
-        }
         path = gt_diagbandseed_kmer_filename(arg->bencseq,
                                              arg->spacedseedweight,
                                              arg->seedlength,
@@ -4833,10 +4828,6 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                               arg->spacedseedweight,
                                               aseqranges,
                                               aidx);
-    if (arg->verbose)
-    {
-      gt_kmerpos_encode_info_show(stdout,aencode_info);
-    }
     if (arg->use_kmerfile) {
       path = gt_diagbandseed_kmer_filename(arg->aencseq,
                                            arg->spacedseedweight,
