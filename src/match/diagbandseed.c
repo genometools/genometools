@@ -439,19 +439,16 @@ static GtCodetype gt_kmerpos_entry_code(
   return value >> encode_info->shift_code;
 }
 
-static GtDiagbandseedKmerPos gt_kmerpos_entry_decode(
+static void gt_kmerpos_entry_decode(GtDiagbandseedKmerPos *dec,
                       const GtKmerPosListEncodeInfo *encode_info,
                       GtUword value)
 {
-  GtDiagbandseedKmerPos dec;
-
-  gt_assert(encode_info != NULL);
-  dec.code = gt_kmerpos_entry_code(encode_info,value);
-  dec.seqnum = encode_info->first_seqnum +
-               ((value >> encode_info->shift_seqnum) &
+  gt_assert(dec != NULL && encode_info != NULL);
+  dec->code = gt_kmerpos_entry_code(encode_info,value);
+  dec->seqnum = encode_info->first_seqnum +
+                ((value >> encode_info->shift_seqnum) &
                 encode_info->mask_seqnum);
-  dec.endpos = (value >> encode_info->shift_endpos) & encode_info->mask_endpos;
-  return dec;
+  dec->endpos = (value >> encode_info->shift_endpos) & encode_info->mask_endpos;
 }
 
 static void gt_kmerpos_list_add(GtKmerPosList *kmerpos_list,
@@ -550,15 +547,14 @@ static void gt_kmerpos_list_show(FILE *stream,const GtKmerPosList *kmerpos_list)
 
     if (kmerpos_list->encode_info != NULL)
     {
-      dec = gt_kmerpos_entry_decode(kmerpos_list->encode_info,
-                                    kmerpos_list->spaceGtUword[idx]);
+      gt_kmerpos_entry_decode(&dec,kmerpos_list->encode_info,
+                              kmerpos_list->spaceGtUword[idx]);
     } else
     {
       dec = kmerpos_list->spaceGtDiagbandseedKmerPos[idx];
     }
     fprintf(stream, "# Kmer (" GT_LX ",%"PRIu32",%"PRIu32")\n",dec.code,
-            dec.endpos,
-            dec.seqnum);
+            dec.endpos, dec.seqnum);
   }
 }
 
@@ -1129,8 +1125,9 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
       code = gt_kmerpos_entry_code(ki->section.encode_info,*ki->listptr_uword);
       do
       {
-        ki->section.spaceGtDiagbandseedKmerPos[ki->section.nextfree++]
-          = gt_kmerpos_entry_decode(ki->section.encode_info,*ki->listptr_uword);
+        gt_kmerpos_entry_decode(ki->section.spaceGtDiagbandseedKmerPos +
+                                ki->section.nextfree++,
+                                ki->section.encode_info,*ki->listptr_uword);
         ki->listptr_uword++;
       } while (ki->listptr_uword < ki->listend_uword &&
                code == gt_kmerpos_entry_code(ki->section.encode_info,
@@ -1168,8 +1165,9 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
       do
       {
         gt_assert(ki->section.nextfree < ki->section.allocated);
-        ki->section.spaceGtDiagbandseedKmerPos[ki->section.nextfree++]
-          = gt_kmerpos_entry_decode(ki->section.encode_info,ki->buffer_uword);
+        gt_kmerpos_entry_decode(ki->section.spaceGtDiagbandseedKmerPos +
+                                ki->section.nextfree++,
+                                ki->section.encode_info,ki->buffer_uword);
         rval = gt_readnextfromstream_GtUword(&ki->buffer_uword,
                                              &ki->kmerstream_uword);
       } while (rval == 1 &&
