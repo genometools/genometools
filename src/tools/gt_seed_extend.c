@@ -38,6 +38,7 @@
 #include "match/ft-polish.h"
 #include "match/initbasepower.h"
 #include "match/seed_extend_parts.h"
+#include "match/dbs_spaced_seeds.h"
 #include "tools/gt_seed_extend.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread_api.h"
@@ -49,7 +50,6 @@ typedef struct {
   GtStr *dbs_queryname;
   unsigned int dbs_spacedseedweight;
   unsigned int dbs_seedlength;
-  bool spacedseed;
   GtUword dbs_logdiagbandwidth;
   GtUword dbs_mincoverage;
   GtUword dbs_maxfreq;
@@ -75,7 +75,7 @@ typedef struct {
   GtUword se_historysize;
   GtUword se_maxalilendiff;
   GtUword se_perc_match_hist;
-  GtStr *char_access_mode, *splt_string;
+  GtStr *char_access_mode, *splt_string, *kmplt_string;
   bool bias_parameters;
   bool relax_polish;
   bool verify_alignment;
@@ -96,6 +96,7 @@ typedef struct {
   bool use_apos, use_apos_track_all, compute_ani;
   GtUword maxmat;
   GtOption *se_ref_op_evalue,
+           *se_ref_op_spacedseed,
            *se_ref_op_maxmat,
            *ref_diagband_statistics,
            *se_ref_op_gre,
@@ -113,6 +114,7 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
+  arguments->kmplt_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
   return arguments;
 }
@@ -129,7 +131,9 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->char_access_mode);
     gt_str_delete(arguments->splt_string);
+    gt_str_delete(arguments->kmplt_string);
     gt_option_delete(arguments->se_ref_op_gre);
+    gt_option_delete(arguments->se_ref_op_spacedseed);
     gt_option_delete(arguments->se_ref_op_xdr);
     gt_option_delete(arguments->se_ref_op_evalue);
     gt_option_delete(arguments->se_ref_op_maxmat);
@@ -143,7 +147,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt,
+  GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt, *op_kmplt,
     *op_his, *op_dif, *op_pmh,
     *op_seedlength, *op_spacedseed, *op_minlen, *op_minid, *op_evalue, *op_xbe,
     *op_sup, *op_frq,
@@ -195,12 +199,17 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_seedlength);
 
   /* -spacedseed */
-  op_spacedseed = gt_option_new_bool("spacedseed",
-                                     "use spaced seed of length specified by "
-                                     "option -seedlength",
-                                     &arguments->spacedseed,
-                                     false);
+  op_spacedseed = gt_option_new_uint_min("spacedseed",
+                                          "use spaced seed of length "
+                                          "specified by option -seedlength\n"
+                                          "(optional argument specifies "
+                                          " weight of spaced seed)",
+                                          &arguments->dbs_spacedseedweight,
+                                          0,
+                                          1);
+  gt_option_argument_is_optional(op_spacedseed);
   gt_option_parser_add_option(op, op_spacedseed);
+  arguments->se_ref_op_spacedseed = gt_option_ref(op_spacedseed);
 
   /* -diagbandwidth */
   op_diagbandwidth = gt_option_new_uword_min_max("diagbandwidth",
@@ -397,6 +406,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_hide_default(op_splt);
   gt_option_is_development_option(op_splt);
   gt_option_parser_add_option(op, op_splt);
+
+  /* -kmplt */
+  op_kmplt = gt_option_new_string("kmplt",
+                                  gt_diagbandseed_kmplt_comment(),
+                                  arguments->kmplt_string,
+                                  "");
+  gt_option_hide_default(op_kmplt);
+  gt_option_is_development_option(op_kmplt);
+  gt_option_parser_add_option(op, op_kmplt);
 
   /* -trimstat */
   op_trimstat = gt_option_new_bool("trimstat","show trimming statistics",
@@ -741,7 +759,8 @@ static int gt_seed_extend_runner(int argc,
   GtTimer *seedextendtimer = NULL;
   GtExtendCharAccess cam_a = GT_EXTEND_CHAR_ACCESS_ANY,
                      cam_b = GT_EXTEND_CHAR_ACCESS_ANY;
-  GtDiagbandseedPairlisttype splt = GT_DIAGBANDSEED_SPLT_UNDEFINED;
+  GtDiagbandseedBaseListType splt = GT_DIAGBANDSEED_BASE_LIST_UNDEFINED,
+                             kmplt = GT_DIAGBANDSEED_BASE_LIST_UNDEFINED;
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   bool extendxdrop, extendgreedy = true;
@@ -752,7 +771,6 @@ static int gt_seed_extend_runner(int argc,
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
-  const unsigned int spacedseedweight = 21, spacedseedlength = 30;
   GtAniAccumulate ani_accumulate[2];
 
   gt_error_check(err);
@@ -832,8 +850,19 @@ static int gt_seed_extend_runner(int argc,
   }
   if (!had_err)
   {
-    splt = gt_diagbandseed_splt_get(gt_str_get(arguments->splt_string),err);
+    splt = gt_diagbandseed_base_list_get(true,
+                                         gt_str_get(arguments->splt_string),
+                                         err);
     if ((int) splt == -1) {
+      had_err = -1;
+    }
+  }
+  if (!had_err)
+  {
+    kmplt = gt_diagbandseed_base_list_get(false,
+                                          gt_str_get(arguments->kmplt_string),
+                                          err);
+    if ((int) kmplt == -1) {
       had_err = -1;
     }
   }
@@ -925,7 +954,6 @@ static int gt_seed_extend_runner(int argc,
   maxseqlength = MIN(gt_encseq_max_seq_length(aencseq),
                      gt_encseq_max_seq_length(bencseq));
 
-  arguments->dbs_spacedseedweight = 0;
   if (arguments->dbs_seedlength == UINT_MAX)
   {
     if (arguments->maxmat == 1)
@@ -933,31 +961,32 @@ static int gt_seed_extend_runner(int argc,
       arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
     } else
     {
-      if (arguments->spacedseed)
-      {
-        arguments->dbs_seedlength = spacedseedlength;
-        arguments->dbs_spacedseedweight = spacedseedweight;
-      } else
-      {
-        unsigned int local_seedlength, log_avg_totallength;
-        double avg_totallength = 0.5 * (gt_encseq_total_length(aencseq) +
-                                        gt_encseq_total_length(bencseq));
-        gt_assert(nchars > 0);
-        log_avg_totallength
-          = (unsigned int) gt_round_to_long(gt_log_base(avg_totallength,
-                                                        (double) nchars));
-        local_seedlength = (unsigned int) MIN3(log_avg_totallength,
-                                               maxseqlength,maxseedlength);
-        arguments->dbs_seedlength = MAX(local_seedlength, 2);
-      }
+      unsigned int local_seedlength, log_avg_totallength;
+      double avg_totallength = 0.5 * (gt_encseq_total_length(aencseq) +
+                                      gt_encseq_total_length(bencseq));
+      gt_assert(nchars > 0);
+      log_avg_totallength
+        = (unsigned int) gt_round_to_long(gt_log_base(avg_totallength,
+                                                      (double) nchars));
+      local_seedlength = (unsigned int) MIN3(log_avg_totallength,
+                                             maxseqlength,maxseedlength);
+      arguments->dbs_seedlength = MAX(local_seedlength, 2);
+    }
+    if (gt_option_is_set(arguments->se_ref_op_spacedseed))
+    {
+      arguments->dbs_seedlength = MIN(maxseedlength,
+                                      (arguments->dbs_seedlength * 3)/2);
+      arguments->dbs_seedlength = MAX(arguments->dbs_seedlength,
+                                      GT_SPACED_SEED_FIRST_SPAN);
     }
   }
-  if (!had_err && !arguments->spacedseed &&
-      arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength))
+  if (!had_err && arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength))
   {
     if (maxseedlength <= maxseqlength) {
-      gt_error_set(err, "maximum seedlength for alphabet of size %u is %u",
-                   nchars, maxseedlength);
+      gt_error_set(err, "maximum seedlength for alphabet of size %u is %u "
+                        "(if the sequences %scontain wildcards)",
+                          nchars, maxseedlength,maxseqlength == 32 ?
+                                         "do not " : "");
     } else {
       gt_error_set(err, "argument to option \"-seedlength\" must be an integer "
                    "<= " GT_WU " (length of longest sequence).", maxseqlength);
@@ -966,21 +995,48 @@ static int gt_seed_extend_runner(int argc,
   }
   if (!had_err)
   {
-    if (arguments->spacedseed)
+    if (gt_option_is_set(arguments->se_ref_op_spacedseed))
     {
-      arguments->dbs_spacedseedweight = spacedseedweight;
-      if (arguments->dbs_seedlength != spacedseedlength)
+      if (nchars != 4)
       {
-        gt_error_set(err,"only spaced seeds of length %u supported",
-                     spacedseedlength);
+        gt_error_set(err,"spaced seeds only work for sequences over an "
+                         "alphabet of size 4");
         had_err = -1;
       } else
       {
-        if (nchars != 4)
+        if (arguments->dbs_seedlength > maxseedlength ||
+            arguments->dbs_seedlength < GT_SPACED_SEED_FIRST_SPAN)
         {
-          gt_error_set(err,"spaced seeds only work for sequences over an "
-                           "alphabet of size 4");
+          gt_error_set(err,"illegal seedlength %u: for this set of sequences "
+                           "can only handle spaced seeds of span between %d "
+                           "and %u",
+                           arguments->dbs_seedlength,
+                           GT_SPACED_SEED_FIRST_SPAN,
+                           maxseedlength);
           had_err = -1;
+        } else
+        {
+          int min_weight, max_weight;
+
+          gt_spaced_seed_weight_range(&min_weight,&max_weight,
+                                      (int) arguments->dbs_seedlength);
+          if (arguments->dbs_spacedseedweight == 0)
+          {
+            /* halfway between min and max */
+            arguments->dbs_spacedseedweight = min_weight +
+                                              (max_weight - min_weight + 1)/2;
+          } else
+          {
+            if (arguments->dbs_spacedseedweight < (GtUword) min_weight ||
+                arguments->dbs_spacedseedweight > (GtUword) max_weight)
+            {
+              gt_error_set(err,"illegal weight %u: for spaced seeds of span %u "
+                               "the weight must be in the range from %d to %d",
+                               arguments->dbs_spacedseedweight,
+                               arguments->dbs_seedlength,min_weight,max_weight);
+              had_err = -1;
+            }
+          }
         }
       }
     }
@@ -1159,6 +1215,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->nofwd,
                                     &arguments->seedpairdistance,
                                     splt,
+                                    kmplt,
                                     arguments->dbs_verify,
                                     arguments->verbose,
                                     arguments->dbs_debug_kmer,

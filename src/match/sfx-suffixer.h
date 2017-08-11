@@ -90,7 +90,7 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                              GtUword),
                                    void *processkmerspecialinfo);
 
-void getencseqkmers_twobitencoding_slice(const GtEncseq *encseq,
+void gt_getencseqkmers_twobitencoding_slice(const GtEncseq *encseq,
                                          GtReadmode readmode,
                                          unsigned int kmersize,
                                          unsigned int upperkmersize,

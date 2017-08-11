@@ -942,7 +942,7 @@ void getencseqkmers_rangetwobitencoding(const GtEncseq *encseq,
   }
 }
 
-void getencseqkmers_twobitencoding_slice(const GtEncseq *encseq,
+void gt_getencseqkmers_twobitencoding_slice(const GtEncseq *encseq,
                                          GtReadmode readmode,
                                          unsigned int kmersize,
                                          unsigned int upperkmersize,
@@ -1054,17 +1054,17 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                              GtUword),
                                    void *processkmerspecialinfo)
 {
-  getencseqkmers_twobitencoding_slice(encseq,
-                                      readmode,
-                                      kmersize,
-                                      upperkmersize,
-                                      onlyfirst,
-                                      processkmercode,
-                                      processkmercodeinfo,
-                                      processkmerspecial,
-                                      processkmerspecialinfo,
-                                      0,
-                                      gt_encseq_total_length(encseq));
+  gt_getencseqkmers_twobitencoding_slice(encseq,
+                                         readmode,
+                                         kmersize,
+                                         upperkmersize,
+                                         onlyfirst,
+                                         processkmercode,
+                                         processkmercodeinfo,
+                                         processkmerspecial,
+                                         processkmerspecialinfo,
+                                         0,
+                                         gt_encseq_total_length(encseq));
 }
 
 static void gt_updateleftborderforkmer(Sfxiterator *sfi,

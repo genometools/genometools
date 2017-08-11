@@ -57,7 +57,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
             buf->nextfree\
               = (unsigned int) fread(buf->bufferedfilespace,\
                                      sizeof (*buf->bufferedfilespace),\
-                                     (size_t) FILEBUFFERSIZE,\
+                                     (size_t) GT_FILEBUFFERSIZE,\
                                      buf->fp);\
             if (ferror(buf->fp))\
             {\
