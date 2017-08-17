@@ -820,12 +820,13 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         {
           GtUchar prevcc;
 
-          if (gt_readnextfromstream_GtUchar(&prevcc,&suffixarray.bwttabstream)
-              == 1)
+          if (gt_readnextfromstream_GtUchar(&prevcc,
+                                            &suffixarray.bwttabstream) == 1)
           {
             GtUchar cc;
-            while (gt_readnextfromstream_GtUchar(&cc,&suffixarray.bwttabstream)
-                   == 1)
+            while (gt_readnextfromstream_GtUchar(&cc,
+                                                 &suffixarray.bwttabstream)
+                                                 == 1)
             {
               if (prevcc != cc || ISSPECIAL(cc))
               {

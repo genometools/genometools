@@ -110,7 +110,8 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
           if ((SSAR)->scanfile)\
           {\
             int retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,\
-                                        &(SSAR)->suffixarray->lcptabstream);\
+                                                       &(SSAR)->suffixarray->\
+                                                                lcptabstream);\
             if (retval > 0)\
             {\
               if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
@@ -120,7 +121,9 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
               {\
                 Largelcpvalue tmpexception;\
                 retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,\
-                                        &(SSAR)->suffixarray->llvtabstream);\
+                                                             &(SSAR)->\
+                                                               suffixarray->\
+                                                             llvtabstream);\
                 if (retval == 0)\
                 {\
                   gt_error_set(err,"file %s: line %d: unexpected end "\
@@ -164,7 +167,8 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
           if ((SSAR)->scanfile)\
           {\
             int retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,\
-                                        &(SSAR)->suffixarray->lcptabstream);\
+                                                       &(SSAR)->suffixarray->\
+                                                                lcptabstream);\
             if (retval > 0)\
             {\
               if (tmpsmalllcpvalue < (GtUchar) LCPOVERFLOW)\
@@ -174,7 +178,9 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
               {\
                 Largelcpvalue tmpexception;\
                 retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,\
-                                        &(SSAR)->suffixarray->llvtabstream);\
+                                                             &(SSAR)->\
+                                                               suffixarray->\
+                                                               llvtabstream);\
                 if (retval == 0)\
                 {\
                   gt_error_set(err,"file %s: line %d: unexpected end "\

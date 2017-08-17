@@ -410,7 +410,8 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
         if (storeindexpos)
         {
           retval = gt_readnextfromstream_GtUword(&tmpsuftabvalue,
-                                            &suffixarray.suftabstream_GtUword);
+                                                 &suffixarray.
+                                                   suftabstream_GtUword);
           if (retval == 0)
           {
             break;

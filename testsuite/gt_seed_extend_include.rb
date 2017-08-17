@@ -311,15 +311,37 @@ Test do
       $CAM_LIST.each do |a_cam|
         $CAM_LIST.each do |b_cam|
           run_test "#{$bin}gt seed_extend -extendgreedy " +
-                   "-cam #{a_cam},#{b_cam} -ii at1MB #{splt} -kmplt #{kmplt}", 
+                   "-cam #{a_cam},#{b_cam} -ii at1MB #{splt} -kmplt #{kmplt}",
                    :retval => 0
           run "grep -v '^#' #{last_stdout}"
           run "sort #{last_stdout}"
-          run "mv #{last_stdout} see-ext-at1MB-#{a_cam}-#{b_cam}.matches"
-          run "diff -I '^#' see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
+          outfile="see-ext-at1MB-#{kmplt}-#{a_cam}-#{b_cam}.matches"
+          run "mv #{last_stdout} #{outfile}"
+          run "diff -I '^#' #{outfile} #{$testdata}see-ext-at1MB.matches"
         end
       end
     end
+  end
+end
+
+Name "gt seed_extend: kmplt"
+Keywords "gt_seed_extend kmplt"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  22.upto(30).each do |seedlength|
+    common="#{$bin}gt seed_extend -seedlength #{seedlength} -ii at1MB"
+    run_test "#{common} -kmplt struct"
+    run "mv #{last_stdout} struct.matches"
+    run_test "#{common}"
+    run "diff -I '^#' #{last_stdout} struct.matches"
+  end
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
+  22.upto(32).each do |seedlength|
+    common="#{$bin}gt seed_extend -seedlength #{seedlength} -ii U89959_genomic -maxmat -l #{seedlength}"
+    run_test "#{common} -kmplt struct"
+    run "mv #{last_stdout} struct#{seedlength}.matches"
+    run_test "#{common}"
+    run "diff -I '^#' #{last_stdout} struct#{seedlength}.matches"
   end
 end
 

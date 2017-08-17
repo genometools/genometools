@@ -91,7 +91,8 @@ int gt_nextSequentiallcpvalue(GtUword *currentlcp,
         Largelcpvalue tmpexception;
 
         retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,
-                                          &ssar->suffixarray->llvtabstream);
+                                                     &ssar->suffixarray->
+                                                       llvtabstream);
         if (retval == 0)
         {
           gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -136,19 +137,21 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
     if (ssar->suffixarray->suftabstream_GtUword.fp != NULL)
     {
       return gt_readnextfromstream_GtUword(currentsuffix,
-                                 &ssar->suffixarray->suftabstream_GtUword);
+                                           &ssar->suffixarray->
+                                              suftabstream_GtUword);
     } else
     {
       uint32_t readvalue = 0;
-      int ret = gt_readnextfromstream_uint32_t(
-                                 &readvalue,
-                                 &ssar->suffixarray->suftabstream_uint32_t);
+      int ret = gt_readnextfromstream_uint32_t(&readvalue,
+                                               &ssar->suffixarray->
+                                                      suftabstream_uint32_t);
       *currentsuffix = (GtUword) readvalue;
       return ret;
     }
 #else
-     return gt_readnextfromstream_GtUword(currentsuffix,
-                                      &ssar->suffixarray->suftabstream_GtUword);
+    return gt_readnextfromstream_GtUword(currentsuffix,
+                                         &ssar->suffixarray->
+                                                suftabstream_GtUword);
 #endif
   }
   if (ssar->scanfile)

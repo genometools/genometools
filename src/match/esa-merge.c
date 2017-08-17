@@ -91,9 +91,9 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   gt_error_check(err);
   for (idx=0; idx<numofindexes; idx++)
   {
-    retval
-      = gt_readnextfromstream_GtUword(&suftabvalue,
-                                  &suffixarraytable[idx].suftabstream_GtUword);
+    retval = gt_readnextfromstream_GtUword(&suftabvalue,
+                                           &suffixarraytable[idx].
+                                             suftabstream_GtUword);
     if (retval == 0)
     {
       gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -162,8 +162,8 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
     } else
     {
       retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,
-                                       &emmesa->suffixarraytable[tmpidx].
-                                                lcptabstream);
+                                             &emmesa->suffixarraytable[tmpidx].
+                                               lcptabstream);
       if (retval < 0)
       {
         return -1;
@@ -176,9 +176,10 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
       }
       if (tmpsmalllcpvalue == (GtUchar) LCPOVERFLOW)
       {
-        retval = gt_readnextfromstream_Largelcpvalue(
-                               &tmpexception,
-                               &emmesa->suffixarraytable[tmpidx].llvtabstream);
+        retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,
+                                                     &emmesa->
+                                                       suffixarraytable[tmpidx].
+                                                       llvtabstream);
         if (retval < 0)
         {
           return -3;
@@ -200,8 +201,8 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
       }
       tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,err);
       retval = gt_readnextfromstream_GtUword(&tmpsuftabvalue,
-                                         &emmesa->suffixarraytable[tmpidx].
-                                         suftabstream_GtUword);
+                                             &emmesa->suffixarraytable[tmpidx].
+                                             suftabstream_GtUword);
       if (retval == 0)
       {
         gt_error_set(err,"file %s: line %d: unexpected end of file when "

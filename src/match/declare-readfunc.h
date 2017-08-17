@@ -20,6 +20,7 @@
 #define DECLARE_READFUNC_H
 
 #include <stdio.h>
+#include <inttypes.h>
 #include "core/unused_api.h"
 
 #define GT_FILEBUFFERSIZE 4096
@@ -45,7 +46,7 @@
                                                  buf->fp);\
             if (ferror(buf->fp))\
             {\
-              fprintf(stderr,"error when trying to read next %s",#TYPE);\
+              fprintf(stderr,"error when trying to read next %s\n",#TYPE);\
               exit(GT_EXIT_PROGRAMMING_ERROR);\
             }\
             buf->nextread = 0;\
@@ -60,5 +61,6 @@
 
 GT_DECLAREBufferedfiletype(GtUword);
 GT_DECLAREREADFUNCTION(GtUword);
+GT_DECLAREBufferedfiletype(uint8_t);
 
 #endif
