@@ -57,6 +57,7 @@ size_t gt_turningwheel_size(void)
 
 bool gt_turningwheel_next(Turningwheel *tw)
 {
+  gt_assert(tw != NULL);
   while (true)
   {
     tw->wheelspace[tw->idx]++;
@@ -80,6 +81,7 @@ bool gt_turningwheel_next(Turningwheel *tw)
 
 unsigned int gt_turningwheel_minchanged(const Turningwheel *tw)
 {
+  gt_assert(tw != NULL);
   return tw->minchanged;
 }
 
@@ -87,10 +89,17 @@ void gt_turningwheel_output(const Turningwheel *tw)
 {
   unsigned int i;
 
+  gt_assert(tw != NULL);
   for (i=0; i<tw->numofwheels; i++)
   {
     printf("%u",tw->wheelspace[i]);
   }
+}
+
+const unsigned int *gt_turningwheel_state(const Turningwheel *tw)
+{
+  gt_assert(tw != NULL);
+  return tw->wheelspace;
 }
 
 void gt_turningwheel_delete(Turningwheel *tw)

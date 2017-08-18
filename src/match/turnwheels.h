@@ -31,6 +31,8 @@ unsigned int gt_turningwheel_minchanged(const Turningwheel *tw);
 
 void gt_turningwheel_output(const Turningwheel *tw);
 
+const unsigned int *gt_turningwheel_state(const Turningwheel *tw);
+
 void gt_turningwheel_delete(Turningwheel *tw);
 
 #endif
