@@ -14,8 +14,8 @@ require_relative "SEmatch"
 
 def accumulate_ani_values(filename)
   miter = SEmatch.new(filename)
-  sqSumIdy = 0.0
-  sqSumLen = 0
+  sum_of_distance = 0
+  sum_of_aligned_len = 0
   miter.each do |m|
     if not m.has_key?(:s_len)
       STDERR.puts "#{$0}: cannot determine length of match on subject"
@@ -32,10 +32,10 @@ def accumulate_ani_values(filename)
       exit 1
     end
     # printf("%.2f %d %d\n",m[:identity],s_len,q_len)
-    sqSumIdy += m[:identity] * (s_len + q_len);
-    sqSumLen += s_len + q_len
+    sum_of_distance += m[:editdist]
+    sum_of_aligned_len += s_len + q_len
   end
-  return sqSumIdy, sqSumLen
+  return sum_of_distance, sum_of_aligned_len
 end
 
 if ARGV.length != 1
@@ -43,10 +43,12 @@ if ARGV.length != 1
   exit 1
 end
 # TODO: filter
-sqSumIdy, sqSumLen = accumulate_ani_values(ARGV[0])
-print "sum_similarity=#{sqSumIdy}\tsum_aligned=#{sqSumLen}\tani="
-if sqSumLen > 0
-  printf("%.4f\n",sqSumIdy/sqSumLen.to_f)
+sum_of_distance, sum_of_aligned_len = accumulate_ani_values(ARGV[0])
+print "#{ARGV[0]} "
+print "sum_distance=#{sum_of_distance}\tsum_aligned=#{sum_of_aligned_len}\tani="
+if sum_of_aligned_len > 0
+  printf("%.4f\n",
+         100.0 * (1.0 - (2 * sum_of_distance).to_f/sum_of_aligned_len.to_f))
 else
   puts "0"
 end

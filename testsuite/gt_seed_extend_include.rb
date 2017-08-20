@@ -40,6 +40,8 @@ Test do
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -ani"
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani-at1MB-U8.txt"
+  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -ani 2"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani2-at1MB-U8.txt"
 end
 
 Name "gt seed_extend: blast like output"

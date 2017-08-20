@@ -83,6 +83,7 @@ typedef struct
 {
   GtUword sum_of_distance,
           sum_of_aligned_len;
+  int max_process_runs;
 } GtAniAccumulate;
 
 /* The constructor for GtDiagbandseedExtendParams*/
@@ -111,6 +112,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool verify_alignment,
                                 bool only_selected_seqpairs,
                                 GtAniAccumulate *ani_accumulate);
+
+bool gt_diagbandseed_derive_maxmat_show(GtUword maxmat);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
