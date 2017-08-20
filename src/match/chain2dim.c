@@ -28,7 +28,7 @@
 #include "extended/ranked_list.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
-
+#define NEWOVERLAP
 /*
   The basic information required for each match is stored
   in a structure of the following type. The user has to specify
@@ -555,6 +555,7 @@ static void gt_chain2dim_bruteforcechainingscores(
     }
     for (rightmatch=1Ul; rightmatch<matchtable->nextfree; rightmatch++)
     {
+
       const GtChain2Dimscoretype weightright
         = matchtable->matches[rightmatch].weight;
       GtUword leftmatch;
@@ -565,6 +566,7 @@ static void gt_chain2dim_bruteforcechainingscores(
       localmaxmatch.maxmatchnum = 0;
       for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
+
         bool combinable;
 
         if (chainmode->maxgapwidth != 0 &&
@@ -602,6 +604,41 @@ static void gt_chain2dim_bruteforcechainingscores(
           } else
           {
             score -= chaingapcostfunction(matchtable,leftmatch,rightmatch);
+            
+#ifdef NEWOVERLAP
+
+            score += chaingapcostfunction(matchtable,leftmatch,rightmatch);
+            if (gt_chain2dim_overlapping(matchtable,leftmatch,rightmatch))
+            {
+              GtUword len0 = GT_CHAIN2DIM_GETSTOREDENDPOINT(0, rightmatch) -
+              GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
+              
+              GtUword len1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, rightmatch) -
+              GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
+              
+              GtUword len = (len0 > len1? len0 : len1);
+              GtUword overlap0 = 0;
+              if(GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) > 
+                GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch))
+              {  
+                overlap0 = GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch)
+                    - GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
+              }
+  
+              GtUword overlap1 = 0;
+              if ( GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) >
+                      GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch))
+              {
+                overlap1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) -
+                            GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
+               
+              }
+              GtUword overlap = (overlap0 > overlap1? overlap0:overlap1);
+              score -= overlap*matchtable->matches[rightmatch].weight/(float)len;
+            } 
+
+#endif
+
             if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
             {
               score += (weightright + GT_CHAIN2DIM_TERMINALGAP(leftmatch)
@@ -620,6 +657,7 @@ static void gt_chain2dim_bruteforcechainingscores(
               }
             }
           }
+
           if (!localmaxmatch.defined || localmaxmatch.maxscore < score)
           {
             localmaxmatch.maxscore = score;
