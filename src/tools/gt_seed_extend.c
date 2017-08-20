@@ -96,6 +96,7 @@ typedef struct {
   bool use_apos, use_apos_track_all;
   unsigned int ani_mode; /* 0 no, 1 any with one loop, 2 any with two loops */
   GtUword maxmat;
+  GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
   GtOption *se_ref_op_evalue,
            *se_ref_op_spacedseed,
            *se_ref_op_maxmat,
@@ -418,6 +419,14 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_hide_default(op_kmplt);
   gt_option_is_development_option(op_kmplt);
   gt_option_parser_add_option(op, op_kmplt);
+
+  /* -fbsize */
+  option = gt_option_new_ulong("fbsize",
+                               "specify size of file buffer for kmerpos in kB",
+                               &arguments->file_buffer_size_kb,
+                               256);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -trimstat */
   op_trimstat = gt_option_new_bool("trimstat","show trimming statistics",
@@ -1247,6 +1256,8 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->maxmat,
                                     arguments->chainarguments,
                                     arguments->diagband_statistics_arg,
+                                    1024 *
+                                    (size_t) arguments->file_buffer_size_kb,
                                     extp);
 
     /* Start algorithm */

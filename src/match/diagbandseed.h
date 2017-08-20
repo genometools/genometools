@@ -68,6 +68,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtStr *chainarguments,
                                              const GtStr
                                                *diagband_statistics_arg,
+                                             size_t file_buffer_size,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 
