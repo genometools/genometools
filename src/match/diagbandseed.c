@@ -4269,7 +4269,10 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                    seedpairlist->aseqrange_start + 1) *
                                   (seedpairlist->bseqrange_end -
                                    seedpairlist->bseqrange_start + 1);
-      gt_diagbandseed_dbs_state_update(dbs_state,mlistlen,numseqpairs);
+      gt_diagbandseed_dbs_state_update(dbs_state,
+                                       max_process_runs == 1 ? mlistlen
+                                                             : 2 * mlistlen,
+                                       numseqpairs);
 #ifndef _WIN32
       dbs_state->total_process_seeds_usec
         += gt_timer_elapsed_usec(timer);
