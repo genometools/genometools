@@ -28,7 +28,7 @@
 #include "extended/ranked_list.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
-#define NEWOVERLAP
+#define DELTAFILTEROVERLAP
 /*
   The basic information required for each match is stored
   in a structure of the following type. The user has to specify
@@ -46,7 +46,8 @@ typedef struct
                                    chainkinds but only used for local chaining
                                 */
                 previousinchain;  /* previous index in chain, compute */
-  GtChain2Dimscoretype
+  
+ GtChain2Dimscoretype
          weight, /* weight of match, user defined */
          initialgap, /* gap to start of sequences, user defined */
          terminalgap, /* gap to last positions of match, user defined */
@@ -255,7 +256,7 @@ typedef struct
 typedef struct
 {
   GtChain2Dimscoretype maxscore;
-  GtUword maxmatchnum;
+  GtUword maxmatchnum, diff;
   bool defined;
 } GtChain2DimMaxmatchvalue;
 
@@ -539,7 +540,7 @@ static bool gt_chain2dim_checkmaxgapwidth(const GtChain2Dimmatchtable
 static void gt_chain2dim_bruteforcechainingscores(
                                const GtChain2Dimmode *chainmode,
                                GtChain2Dimmatchtable *matchtable,
-                               GtChain2Dimgapcostfunction chaingapcostfunction)
+                               GT_UNUSED GtChain2Dimgapcostfunction chaingapcostfunction)
 {
   if (matchtable->nextfree > 1UL)
   {
@@ -547,7 +548,20 @@ static void gt_chain2dim_bruteforcechainingscores(
 
     matchtable->matches[0].firstinchain = 0;
     matchtable->matches[0].previousinchain = GT_CHAIN2DIM_UNDEFPREVIOUS;
+
     matchtable->matches[0].score = matchtable->matches[0].weight;
+#ifdef DELTAFILTEROVERLAP
+    GtUword len0 =  GT_CHAIN2DIM_GETSTOREDENDPOINT(0, 0) - 
+                    GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, 0)+1;
+    GtUword len1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, 0) -
+                   GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, 0)+1;
+    GtUword len = len0 > len1 ? len1 : len0;
+    matchtable->matches[0].score =matchtable->matches[0].weight*len;
+    GtUword *difftable = gt_calloc(matchtable->nextfree, sizeof(*difftable));
+    GtUword diff = 0;
+#endif
+
+    
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
       matchtable->matches[0].score -= (GT_CHAIN2DIM_INITIALGAP(0)
@@ -555,18 +569,30 @@ static void gt_chain2dim_bruteforcechainingscores(
     }
     for (rightmatch=1Ul; rightmatch<matchtable->nextfree; rightmatch++)
     {
-
-      const GtChain2Dimscoretype weightright
-        = matchtable->matches[rightmatch].weight;
+      GtChain2Dimscoretype weightright;
       GtUword leftmatch;
       GtChain2DimMaxmatchvalue localmaxmatch;
+
+#ifndef DELTAFILTEROVERLAP
+      weightright
+        = matchtable->matches[rightmatch].weight;
+#endif
+
+#ifdef DELTAFILTEROVERLAP
+      len0 =  GT_CHAIN2DIM_GETSTOREDENDPOINT(0, rightmatch) -
+              GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
+      len1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, rightmatch) -
+             GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
+      len = len0 > len1 ? len1 : len0;
+      weightright = matchtable->matches[rightmatch].weight*len;
+#endif
 
       localmaxmatch.defined = false;
       localmaxmatch.maxscore = 0;
       localmaxmatch.maxmatchnum = 0;
+      localmaxmatch.diff = 0;
       for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
-
         bool combinable;
 
         if (chainmode->maxgapwidth != 0 &&
@@ -580,6 +606,9 @@ static void gt_chain2dim_bruteforcechainingscores(
           {
             combinable = gt_chain2dim_ovl_colinear(matchtable,leftmatch,
                                                    rightmatch);
+#ifdef DELTAFILTEROVERLAP
+            combinable = true;
+#endif
           } else
           {
             if (gt_chain2dim_overlapping(matchtable,leftmatch,rightmatch))
@@ -603,41 +632,34 @@ static void gt_chain2dim_bruteforcechainingscores(
             previous = leftmatch;
           } else
           {
+
+#ifndef DELTAFILTEROVERLAP
             score -= chaingapcostfunction(matchtable,leftmatch,rightmatch);
-            
-#ifdef NEWOVERLAP
-
-            score += chaingapcostfunction(matchtable,leftmatch,rightmatch);
-            if (gt_chain2dim_overlapping(matchtable,leftmatch,rightmatch))
-            {
-              GtUword len0 = GT_CHAIN2DIM_GETSTOREDENDPOINT(0, rightmatch) -
-              GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
-              
-              GtUword len1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, rightmatch) -
-              GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
-              
-              GtUword len = (len0 > len1? len0 : len1);
-              GtUword overlap0 = 0;
-              if(GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) > 
-                GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch))
-              {  
-                overlap0 = GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch)
-                    - GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
-              }
-  
-              GtUword overlap1 = 0;
-              if ( GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) >
-                      GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch))
-              {
-                overlap1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) -
-                            GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
-               
-              }
-              GtUword overlap = (overlap0 > overlap1? overlap0:overlap1);
-              score -= overlap*matchtable->matches[rightmatch].weight/(float)len;
-            } 
-
 #endif
+
+#ifdef DELTAFILTEROVERLAP
+             if (gt_chain2dim_overlapping(matchtable,leftmatch,rightmatch))
+             {
+                GtUword ov0 = 0;
+                if(GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) >=
+                GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch))
+                { 
+                  ov0 = GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) -
+                        GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
+                }
+                
+                GtUword ov1 = 0;
+                if(GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) >= 
+                GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch))
+                { 
+                  ov1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) -
+                        GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
+                }
+                GtUword ovlap = ov0 > ov1 ? ov0 : ov1;
+                score -= ovlap * matchtable->matches[rightmatch].weight;
+              }
+#endif
+
 
             if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
             {
@@ -660,9 +682,47 @@ static void gt_chain2dim_bruteforcechainingscores(
 
           if (!localmaxmatch.defined || localmaxmatch.maxscore < score)
           {
+#ifdef DELTAFILTEROVERLAP
+           
+            diff = difftable[leftmatch];
+            if (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,leftmatch)
+              < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,rightmatch))
+            {
+              diff += labs(GT_CHAIN2DIM_GETSTOREDENDPOINT(0,leftmatch) -
+                           GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,rightmatch));
+            }
+            else
+            {
+              diff += labs(GT_CHAIN2DIM_GETSTOREDENDPOINT(0,rightmatch) -
+                           GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,leftmatch));
+            }
+            if (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,leftmatch)
+              < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,rightmatch))
+            {
+              diff += labs(GT_CHAIN2DIM_GETSTOREDENDPOINT(1,leftmatch) -
+                           GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,rightmatch));
+            }
+            else
+            {
+              diff += labs(GT_CHAIN2DIM_GETSTOREDENDPOINT(1,rightmatch) -
+                           GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,leftmatch));
+            }
+            
+            if (score > matchtable->matches[rightmatch].score ||
+                (score == matchtable->matches[rightmatch].score &&
+                 diff < difftable[rightmatch]))
+            {
+              localmaxmatch.maxscore = score;
+              localmaxmatch.maxmatchnum = previous;
+              localmaxmatch.defined = true;
+              localmaxmatch.diff = diff;
+            }
+#endif
+#ifndef DELTAFILTEROVERLAP
             localmaxmatch.maxscore = score;
             localmaxmatch.maxmatchnum = previous;
             localmaxmatch.defined = true;
+#endif
           }
         }
       }
@@ -679,12 +739,18 @@ static void gt_chain2dim_bruteforcechainingscores(
             = matchtable->matches[localmaxmatch.maxmatchnum].firstinchain;
         }
         matchtable->matches[rightmatch].score = localmaxmatch.maxscore;
+#ifdef DELTAFILTEROVERLAP
+        difftable[rightmatch] = localmaxmatch.diff;
+#endif
       } else
       {
         matchtable->matches[rightmatch].previousinchain
           = GT_CHAIN2DIM_UNDEFPREVIOUS;
         matchtable->matches[rightmatch].firstinchain = rightmatch;
         matchtable->matches[rightmatch].score = weightright;
+#ifdef DELTAFILTEROVERLAP
+        difftable[rightmatch] = 0;
+#endif
         if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
         {
           matchtable->matches[rightmatch].score
@@ -693,6 +759,9 @@ static void gt_chain2dim_bruteforcechainingscores(
         }
       }
     }
+#ifdef DELTAFILTEROVERLAP
+  gt_free(difftable);
+#endif
   }
 }
 
@@ -1104,8 +1173,10 @@ static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
   *maxscore = 0;
   for (matchnum=0; matchnum<matchtable->nextfree; matchnum++)
   {
+#ifndef DELTAFILTEROVERLAP
     if (gt_chain2dim_isrightmaximal_chain(matchtable,matchnum))
     {
+#endif
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
       {
         tgap = GT_CHAIN2DIM_TERMINALGAP(matchnum);
@@ -1119,7 +1190,9 @@ static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
         *maxscore = matchtable->matches[matchnum].score - tgap;
         maxscoredefined = true;
       }
+#ifndef DELTAFILTEROVERLAP
     }
+#endif
   }
   return maxscoredefined;
 }
@@ -1155,14 +1228,18 @@ static void retrieve_local_chainbestscores(bool *minscoredefined,
   dictbestmatches = gt_ranked_list_new(howmanybest,comparescores,NULL,NULL);
   for (idx=0; idx<matchtable->nextfree; idx++)
   {
+#ifndef DELTAFILTEROVERLAP
     if (gt_chain2dim_isrightmaximal_chain(matchtable,idx))
     {
+#endif
       scores[matchnum] = matchtable->matches[idx].score;
       gt_ranked_list_insert(dictbestmatches,
                             (void *) (scores + matchnum));
       matchnum++;
     }
+#ifndef DELTAFILTEROVERLAP
   }
+#endif
   if (matchnum == 0)
   {
     *minscoredefined = false;
@@ -1192,8 +1269,10 @@ static void gt_chain2dim_retrievechainthreshold(
   GT_INITARRAY(&stack,GtChain2DimEdgelevel);
   for (matchnum=0; matchnum < matchtable->nextfree; matchnum++)
   {
+#ifndef DELTAFILTEROVERLAP
     if (gt_chain2dim_isrightmaximal_chain(matchtable,matchnum))
     {
+#endif
       GtChain2Dimscoretype tgap;
 
       if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
@@ -1237,7 +1316,9 @@ static void gt_chain2dim_retrievechainthreshold(
           }
         }
       }
+#ifndef DELTAFILTEROVERLAP
     }
+#endif
   }
   GT_FREEARRAY(&stack,GtChain2DimEdgelevel);
 }
@@ -1608,6 +1689,19 @@ static int cmpMatchchaininfo1(const void *keya,const void *keyb)
   {
     return 1;
   }
+#ifdef DELTAFILTEROVERLAP
+
+   if (((((const Matchchaininfo *) keya)->endpos[1]-
+         ((const Matchchaininfo *) keya)->startpos[1]) *
+         ((const Matchchaininfo *) keya)->weight ) > 
+         ((((const Matchchaininfo *) keyb)->endpos[1]-
+         ((const Matchchaininfo *) keyb)->startpos[1]) *
+         ((const Matchchaininfo *) keyb)->weight ))
+     return -1;
+   else
+     return 1;
+
+#endif
   return 0;
 }
 
@@ -1827,7 +1921,7 @@ void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
 
 void gt_chain_printchainelem(FILE *outfp,const GtChain2Dimmatchvalues *value)
 {
-  fprintf(outfp,GT_WU " " GT_WU " " GT_WU " " GT_WU " " GT_WD "\n",
+  fprintf(outfp,GT_WU " " GT_WU " " GT_WU " " GT_WU " " GT_WU "\n",
           value->startpos[0],
           value->endpos[0],
           value->startpos[1],
