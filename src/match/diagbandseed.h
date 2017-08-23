@@ -69,6 +69,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtStr
                                                *diagband_statistics_arg,
                                              size_t file_buffer_size,
+                                             bool snd_pass,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 
@@ -80,12 +81,13 @@ GtDiagbandseedBaseListType gt_diagbandseed_base_list_get(
                                    bool with_splt,
                                    const char *base_list_string,GtError *err);
 
-typedef struct
-{
-  GtUword sum_of_distance,
-          sum_of_aligned_len;
-  int max_process_runs;
-} GtAniAccumulate;
+typedef struct GtAniAccumulate GtAniAccumulate;
+
+GtAniAccumulate *gt_ani_accumulate_new(const GtEncseq *a_encseq,
+                                       const GtEncseq *b_encseq,
+                                       bool aseqfirstrun);
+
+void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate);
 
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(

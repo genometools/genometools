@@ -94,7 +94,8 @@ typedef struct {
   bool use_kmerfile;
   bool trimstat_on;
   bool use_apos, use_apos_track_all;
-  unsigned int ani_mode; /* 0 no, 1 any with one loop, 2 any with two loops */
+  bool compute_ani;
+  bool snd_pass;
   GtUword maxmat;
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
   GtOption *se_ref_op_evalue,
@@ -160,7 +161,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
     *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics,
-    *op_ani, *op_benchmark;
+    *op_ani, *op_benchmark, *op_snd_pass;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
@@ -538,17 +539,19 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_outfmt,op_onlyseeds);
 
   /* -ani */
-  op_ani = gt_option_new_uint("ani",
-                              "output average nucleotide identity determined "
-                              "from the computed matches "
-                              "(which are not output, optional argument 2 "
-                              "means a second run to obtain a symmetric "
-                              "distance which considers genome1 vs genome2 "
-                              "and vice versa",
-                              &arguments->ani_mode,1);
-  arguments->se_ref_op_ani = gt_option_ref(op_ani);
-  gt_option_argument_is_optional(op_ani);
+  op_ani = gt_option_new_bool("ani",
+                              "output matrix of average nucleotide identities "
+                              "determined from the computed matches",
+                              &arguments->compute_ani,false);
   gt_option_parser_add_option(op, op_ani);
+  gt_option_exclude(op_ani, op_outfmt);
+
+  /* -snd_pass */
+  op_snd_pass = gt_option_new_bool("snd_pass",
+                              "perform a second pass over each seedpair list"
+                              "sorted in apos order",
+                              &arguments->snd_pass,false);
+  gt_option_parser_add_option(op, op_snd_pass);
 
   /* -no-reverse */
   op_norev = gt_option_new_bool("no-reverse",
@@ -736,20 +739,8 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   {
     arguments->maxmat = 0;
   }
-  if (!gt_option_is_set(arguments->se_ref_op_ani))
-  {
-    arguments->ani_mode = 0;
-  } else
-  {
-    if (arguments->ani_mode > 2U)
-    {
-      gt_error_set(err, "illegal argument %u to option -ani",
-                   arguments->ani_mode);
-      had_err = -1;
-    }
-  }
 #ifdef GT_THREADS_ENABLED
-  if (!had_err && arguments->ani_mode > 0 && gt_jobs > 1)
+  if (!had_err && arguments->compute_ani && gt_jobs > 1)
   {
     gt_error_set(err,"option -ani does not work with multiple threads");
     had_err = -1;
@@ -765,15 +756,6 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
     had_err = -1;
   }
   return had_err;
-}
-
-static double gt_seed_extend_ani_evaluate(GtUword sum_of_aligned_len,
-                                          GtUword sum_of_distance)
-{
-  return sum_of_aligned_len > 0
-             ? (100.0 * (1.0 - (double)
-                               (2 * sum_of_distance)/sum_of_aligned_len))
-             : 0.0;
 }
 
 static int gt_seed_extend_runner(int argc,
@@ -799,16 +781,11 @@ static int gt_seed_extend_runner(int argc,
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
-  GtAniAccumulate ani_accumulate[2];
+  GtAniAccumulate *ani_accumulate = NULL;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
-  ani_accumulate[0].sum_of_aligned_len = 0;
-  ani_accumulate[0].sum_of_distance = 0;
-  ani_accumulate[0].max_process_runs = arguments->ani_mode;
-  ani_accumulate[1].sum_of_aligned_len = 0;
-  ani_accumulate[1].sum_of_distance = 0;
-  ani_accumulate[0].max_process_runs = arguments->ani_mode;
+
   /* Define, whether greedy extension will be performed */
   extendxdrop = gt_option_is_set(arguments->se_ref_op_xdr);
   if (arguments->onlyseeds || extendxdrop) {
@@ -830,7 +807,7 @@ static int gt_seed_extend_runner(int argc,
     seedextendtimer = gt_timer_new();
     gt_timer_start(seedextendtimer);
   }
-  if (arguments->ani_mode == 0)
+  if (!arguments->compute_ani)
   {
     out_display_flag = gt_querymatch_display_flag_new(arguments->display_args,
                                                       setmode,err);
@@ -851,7 +828,7 @@ static int gt_seed_extend_runner(int argc,
       gt_querymatch_Options_output(stdout,argc,argv,idhistout,
                                    arguments->se_minidentity,
                                    arguments->se_historysize);
-      if (arguments->ani_mode == 0 && !arguments->onlyseeds &&
+      if (!arguments->compute_ani && !arguments->onlyseeds &&
           !gt_diagbandseed_derive_maxmat_show(arguments->maxmat))
       {
         gt_querymatch_Fields_output(stdout,out_display_flag);
@@ -985,6 +962,10 @@ static int gt_seed_extend_runner(int argc,
   maxseqlength = MIN(gt_encseq_max_seq_length(aencseq),
                      gt_encseq_max_seq_length(bencseq));
 
+  if (arguments->compute_ani)
+  {
+    ani_accumulate = gt_ani_accumulate_new(aencseq, bencseq, false);
+  }
   if (arguments->dbs_seedlength == UINT_MAX)
   {
     if (arguments->maxmat == 1)
@@ -1232,9 +1213,7 @@ static int gt_seed_extend_runner(int argc,
                                              !arguments->relax_polish,
                                              arguments->verify_alignment,
                                              arguments->only_selected_seqpairs,
-                                             arguments->ani_mode > 0
-                                               ? &ani_accumulate[0]
-                                               : NULL);
+                                             ani_accumulate);
 
     info = gt_diagbandseed_info_new(aencseq,
                                     bencseq,
@@ -1258,6 +1237,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->diagband_statistics_arg,
                                     1024 *
                                     (size_t) arguments->file_buffer_size_kb,
+                                    arguments->snd_pass,
                                     extp);
 
     /* Start algorithm */
@@ -1275,6 +1255,10 @@ static int gt_seed_extend_runner(int argc,
     gt_sequence_parts_info_delete(aseqranges);
     gt_diagbandseed_extend_params_delete(extp);
     gt_diagbandseed_info_delete(info);
+  }
+  if (arguments->compute_ani)
+  {
+    gt_ani_accumulate_delete(ani_accumulate);
   }
   gt_encseq_delete(aencseq);
   gt_encseq_delete(bencseq);
@@ -1300,22 +1284,6 @@ static int gt_seed_extend_runner(int argc,
     gt_timer_delete(seedextendtimer);
   }
   gt_querymatch_display_flag_delete(out_display_flag);
-  if (arguments->ani_mode > 0)
-  {
-    int idx;
-
-    printf("ANI %s %s",gt_str_get(arguments->dbs_indexname),
-                       gt_str_length(arguments->dbs_queryname) > 0
-                         ? gt_str_get(arguments->dbs_queryname)
-                         : gt_str_get(arguments->dbs_indexname));
-    for (idx = 0; idx < 2; idx++)
-    {
-      printf(" %.4f",gt_seed_extend_ani_evaluate(
-                          ani_accumulate[idx].sum_of_aligned_len,
-                          ani_accumulate[idx].sum_of_distance));
-    }
-    printf("\n");
-  }
   return had_err;
 }
 

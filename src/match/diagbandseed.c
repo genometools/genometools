@@ -41,6 +41,7 @@
 #include "core/qsort-ulong.h"
 #include "core/log_api.h"
 #include "core/bittab_api.h"
+#include "core/array2dim_api.h"
 #include "match/chain2dim.h"
 #include "match/declare-readfunc.h"
 #include "match/kmercodes.h"
@@ -139,7 +140,8 @@ struct GtDiagbandseedInfo
        debug_kmer,
        debug_seedpair,
        use_kmerfile,
-       trimstat_on;
+       trimstat_on,
+       snd_pass;
 };
 
 struct GtDiagbandseedExtendParams
@@ -296,6 +298,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtStr
                                                *diagband_statistics_arg,
                                              size_t file_buffer_size,
+                                             bool snd_pass,
                                              const GtDiagbandseedExtendParams
                                                *extp)
 {
@@ -333,6 +336,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->chainarguments = chainarguments;
   info->diagband_statistics_arg = diagband_statistics_arg;
   info->file_buffer_size = file_buffer_size;
+  info->snd_pass = snd_pass;
   info->extp = extp;
   return info;
 }
@@ -343,6 +347,58 @@ void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info)
     gt_spaced_seed_spec_delete(info->spaced_seed_spec);
     gt_free(info);
   }
+}
+
+typedef struct
+{
+  GtUword sum_of_distance,
+          sum_of_aligned_len;
+} GtAniAccumulateEntry;
+
+struct GtAniAccumulate
+{
+  GtAniAccumulateEntry **matrix[2];
+  const GtEncseq *aencseq, *bencseq;
+};
+
+GtAniAccumulate *gt_ani_accumulate_new(const GtEncseq *aencseq,
+                                       const GtEncseq *bencseq,
+                                       GT_UNUSED bool aseqfirstrun)
+{
+  int rows = 1, columns = 1;
+  GtAniAccumulate *ani_accumulate = gt_malloc(sizeof *ani_accumulate);
+
+  ani_accumulate->aencseq = aencseq;
+  ani_accumulate->bencseq = bencseq;
+  gt_array2dim_calloc(ani_accumulate->matrix[0],rows,columns);
+  gt_array2dim_calloc(ani_accumulate->matrix[1],rows,columns);
+  return ani_accumulate;
+}
+
+static double gt_seed_extend_ani_evaluate(GtUword sum_of_aligned_len,
+                                          GtUword sum_of_distance)
+{
+  return sum_of_aligned_len > 0
+             ? (100.0 * (1.0 - (double)
+                               (2 * sum_of_distance)/sum_of_aligned_len))
+             : 0.0;
+}
+
+void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate)
+{
+  int idx;
+
+  printf("ANI %s %s",gt_encseq_indexname(ani_accumulate->aencseq),
+                     gt_encseq_indexname(ani_accumulate->bencseq));
+  for (idx = 0; idx < 2; idx++)
+  {
+    printf(" %.4f",gt_seed_extend_ani_evaluate(
+                    ani_accumulate->matrix[idx][0][0].sum_of_aligned_len,
+                    ani_accumulate->matrix[idx][0][0].sum_of_distance));
+    gt_array2dim_delete(ani_accumulate->matrix[idx]);
+  }
+  printf("\n");
+  gt_free(ani_accumulate);
 }
 
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
@@ -2975,7 +3031,8 @@ typedef struct
   const GtKarlinAltschulStat *karlin_altschul_stat;
   const GtSeedExtendDisplayFlag *out_display_flag;
   bool benchmark;
-  GtAniAccumulate *ani_accumulate;
+  GtAniAccumulateEntry **ani_accumulate_matrix,
+                       *ani_accumulate_entry;
   GtDiagbandseedState *dbs_state;
 } GtDiagbandseedExtendSegmentInfo;
 
@@ -3059,7 +3116,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     {
       double evalue, bit_score;
 
-      if (esi->ani_accumulate != NULL)
+      if (esi->ani_accumulate_entry != NULL)
       {
         const GtUword query_seqlen
           = esi->plainsequence_info.bseqorencseq.seqlength,
@@ -3081,8 +3138,8 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                esi->evalue_threshold,
                                stdout))
         {
-          esi->ani_accumulate->sum_of_aligned_len += aligned_len;
-          esi->ani_accumulate->sum_of_distance
+          esi->ani_accumulate_entry->sum_of_aligned_len += aligned_len;
+          esi->ani_accumulate_entry->sum_of_distance
             += esi->info_querymatch.previous_match_distance;
           ret = 3;
         } else
@@ -3618,6 +3675,24 @@ static void gt_diagbandseed_segment2matches(
 #define GT_DIAGBANDSEED_PROCESS_SEGMENT\
         for (process_run = 0; process_run < max_process_runs; process_run++) \
         {\
+          if (esi != NULL)\
+          {\
+            if (esi->ani_accumulate_matrix != NULL)\
+            {\
+              if (esi->same_encseq)\
+              {\
+                esi->ani_accumulate_entry\
+                  = &esi->ani_accumulate_matrix[currsegm_aseqnum]\
+                                               [currsegm_bseqnum];\
+              } else\
+              {\
+                esi->ani_accumulate_entry = &esi->ani_accumulate_matrix[0][0];\
+              }\
+            } else\
+            {\
+              esi->ani_accumulate_entry = NULL;\
+            }\
+          }\
           if (process_run == 1)\
           {\
             gt_radixsort_inplace_ulong((GtUword *) segment_positions,\
@@ -3673,18 +3748,37 @@ static void gt_diagbandseed_segment2matches(
               }\
               gt_assert(segment_proc_func != NULL && \
                         segment_proc_info != NULL);\
-              segment_proc_func(segment_proc_info,\
-                                aencseq,\
-                                bencseq,\
-                                currsegm_aseqnum,\
-                                currsegm_bseqnum,\
-                                diagband_struct,\
-                                memstore == NULL\
-                                  ? NULL \
-                                  : memstore->spaceGtDiagbandseedMaximalmatch,\
-                                seedlength,\
-                                segment_positions,\
-                                segment_length);\
+              if (process_run == 0)\
+              {\
+                segment_proc_func(segment_proc_info,\
+                                  aencseq,\
+                                  bencseq,\
+                                  currsegm_aseqnum,\
+                                  currsegm_bseqnum,\
+                                  diagband_struct,\
+                                  memstore == NULL\
+                                    ? NULL \
+                                    : memstore->\
+                                        spaceGtDiagbandseedMaximalmatch,\
+                                  seedlength,\
+                                  segment_positions,\
+                                  segment_length);\
+              } else\
+              {\
+                segment_proc_func(segment_proc_info,\
+                                  bencseq,\
+                                  aencseq,\
+                                  currsegm_bseqnum,\
+                                  currsegm_aseqnum,\
+                                  diagband_struct,\
+                                  memstore == NULL\
+                                    ? NULL \
+                                    : memstore->\
+                                        spaceGtDiagbandseedMaximalmatch,\
+                                  seedlength,\
+                                  segment_positions,\
+                                  segment_length);\
+              }\
             }\
           }\
           if (diagband_struct != NULL && \
@@ -3885,14 +3979,14 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   {
     if (GT_ISDIRREVERSE(query_readmode))
     {
-      esi->ani_accumulate = extp->ani_accumulate + 1;
+      esi->ani_accumulate_matrix = extp->ani_accumulate->matrix[1];
     } else
     {
-      esi->ani_accumulate = extp->ani_accumulate;
+      esi->ani_accumulate_matrix = extp->ani_accumulate->matrix[0];
     }
   } else
   {
-    esi->ani_accumulate = NULL;
+    esi->ani_accumulate_matrix = NULL;
   }
   return esi;
 }
@@ -3944,6 +4038,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                           const GtStr *diagband_statistics_arg,
                                           GtDiagbandseedState
                                             *dbs_state,
+                                          bool snd_pass,
                                           GtSegmentRejectFunc
                                             segment_reject_func,
                                           GtSegmentRejectInfo
@@ -3962,9 +4057,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandStatistics *diagband_statistics = NULL;
   GtDiagbandseedProcessSegmentFunc segment_proc_func = NULL;
   int process_run;
-  const int max_process_runs
-    = (extp->ani_accumulate == NULL) ? 1
-                                     : extp->ani_accumulate[0].max_process_runs;
+  const int max_process_runs = snd_pass ? 2 : 1;
   void *segment_proc_info = NULL;
 
   gt_assert(extp->mincoverage >= seedlength && minsegmentlen >= 1);
@@ -4685,6 +4778,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   stream,
                                   arg->diagband_statistics_arg,
                                   dbs_state,
+                                  arg->snd_pass,
                                   segment_reject_func,
                                   segment_reject_info);
     gt_seedpairlist_reset(seedpairlist);
@@ -4815,6 +4909,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   stream,
                                   arg->diagband_statistics_arg,
                                   dbs_state,
+                                  arg->snd_pass,
                                   segment_reject_func,
                                   segment_reject_info);
   }
