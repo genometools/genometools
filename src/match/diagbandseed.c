@@ -141,7 +141,8 @@ struct GtDiagbandseedInfo
        debug_seedpair,
        use_kmerfile,
        trimstat_on,
-       snd_pass;
+       snd_pass,
+       inseqseeds;
 };
 
 struct GtDiagbandseedExtendParams
@@ -299,6 +300,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                                *diagband_statistics_arg,
                                              size_t file_buffer_size,
                                              bool snd_pass,
+                                             bool inseqseeds,
                                              const GtDiagbandseedExtendParams
                                                *extp)
 {
@@ -337,6 +339,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->diagband_statistics_arg = diagband_statistics_arg;
   info->file_buffer_size = file_buffer_size;
   info->snd_pass = snd_pass;
+  info->inseqseeds = inseqseeds;
   info->extp = extp;
   return info;
 }
@@ -358,7 +361,7 @@ typedef struct
 struct GtAniAccumulate
 {
   GtAniAccumulateEntry **matrix[2];
-  GtUword rows, columns;
+  GtUword rows;
   const GtEncseq *aencseq, *bencseq;
 };
 
@@ -367,15 +370,20 @@ GtAniAccumulate *gt_ani_accumulate_new(const GtEncseq *aencseq,
                                        bool snd_pass)
 {
   GtAniAccumulate *ani_accumulate = gt_malloc(sizeof *ani_accumulate);
+  GtUword columns;
 
   ani_accumulate->aencseq = aencseq;
   ani_accumulate->bencseq = bencseq;
-  ani_accumulate->rows = snd_pass ? 2 : 1;
-  ani_accumulate->columns = 1;
-  gt_array2dim_calloc(ani_accumulate->matrix[0],ani_accumulate->rows,
-                                                ani_accumulate->columns);
-  gt_array2dim_calloc(ani_accumulate->matrix[1],ani_accumulate->rows,
-                                                ani_accumulate->columns);
+  if (aencseq == bencseq)
+  {
+    ani_accumulate->rows = columns = gt_encseq_num_of_sequences(aencseq);
+  } else
+  {
+    ani_accumulate->rows = snd_pass ? 2 : 1;
+    columns = 1;
+  }
+  gt_array2dim_calloc(ani_accumulate->matrix[0],ani_accumulate->rows,columns);
+  gt_array2dim_calloc(ani_accumulate->matrix[1],ani_accumulate->rows,columns);
   return ani_accumulate;
 }
 
@@ -390,20 +398,66 @@ static double gt_seed_extend_ani_evaluate(GtUword sum_of_aligned_len,
 
 void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate)
 {
-  int idx;
   GtUword row;
+  int idx;
 
-  for (row = 0; row < ani_accumulate->rows; row++)
+  if (ani_accumulate->aencseq == ani_accumulate->bencseq)
   {
-    printf("ANI %s %s",gt_encseq_indexname(ani_accumulate->aencseq),
-                       gt_encseq_indexname(ani_accumulate->bencseq));
-    for (idx = 0; idx < 2; idx++)
+    GtUword column;
+    printf(GT_WU " X " GT_WU "-Matrix with ANI for sequences\n",
+           ani_accumulate->rows,ani_accumulate->rows);
+    for (row = 0; row < ani_accumulate->rows; row++)
     {
-      printf(" %.4f",gt_seed_extend_ani_evaluate(
-                      ani_accumulate->matrix[idx][row][0].sum_of_aligned_len,
-                      ani_accumulate->matrix[idx][row][0].sum_of_distance));
+      GtUword desclen;
+      const char *desc = gt_encseq_description(ani_accumulate->aencseq,
+                                               &desclen,row);
+      gt_xfwrite(desc,sizeof *desc,desclen,stdout);
+      fputc('\n',stdout);
     }
-    printf("\n");
+    for (row = 0; row < ani_accumulate->rows; row++)
+    {
+      for (column = 0; column < ani_accumulate->rows; column++)
+      {
+        double ani_value[2];
+
+        if (row == column)
+        {
+          ani_value[0] = ani_value[1] = 100.0;
+        } else
+        {
+          for (idx = 0; idx < 2; idx++)
+          {
+            ani_value[idx]
+              = gt_seed_extend_ani_evaluate(
+                   ani_accumulate->matrix[idx][row][column].sum_of_aligned_len,
+                   ani_accumulate->matrix[idx][row][column].sum_of_distance);
+          }
+        }
+        printf("%.4f/%.4f%c",ani_value[0],ani_value[1],
+                             column < ani_accumulate->rows - 1 ? '\t' : '\n');
+      }
+    }
+  } else
+  {
+    for (row = 0; row < ani_accumulate->rows; row++)
+    {
+      if (row == 0)
+      {
+        printf("ANI %s %s",gt_encseq_indexname(ani_accumulate->aencseq),
+                           gt_encseq_indexname(ani_accumulate->bencseq));
+      } else
+      {
+        printf("ANI %s %s",gt_encseq_indexname(ani_accumulate->bencseq),
+                           gt_encseq_indexname(ani_accumulate->aencseq));
+      }
+      for (idx = 0; idx < 2; idx++)
+      {
+        printf(" %.4f",gt_seed_extend_ani_evaluate(
+                        ani_accumulate->matrix[idx][row][0].sum_of_aligned_len,
+                        ani_accumulate->matrix[idx][row][0].sum_of_distance));
+      }
+      printf("\n");
+    }
   }
   for (idx = 0; idx < 2; idx++)
   {
@@ -2355,8 +2409,9 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
                                   GtDiagbandseedKmerIterator *biter,
                                   GtUword maxfreq,
                                   GtUword maxgram,
-                                  const GtRange *seedpairdistance,
-                                  bool selfcomp)
+                                  GT_UNUSED const GtRange *seedpairdistance,
+                                  bool selfcomp,
+                                  bool inseqseeds)
 {
   const GtKmerPosList *alist, *blist;
   const bool count_cartesian = (histogram != NULL && !selfcomp) ? true : false;
@@ -2400,7 +2455,8 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
               for (bptr = bsegment; bptr < bsegment + blen; bptr++)
               {
                 if (!selfcomp || aptr->seqnum < bptr->seqnum ||
-                    (aptr->seqnum == bptr->seqnum &&
+                    (inseqseeds &&
+                     aptr->seqnum == bptr->seqnum &&
                      aptr->endpos + seedpairdistance->start <= bptr->endpos &&
                      aptr->endpos + seedpairdistance->end >= bptr->endpos))
                 {
@@ -2535,6 +2591,7 @@ static int gt_diagbandseed_get_mlistlen_maxfreq(GtUword *mlistlen,
                                             const GtRange *seedpairdistance,
                                             GtUword len_used,
                                             bool selfcomp,
+                                            bool inseqseeds,
                                             bool alist_blist_id,
                                             bool verbose,
                                             FILE *stream,
@@ -2562,7 +2619,8 @@ static int gt_diagbandseed_get_mlistlen_maxfreq(GtUword *mlistlen,
                         *maxfreq,
                         maxgram,
                         seedpairdistance,
-                        selfcomp);
+                        selfcomp,
+                        inseqseeds);
   *maxfreq = gt_diagbandseed_processhistogram(histogram,
                                               *maxfreq,
                                               maxgram,
@@ -2612,6 +2670,7 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
                                           GtUword known_size,
                                           const GtRange *seedpairdistance,
                                           bool selfcomp,
+                                          bool inseqseeds,
                                           bool debug_seedpair,
                                           bool verbose,
                                           FILE *stream)
@@ -2644,7 +2703,8 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
                         maxfreq,
                         GT_UWORD_MAX, /* maxgram */
                         seedpairdistance,
-                        selfcomp);
+                        selfcomp,
+                        inseqseeds);
   mlistlen = gt_seedpairlist_length(seedpairlist);
   if (verbose) {
     fprintf(stream, "# ... collected " GT_WU " seeds ", mlistlen);
@@ -3740,21 +3800,20 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
             {\
               esi->ani_accumulate_entry = NULL;\
             }\
-          }\
-          if (process_run == 1)\
-          {\
-            gt_assert(esi != NULL);\
-            if (process_run == 1 && !forward)\
+            if (process_run == 1)\
             {\
-              gt_transform_segment_positions(\
-                      esi->plainsequence_info.aseqorencseq.seqlength,\
-                      esi->plainsequence_info.bseqorencseq.seqlength,\
-                      segment_positions,\
-                      segment_length,\
-                      seedlength);\
+              if (!forward)\
+              {\
+                gt_transform_segment_positions(\
+                        esi->plainsequence_info.aseqorencseq.seqlength,\
+                        esi->plainsequence_info.bseqorencseq.seqlength,\
+                        segment_positions,\
+                        segment_length,\
+                        seedlength);\
+              }\
+              gt_radixsort_inplace_ulong((GtUword *) segment_positions,\
+                                         segment_length);\
             }\
-            gt_radixsort_inplace_ulong((GtUword *) segment_positions,\
-                                       segment_length);\
           }\
           if (diagband_struct != NULL)\
           {\
@@ -4687,6 +4746,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                    &seedpairdistance,
                                                    len_used,
                                                    selfcomp,
+                                                   arg->inseqseeds,
                                                    alist_blist_id,
                                                    arg->verbose,
                                                    stream,
@@ -4706,6 +4766,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   mlistlen,
                                   &seedpairdistance,
                                   selfcomp,
+                                  arg->inseqseeds,
                                   arg->debug_seedpair,
                                   arg->verbose,
                                   stream);
@@ -4891,6 +4952,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                          &seedpairdistance,
                                                          len_used,
                                                          selfcomp,
+                                                         arg->inseqseeds,
                                                          alist_blist_id,
                                                          arg->verbose,
                                                          stream,
@@ -4908,6 +4970,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                       mrevlen,
                                       &seedpairdistance,
                                       selfcomp,
+                                      arg->inseqseeds,
                                       arg->debug_seedpair,
                                       arg->verbose,
                                       stream);
@@ -5535,7 +5598,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     int cc;
     rewind(stream_tab[tidx]);
     while ((cc = fgetc(stream_tab[tidx])) != EOF) {
-      putchar(cc);
+      fputc(cc,stdout);
     }
     gt_fa_xfclose(stream_tab[tidx]);
   }

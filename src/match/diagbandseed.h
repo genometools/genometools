@@ -70,6 +70,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                                *diagband_statistics_arg,
                                              size_t file_buffer_size,
                                              bool snd_pass,
+                                             bool inseqseeds,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 

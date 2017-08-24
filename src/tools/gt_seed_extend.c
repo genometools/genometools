@@ -96,6 +96,7 @@ typedef struct {
   bool use_apos, use_apos_track_all;
   bool compute_ani;
   bool snd_pass;
+  bool noinseqseeds;
   GtUword maxmat;
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
   GtOption *se_ref_op_evalue,
@@ -545,6 +546,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               &arguments->compute_ani,false);
   gt_option_parser_add_option(op, op_ani);
   gt_option_exclude(op_ani, op_outfmt);
+
+  option = gt_option_new_bool("noinseqseeds",
+                              "ignore seeds that are in same sequence"
+                              "(triggered by option -ani)",
+                              &arguments->noinseqseeds,false);
+  gt_option_parser_add_option(op, option);
 
   /* -snd_pass */
   op_snd_pass = gt_option_new_bool("snd_pass",
@@ -1239,6 +1246,7 @@ static int gt_seed_extend_runner(int argc,
                                     1024 *
                                     (size_t) arguments->file_buffer_size_kb,
                                     arguments->snd_pass,
+                                    !arguments->noinseqseeds,
                                     extp);
 
     /* Start algorithm */
