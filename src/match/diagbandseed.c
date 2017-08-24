@@ -3067,8 +3067,9 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
            haspreviousmatch ? "true" : "false");
   }
   if (!haspreviousmatch ||
-      (bpos_sorted && esi->info_querymatch.previous_match_b_end < bpos) ||
-      (!bpos_sorted && esi->info_querymatch.previous_match_a_end < apos) ||
+      (use_apos == 0 &&
+      ((bpos_sorted && esi->info_querymatch.previous_match_b_end < bpos) ||
+      (!bpos_sorted && esi->info_querymatch.previous_match_b_end < apos))) ||
       /* no overlap */
       (use_apos > 0 && !gt_diagbandseed_has_overlap_with_previous_match(
                              previous_extensions,
@@ -3099,18 +3100,35 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     /* the following function called is either
          gt_greedy_extend_seed_relative or
          gt_xdrop_extend_seed_relative */
-    success = esi->extend_relative_coords_function(&esi->info_querymatch,
-                                                   &esi->plainsequence_info.
-                                                     aseqorencseq,
-                                                   aseqnum,
-                                                   astart,
-                                                   &esi->plainsequence_info.
-                                                     bseqorencseq,
-                                                   esi->same_encseq,
-                                                   bseqnum,
-                                                   bstart,
-                                                   matchlength,
-                                                   esi->query_readmode);
+    if (bpos_sorted)
+    {
+      success = esi->extend_relative_coords_function(&esi->info_querymatch,
+                                                     &esi->plainsequence_info.
+                                                       aseqorencseq,
+                                                     aseqnum,
+                                                     astart,
+                                                     &esi->plainsequence_info.
+                                                       bseqorencseq,
+                                                     esi->same_encseq,
+                                                     bseqnum,
+                                                     bstart,
+                                                     matchlength,
+                                                     esi->query_readmode);
+    } else
+    {
+      success = esi->extend_relative_coords_function(&esi->info_querymatch,
+                                                     &esi->plainsequence_info.
+                                                       bseqorencseq,
+                                                     bseqnum,
+                                                     bstart,
+                                                     &esi->plainsequence_info.
+                                                       aseqorencseq,
+                                                     esi->same_encseq,
+                                                     aseqnum,
+                                                     astart,
+                                                     matchlength,
+                                                     esi->query_readmode);
+    }
 #ifndef _WIN32
     if (esi->dbs_state != NULL &&
         esi->dbs_state->withtiming)
@@ -3682,6 +3700,25 @@ static void gt_diagbandseed_segment2matches(
   }
 }
 
+static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
+                                           GtDiagbandseedPosition b_seqlength,
+                                           GtSeedpairPositions
+                                            *segment_positions,
+                                           GtUword segment_length,
+                                           GtUword seedlength)
+{
+  GtSeedpairPositions *sptr;
+
+  for (sptr = segment_positions; sptr < segment_positions + segment_length;
+       sptr++)
+  {
+     gt_assert(sptr->apos < a_seqlength);
+     sptr->apos = GT_REVERSEPOS(a_seqlength,sptr->apos) + seedlength - 1;
+     gt_assert(sptr->bpos < b_seqlength);
+     sptr->bpos = GT_REVERSEPOS(b_seqlength,sptr->bpos) + seedlength - 1;
+  }
+}
+
 #define GT_DIAGBANDSEED_PROCESS_SEGMENT\
         for (process_run = 0; process_run < max_process_runs; process_run++) \
         {\
@@ -3706,6 +3743,16 @@ static void gt_diagbandseed_segment2matches(
           }\
           if (process_run == 1)\
           {\
+            gt_assert(esi != NULL);\
+            if (process_run == 1 && !forward)\
+            {\
+              gt_transform_segment_positions(\
+                      esi->plainsequence_info.aseqorencseq.seqlength,\
+                      esi->plainsequence_info.bseqorencseq.seqlength,\
+                      segment_positions,\
+                      segment_length,\
+                      seedlength);\
+            }\
             gt_radixsort_inplace_ulong((GtUword *) segment_positions,\
                                        segment_length);\
           }\

@@ -42,6 +42,13 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani-at1MB-U8.txt"
   run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -ani -snd_pass"
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani2-at1MB-U8.txt"
+  run_test "#{$bin}/gt seed_extend -ii U89959_genomic -qii at1MB -ani"
+  run "grep -v '^#' #{last_stdout}"
+  run "cut -f 4-5 -d ' ' #{last_stdout}"
+  run "mv #{last_stdout} tmp.ani"
+  run "tail -1 #{$testdata}/see-ext-ani2-at1MB-U8.txt"
+  run "cut -f 4-5 -d ' ' #{last_stdout}"
+  run "diff #{last_stdout} tmp.ani"
 end
 
 Name "gt seed_extend: blast like output"
