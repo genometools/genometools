@@ -964,7 +964,8 @@ static int gt_seed_extend_runner(int argc,
 
   if (arguments->compute_ani)
   {
-    ani_accumulate = gt_ani_accumulate_new(aencseq, bencseq, false);
+    ani_accumulate = gt_ani_accumulate_new(aencseq, bencseq,
+                                           arguments->snd_pass);
   }
   if (arguments->dbs_seedlength == UINT_MAX)
   {
