@@ -59,18 +59,13 @@ void gt_diagband_struct_delete(GtDiagbandStruct *diagband_struct);
 
 bool gt_diagband_struct_empty(const GtDiagbandStruct *diagband_struct);
 
+void gt_diagband_struct_bpos_sorted_set(GtDiagbandStruct *diagband_struct,
+                                        bool value);
+
+bool gt_diagband_struct_bpos_sorted_get(const GtDiagbandStruct
+                                          *diagband_struct);
+
 typedef uint32_t GtDiagbandseedPosition;
-
-/* for a given match of length <matchlength> ending a positions <apos> and
-   <bpos> the sequence from A and from B, respectively, update the
-   diagonal band score, which is the number of positions on B covered by the
-   match. If previous matches have been added to the band before, then
-   the positions overlapping with these on the B-sequence are not counted.*/
-
-void gt_diagband_struct_single_update(GtDiagbandStruct *diagband_struct,
-                                      GtDiagbandseedPosition apos,
-                                      GtDiagbandseedPosition bpos,
-                                      GtDiagbandseedPosition matchlength);
 
 /* for a given pair of positions <apos> and <bpos> on the A- and on the
    B-sequence, respectively, determine the corresponding coverage. */
@@ -92,17 +87,27 @@ typedef struct
    <numofmatches> MEMs stored in <memstore>. The matches have to be sorted
    by the B-position */
 
-void gt_diagband_struct_multi_update(GtDiagbandStruct *diagband_struct,
-                                     const GtDiagbandseedMaximalmatch *memstore,
-                                     GtUword numofmatches);
+void gt_diagband_struct_mem_multi_update(GtDiagbandStruct *diagband_struct,
+                                         const GtDiagbandseedMaximalmatch
+                                           *memstore,
+                                         GtUword numofmatches);
 
 /* To store seeds in we use elements of the following type. */
 
 typedef struct
 {
-  GtDiagbandseedPosition apos, /* secondary key */
-                         bpos; /* primary key */
+  GtDiagbandseedPosition bpos;
+  GtDiagbandseedPosition apos;
 } GtSeedpairPositions;
+
+/* The following function updates the diagonal band score for
+   <segment_length> seeds stored in <seedstore>, each of length seedlength.
+   The matches have to be sorted by the B-position */
+
+void gt_diagband_struct_seed_multi_update(GtDiagbandStruct *diagband_struct,
+                                          const GtSeedpairPositions *seedstore,
+                                          GtUword segment_length,
+                                          GtUword seedlength);
 
 /* The following function resets the diagonal band score for
    <segment_length> seeds. */

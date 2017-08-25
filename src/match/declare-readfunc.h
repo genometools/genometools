@@ -23,14 +23,13 @@
 #include <inttypes.h>
 #include "core/unused_api.h"
 
-#define GT_FILEBUFFERSIZE 4096
-
 #define GT_DECLAREBufferedfiletype(TYPE)\
         typedef struct\
         {\
           unsigned int nextfree,\
                        nextread;\
           TYPE *bufferedfilespace;\
+          size_t buffer_unit_size, buffer_items;\
           FILE *fp;\
         } GtBufferedfile_ ## TYPE
 
@@ -40,10 +39,11 @@
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
-            buf->nextfree = (unsigned int) fread(buf->bufferedfilespace,\
-                                                 sizeof (TYPE),\
-                                                 (size_t) GT_FILEBUFFERSIZE,\
-                                                 buf->fp);\
+            buf->nextfree = (unsigned int) \
+                            fread(buf->bufferedfilespace,\
+                                  buf->buffer_unit_size,\
+                                  buf->buffer_items,\
+                                  buf->fp);\
             if (ferror(buf->fp))\
             {\
               fprintf(stderr,"error when trying to read next %s\n",#TYPE);\
@@ -58,6 +58,18 @@
           *val = buf->bufferedfilespace[buf->nextread++];\
           return 1;\
         }
+
+#define GT_BUFFEREDFILE_BUFFER_SET(BUF,BUFFERSIZE,UNITSIZE)\
+        (BUF)->buffer_unit_size = UNITSIZE;\
+        if ((BUFFERSIZE) % (BUF)->buffer_unit_size == 0)\
+        {\
+          (BUF)->buffer_items = (BUFFERSIZE)/(BUF)->buffer_unit_size;\
+        } else\
+        {\
+          (BUF)->buffer_items = 1+(BUFFERSIZE)/(BUF)->buffer_unit_size;\
+        }\
+        (BUF)->bufferedfilespace \
+          = gt_malloc((BUF)->buffer_unit_size * (BUF)->buffer_items)
 
 GT_DECLAREBufferedfiletype(GtUword);
 GT_DECLAREREADFUNCTION(GtUword);

@@ -68,6 +68,9 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtStr *chainarguments,
                                              const GtStr
                                                *diagband_statistics_arg,
+                                             size_t file_buffer_size,
+                                             bool snd_pass,
+                                             bool inseqseeds,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 
@@ -79,11 +82,13 @@ GtDiagbandseedBaseListType gt_diagbandseed_base_list_get(
                                    bool with_splt,
                                    const char *base_list_string,GtError *err);
 
-typedef struct
-{
-  GtUword sum_of_distance,
-          sum_of_aligned_len;
-} GtAniAccumulate;
+typedef struct GtAniAccumulate GtAniAccumulate;
+
+GtAniAccumulate *gt_ani_accumulate_new(const GtEncseq *a_encseq,
+                                       const GtEncseq *b_encseq,
+                                       bool aseqfirstrun);
+
+void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate);
 
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
@@ -111,6 +116,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool verify_alignment,
                                 bool only_selected_seqpairs,
                                 GtAniAccumulate *ani_accumulate);
+
+bool gt_diagbandseed_derive_maxmat_show(GtUword maxmat);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
