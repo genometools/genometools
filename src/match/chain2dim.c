@@ -29,6 +29,7 @@
 #include "chain2dim.h"
 #include "prsqualint.h"
 #define DELTAFILTEROVERLAP
+
 /*
   The basic information required for each match is stored
   in a structure of the following type. The user has to specify
@@ -46,9 +47,8 @@ typedef struct
                                    chainkinds but only used for local chaining
                                 */
                 previousinchain;  /* previous index in chain, compute */
-  
- GtChain2Dimscoretype
-         weight, /* weight of match, user defined */
+  GtChain2DimWeightType weight; /* weight of match, user defined */
+  GtChain2Dimscoretype
          initialgap, /* gap to start of sequences, user defined */
          terminalgap, /* gap to last positions of match, user defined */
          score; /* score of highest scoreing chain ending here, compute */
@@ -550,17 +550,23 @@ static void gt_chain2dim_bruteforcechainingscores(
     matchtable->matches[0].previousinchain = GT_CHAIN2DIM_UNDEFPREVIOUS;
 
     matchtable->matches[0].score = matchtable->matches[0].weight;
+
 #ifdef DELTAFILTEROVERLAP
+    /* set score for match element 0. In contast to the 'normal' version the
+       score is dependt additional on minimal aligned length */
+
     GtUword len0 =  GT_CHAIN2DIM_GETSTOREDENDPOINT(0, 0) - 
                     GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, 0)+1;
     GtUword len1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, 0) -
                    GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, 0)+1;
     GtUword len = len0 > len1 ? len1 : len0;
-    matchtable->matches[0].score =matchtable->matches[0].weight*len;
+    matchtable->matches[0].score = matchtable->matches[0].weight*len;
+    
+    /* initialize difftable, use diff as an additional criterion to extend the
+       chain if the score dose not change */
     GtUword *difftable = gt_calloc(matchtable->nextfree, sizeof(*difftable));
     GtUword diff = 0;
 #endif
-
     
     if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
     {
@@ -569,7 +575,8 @@ static void gt_chain2dim_bruteforcechainingscores(
     }
     for (rightmatch=1Ul; rightmatch<matchtable->nextfree; rightmatch++)
     {
-      GtChain2Dimscoretype weightright;
+
+      GtChain2DimWeightType weightright;
       GtUword leftmatch;
       GtChain2DimMaxmatchvalue localmaxmatch;
 
@@ -579,6 +586,7 @@ static void gt_chain2dim_bruteforcechainingscores(
 #endif
 
 #ifdef DELTAFILTEROVERLAP
+      /* new way to calculate weightright (dependent on the minimal alignedlen) */
       len0 =  GT_CHAIN2DIM_GETSTOREDENDPOINT(0, rightmatch) -
               GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
       len1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, rightmatch) -
@@ -591,6 +599,7 @@ static void gt_chain2dim_bruteforcechainingscores(
       localmaxmatch.maxscore = 0;
       localmaxmatch.maxmatchnum = 0;
       localmaxmatch.diff = 0;
+
       for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
       {
         bool combinable;
@@ -607,6 +616,8 @@ static void gt_chain2dim_bruteforcechainingscores(
             combinable = gt_chain2dim_ovl_colinear(matchtable,leftmatch,
                                                    rightmatch);
 #ifdef DELTAFILTEROVERLAP
+            /* colinearity is no more a criteriation, now diff is the
+               additional criterion */
             combinable = true;
 #endif
           } else
@@ -638,29 +649,41 @@ static void gt_chain2dim_bruteforcechainingscores(
 #endif
 
 #ifdef DELTAFILTEROVERLAP
-             if (gt_chain2dim_overlapping(matchtable,leftmatch,rightmatch))
-             {
-                GtUword ov0 = 0;
-                if(GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) >=
+            /* new way to handle overlap case */
+            GtChain2DimWeightType negscore = 0;
+            GtUword ov0 = 0;
+            GtUword ov1 = 0;
+            GtUword ovlap = 0;
+
+            if(GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) >=
                 GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch))
-                { 
-                  ov0 = GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) -
-                        GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
-                }
-                
-                GtUword ov1 = 0;
-                if(GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) >= 
+            { 
+              ov0 = GT_CHAIN2DIM_GETSTOREDENDPOINT(0, leftmatch) -
+                    GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0, rightmatch)+1;
+            }
+
+            if(GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) >= 
                 GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch))
-                { 
-                  ov1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) -
-                        GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
-                }
-                GtUword ovlap = ov0 > ov1 ? ov0 : ov1;
-                score -= ovlap * matchtable->matches[rightmatch].weight;
-              }
+            { 
+              ov1 = GT_CHAIN2DIM_GETSTOREDENDPOINT(1, leftmatch) -
+                    GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1, rightmatch)+1;
+            }
+  
+            ovlap = ov0 > ov1 ? ov0 : ov1;
+            negscore = (ovlap * matchtable->matches[rightmatch].weight);
+
+            if (negscore < score)
+            {
+              score += (long)(weightright - negscore);
+              previous = leftmatch;
+            }
+            else
+            {
+              score = weightright;
+              previous = GT_CHAIN2DIM_UNDEFPREVIOUS;
+            } 
 #endif
-
-
+#ifndef DELTAFILTEROVERLAP
             if (chainmode->chainkind == GLOBALCHAININGWITHGAPCOST)
             {
               score += (weightright + GT_CHAIN2DIM_TERMINALGAP(leftmatch)
@@ -678,12 +701,14 @@ static void gt_chain2dim_bruteforcechainingscores(
                 previous = GT_CHAIN2DIM_UNDEFPREVIOUS;
               }
             }
+#endif
           }
 
-          if (!localmaxmatch.defined || localmaxmatch.maxscore < score)
+          if (!localmaxmatch.defined || localmaxmatch.maxscore < score ||
+                score == localmaxmatch.maxscore)
           {
 #ifdef DELTAFILTEROVERLAP
-           
+            /* update additional criterion diff */
             diff = difftable[leftmatch];
             if (GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,leftmatch)
               < GT_CHAIN2DIM_GETSTOREDSTARTPOINT(0,rightmatch))
@@ -708,9 +733,8 @@ static void gt_chain2dim_bruteforcechainingscores(
                            GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,leftmatch));
             }
             
-            if (score > matchtable->matches[rightmatch].score ||
-                (score == matchtable->matches[rightmatch].score &&
-                 diff < difftable[rightmatch]))
+            if (!localmaxmatch.defined || score > localmaxmatch.maxscore ||
+                (score == localmaxmatch.maxscore && diff < localmaxmatch.diff))
             {
               localmaxmatch.maxscore = score;
               localmaxmatch.maxmatchnum = previous;
@@ -718,6 +742,7 @@ static void gt_chain2dim_bruteforcechainingscores(
               localmaxmatch.diff = diff;
             }
 #endif
+
 #ifndef DELTAFILTEROVERLAP
             localmaxmatch.maxscore = score;
             localmaxmatch.maxmatchnum = previous;
@@ -1921,10 +1946,10 @@ void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
 
 void gt_chain_printchainelem(FILE *outfp,const GtChain2Dimmatchvalues *value)
 {
-  fprintf(outfp,GT_WU " " GT_WU " " GT_WU " " GT_WU " " GT_WU "\n",
+  fprintf(outfp,GT_WU " " GT_WU " " GT_WU " " GT_WU " "GT_WD"\n",
           value->startpos[0],
           value->endpos[0],
           value->startpos[1],
           value->endpos[1],
-          value->weight);
+          (GtUword) value->weight);
 }

@@ -47,6 +47,10 @@ typedef GtUword GtChain2Dimpostype;
 
 typedef GtWord GtChain2Dimscoretype;
 
+/* the following type is used for weight of matches */
+
+typedef float GtChain2DimWeightType;
+
 /* the anonymous type for a chain */
 
 typedef struct GtChain2Dim GtChain2Dim;
@@ -63,7 +67,7 @@ typedef struct
   GtChain2Dimpostype startpos[2], /* start of matches in the 2 dimensions,
                                  userdef */
                  endpos[2];  /* end of matches in the 2 dimensions, userdef */
-  GtChain2Dimscoretype weight; /* weight of match, user defined */
+  GtChain2DimWeightType weight; /* weight of match, user defined */
 } GtChain2Dimmatchvalues;
 
 /*
