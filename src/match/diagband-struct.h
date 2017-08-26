@@ -109,6 +109,16 @@ void gt_diagband_struct_seed_multi_update(GtDiagbandStruct *diagband_struct,
                                           GtUword segment_length,
                                           GtUword seedlength);
 
+/* The following function update the amaxlen and bmaxlen elements. This
+   is usefull in circumstances, where we want to process a segment for
+   two sequences as part of a larger index in the same way as the two
+   sequences are processed without any other sequences. We achieve this
+   behavior by supplying the length of the two sequences of the segment
+   as amaxlen and bmaxlen */
+
+void gt_diagbandseed_maxlen_update(GtDiagbandStruct *diagband_struct,
+                                   GtUword amaxlen,GtUword bmaxlen);
+
 /* The following function resets the diagonal band score for
    <segment_length> seeds. */
 

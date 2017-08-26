@@ -404,37 +404,46 @@ void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate)
   if (ani_accumulate->aencseq == ani_accumulate->bencseq)
   {
     GtUword column;
-    printf(GT_WU " X " GT_WU "-Matrix with ANI for sequences\n",
-           ani_accumulate->rows,ani_accumulate->rows);
+    printf("# pairwise ANI values for " GT_WU " sequences\n",
+              ani_accumulate->rows);
     for (row = 0; row < ani_accumulate->rows; row++)
     {
       GtUword desclen;
       const char *desc = gt_encseq_description(ani_accumulate->aencseq,
                                                &desclen,row);
+      printf(GT_WU "\t",row);
       gt_xfwrite(desc,sizeof *desc,desclen,stdout);
       fputc('\n',stdout);
     }
     for (row = 0; row < ani_accumulate->rows; row++)
     {
-      for (column = 0; column < ani_accumulate->rows; column++)
+      for (column = row+1; column < ani_accumulate->rows; column++)
       {
-        double ani_value[2];
+        double ani_value[4];
+        bool outputsnd = false;
 
-        if (row == column)
+        for (idx = 0; idx < 2; idx++)
         {
-          ani_value[0] = ani_value[1] = 100.0;
-        } else
-        {
-          for (idx = 0; idx < 2; idx++)
+          ani_value[idx]
+            = gt_seed_extend_ani_evaluate(
+                 ani_accumulate->matrix[idx][row][column].sum_of_aligned_len,
+                 ani_accumulate->matrix[idx][row][column].sum_of_distance);
+          if (ani_accumulate->matrix[idx][column][row].sum_of_aligned_len > 0)
           {
-            ani_value[idx]
+            ani_value[2+idx]
               = gt_seed_extend_ani_evaluate(
-                   ani_accumulate->matrix[idx][row][column].sum_of_aligned_len,
-                   ani_accumulate->matrix[idx][row][column].sum_of_distance);
+                 ani_accumulate->matrix[idx][column][row].sum_of_aligned_len,
+                 ani_accumulate->matrix[idx][column][row].sum_of_distance);
+            outputsnd = true;
+          } else
+          {
+            ani_value[2+idx] = 0.0;
           }
         }
-        printf("%.4f/%.4f%c",ani_value[0],ani_value[1],
-                             column < ani_accumulate->rows - 1 ? '\t' : '\n');
+        printf("ANI " GT_WU " " GT_WU " %.4f %.4f\n",row,column,ani_value[0],
+                                                                ani_value[1]);
+        printf("ANI " GT_WU " " GT_WU " %.4f %.4f\n",column,row,ani_value[2],
+                                                                ani_value[3]);
       }
     }
   } else
@@ -1798,7 +1807,7 @@ typedef struct
   int shift_tab[4],
       transfer_shift,
       bits_unused_in2GtUwords;
-  bool maxmat_compute, maxmat_show;
+  bool maxmat_compute, maxmat_show, inseqseeds;
   GtUword amaxlen;
 } GtSeedpairlist;
 
@@ -1825,6 +1834,7 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
                         const GtSequencePartsInfo *bseqranges,
                         GtUword bidx,
                         GtUword maxmat,
+                        bool inseqseeds,
                         GtUword amaxlen)
 {
   GtSeedpairlist *seedpairlist = gt_malloc(sizeof *seedpairlist);
@@ -1837,6 +1847,7 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
   seedpairlist->maxmat_show = gt_diagbandseed_derive_maxmat_show(maxmat);
   seedpairlist->maxmat_compute = maxmat > 0 ? true : false;
   seedpairlist->amaxlen = amaxlen;
+  seedpairlist->inseqseeds = inseqseeds;
   seedpairlist->aseqrange_max_length
     = gt_sequence_parts_info_max_length_get(aseqranges,aidx);
   seedpairlist->bseqrange_max_length
@@ -3788,13 +3799,21 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
             {\
               if (esi->same_encseq)\
               {\
-                esi->ani_accumulate_entry\
-                  = &esi->ani_accumulate_matrix[currsegm_aseqnum]\
-                                               [currsegm_bseqnum];\
+                if (process_run == 0)\
+                {\
+                  esi->ani_accumulate_entry\
+                    = esi->ani_accumulate_matrix[currsegm_aseqnum] + \
+                                                currsegm_bseqnum;\
+                } else\
+                {\
+                  esi->ani_accumulate_entry\
+                    = esi->ani_accumulate_matrix[currsegm_bseqnum] +\
+                                                currsegm_aseqnum;\
+                }\
               } else\
               {\
                 esi->ani_accumulate_entry\
-                  = &esi->ani_accumulate_matrix[process_run][0];\
+                  = esi->ani_accumulate_matrix[process_run];\
               }\
             } else\
             {\
@@ -3858,6 +3877,13 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
             {\
               if (!seedpairlist->maxmat_compute)\
               {\
+                if (!seedpairlist->inseqseeds)\
+                {\
+                  gt_assert(esi != NULL);\
+                  gt_diagbandseed_maxlen_update(diagband_struct,\
+                        esi->plainsequence_info.aseqorencseq.seqlength,\
+                        esi->plainsequence_info.bseqorencseq.seqlength);\
+                }\
                 gt_diagband_struct_seed_multi_update(diagband_struct,\
                                                      segment_positions,\
                                                      segment_length,\
@@ -4715,7 +4741,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     len_used += blen;
   }
   seedpairlist = gt_seedpairlist_new(arg->splt,aseqranges,aidx,bseqranges,bidx,
-                                     arg->maxmat,amaxlen);
+                                     arg->maxmat,arg->inseqseeds,amaxlen);
   sizeofunit = gt_seedpairlist_sizeofunit(seedpairlist);
   if (seedpairlist->maxmat_compute && !seedpairlist->maxmat_show)
   {
