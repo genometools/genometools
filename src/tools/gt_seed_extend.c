@@ -1155,7 +1155,7 @@ static int gt_seed_extend_runner(int argc,
     GtDiagbandseedInfo *info = NULL;
     GtUword sensitivity = 0;
     GtSequencePartsInfo *aseqranges, *bseqranges;
-    GtUword use_apos_local = 0;
+    GtUword use_apos_local = 0, effective_parts;
 
     if (extendgreedy) {
       sensitivity = arguments->se_extendgreedy;
@@ -1166,6 +1166,13 @@ static int gt_seed_extend_runner(int argc,
     /* Get sequence ranges */
     aseqranges = gt_sequence_parts_info_new(aencseq,a_numofsequences,
                                             arguments->dbs_parts);
+    effective_parts = gt_sequence_parts_info_number(aseqranges);
+    if (effective_parts < arguments->dbs_parts)
+    {
+      gt_sequence_parts_info_delete(aseqranges);
+      aseqranges = gt_sequence_parts_info_new(aencseq,a_numofsequences,
+                                              effective_parts);
+    }
     if (arguments->verbose && gt_sequence_parts_info_number(aseqranges) > 1)
     {
       gt_sequence_parts_info_variance_show(aseqranges);
@@ -1177,6 +1184,13 @@ static int gt_seed_extend_runner(int argc,
     {
       bseqranges = gt_sequence_parts_info_new(bencseq,b_numofsequences,
                                               arguments->dbs_parts);
+      effective_parts = gt_sequence_parts_info_number(bseqranges);
+      if (effective_parts < arguments->dbs_parts)
+      {
+        gt_sequence_parts_info_delete(bseqranges);
+        bseqranges = gt_sequence_parts_info_new(bencseq,b_numofsequences,
+                                                effective_parts);
+      }
       if (arguments->verbose && gt_sequence_parts_info_number(bseqranges) > 1)
       {
         gt_sequence_parts_info_variance_show(bseqranges);

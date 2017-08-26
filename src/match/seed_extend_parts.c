@@ -142,8 +142,7 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
     for (idx = 0, seqnum = 0; idx < numparts && seqnum < numofsequences; idx++)
     {
       const GtUword seqnum_next_width
-        = gt_encseq_next_larger_width(spi,seqnum,partwidth,
-                                      numofsequences);
+        = gt_encseq_next_larger_width(spi,seqnum,partwidth,numofsequences);
       spi->ranges[idx].start = seqnum;
       if (seqnum_next_width == GT_UWORD_MAX)
       {
@@ -154,8 +153,7 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
       spi->ranges[idx].end = seqnum_next_width;
       seqnum = seqnum_next_width + 1;
     }
-    gt_assert(idx > 0 &&
-              spi->ranges[idx-1].end == numofsequences - 1);
+    gt_assert(idx > 0 && spi->ranges[idx-1].end == numofsequences - 1);
     effective_num_parts = idx;
     if (effective_num_parts == 1)
     {

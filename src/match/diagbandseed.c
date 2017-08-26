@@ -420,7 +420,7 @@ void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate)
       for (column = row+1; column < ani_accumulate->rows; column++)
       {
         double ani_value[4];
-        bool outputsnd = false;
+        bool output_snd_pass = false;
 
         for (idx = 0; idx < 2; idx++)
         {
@@ -434,7 +434,7 @@ void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate)
               = gt_seed_extend_ani_evaluate(
                  ani_accumulate->matrix[idx][column][row].sum_of_aligned_len,
                  ani_accumulate->matrix[idx][column][row].sum_of_distance);
-            outputsnd = true;
+            output_snd_pass = true;
           } else
           {
             ani_value[2+idx] = 0.0;
@@ -442,8 +442,11 @@ void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate)
         }
         printf("ANI " GT_WU " " GT_WU " %.4f %.4f\n",row,column,ani_value[0],
                                                                 ani_value[1]);
-        printf("ANI " GT_WU " " GT_WU " %.4f %.4f\n",column,row,ani_value[2],
-                                                                ani_value[3]);
+        if (output_snd_pass)
+        {
+          printf("ANI " GT_WU " " GT_WU " %.4f %.4f\n",column,row,ani_value[2],
+                                                                  ani_value[3]);
+        }
       }
     }
   } else
@@ -761,6 +764,7 @@ static void gt_kmerpos_list_add(GtKmerPosList *kmerpos_list,
           ((GtUword) kmerpos_entry->endpos << encode_info->u_shift_endpos);
     } else
     {
+#undef SKDEBUG
 #ifdef SKDEBUG
       GtDiagbandseedKmerPos kmerpos_entry2;
 #endif
@@ -2123,8 +2127,8 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                                 GtDiagbandseedPosition bpos,
                                 GtDiagbandseedPosition apos)
 {
-  gt_assert(seedpairlist != NULL);
-  gt_assert(aseqnum >= seedpairlist->aseqrange_start &&
+  gt_assert(seedpairlist != NULL &&
+            aseqnum >= seedpairlist->aseqrange_start &&
             aseqnum <= seedpairlist->aseqrange_end &&
             bseqnum >= seedpairlist->bseqrange_start &&
             bseqnum <= seedpairlist->bseqrange_end &&
