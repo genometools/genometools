@@ -109,7 +109,7 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
     fragment.startpos[1] = (GtChain2Dimpostype) storeinteger[2];
     fragment.endpos[1] = (GtChain2Dimpostype) storeinteger[3];
     fragment.weight
-      = (GtChain2DimWeightType) (weightfactor * (double) storeinteger[4]);
+      = (GtChain2Dimscoretype) (weightfactor * (double) storeinteger[4]);
     gt_chain_matchtable_add(matchtable,&fragment);
     /*gt_chain_printchainelem(stdout,&fragment); */
   }
