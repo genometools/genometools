@@ -184,6 +184,11 @@ GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
 {
+  return (double) (2 * distance)/alignedlen;
+}
+
+double gt_querymatch_error_percentage(GtUword distance,GtUword alignedlen)
+{
   return 200.0 * (double) distance/alignedlen;
 }
 
@@ -355,7 +360,7 @@ static bool gt_querymatch_ordered(const GtQuerymatch *querymatch)
 
 static double gt_querymatch_similarity(GtUword distance,GtUword aligned_len)
 {
-  return 100.0 - gt_querymatch_error_rate(distance,aligned_len);
+  return 100.0 - gt_querymatch_error_percentage(distance,aligned_len);
 }
 
 static int gt_non_white_space_prefix_length(const char *s)
@@ -713,17 +718,18 @@ bool gt_querymatch_check_final_generic(
                                GtUword distance,
                                GtUword mismatches,
                                GtUword userdefinedleastlength,
-                               GtUword errorpercentage,
+                               GtUword error_percentage_th,
                                double evalue_threshold,
                                GT_UNUSED FILE *fp)
 {
 #undef SKDEBUG
 #ifdef SKDEBUG
-  fprintf(fp, "# errorrate = %.2f <=? " GT_WU " = errorpercentage ",
-          gt_querymatch_error_rate(distance,aligned_len),
-          errorpercentage);
+  fprintf(fp, "# errorrate = %.2f <=? " GT_WU " = errorpercentage_threshold ",
+          gt_querymatch_error_percentage(distance,aligned_len),
+          error_percentage_th);
 #endif
-  if (gt_querymatch_error_rate(distance,aligned_len) > (double) errorpercentage)
+  if (gt_querymatch_error_percentage(distance,aligned_len)
+        > (double) error_percentage_th)
   {
 #ifdef SKDEBUG
     fprintf(fp, "false => reject\n");
@@ -788,7 +794,7 @@ bool gt_querymatch_check_final(double *evalue_ptr,
                                const GtKarlinAltschulStat *karlin_altschul_stat,
                                const GtQuerymatch *querymatch,
                                GtUword userdefinedleastlength,
-                               GtUword errorpercentage,
+                               GtUword error_percentage_th,
                                double evalue_threshold)
 {
   GtUword aligned_len;
@@ -810,7 +816,7 @@ bool gt_querymatch_check_final(double *evalue_ptr,
                                querymatch->distance,
                                querymatch->mismatches,
                                userdefinedleastlength,
-                               errorpercentage,
+                               error_percentage_th,
                                evalue_threshold,
                                querymatch->fp);
 }

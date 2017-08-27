@@ -100,6 +100,14 @@ bool gt_diagband_struct_bpos_sorted_get(const GtDiagbandStruct *diagband_struct)
   return diagband_struct->bpos_sorted;
 }
 
+void gt_diagbandseed_maxlen_update(GtDiagbandStruct *diagband_struct,
+                                   GtUword amaxlen,GtUword bmaxlen)
+{
+  gt_assert(diagband_struct != NULL);
+  diagband_struct->amaxlen = amaxlen;
+  diagband_struct->bmaxlen = bmaxlen;
+}
+
 void gt_diagband_struct_reset_counts(const GtDiagbandStruct *diagband_struct,
                                      FILE *stream)
 {

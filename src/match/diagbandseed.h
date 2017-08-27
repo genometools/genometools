@@ -82,13 +82,16 @@ GtDiagbandseedBaseListType gt_diagbandseed_base_list_get(
                                    bool with_splt,
                                    const char *base_list_string,GtError *err);
 
-typedef struct GtAniAccumulate GtAniAccumulate;
+typedef struct GtAccumulateMatchValues GtAccumulateMatchValues;
 
-GtAniAccumulate *gt_ani_accumulate_new(const GtEncseq *a_encseq,
-                                       const GtEncseq *b_encseq,
-                                       bool aseqfirstrun);
+GtAccumulateMatchValues *gt_accumulate_match_values_new(
+                                                const GtEncseq *aencseq,
+                                                const GtEncseq *bencseq,
+                                                bool snd_pass,
+                                                bool output_ani);
 
-void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate);
+void gt_accumulate_match_values_delete(GtAccumulateMatchValues
+                                           *accu_match_values);
 
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
@@ -115,7 +118,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool always_polished_ends,
                                 bool verify_alignment,
                                 bool only_selected_seqpairs,
-                                GtAniAccumulate *ani_accumulate);
+                                GtAccumulateMatchValues *accu_match_values);
 
 bool gt_diagbandseed_derive_maxmat_show(GtUword maxmat);
 

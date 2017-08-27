@@ -239,7 +239,7 @@ static bool gt_combine_extensions(
 #ifdef SKDEBUG
   printf("total_distance=" GT_WU ", total_score=" GT_WD ",total_alignedlen="
          GT_WU ", err=%.2f\n",total_distance,total_score,total_alignedlen,
-          gt_querymatch_error_rate(total_distance,total_alignedlen));
+          gt_querymatch_error_percentage(total_distance,total_alignedlen));
 #endif
   info_querymatch->previous_match_a_start
     = sesp->dbstart_relative - u_left_ext;

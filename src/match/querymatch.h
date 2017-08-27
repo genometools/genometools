@@ -113,6 +113,8 @@ void gt_querymatch_query_coordinates(GtUword *query_seqnum,
                                      GtUword *query_seqlen,
                                      const GtQuerymatch *querymatch);
 
+double gt_querymatch_error_percentage(GtUword distance,GtUword alignedlen);
+
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
 GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
