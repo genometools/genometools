@@ -107,6 +107,35 @@ static GtUword gt_encseq_next_larger_width(const GtSequencePartsInfo *spi,
   return found;
 }
 
+static GtUword gt_encseq_next_larger_width_linear(
+                                           const GtSequencePartsInfo *spi,
+                                           GtUword startseqnum,
+                                           GtUword width,
+                                           GtUword numofsequences)
+{
+  GtUword idx,
+          sum_width = 0,
+          start_segment = gt_sequence_parts_info_seqstartpos(spi,startseqnum);
+
+  for (idx = startseqnum; idx < numofsequences; idx++)
+  {
+    GtUword endpos = gt_sequence_parts_info_seqendpos(spi,idx),
+            next_sum_width = endpos - start_segment + 1;
+    if (next_sum_width > width)
+    {
+      gt_assert(sum_width <= width);
+      if (width - sum_width < next_sum_width - width)
+      {
+        gt_assert(idx > startseqnum);
+        return idx-1;
+      }
+      return idx;
+    }
+    sum_width = next_sum_width;
+  }
+  return GT_UWORD_MAX;
+}
+
 GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
                                                 GtUword numofsequences,
                                                 GtUword numparts)
@@ -128,7 +157,8 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
   { /* assign one seq for each part */
     GtUword idx;
 
-    for (idx = 0; idx < numofsequences; ++idx) {
+    for (idx = 0; idx < numofsequences; idx++)
+    {
       spi->ranges[idx].start = spi->ranges[idx].end = idx;
       spi->ranges[idx].max_length
         = gt_sequence_parts_info_partlength(spi,idx,idx);
@@ -141,8 +171,19 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
 
     for (idx = 0, seqnum = 0; idx < numparts && seqnum < numofsequences; idx++)
     {
-      const GtUword seqnum_next_width
-        = gt_encseq_next_larger_width(spi,seqnum,partwidth,numofsequences);
+      GtUword seqnum_next_width;
+
+      if (numofsequences < 1024)
+      {
+        seqnum_next_width = gt_encseq_next_larger_width_linear(spi,seqnum,
+                                                               partwidth,
+                                                               numofsequences);
+      } else
+      {
+        seqnum_next_width = gt_encseq_next_larger_width(spi,seqnum,
+                                                        partwidth,
+                                                        numofsequences);
+      }
       spi->ranges[idx].start = seqnum;
       if (seqnum_next_width == GT_UWORD_MAX)
       {
@@ -153,7 +194,12 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
       spi->ranges[idx].end = seqnum_next_width;
       seqnum = seqnum_next_width + 1;
     }
-    gt_assert(idx > 0 && spi->ranges[idx-1].end == numofsequences - 1);
+    gt_assert(idx > 0);
+    gt_assert(spi->ranges[idx-1].end <= numofsequences - 1);
+    if (spi->ranges[idx-1].end < numofsequences - 1)
+    {
+      spi->ranges[idx-1].end = numofsequences - 1;
+    }
     effective_num_parts = idx;
     if (effective_num_parts == 1)
     {
