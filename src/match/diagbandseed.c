@@ -162,7 +162,7 @@ struct GtDiagbandseedExtendParams
   const GtSeedExtendDisplayFlag *out_display_flag;
   double matchscore_bias;
   GtUword use_apos;
-  GtAniAccumulate *ani_accumulate;
+  GtAccumulateMatchValues *accu_match_values;
   bool extendgreedy,
        extendxdrop,
        weakends,
@@ -358,124 +358,187 @@ typedef struct
           sum_of_aligned_len;
 } GtAniAccumulateEntry;
 
-struct GtAniAccumulate
+struct GtAccumulateMatchValues
 {
-  GtAniAccumulateEntry **matrix[2];
+  GtAniAccumulateEntry **matrix[2]; /* one for forward and one for reverse */
   GtUword rows;
+  bool output_ani;
   const GtEncseq *aencseq, *bencseq;
 };
 
-GtAniAccumulate *gt_ani_accumulate_new(const GtEncseq *aencseq,
+GtAccumulateMatchValues *gt_accumulate_match_values_new(
+                                       const GtEncseq *aencseq,
                                        const GtEncseq *bencseq,
-                                       bool snd_pass)
+                                       bool snd_pass,
+                                       bool output_ani)
 {
-  GtAniAccumulate *ani_accumulate = gt_malloc(sizeof *ani_accumulate);
+  GtAccumulateMatchValues *accu_match_values
+    = gt_malloc(sizeof *accu_match_values);
   GtUword columns;
 
-  ani_accumulate->aencseq = aencseq;
-  ani_accumulate->bencseq = bencseq;
+  accu_match_values->aencseq = aencseq;
+  accu_match_values->bencseq = bencseq;
+  accu_match_values->output_ani = output_ani;
   if (aencseq == bencseq)
   {
-    ani_accumulate->rows = columns = gt_encseq_num_of_sequences(aencseq);
+    accu_match_values->rows = columns = gt_encseq_num_of_sequences(aencseq);
   } else
   {
-    ani_accumulate->rows = snd_pass ? 2 : 1;
+    accu_match_values->rows = snd_pass ? 2 : 1;
     columns = 1;
   }
-  gt_array2dim_calloc(ani_accumulate->matrix[0],ani_accumulate->rows,columns);
-  gt_array2dim_calloc(ani_accumulate->matrix[1],ani_accumulate->rows,columns);
-  return ani_accumulate;
+  gt_array2dim_calloc(accu_match_values->matrix[0],accu_match_values->rows,
+                      columns);
+  gt_array2dim_calloc(accu_match_values->matrix[1],accu_match_values->rows,
+                      columns);
+  return accu_match_values;
 }
 
-static double gt_seed_extend_ani_evaluate(GtUword sum_of_aligned_len,
-                                          GtUword sum_of_distance)
+static double gt_seed_extend_ani_evaluate(GtUword sum_of_distance,
+                                          GtUword sum_of_aligned_len)
 {
   return sum_of_aligned_len > 0
-             ? (100.0 * (1.0 - (double)
-                               (2 * sum_of_distance)/sum_of_aligned_len))
+             ? (100.0 * (1.0 - gt_querymatch_error_rate(sum_of_distance,
+                                                        sum_of_aligned_len)))
              : 0.0;
 }
 
-void gt_ani_accumulate_delete(GtAniAccumulate *ani_accumulate)
+static double gt_jukes_cantor_correction(double dist)
+{
+  return -3.0/4.0 * log(1.0 - 4.0/3.0 * dist);
+}
+
+static double gt_se_final_corrected_distance(const double *values)
+{
+  double min_dist_fwd0 = MIN(values[0],values[1]),
+         min_dist_fwd1 = MIN(values[2],values[3]);
+
+  return (gt_jukes_cantor_correction(min_dist_fwd0) +
+          gt_jukes_cantor_correction(min_dist_fwd1))/2.0;
+}
+
+void gt_accumulate_match_values_delete(GtAccumulateMatchValues
+                                          *accu_match_values)
 {
   GtUword row;
   int idx;
+  double (*result_evaluate_func)(GtUword,GtUword);
+  const char *key;
+  const int jkdprecision = 8;
 
-  if (ani_accumulate->aencseq == ani_accumulate->bencseq)
+  if (accu_match_values == NULL)
+  {
+    return;
+  }
+  if (accu_match_values->output_ani)
+  {
+    key = "ANI";
+    result_evaluate_func = gt_seed_extend_ani_evaluate;
+  } else
+  {
+    key = "JKD";
+    result_evaluate_func = gt_querymatch_error_rate;
+  }
+  if (accu_match_values->aencseq == accu_match_values->bencseq)
   {
     GtUword column;
-    printf("# pairwise ANI values for " GT_WU " sequences\n",
-              ani_accumulate->rows);
-    for (row = 0; row < ani_accumulate->rows; row++)
+    printf("# pairwise %s values for " GT_WU " sequences\n",key,
+              accu_match_values->rows);
+    for (row = 0; row < accu_match_values->rows; row++)
     {
       GtUword desclen;
-      const char *desc = gt_encseq_description(ani_accumulate->aencseq,
+      const char *desc = gt_encseq_description(accu_match_values->aencseq,
                                                &desclen,row);
       printf(GT_WU "\t",row);
       gt_xfwrite(desc,sizeof *desc,desclen,stdout);
       fputc('\n',stdout);
     }
-    for (row = 0; row < ani_accumulate->rows; row++)
+    for (row = 0; row < accu_match_values->rows; row++)
     {
-      for (column = row+1; column < ani_accumulate->rows; column++)
+      for (column = row+1; column < accu_match_values->rows; column++)
       {
-        double ani_value[4];
+        double values[4];
         bool output_snd_pass = false;
 
         for (idx = 0; idx < 2; idx++)
         {
-          ani_value[idx]
-            = gt_seed_extend_ani_evaluate(
-                 ani_accumulate->matrix[idx][row][column].sum_of_aligned_len,
-                 ani_accumulate->matrix[idx][row][column].sum_of_distance);
-          if (ani_accumulate->matrix[idx][column][row].sum_of_aligned_len > 0)
+          values[idx]
+            = result_evaluate_func(
+                accu_match_values->matrix[idx][row][column].sum_of_distance,
+                accu_match_values->matrix[idx][row][column].sum_of_aligned_len);
+          if (accu_match_values->matrix[idx][column][row].sum_of_aligned_len
+                > 0)
           {
-            ani_value[2+idx]
-              = gt_seed_extend_ani_evaluate(
-                 ani_accumulate->matrix[idx][column][row].sum_of_aligned_len,
-                 ani_accumulate->matrix[idx][column][row].sum_of_distance);
+            values[2+idx]
+              = result_evaluate_func(
+                accu_match_values->matrix[idx][column][row].sum_of_distance,
+                accu_match_values->matrix[idx][column][row].sum_of_aligned_len);
             output_snd_pass = true;
           } else
           {
-            ani_value[2+idx] = 0.0;
+            values[2+idx] = 0.0;
           }
         }
-        printf("ANI " GT_WU " " GT_WU " %.4f %.4f\n",row,column,ani_value[0],
-                                                                ani_value[1]);
-        if (output_snd_pass)
+        if (accu_match_values->output_ani)
         {
-          printf("ANI " GT_WU " " GT_WU " %.4f %.4f\n",column,row,ani_value[2],
-                                                                  ani_value[3]);
+          printf("%s " GT_WU " " GT_WU " %.4f %.4f\n",key,row,column,
+                                                      values[0],values[1]);
+          if (output_snd_pass)
+          {
+            printf("%s " GT_WU " " GT_WU " %.4f %.4f\n",key,column,row,
+                                                        values[2],
+                                                        values[3]);
+          }
+        } else
+        {
+          gt_assert(output_snd_pass);
+          printf("%s " GT_WU " " GT_WU " %.*f\n",
+                 key,row,column,
+                 jkdprecision,gt_se_final_corrected_distance(values));
         }
       }
     }
   } else
   {
-    for (row = 0; row < ani_accumulate->rows; row++)
+    double values[4];
+
+    for (row = 0; row < accu_match_values->rows; row++)
     {
       if (row == 0)
       {
-        printf("ANI %s %s",gt_encseq_indexname(ani_accumulate->aencseq),
-                           gt_encseq_indexname(ani_accumulate->bencseq));
+        printf("%s %s %s",key,gt_encseq_indexname(accu_match_values->aencseq),
+                          gt_encseq_indexname(accu_match_values->bencseq));
       } else
       {
-        printf("ANI %s %s",gt_encseq_indexname(ani_accumulate->bencseq),
-                           gt_encseq_indexname(ani_accumulate->aencseq));
+        if (accu_match_values->output_ani)
+        {
+          printf("%s %s %s",key,gt_encseq_indexname(accu_match_values->bencseq),
+                            gt_encseq_indexname(accu_match_values->aencseq));
+        }
       }
       for (idx = 0; idx < 2; idx++)
       {
-        printf(" %.4f",gt_seed_extend_ani_evaluate(
-                        ani_accumulate->matrix[idx][row][0].sum_of_aligned_len,
-                        ani_accumulate->matrix[idx][row][0].sum_of_distance));
+        values[2 * row + idx]
+          = result_evaluate_func(
+                  accu_match_values->matrix[idx][row][0].sum_of_distance,
+                  accu_match_values->matrix[idx][row][0].sum_of_aligned_len);
       }
-      printf("\n");
+      if (accu_match_values->output_ani)
+      {
+        printf(" %.4f %.4f\n",values[2 * row],values[2 * row + 1]);
+      }
+    }
+    if (!accu_match_values->output_ani)
+    {
+      gt_assert(accu_match_values->rows == 2);
+      printf(" %.*f\n",jkdprecision,gt_se_final_corrected_distance(values));
     }
   }
   for (idx = 0; idx < 2; idx++)
   {
-    gt_array2dim_delete(ani_accumulate->matrix[idx]);
+    gt_array2dim_delete(accu_match_values->matrix[idx]);
   }
-  gt_free(ani_accumulate);
+  gt_free(accu_match_values);
 }
 
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
@@ -502,7 +565,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool always_polished_ends,
                                 bool verify_alignment,
                                 bool only_selected_seqpairs,
-                                GtAniAccumulate *ani_accumulate)
+                                GtAccumulateMatchValues *accu_match_values)
 {
   GtDiagbandseedExtendParams *extp = gt_malloc(sizeof *extp);
   extp->userdefinedleastlength = userdefinedleastlength;
@@ -528,7 +591,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->always_polished_ends = always_polished_ends;
   extp->verify_alignment = verify_alignment;
   extp->only_selected_seqpairs = only_selected_seqpairs;
-  extp->ani_accumulate = ani_accumulate;
+  extp->accu_match_values = accu_match_values;
   return extp;
 }
 
@@ -3117,8 +3180,8 @@ typedef struct
   const GtKarlinAltschulStat *karlin_altschul_stat;
   const GtSeedExtendDisplayFlag *out_display_flag;
   bool benchmark;
-  GtAniAccumulateEntry **ani_accumulate_matrix,
-                       *ani_accumulate_entry;
+  GtAniAccumulateEntry **accu_match_values_matrix,
+                       *accu_match_values_entry;
   GtDiagbandseedState *dbs_state;
 } GtDiagbandseedExtendSegmentInfo;
 
@@ -3219,7 +3282,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     {
       double evalue, bit_score;
 
-      if (esi->ani_accumulate_entry != NULL)
+      if (esi->accu_match_values_entry != NULL)
       {
         const GtUword query_seqlen
           = esi->plainsequence_info.bseqorencseq.seqlength,
@@ -3241,8 +3304,8 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                esi->evalue_threshold,
                                stdout))
         {
-          esi->ani_accumulate_entry->sum_of_aligned_len += aligned_len;
-          esi->ani_accumulate_entry->sum_of_distance
+          esi->accu_match_values_entry->sum_of_aligned_len += aligned_len;
+          esi->accu_match_values_entry->sum_of_distance
             += esi->info_querymatch.previous_match_distance;
           ret = 3;
         } else
@@ -3799,29 +3862,29 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
         {\
           if (esi != NULL)\
           {\
-            if (esi->ani_accumulate_matrix != NULL)\
+            if (esi->accu_match_values_matrix != NULL)\
             {\
               if (esi->same_encseq)\
               {\
                 if (process_run == 0)\
                 {\
-                  esi->ani_accumulate_entry\
-                    = esi->ani_accumulate_matrix[currsegm_aseqnum] + \
+                  esi->accu_match_values_entry\
+                    = esi->accu_match_values_matrix[currsegm_aseqnum] + \
                                                 currsegm_bseqnum;\
                 } else\
                 {\
-                  esi->ani_accumulate_entry\
-                    = esi->ani_accumulate_matrix[currsegm_bseqnum] +\
+                  esi->accu_match_values_entry\
+                    = esi->accu_match_values_matrix[currsegm_bseqnum] +\
                                                 currsegm_aseqnum;\
                 }\
               } else\
               {\
-                esi->ani_accumulate_entry\
-                  = esi->ani_accumulate_matrix[process_run];\
+                esi->accu_match_values_entry\
+                  = esi->accu_match_values_matrix[process_run];\
               }\
             } else\
             {\
-              esi->ani_accumulate_entry = NULL;\
+              esi->accu_match_values_entry = NULL;\
             }\
             if (process_run == 1)\
             {\
@@ -3896,7 +3959,7 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
               gt_assert(segment_proc_func != NULL && \
                         segment_proc_info != NULL);\
               if (process_run == 1 && \
-                  (esi == NULL || esi->ani_accumulate_entry == NULL))\
+                  (esi == NULL || esi->accu_match_values_entry == NULL))\
               {\
                   printf("# snd_pass\n");\
               }\
@@ -3981,7 +4044,7 @@ static void gt_diagbandseed_info_qm_set(
                                    void *processinfo)
 {
   ifqm->processinfo = processinfo;
-  if (extp->ani_accumulate != NULL)
+  if (extp->accu_match_values != NULL)
   {
     ifqm->querymatchspaceptr = NULL;
   } else
@@ -4109,24 +4172,24 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->karlin_altschul_stat = karlin_altschul_stat;
   esi->out_display_flag = extp->out_display_flag;
   esi->benchmark = extp->benchmark;
-  if (extp->ani_accumulate != NULL)
+  if (extp->accu_match_values != NULL)
   {
     if (GT_ISDIRREVERSE(query_readmode))
     {
-      esi->ani_accumulate_matrix = extp->ani_accumulate->matrix[1];
+      esi->accu_match_values_matrix = extp->accu_match_values->matrix[1];
     } else
     {
-      esi->ani_accumulate_matrix = extp->ani_accumulate->matrix[0];
+      esi->accu_match_values_matrix = extp->accu_match_values->matrix[0];
     }
   } else
   {
-    esi->ani_accumulate_matrix = NULL;
+    esi->accu_match_values_matrix = NULL;
   }
   return esi;
 }
 
 static void gt_diagbandseed_extendSI_delete(
-                                        GtDiagbandseedExtendSegmentInfo * esi)
+                                        GtDiagbandseedExtendSegmentInfo *esi)
 {
   if (esi != NULL)
   {

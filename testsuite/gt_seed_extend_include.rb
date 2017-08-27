@@ -38,17 +38,33 @@ Keywords "gt_seed_extend ANI"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
-  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -ani"
+  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -estim ANI"
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani-at1MB-U8.txt"
-  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -ani -snd_pass"
+  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -estim ANI -snd_pass"
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani2-at1MB-U8.txt"
-  run_test "#{$bin}/gt seed_extend -ii U89959_genomic -qii at1MB -ani"
+  run_test "#{$bin}/gt seed_extend -ii U89959_genomic -qii at1MB -estim ANI"
   run "grep -v '^#' #{last_stdout}"
   run "cut -f 4-5 -d ' ' #{last_stdout}"
   run "mv #{last_stdout} tmp.ani"
   run "tail -1 #{$testdata}/see-ext-ani2-at1MB-U8.txt"
   run "cut -f 4-5 -d ' ' #{last_stdout}"
   run "diff #{last_stdout} tmp.ani"
+  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -estim JKD -seedlength 11 -histogram no  -cam encseq,encseq -snd_pass -bias-parameters"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-at1MB-U8.txt"
+  run "cp #{$testdata}/U89959_genomic.fas U8-mutate0.fna"
+  seqnum = 3
+  0.upto(seqnum-1).each do |idx|
+    run_test "#{$bin}/gt -seed 3438284043 seqmutate -rate 10 -width 70 " +
+             "-o U8-mutate#{idx+1}.fna U8-mutate#{idx}.fna"
+  end
+  file_list = Range.new(0,seqnum).to_a.map {|idx| "U8-mutate#{idx}.fna"}
+  run_test "#{$bin}gt encseq encode -indexname U8-all " + file_list.join(" ")
+  1.upto(2).each do |parts|
+    run_test "#{$bin}/gt -j #{parts} seed_extend -ii U8-all -estim JKD " +
+             "-seedlength 10 -histogram no -noinseqseeds -cam encseq,encseq " +
+             "-snd_pass -bias-parameters -parts #{parts}"
+    run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-U8-all.txt"
+  end
 end
 
 Name "gt seed_extend: blast like output"

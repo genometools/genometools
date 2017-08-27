@@ -1,0 +1,6 @@
+# Options: -ii at1MB -qii U89959_genomic -estim JKD -seedlength 11 -histogram no -cam encseq,encseq -snd_pass -bias-parameters -minidentity 80 -history 60
+JKD at1MB U89959_genomic 0.10121324
+# TIME seedextend-greedy-11-27-80-30-80 overall 0.068365
+# space peak in megabytes: 1.23 (in 24323 events)
+# mmap space peak in megabytes: 0.55
+# combined space peak in megabytes: 1.78
