@@ -1,6 +1,3 @@
-# Options: -ii at1MB -qii U89959_genomic.fas -ani -minidentity 80 -history 60
-# TIME seedextend-greedy-9-22-80-5-64 overall 0.667635
+# Options: -ii at1MB -qii U89959_genomic -noinseqseeds -estim ANI -minidentity 80 -history 60
 ANI at1MB U89959_genomic 83.5046 82.9379
-# space peak in megabytes: 9.84 (in 1123 events)
-# mmap space peak in megabytes: 0.55
-# combined space peak in megabytes: 10.39
+ANI U89959_genomic at1MB 84.0707 82.6302

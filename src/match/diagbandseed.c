@@ -3944,9 +3944,9 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
             {\
               if (!seedpairlist->maxmat_compute)\
               {\
-                if (!seedpairlist->inseqseeds)\
+                gt_assert(esi != NULL);\
+                if (esi->same_encseq && !seedpairlist->inseqseeds)\
                 {\
-                  gt_assert(esi != NULL);\
                   gt_diagbandseed_maxlen_update(diagband_struct,\
                         esi->plainsequence_info.aseqorencseq.seqlength,\
                         esi->plainsequence_info.bseqorencseq.seqlength);\
