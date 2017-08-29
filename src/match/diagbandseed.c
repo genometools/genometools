@@ -53,6 +53,7 @@
 #include "match/rectangle-store.h"
 #include "match/diagband-struct.h"
 #include "match/dbs_spaced_seeds.h"
+#include "match/weighted_lis_filter.h"
 #include "match/diagbandseed.h"
 
 #ifdef GT_THREADS_ENABLED
@@ -279,6 +280,10 @@ static GtDiagbandseedBaseListType gt_diagbandseed_base_type(size_t bytes,
 struct GtQuerymatchSegmentBuffer
 {
   GtArrayGtQuerymatch matchtable;
+  GtArraydouble evaluetable, bitscoretable;
+  GtWLisFilterMatches *wlis_filter_matches;
+  GtArrayGtUword wlis_filter_result;
+  bool store_querymatch;
 };
 
 GtQuerymatchSegmentBuffer *gt_querymatch_segment_buffer_new(void)
@@ -286,6 +291,10 @@ GtQuerymatchSegmentBuffer *gt_querymatch_segment_buffer_new(void)
   GtQuerymatchSegmentBuffer *buf = gt_malloc(sizeof *buf);
 
   GT_INITARRAY(&buf->matchtable,GtQuerymatch);
+  GT_INITARRAY(&buf->evaluetable,double);
+  GT_INITARRAY(&buf->bitscoretable,double);
+  GT_INITARRAY(&buf->wlis_filter_result,GtUword);
+  buf->wlis_filter_matches = gt_wlis_filter_matches_new();
   return buf;
 }
 
@@ -294,6 +303,10 @@ void gt_querymatch_segment_buffer_delete(GtQuerymatchSegmentBuffer *buf)
   if (buf != NULL)
   {
     GT_FREEARRAY(&buf->matchtable,GtQuerymatch);
+    GT_FREEARRAY(&buf->evaluetable,double);
+    GT_FREEARRAY(&buf->bitscoretable,double);
+    GT_FREEARRAY(&buf->wlis_filter_result,GtUword);
+    gt_wlis_filter_matches_delete(buf->wlis_filter_matches);
     gt_free(buf);
   }
 }
@@ -302,25 +315,75 @@ static void gt_querymatch_segment_buffer_reset(GtQuerymatchSegmentBuffer *buf)
 {
   gt_assert(buf != NULL);
   buf->matchtable.nextfreeGtQuerymatch = 0;
-}
-
-static GtUword gt_querymatch_segment_buffer_num_matches(
-                            const GtQuerymatchSegmentBuffer *buf)
-{
-  gt_assert(buf != NULL);
-  return buf->matchtable.nextfreeGtQuerymatch;
+  buf->evaluetable.nextfreedouble = 0;
+  buf->bitscoretable.nextfreedouble = 0;
+  buf->wlis_filter_result.nextfreeGtUword = 0;
+  gt_wlis_filter_matches_reset(buf->wlis_filter_matches);
 }
 
 static void gt_querymatch_segment_buffer_add(GtQuerymatchSegmentBuffer *buf,
-                                             const GtQuerymatch *querymatch)
+                                             bool store_querymatch,
+                                             const GtQuerymatch *querymatch,
+                                             GtUword a_start,GtUword a_end,
+                                             GtUword b_start,GtUword b_end,
+                                             GtUword distance,
+                                             double evalue,
+                                             double bitscore)
 {
   gt_assert(buf != NULL);
+  gt_wlis_filter_matches_add(buf->wlis_filter_matches,a_start,a_end,
+                                                      b_start,b_end,
+                                                      distance);
+  buf->store_querymatch = store_querymatch;
   gt_querymatch_table_add(&buf->matchtable,querymatch);
+  GT_STOREINARRAY(&buf->evaluetable,double,
+                  buf->evaluetable.allocateddouble * 0.2 + 256,evalue);
+  GT_STOREINARRAY(&buf->bitscoretable,double,
+                  buf->bitscoretable.allocateddouble * 0.2 + 256,bitscore);
 }
 
-static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf)
+typedef struct
 {
-  printf(GT_WU " matches\n",gt_querymatch_segment_buffer_num_matches(buf));
+  GtUword sum_of_distance,
+          sum_of_aligned_len;
+} GtAniAccumulateEntry;
+
+static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
+                                                bool forward,
+                                                const GtSeedExtendDisplayFlag
+                                                  *out_display_flag,
+                                                GtAniAccumulateEntry
+                                                  *accu_match_values_entry)
+{
+  if (buf->store_querymatch)
+  {
+    GtUword idx;
+
+    gt_assert(out_display_flag != NULL && accu_match_values_entry == NULL);
+    gt_wlis_filter_evaluate(&buf->wlis_filter_result,
+                            NULL,
+                            NULL,
+                            buf->wlis_filter_matches,
+                            forward);
+    for (idx = 0; idx < buf->wlis_filter_result.nextfreeGtUword; idx++)
+    {
+      GtUword matchnum = buf->wlis_filter_result.spaceGtUword[idx];
+      GtQuerymatch *querymatch_ptr
+        = gt_querymatch_table_get(&buf->matchtable,matchnum);
+      gt_querymatch_prettyprint(buf->evaluetable.spacedouble[matchnum],
+                                buf->bitscoretable.spacedouble[matchnum],
+                                out_display_flag,
+                                querymatch_ptr);
+    }
+  } else
+  {
+    gt_assert(out_display_flag == NULL && accu_match_values_entry != NULL);
+    gt_wlis_filter_evaluate(NULL,
+                            &accu_match_values_entry->sum_of_distance,
+                            &accu_match_values_entry->sum_of_aligned_len,
+                            buf->wlis_filter_matches,
+                            forward);
+  }
 }
 
 /* * * * * CONSTRUCTORS AND DESTRUCTORS * * * * */
@@ -402,12 +465,6 @@ void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info)
     gt_free(info);
   }
 }
-
-typedef struct
-{
-  GtUword sum_of_distance,
-          sum_of_aligned_len;
-} GtAniAccumulateEntry;
 
 struct GtAccumulateMatchValues
 {
@@ -3478,8 +3535,18 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                       esi->errorpercentage,
                                       esi->evalue_threshold))
         {
-          gt_querymatch_segment_buffer_add(esi->querymatch_segment_buffer,
-                                           querymatch);
+          gt_querymatch_segment_buffer_add(
+                              esi->querymatch_segment_buffer,
+                              esi->accu_match_values_entry == NULL ? true
+                                                                   : false,
+                              querymatch,
+                              esi->info_querymatch.previous_match_a_start,
+                              esi->info_querymatch.previous_match_a_end,
+                              esi->info_querymatch.previous_match_b_start,
+                              esi->info_querymatch.previous_match_b_end,
+                              esi->info_querymatch.previous_match_distance,
+                              evalue,
+                              bit_score);
           ret = 3;
         } else
         {
@@ -4072,7 +4139,6 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
           {\
             if (esi->querymatch_segment_buffer != NULL)\
             {\
-              printf("reset segment_buffer\n");\
               gt_querymatch_segment_buffer_reset(\
                         esi->querymatch_segment_buffer);\
             }\
@@ -4208,7 +4274,10 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
           if (esi != NULL && esi->querymatch_segment_buffer != NULL)\
           {\
             gt_querymatch_segment_buffer_select(esi->\
-                                                querymatch_segment_buffer);\
+                                                  querymatch_segment_buffer,\
+                                                forward,\
+                                                esi->out_display_flag,\
+                                                esi->accu_match_values_entry);\
           }\
         }
 
