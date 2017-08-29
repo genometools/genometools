@@ -46,6 +46,12 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtUwordPair *pick,
                         GtError *err);
 
+typedef struct GtQuerymatchSegmentBuffer GtQuerymatchSegmentBuffer;
+
+GtQuerymatchSegmentBuffer *gt_querymatch_segment_buffer_new(void);
+void gt_querymatch_segment_buffer_delete(GtQuerymatchSegmentBuffer
+                                            *querymatch_segment_buffer);
+
 /* The constructor for GtDiagbandseedInfo*/
 GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtEncseq *bencseq,
@@ -70,6 +76,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                                *diagband_statistics_arg,
                                              size_t file_buffer_size,
                                              bool snd_pass,
+                                             GtQuerymatchSegmentBuffer
+                                               *querymatch_segment_buffer,
                                              bool inseqseeds,
                                              const GtDiagbandseedExtendParams
                                                *extp);
