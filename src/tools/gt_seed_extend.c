@@ -40,9 +40,6 @@
 #include "match/seed_extend_parts.h"
 #include "match/dbs_spaced_seeds.h"
 #include "tools/gt_seed_extend.h"
-#ifdef GT_THREADS_ENABLED
-#include "core/thread_api.h"
-#endif
 
 typedef struct {
   /* diagbandseed options */
