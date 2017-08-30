@@ -18,7 +18,9 @@
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
+#include "core/unused_api.h"
 #include "weighted_lis_filter.h"
+
 
 typedef struct
 {
@@ -90,7 +92,7 @@ void gt_wlis_filter_matches_add(GtWLisFilterMatches *wlismatches,
   GtUword aligned_len;
   float prob_id;
   GtWlisItem *current_match;
-
+  //printf("add %lu 0 %lu P %lu 0 %lu\n", s_end-s_start+1, s_start, q_end-q_start+1, q_start); 
   gt_assert(wlismatches != NULL);
   GT_GETNEXTFREEINARRAY(current_match,&wlismatches->items,GtWlisItem,
                         wlismatches->items.
@@ -236,10 +238,10 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
                              GtUword *sum_distance_chain,
                              GtUword *sum_aligned_len_chain,
                              GtWLisFilterMatches *wlismatches,
-                             bool forward)
+                             GT_UNUSED bool forward)
 {
-  GtUword bestchain_idx, idx, *fwd, *bck;
-
+  GtUword bestchain_idx, *fwd, *bck;
+  
   if (wlismatches->items.nextfreeGtWlisItem == 0)
   {
     return;
@@ -249,22 +251,26 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
             (chain != NULL && sum_distance_chain == NULL
                            && sum_aligned_len_chain == NULL));
   /* adjust coordinates */
-  if (!forward)
+  /*if (!forward)
   {
     for (idx = 0; idx < wlismatches->items.nextfreeGtWlisItem; idx++)
     {
+      GtUword tmp = GT_WLIS_ACC(idx).startpos[1];
       GT_WLIS_ACC(idx).startpos[1]
-        = wlismatches->qmax - GT_WLIS_ACC(idx).startpos[1];
-      GT_WLIS_ACC(idx).endpos[1]
         = wlismatches->qmax - GT_WLIS_ACC(idx).endpos[1];
+      GT_WLIS_ACC(idx).endpos[1]
+        = wlismatches->qmax - tmp;
     }
-  }
+  }*/
   /* sort by query seuqence */
   qsort(wlismatches->items.spaceGtWlisItem,
         (size_t) wlismatches->items.nextfreeGtWlisItem,
         sizeof *wlismatches->items.spaceGtWlisItem,
         gt_alignment_link_compare);
-
+  /*for (idx = 0; idx < wlismatches->items.nextfreeGtWlisItem; idx++)
+  {
+    printf("after sort: %lu 0 %lu P %lu 0 %lu\n", GT_WLIS_ACC(idx).endpos[0]-GT_WLIS_ACC(idx).startpos[0]+1, GT_WLIS_ACC(idx).startpos[0], GT_WLIS_ACC(idx).endpos[1]-GT_WLIS_ACC(idx).startpos[1]+1, GT_WLIS_ACC(idx).startpos[1]); 
+  }*/
   /* call filter algorithm */
   bestchain_idx = gt_filter_apply(wlismatches);
 
