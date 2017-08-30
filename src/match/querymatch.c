@@ -191,7 +191,7 @@ GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
 {
-  return alignedlen == 0 ? 100.00 : (double) (2 * distance)/alignedlen;
+  return alignedlen == 0 ? 1.00 : (double) (2 * distance)/alignedlen;
 }
 
 double gt_querymatch_error_percentage(GtUword distance,GtUword alignedlen)

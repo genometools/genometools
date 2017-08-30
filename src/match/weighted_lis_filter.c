@@ -139,7 +139,7 @@ static GtUword gt_filter_apply(GtWLisFilterMatches *allmatches)
           rightmatch,
           len0, len1, len;
 
-  gt_assert(allmatches && allmatches->nextfree);
+  gt_assert(allmatches != NULL && allmatches->nextfree > 0);
   len0 = allmatches->table[0].endpos[0] - allmatches->table[0].startpos[0]+1;
   len1 = allmatches->table[0].endpos[1] - allmatches->table[0].startpos[1]+1;
   len = MIN(len0, len1);
@@ -238,6 +238,10 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
   GtUword bestchain_idx, idx;
   GtUword *fwd, *bck;
 
+  if (allmatches->nextfree == 0)
+  {
+    return;
+  }
   gt_assert((chain == NULL && sum_distance_chain != NULL
                            && sum_aligned_len_chain != NULL) ||
             (chain != NULL && sum_distance_chain == NULL
