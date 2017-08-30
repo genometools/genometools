@@ -333,13 +333,17 @@ static void gt_querymatch_segment_buffer_add(GtQuerymatchSegmentBuffer *buf,
   gt_assert(buf != NULL);
   gt_wlis_filter_matches_add(buf->wlis_filter_matches,a_start,a_end,
                                                       b_start,b_end,
-                                                      distance);
+                                                      distance,
+                                                      store_querymatch);
   buf->store_querymatch = store_querymatch;
-  gt_querymatch_table_add(&buf->matchtable,querymatch);
-  GT_STOREINARRAY(&buf->evaluetable,double,
-                  buf->evaluetable.allocateddouble * 0.2 + 256,evalue);
-  GT_STOREINARRAY(&buf->bitscoretable,double,
-                  buf->bitscoretable.allocateddouble * 0.2 + 256,bitscore);
+  if (store_querymatch)
+  {
+    gt_querymatch_table_add(&buf->matchtable,querymatch);
+    GT_STOREINARRAY(&buf->evaluetable,double,
+                    buf->evaluetable.allocateddouble * 0.2 + 256,evalue);
+    GT_STOREINARRAY(&buf->bitscoretable,double,
+                    buf->bitscoretable.allocateddouble * 0.2 + 256,bitscore);
+  }
 }
 
 typedef struct
