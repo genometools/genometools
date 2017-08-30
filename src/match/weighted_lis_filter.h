@@ -57,7 +57,8 @@ void          gt_wlis_filter_matches_delete(GtWLisFilterMatches *allmatches);
 void           gt_wlis_filter_matches_add(GtWLisFilterMatches *allmatches,
                                          GtUword s_start, GtUword s_end,
                                          GtUword q_start, GtUword q_end,
-                                         GtUword distance);
+                                         GtUword distance,
+                                         bool store_querymatch);
 
 /* function that applies the filter-algorithm to a given table of matches
    <allmatches> and stores the result in <filter> */
