@@ -33,6 +33,8 @@ typedef struct GtQuerymatch GtQuerymatch;
 
 GtQuerymatch *gt_querymatch_new(void);
 
+void gt_querymatch_set_order(GtQuerymatch *querymatch,bool force);
+
 void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp);
 
 void gt_querymatch_db_keyvalues_set(GtQuerymatch *querymatch,

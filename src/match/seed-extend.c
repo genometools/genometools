@@ -980,7 +980,7 @@ static bool gt_extend_sesp(bool forxdrop,
       sesp->dbstart_relative + sesp->seedlength - 1 >=
       sesp->querystart_relative)
   {
-    return NULL;
+    return false;
   }
   if (forxdrop)
   {

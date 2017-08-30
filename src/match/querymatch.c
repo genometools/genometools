@@ -50,7 +50,7 @@ struct GtQuerymatch
     mismatches;
   GtWord score; /* 0 for exact match */
   GtReadmode query_readmode; /* readmode of query sequence */
-  bool selfmatch, verify_alignment;
+  bool selfmatch, verify_alignment, force_order;
   GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
       resources needed for alignment output */
   FILE *fp;
@@ -70,7 +70,14 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->queryseqnum = GT_UWORD_MAX;
   querymatch->db_desc = NULL;
   querymatch->query_desc = NULL;
+  querymatch->force_order = true;
   return querymatch;
+}
+
+void gt_querymatch_set_order(GtQuerymatch *querymatch,bool force)
+{
+  gt_assert(querymatch != NULL);
+  querymatch->force_order = force;
 }
 
 void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
@@ -184,7 +191,7 @@ GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
 {
-  return (double) (2 * distance)/alignedlen;
+  return alignedlen == 0 ? 100.00 : (double) (2 * distance)/alignedlen;
 }
 
 double gt_querymatch_error_percentage(GtUword distance,GtUword alignedlen)
@@ -350,7 +357,10 @@ void gt_querymatch_delete(GtQuerymatch *querymatch)
 static bool gt_querymatch_ordered(const GtQuerymatch *querymatch)
 {
   return (!querymatch->selfmatch ||
-          querymatch->dbseqnum < querymatch->queryseqnum ||
+          (querymatch->force_order &&
+           querymatch->dbseqnum < querymatch->queryseqnum) ||
+          (!querymatch->force_order &&
+           querymatch->dbseqnum != querymatch->queryseqnum) ||
           (querymatch->dbseqnum == querymatch->queryseqnum &&
            (querymatch->dbstart_relative <
              (GT_ISDIRREVERSE(querymatch->query_readmode)

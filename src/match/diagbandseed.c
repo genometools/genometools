@@ -53,6 +53,7 @@
 #include "match/rectangle-store.h"
 #include "match/diagband-struct.h"
 #include "match/dbs_spaced_seeds.h"
+#include "match/weighted_lis_filter.h"
 #include "match/diagbandseed.h"
 
 #ifdef GT_THREADS_ENABLED
@@ -143,6 +144,7 @@ struct GtDiagbandseedInfo
        trimstat_on,
        snd_pass,
        inseqseeds;
+  GtQuerymatchSegmentBuffer *querymatch_segment_buffer;
 };
 
 struct GtDiagbandseedExtendParams
@@ -275,6 +277,115 @@ static GtDiagbandseedBaseListType gt_diagbandseed_base_type(size_t bytes,
   return bt;
 }
 
+struct GtQuerymatchSegmentBuffer
+{
+  GtArrayGtQuerymatch matchtable;
+  GtArraydouble evaluetable, bitscoretable;
+  GtWLisFilterMatches *wlis_filter_matches;
+  GtArrayGtUword wlis_filter_result;
+  bool store_querymatch;
+};
+
+GtQuerymatchSegmentBuffer *gt_querymatch_segment_buffer_new(void)
+{
+  GtQuerymatchSegmentBuffer *buf = gt_malloc(sizeof *buf);
+
+  GT_INITARRAY(&buf->matchtable,GtQuerymatch);
+  GT_INITARRAY(&buf->evaluetable,double);
+  GT_INITARRAY(&buf->bitscoretable,double);
+  GT_INITARRAY(&buf->wlis_filter_result,GtUword);
+  buf->wlis_filter_matches = gt_wlis_filter_matches_new();
+  return buf;
+}
+
+void gt_querymatch_segment_buffer_delete(GtQuerymatchSegmentBuffer *buf)
+{
+  if (buf != NULL)
+  {
+    GT_FREEARRAY(&buf->matchtable,GtQuerymatch);
+    GT_FREEARRAY(&buf->evaluetable,double);
+    GT_FREEARRAY(&buf->bitscoretable,double);
+    GT_FREEARRAY(&buf->wlis_filter_result,GtUword);
+    gt_wlis_filter_matches_delete(buf->wlis_filter_matches);
+    gt_free(buf);
+  }
+}
+
+static void gt_querymatch_segment_buffer_reset(GtQuerymatchSegmentBuffer *buf)
+{
+  gt_assert(buf != NULL);
+  buf->matchtable.nextfreeGtQuerymatch = 0;
+  buf->evaluetable.nextfreedouble = 0;
+  buf->bitscoretable.nextfreedouble = 0;
+  buf->wlis_filter_result.nextfreeGtUword = 0;
+  gt_wlis_filter_matches_reset(buf->wlis_filter_matches);
+}
+
+static void gt_querymatch_segment_buffer_add(GtQuerymatchSegmentBuffer *buf,
+                                             bool store_querymatch,
+                                             const GtQuerymatch *querymatch,
+                                             GtUword a_start,GtUword a_end,
+                                             GtUword b_start,GtUword b_end,
+                                             GtUword distance,
+                                             double evalue,
+                                             double bitscore)
+{
+  gt_assert(buf != NULL);
+  gt_wlis_filter_matches_add(buf->wlis_filter_matches,a_start,a_end,
+                                                      b_start,b_end,
+                                                      distance);
+  buf->store_querymatch = store_querymatch;
+  gt_querymatch_table_add(&buf->matchtable,querymatch);
+  GT_STOREINARRAY(&buf->evaluetable,double,
+                  buf->evaluetable.allocateddouble * 0.2 + 256,evalue);
+  GT_STOREINARRAY(&buf->bitscoretable,double,
+                  buf->bitscoretable.allocateddouble * 0.2 + 256,bitscore);
+}
+
+typedef struct
+{
+  GtUword sum_of_distance,
+          sum_of_aligned_len;
+} GtAniAccumulateEntry;
+
+static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
+                                                bool forward,
+                                                const GtSeedExtendDisplayFlag
+                                                  *out_display_flag,
+                                                GtAniAccumulateEntry
+                                                  *accu_match_values_entry)
+{
+  if (buf->store_querymatch)
+  {
+    GtUword idx;
+
+    gt_assert(out_display_flag != NULL && accu_match_values_entry == NULL);
+    gt_wlis_filter_evaluate(&buf->wlis_filter_result,
+                            NULL,
+                            NULL,
+                            buf->wlis_filter_matches,
+                            forward);
+    for (idx = 0; idx < buf->wlis_filter_result.nextfreeGtUword; idx++)
+    {
+      GtUword matchnum = buf->wlis_filter_result.spaceGtUword[idx];
+      GtQuerymatch *querymatch_ptr
+        = gt_querymatch_table_get(&buf->matchtable,matchnum);
+      gt_querymatch_prettyprint(buf->evaluetable.spacedouble[matchnum],
+                                buf->bitscoretable.spacedouble[matchnum],
+                                out_display_flag,
+                                querymatch_ptr);
+    }
+  } else
+  {
+    gt_assert(out_display_flag == NULL && accu_match_values_entry != NULL);
+    gt_wlis_filter_evaluate(NULL,
+                            &accu_match_values_entry->sum_of_distance,
+                            &accu_match_values_entry->sum_of_aligned_len,
+                            buf->wlis_filter_matches,
+                            forward);
+  }
+}
+
 /* * * * * CONSTRUCTORS AND DESTRUCTORS * * * * */
 
 GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
@@ -300,6 +411,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                                *diagband_statistics_arg,
                                              size_t file_buffer_size,
                                              bool snd_pass,
+                                             GtQuerymatchSegmentBuffer
+                                               *querymatch_segment_buffer,
                                              bool inseqseeds,
                                              const GtDiagbandseedExtendParams
                                                *extp)
@@ -339,6 +452,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->diagband_statistics_arg = diagband_statistics_arg;
   info->file_buffer_size = file_buffer_size;
   info->snd_pass = snd_pass;
+  info->querymatch_segment_buffer = querymatch_segment_buffer;
   info->inseqseeds = inseqseeds;
   info->extp = extp;
   return info;
@@ -351,12 +465,6 @@ void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info)
     gt_free(info);
   }
 }
-
-typedef struct
-{
-  GtUword sum_of_distance,
-          sum_of_aligned_len;
-} GtAniAccumulateEntry;
 
 struct GtAccumulateMatchValues
 {
@@ -458,7 +566,6 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
       for (column = row+1; column < accu_match_values->rows; column++)
       {
         double values[4];
-        bool output_snd_pass = false;
 
         for (idx = 0; idx < 2; idx++)
         {
@@ -466,24 +573,16 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
             = result_evaluate_func(
                 accu_match_values->matrix[idx][row][column].sum_of_distance,
                 accu_match_values->matrix[idx][row][column].sum_of_aligned_len);
-          if (accu_match_values->matrix[idx][column][row].sum_of_aligned_len
-                > 0)
-          {
-            values[2+idx]
-              = result_evaluate_func(
-                accu_match_values->matrix[idx][column][row].sum_of_distance,
-                accu_match_values->matrix[idx][column][row].sum_of_aligned_len);
-            output_snd_pass = true;
-          } else
-          {
-            values[2+idx] = 0.0;
-          }
+          values[2+idx]
+            = result_evaluate_func(
+              accu_match_values->matrix[idx][column][row].sum_of_distance,
+              accu_match_values->matrix[idx][column][row].sum_of_aligned_len);
         }
         if (accu_match_values->output_ani)
         {
           printf("%s " GT_WU " " GT_WU " %.4f %.4f\n",key,row,column,
                                                       values[0],values[1]);
-          if (output_snd_pass)
+          if (values[2] > 0.0 || values[3] > 0.0)
           {
             printf("%s " GT_WU " " GT_WU " %.4f %.4f\n",key,column,row,
                                                         values[2],
@@ -491,7 +590,6 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
           }
         } else
         {
-          gt_assert(output_snd_pass);
           printf("%s " GT_WU " " GT_WU " %.*f\n",
                  key,row,column,
                  jkdprecision,gt_se_final_corrected_distance(values));
@@ -3173,6 +3271,7 @@ typedef struct
   GtDiagbandSeedPlainSequence plainsequence_info;
   GtReadmode query_readmode;
   bool same_encseq, debug;
+  GtQuerymatchSegmentBuffer *querymatch_segment_buffer;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
   GtExtendRelativeCoordsFunc extend_relative_coords_function;
   GtSegmentRejectFunc segment_reject_func;
@@ -3184,6 +3283,141 @@ typedef struct
                        *accu_match_values_entry;
   GtDiagbandseedState *dbs_state;
 } GtDiagbandseedExtendSegmentInfo;
+
+static void gt_diagbandseed_info_qm_set(
+                                   GtProcessinfo_and_querymatchspaceptr *ifqm,
+                                   bool store_matches,
+                                   const GtDiagbandseedExtendParams *extp,
+                                   GtQuerymatchoutoptions *querymoutopt,
+                                   GtReadmode query_readmode,
+                                   FILE *stream,
+                                   const GtKarlinAltschulStat
+                                     *karlin_altschul_stat,
+                                   void *processinfo)
+{
+  ifqm->processinfo = processinfo;
+  if (extp->accu_match_values != NULL && !store_matches)
+  {
+    ifqm->querymatchspaceptr = NULL;
+  } else
+  {
+    ifqm->querymatchspaceptr = gt_querymatch_new();
+    if (extp->verify_alignment)
+    {
+      gt_querymatch_verify_alignment_set(ifqm->querymatchspaceptr);
+    }
+    if (querymoutopt != NULL) {
+      gt_querymatch_outoptions_set(ifqm->querymatchspaceptr,querymoutopt);
+    }
+    gt_querymatch_query_readmode_set(ifqm->querymatchspaceptr,query_readmode);
+    gt_querymatch_file_set(ifqm->querymatchspaceptr, stream);
+  }
+  ifqm->karlin_altschul_stat = karlin_altschul_stat;
+  ifqm->out_display_flag = extp->out_display_flag;;
+  ifqm->previous_match_a_start = 0;
+  ifqm->previous_match_a_end = 0;
+  ifqm->previous_match_b_start = 0;
+  ifqm->previous_match_b_end = 0;
+  ifqm->previous_match_distance = 0;
+  ifqm->previous_match_mismatches = 0;
+}
+
+static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
+                                         const GtDiagbandseedExtendParams *extp,
+                                         void *processinfo,
+                                         GtQuerymatchoutoptions *querymoutopt,
+                                         const GtEncseq *aencseq,
+                                         const GtSequencePartsInfo *aseqranges,
+                                         GtUword aidx,
+                                         const GtEncseq *bencseq,
+                                         const GtSequencePartsInfo *bseqranges,
+                                         GtUword bidx,
+                                         const GtKarlinAltschulStat
+                                           *karlin_altschul_stat,
+                                         GtReadmode query_readmode,
+                                         FILE *stream,
+                                         GtDiagbandseedState
+                                           *dbs_state,
+                                         GtQuerymatchSegmentBuffer
+                                           *querymatch_segment_buffer,
+                                         GtSegmentRejectFunc
+                                           segment_reject_func,
+                                         GtSegmentRejectInfo
+                                           *segment_reject_info)
+{
+  GtDiagbandseedExtendSegmentInfo *esi = gt_malloc(sizeof *esi);
+
+  esi->extend_relative_coords_function = extp->extendgreedy
+                                            ? gt_greedy_extend_seed_relative
+                                            : gt_xdrop_extend_seed_relative;
+  gt_diagbandseed_plainsequence_init(&esi->plainsequence_info,
+                                     gt_querymatch_subjectid_display(
+                                             extp->out_display_flag),
+                                     gt_querymatch_queryid_display(
+                                             extp->out_display_flag),
+                                     aencseq,
+                                     aseqranges,
+                                     aidx,
+                                     extp->a_extend_char_access ==
+                                         GT_EXTEND_CHAR_ACCESS_DIRECT ? true
+                                                                      : false,
+                                     bencseq,
+                                     bseqranges,
+                                     bidx,
+                                     extp->b_extend_char_access ==
+                                        GT_EXTEND_CHAR_ACCESS_DIRECT ? true
+                                                                     : false);
+  gt_diagbandseed_info_qm_set(&esi->info_querymatch,
+                              querymatch_segment_buffer != NULL ? true : false,
+                              extp,
+                              querymoutopt,
+                              query_readmode,
+                              stream,
+                              karlin_altschul_stat,
+                              processinfo);
+  esi->dbs_state = dbs_state;
+  /* the following are constant and depends only on the given parameters */
+  esi->userdefinedleastlength = extp->userdefinedleastlength;
+  esi->errorpercentage = extp->errorpercentage;
+  esi->use_apos = extp->use_apos;
+  esi->mincoverage = extp->mincoverage;
+  esi->only_selected_seqpairs = extp->only_selected_seqpairs;
+  esi->evalue_threshold = extp->evalue_threshold;
+  esi->query_readmode = query_readmode;
+  esi->same_encseq = (aencseq == bencseq) ? true : false;
+  esi->debug = gt_log_enabled() ? true : false;
+  esi->segment_reject_func = segment_reject_func;
+  esi->segment_reject_info = segment_reject_info;
+  esi->karlin_altschul_stat = karlin_altschul_stat;
+  esi->out_display_flag = extp->out_display_flag;
+  esi->benchmark = extp->benchmark;
+  esi->querymatch_segment_buffer = querymatch_segment_buffer;
+  if (extp->accu_match_values != NULL)
+  {
+    if (GT_ISDIRREVERSE(query_readmode))
+    {
+      esi->accu_match_values_matrix = extp->accu_match_values->matrix[1];
+    } else
+    {
+      esi->accu_match_values_matrix = extp->accu_match_values->matrix[0];
+    }
+  } else
+  {
+    esi->accu_match_values_matrix = NULL;
+  }
+  return esi;
+}
+
+static void gt_diagbandseed_extendSI_delete(
+                                        GtDiagbandseedExtendSegmentInfo *esi)
+{
+  if (esi != NULL)
+  {
+    gt_querymatch_delete(esi->info_querymatch.querymatchspaceptr);
+    gt_diagbandseed_plainsequence_delete(&esi->plainsequence_info);
+    gt_free(esi);
+  }
+}
 
 static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                              *previous_extensions,
@@ -3238,6 +3472,11 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     /* the following function called is either
          gt_greedy_extend_seed_relative or
          gt_xdrop_extend_seed_relative */
+    if (esi->info_querymatch.querymatchspaceptr != NULL)
+    {
+      gt_querymatch_set_order(esi->info_querymatch.querymatchspaceptr,
+                              bpos_sorted);
+    }
     if (bpos_sorted)
     {
       success = esi->extend_relative_coords_function(&esi->info_querymatch,
@@ -3282,43 +3521,11 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     {
       double evalue, bit_score;
 
-      if (esi->accu_match_values_entry != NULL)
-      {
-        const GtUword query_seqlen
-          = esi->plainsequence_info.bseqorencseq.seqlength,
-        aligned_len
-          = esi->info_querymatch.previous_match_a_end -
-            esi->info_querymatch.previous_match_a_start + 1 +
-            esi->info_querymatch.previous_match_b_end -
-            esi->info_querymatch.previous_match_b_start + 1;
-        if (gt_querymatch_check_final_generic(
-                               &evalue,
-                               &bit_score,
-                               esi->karlin_altschul_stat,
-                               query_seqlen,
-                               aligned_len,
-                               esi->info_querymatch.previous_match_distance,
-                               esi->info_querymatch.previous_match_mismatches,
-                               esi->userdefinedleastlength,
-                               esi->errorpercentage,
-                               esi->evalue_threshold,
-                               stdout))
-        {
-          esi->accu_match_values_entry->sum_of_aligned_len += aligned_len;
-          esi->accu_match_values_entry->sum_of_distance
-            += esi->info_querymatch.previous_match_distance;
-          ret = 3;
-        } else
-        {
-          ret = 2; /* found match, which does not satisfy length or similarity
-                      constraints */
-        }
-      } else
+      if (esi->querymatch_segment_buffer != NULL)
       {
         const GtQuerymatch *querymatch
           = esi->info_querymatch.querymatchspaceptr;
 
-        /* show extension results */
         gt_assert(querymatch != NULL);
         if (gt_querymatch_check_final(&evalue,
                                       &bit_score,
@@ -3328,33 +3535,101 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                       esi->errorpercentage,
                                       esi->evalue_threshold))
         {
-          if (!esi->benchmark) {
-            if (gt_querymatch_gfa2_display(esi->out_display_flag))
-            {
-              gt_assert(esi->dbs_state != NULL);
-              gt_querymatch_gfa2_edge(querymatch,
-                                      esi->dbs_state->
-                                           current_gfa2_edge_num);
-              esi->dbs_state->current_gfa2_edge_num++;
-              gt_bittab_set_bit(esi->dbs_state->used_a_sequences,
-                                aseqnum);
-              gt_bittab_set_bit(
-                 esi->dbs_state->used_b_sequences != NULL
-                   ? esi->dbs_state->used_b_sequences
-                   : esi->dbs_state->used_a_sequences,
-                   bseqnum);
-            }
-            gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
-                                      querymatch);
-          }
-          ret = 3; /* output match */
+          gt_querymatch_segment_buffer_add(
+                              esi->querymatch_segment_buffer,
+                              esi->accu_match_values_entry == NULL ? true
+                                                                   : false,
+                              querymatch,
+                              esi->info_querymatch.previous_match_a_start,
+                              esi->info_querymatch.previous_match_a_end,
+                              esi->info_querymatch.previous_match_b_start,
+                              esi->info_querymatch.previous_match_b_end,
+                              esi->info_querymatch.previous_match_distance,
+                              evalue,
+                              bit_score);
+          ret = 3;
         } else
         {
-          if (!esi->benchmark) {
-            gt_querymatch_show_failed_seed(esi->out_display_flag,querymatch);
+          ret = 2;
+        }
+      } else
+      {
+        if (esi->accu_match_values_entry != NULL)
+        {
+          const GtUword query_seqlen
+            = esi->plainsequence_info.bseqorencseq.seqlength,
+          aligned_len
+            = esi->info_querymatch.previous_match_a_end -
+              esi->info_querymatch.previous_match_a_start + 1 +
+              esi->info_querymatch.previous_match_b_end -
+              esi->info_querymatch.previous_match_b_start + 1;
+          if (gt_querymatch_check_final_generic(
+                                 &evalue,
+                                 &bit_score,
+                                 esi->karlin_altschul_stat,
+                                 query_seqlen,
+                                 aligned_len,
+                                 esi->info_querymatch.previous_match_distance,
+                                 esi->info_querymatch.previous_match_mismatches,
+                                 esi->userdefinedleastlength,
+                                 esi->errorpercentage,
+                                 esi->evalue_threshold,
+                                 stdout))
+          {
+            esi->accu_match_values_entry->sum_of_aligned_len += aligned_len;
+            esi->accu_match_values_entry->sum_of_distance
+              += esi->info_querymatch.previous_match_distance;
+            ret = 3;
+          } else
+          {
+            ret = 2; /* found match, which does not satisfy length or similarity
+                        constraints */
           }
-          ret = 2; /* found match, which does not satisfy length or similarity
-                      constraints */
+        } else
+        {
+          const GtQuerymatch *querymatch
+            = esi->info_querymatch.querymatchspaceptr;
+
+          /* show extension results */
+          gt_assert(querymatch != NULL);
+          if (gt_querymatch_check_final(&evalue,
+                                        &bit_score,
+                                        esi->karlin_altschul_stat,
+                                        querymatch,
+                                        esi->userdefinedleastlength,
+                                        esi->errorpercentage,
+                                        esi->evalue_threshold))
+          {
+            if (!esi->benchmark)
+            {
+              if (gt_querymatch_gfa2_display(esi->out_display_flag))
+              {
+                gt_assert(esi->dbs_state != NULL);
+                gt_querymatch_gfa2_edge(querymatch,
+                                        esi->dbs_state->
+                                             current_gfa2_edge_num);
+                esi->dbs_state->current_gfa2_edge_num++;
+                gt_bittab_set_bit(esi->dbs_state->used_a_sequences,
+                                  aseqnum);
+                gt_bittab_set_bit(
+                   esi->dbs_state->used_b_sequences != NULL
+                     ? esi->dbs_state->used_b_sequences
+                     : esi->dbs_state->used_a_sequences,
+                     bseqnum);
+              }
+              gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
+                                        querymatch);
+            }
+            ret = 3; /* output match */
+          } else
+          {
+            if (!esi->benchmark)
+            {
+              gt_querymatch_show_failed_seed(esi->out_display_flag,querymatch);
+            }
+            ret = 2; /* found match, which does not satisfy length or similarity
+                        constraints */
+          }
         }
       }
     }
@@ -3862,6 +4137,11 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
         {\
           if (esi != NULL)\
           {\
+            if (esi->querymatch_segment_buffer != NULL)\
+            {\
+              gt_querymatch_segment_buffer_reset(\
+                        esi->querymatch_segment_buffer);\
+            }\
             if (esi->accu_match_values_matrix != NULL)\
             {\
               if (esi->same_encseq)\
@@ -3897,6 +4177,7 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
                         segment_length,\
                         seedlength);\
               }\
+              gt_assert(segment_length > 0);\
               gt_radixsort_inplace_ulong((GtUword *) segment_positions,\
                                          segment_length);\
             }\
@@ -3944,9 +4225,9 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
             {\
               if (!seedpairlist->maxmat_compute)\
               {\
-                if (!seedpairlist->inseqseeds)\
+                gt_assert(esi != NULL);\
+                if (esi->same_encseq && !seedpairlist->inseqseeds)\
                 {\
-                  gt_assert(esi != NULL);\
                   gt_diagbandseed_maxlen_update(diagband_struct,\
                         esi->plainsequence_info.aseqorencseq.seqlength,\
                         esi->plainsequence_info.bseqorencseq.seqlength);\
@@ -3989,6 +4270,14 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
                                        : memstore->\
                                              spaceGtDiagbandseedMaximalmatch,\
                                      segment_length);\
+          }\
+          if (esi != NULL && esi->querymatch_segment_buffer != NULL)\
+          {\
+            gt_querymatch_segment_buffer_select(esi->\
+                                                  querymatch_segment_buffer,\
+                                                forward,\
+                                                esi->out_display_flag,\
+                                                esi->accu_match_values_entry);\
           }\
         }
 
@@ -4033,43 +4322,6 @@ static void gt_diagbandseed_match_header(FILE *stream,
   }
 }
 
-static void gt_diagbandseed_info_qm_set(
-                                   GtProcessinfo_and_querymatchspaceptr *ifqm,
-                                   const GtDiagbandseedExtendParams *extp,
-                                   GtQuerymatchoutoptions *querymoutopt,
-                                   GtReadmode query_readmode,
-                                   FILE *stream,
-                                   const GtKarlinAltschulStat
-                                     *karlin_altschul_stat,
-                                   void *processinfo)
-{
-  ifqm->processinfo = processinfo;
-  if (extp->accu_match_values != NULL)
-  {
-    ifqm->querymatchspaceptr = NULL;
-  } else
-  {
-    ifqm->querymatchspaceptr = gt_querymatch_new();
-    if (extp->verify_alignment)
-    {
-      gt_querymatch_verify_alignment_set(ifqm->querymatchspaceptr);
-    }
-    if (querymoutopt != NULL) {
-      gt_querymatch_outoptions_set(ifqm->querymatchspaceptr,querymoutopt);
-    }
-    gt_querymatch_query_readmode_set(ifqm->querymatchspaceptr,query_readmode);
-    gt_querymatch_file_set(ifqm->querymatchspaceptr, stream);
-  }
-  ifqm->karlin_altschul_stat = karlin_altschul_stat;
-  ifqm->out_display_flag = extp->out_display_flag;;
-  ifqm->previous_match_a_start = 0;
-  ifqm->previous_match_a_end = 0;
-  ifqm->previous_match_b_start = 0;
-  ifqm->previous_match_b_end = 0;
-  ifqm->previous_match_distance = 0;
-  ifqm->previous_match_mismatches = 0;
-}
-
 #define GT_USEC2SEC(TIME_IN_USEC)\
          ((GtUword) (TIME_IN_USEC)/1000000)
 
@@ -4105,99 +4357,6 @@ static void gt_diagbandseed_process_seeds_times(
           GT_USECREMAIN(process_seeds_usec));
 }
 #endif
-
-static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
-                                         const GtDiagbandseedExtendParams *extp,
-                                         void *processinfo,
-                                         GtQuerymatchoutoptions *querymoutopt,
-                                         const GtEncseq *aencseq,
-                                         const GtSequencePartsInfo *aseqranges,
-                                         GtUword aidx,
-                                         const GtEncseq *bencseq,
-                                         const GtSequencePartsInfo *bseqranges,
-                                         GtUword bidx,
-                                         const GtKarlinAltschulStat
-                                           *karlin_altschul_stat,
-                                         GtReadmode query_readmode,
-                                         FILE *stream,
-                                         GtDiagbandseedState
-                                           *dbs_state,
-                                         GtSegmentRejectFunc
-                                           segment_reject_func,
-                                         GtSegmentRejectInfo
-                                           *segment_reject_info)
-{
-  GtDiagbandseedExtendSegmentInfo *esi = gt_malloc(sizeof *esi);
-
-  esi->extend_relative_coords_function = extp->extendgreedy
-                                            ? gt_greedy_extend_seed_relative
-                                            : gt_xdrop_extend_seed_relative;
-  gt_diagbandseed_plainsequence_init(&esi->plainsequence_info,
-                                     gt_querymatch_subjectid_display(
-                                             extp->out_display_flag),
-                                     gt_querymatch_queryid_display(
-                                             extp->out_display_flag),
-                                     aencseq,
-                                     aseqranges,
-                                     aidx,
-                                     extp->a_extend_char_access ==
-                                         GT_EXTEND_CHAR_ACCESS_DIRECT ? true
-                                                                      : false,
-                                     bencseq,
-                                     bseqranges,
-                                     bidx,
-                                     extp->b_extend_char_access ==
-                                        GT_EXTEND_CHAR_ACCESS_DIRECT ? true
-                                                                     : false);
-  gt_diagbandseed_info_qm_set(&esi->info_querymatch,
-                              extp,
-                              querymoutopt,
-                              query_readmode,
-                              stream,
-                              karlin_altschul_stat,
-                              processinfo);
-  esi->dbs_state = dbs_state;
-  /* the following are constant and depends only on the given parameters */
-  esi->userdefinedleastlength = extp->userdefinedleastlength;
-  esi->errorpercentage = extp->errorpercentage;
-  esi->use_apos = extp->use_apos;
-  esi->mincoverage = extp->mincoverage;
-  esi->only_selected_seqpairs = extp->only_selected_seqpairs;
-  esi->evalue_threshold = extp->evalue_threshold;
-  esi->query_readmode = query_readmode;
-  esi->same_encseq = (aencseq == bencseq) ? true : false;
-  esi->debug = gt_log_enabled() ? true : false;
-  esi->segment_reject_func = segment_reject_func;
-  esi->segment_reject_info = segment_reject_info;
-  esi->karlin_altschul_stat = karlin_altschul_stat;
-  esi->out_display_flag = extp->out_display_flag;
-  esi->benchmark = extp->benchmark;
-  if (extp->accu_match_values != NULL)
-  {
-    if (GT_ISDIRREVERSE(query_readmode))
-    {
-      esi->accu_match_values_matrix = extp->accu_match_values->matrix[1];
-    } else
-    {
-      esi->accu_match_values_matrix = extp->accu_match_values->matrix[0];
-    }
-  } else
-  {
-    esi->accu_match_values_matrix = NULL;
-  }
-  return esi;
-}
-
-static void gt_diagbandseed_extendSI_delete(
-                                        GtDiagbandseedExtendSegmentInfo *esi)
-{
-  if (esi != NULL)
-  {
-    gt_querymatch_delete(esi->info_querymatch.querymatchspaceptr);
-    gt_diagbandseed_plainsequence_delete(&esi->plainsequence_info);
-    gt_free(esi);
-  }
-}
 
 typedef void (*GtDiagbandseedProcessSegmentFunc)(
                         void *v_process_segment_info,
@@ -4236,6 +4395,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                           GtDiagbandseedState
                                             *dbs_state,
                                           bool snd_pass,
+                                          GtQuerymatchSegmentBuffer
+                                            *querymatch_segment_buffer,
                                           GtSegmentRejectFunc
                                             segment_reject_func,
                                           GtSegmentRejectInfo
@@ -4302,6 +4463,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                          query_readmode,
                                          stream,
                                          dbs_state,
+                                         querymatch_segment_buffer,
                                          segment_reject_func,
                                          segment_reject_info);
       if (verbose)
@@ -4978,6 +5140,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->diagband_statistics_arg,
                                   dbs_state,
                                   arg->snd_pass,
+                                  arg->querymatch_segment_buffer,
                                   segment_reject_func,
                                   segment_reject_info);
     gt_seedpairlist_reset(seedpairlist);
@@ -5111,6 +5274,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->diagband_statistics_arg,
                                   dbs_state,
                                   arg->snd_pass,
+                                  arg->querymatch_segment_buffer,
                                   segment_reject_func,
                                   segment_reject_info);
   }

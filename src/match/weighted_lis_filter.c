@@ -15,37 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#define GT_UNDEFPREVIOUS allmatches->nextfree
-#define ADD_SIZE 10
-
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "weighted_lis_filter.h"
-
-GtFilter *gt_filter_new()
-{
-  GtFilter *filter = gt_calloc(1, sizeof (*filter));
-  filter->allocated = ADD_SIZE;
-  filter->chain = gt_malloc(sizeof (*filter->chain) * filter->allocated);
-
-  return filter;
-}
-
-void gt_filter_reset(GtFilter *filter)
-{
-  gt_assert(filter);
-  filter->nextfree = 0;
-}
-
-void gt_filter_delete(GtFilter *filter)
-{
-  if (filter != NULL)
-  {
-    gt_free(filter->chain);
-    gt_free(filter);
-  }
-}
 
 typedef struct
 {
@@ -53,38 +26,46 @@ typedef struct
           endpos[2],
           orgidx,
           diff,
-          prev;
-  GtWord  score;
-  float   weight;
+          prev,
+          distance;
+  GtWord score;
+  float weight;
+} GtAlignmentLink;
 
-}GtAlignmentLink;
-
-struct GtAllMatches
+struct GtWLisFilterMatches
 {
   GtAlignmentLink *table;
   GtUword nextfree,
           allocated,
           qmax;
-  bool reverse;
 };
 
-GtAllMatches *gt_filter_all_matches_new(bool reverse)
+static GtUword gt_wlis_filter_aligned_len(const GtAlignmentLink *match)
 {
-  GtAllMatches *allmatches;
-  allmatches = gt_calloc(1, sizeof (*allmatches));
-  allmatches->reverse = reverse;
+  int idx;
+  GtUword aligned_len = 0;
 
+  gt_assert(match != NULL);
+  for (idx = 0; idx < 2; idx++)
+  {
+    aligned_len += match->endpos[idx] - match->startpos[idx] + 1;
+  }
+  return aligned_len;
+}
+
+GtWLisFilterMatches *gt_wlis_filter_matches_new(void)
+{
+  GtWLisFilterMatches *allmatches = gt_calloc(1, sizeof (*allmatches));
   return allmatches;
 }
 
-void gt_filter_all_matches_reset(GtAllMatches *allmatches, bool reverse)
+void gt_wlis_filter_matches_reset(GtWLisFilterMatches *allmatches)
 {
-  gt_assert(allmatches);
+  gt_assert(allmatches != NULL);
   allmatches->nextfree = 0;
-  allmatches->reverse = reverse;
 }
 
-void gt_filter_all_matches_delete(GtAllMatches *allmatches)
+void gt_wlis_filter_matches_delete(GtWLisFilterMatches *allmatches)
 {
   if (allmatches != NULL)
   {
@@ -93,81 +74,82 @@ void gt_filter_all_matches_delete(GtAllMatches *allmatches)
   }
 }
 
-void gt_filter_all_matches_add(GtAllMatches *allmatches,
-                               GtUword s_start, GtUword s_end,
-                               GtUword q_start, GtUword q_end, float weight)
+void gt_wlis_filter_matches_add(GtWLisFilterMatches *allmatches,
+                                GtUword s_start, GtUword s_end,
+                                GtUword q_start, GtUword q_end,
+                                GtUword distance)
 {
   gt_assert(allmatches);
+  GtUword aligned_len;
+  float prob_id;
+  GtAlignmentLink *current_match;
 
   if (allmatches->nextfree >= allmatches->allocated)
   {
-    allmatches->allocated += ADD_SIZE;
+    allmatches->allocated = allmatches->allocated * 1.2 + 256;
     allmatches->table = gt_realloc(allmatches->table,
                              allmatches->allocated*sizeof (*allmatches->table));
   }
-
-  allmatches->table[allmatches->nextfree].startpos[0] = s_start;
-  allmatches->table[allmatches->nextfree].startpos[1] = q_start;
-  allmatches->table[allmatches->nextfree].endpos[0] = s_end;
-  allmatches->table[allmatches->nextfree].endpos[1] = q_end;
-  allmatches->table[allmatches->nextfree].weight = weight;
-  allmatches->table[allmatches->nextfree].orgidx = allmatches->nextfree;
-  allmatches->nextfree++;
-
+  current_match = allmatches->table + allmatches->nextfree;
+  current_match->startpos[0] = s_start;
+  current_match->startpos[1] = q_start;
+  current_match->endpos[0] = s_end;
+  current_match->endpos[1] = q_end;
+  current_match->distance = distance;
+  aligned_len = gt_wlis_filter_aligned_len(current_match);
+  prob_id = (float) (aligned_len - 2 * distance)/aligned_len;
+  current_match->weight = 10000.0 * prob_id * prob_id;
+  current_match->orgidx = allmatches->nextfree++;
   if (s_end > allmatches->qmax)
+  {
     allmatches->qmax = s_end;
-
+  }
 }
 
-static int querycomparefunc(const void *linka, const void *linkb)
+static int gt_alignment_link_compare(const void *vlinka, const void *vlinkb)
 {
-  if (((const GtAlignmentLink *) linka)->startpos[1] <
-      ((const GtAlignmentLink *) linkb)->startpos[1])
+  const GtAlignmentLink *linka = (const GtAlignmentLink *) vlinka;
+  const GtAlignmentLink *linkb = (const GtAlignmentLink *) vlinkb;
+
+  if (linka->startpos[1] < linkb->startpos[1])
   {
     return -1;
   }
-  if (((const GtAlignmentLink *) linka)->startpos[1] >
-      ((const GtAlignmentLink *) linkb)->startpos[1])
+  if (linka->startpos[1] > linkb->startpos[1])
   {
     return 1;
   }
 
-   if (((((const GtAlignmentLink *) linka)->endpos[1]-
-         ((const GtAlignmentLink *) linka)->startpos[1]) *
-         ((const GtAlignmentLink *) linka)->weight ) >
-         ((((const GtAlignmentLink *) linkb)->endpos[1]-
-         ((const GtAlignmentLink *) linkb)->startpos[1]) *
-         ((const GtAlignmentLink *) linkb)->weight ))
-     return -1;
-   else
-     return 1;
-
-  return 0;
+  if (((linka->endpos[1] - linka->startpos[1]) * linka->weight) >
+      ((linkb->endpos[1] - linkb->startpos[1]) * linkb->weight))
+  {
+    return -1;
+  }
+  return 1;
 }
 
-/* leave only the alignments which form the longest mutually consistent set */
-GtUword gt_filter_apply(GtAllMatches *allmatches)
-{
-  gt_assert(allmatches && allmatches->nextfree);
+#define GT_WLIS_FILTER_UNDEF(ABM) (ABM)->nextfree
 
+/* leave only the alignments which form the longest mutually consistent set */
+static GtUword gt_filter_apply(GtWLisFilterMatches *allmatches)
+{
   GtUword bestchain_end = 0,
           maxscore = 0,
           mindiff = GT_UWORD_MAX,
           rightmatch,
           len0, len1, len;
 
+  gt_assert(allmatches && allmatches->nextfree);
   len0 = allmatches->table[0].endpos[0] - allmatches->table[0].startpos[0]+1;
   len1 = allmatches->table[0].endpos[1] - allmatches->table[0].startpos[1]+1;
   len = MIN(len0, len1);
 
-  /* initialize */
   allmatches->table[0].score = allmatches->table[0].weight * len;
   allmatches->table[0].diff = 0;
-  allmatches->table[0].prev = GT_UNDEFPREVIOUS;
+  allmatches->table[0].prev = GT_WLIS_FILTER_UNDEF(allmatches);
 
   for (rightmatch=1UL; rightmatch < allmatches->nextfree; rightmatch++)
   {
-
     GtUword leftmatch;
 
     len0 = allmatches->table[rightmatch].endpos[0] -
@@ -176,10 +158,10 @@ GtUword gt_filter_apply(GtAllMatches *allmatches)
            allmatches->table[rightmatch].startpos[1] + 1;
     len = MIN(len0, len1);
 
-    allmatches->table[rightmatch].score =
-                                   allmatches->table[rightmatch].weight * len;
+    allmatches->table[rightmatch].score
+      = allmatches->table[rightmatch].weight * len;
     allmatches->table[rightmatch].diff = 0;
-    allmatches->table[rightmatch].prev = GT_UNDEFPREVIOUS;
+    allmatches->table[rightmatch].prev = GT_WLIS_FILTER_UNDEF(allmatches);
 
     for (leftmatch=0; leftmatch<rightmatch; leftmatch++)
     {
@@ -206,29 +188,29 @@ GtUword gt_filter_apply(GtAllMatches *allmatches)
 
       /* calculate score */
       score = allmatches->table[leftmatch].score +
-                  ((GtWord)len-overlap) * allmatches->table[rightmatch].weight;
+              ((GtWord) len - overlap) * allmatches->table[rightmatch].weight;
 
       /* calculate Alignment gap */
       diff = allmatches->table[leftmatch].diff;
       for (seq = 0; seq < 2; seq++)
       {
-          if (allmatches->table[leftmatch].startpos[seq] <
-              allmatches->table[rightmatch].startpos[seq])
-          {
-            diff += labs(allmatches->table[leftmatch].endpos[seq] -
-                         allmatches->table[rightmatch].startpos[seq]);
-          }
-          else
-          {
-            diff += labs(allmatches->table[rightmatch].endpos[seq] -
-                         allmatches->table[leftmatch].startpos[seq]);
-          }
+        if (allmatches->table[leftmatch].startpos[seq] <
+            allmatches->table[rightmatch].startpos[seq])
+        {
+          diff += labs(allmatches->table[leftmatch].endpos[seq] -
+                       allmatches->table[rightmatch].startpos[seq]);
+        }
+        else
+        {
+          diff += labs(allmatches->table[rightmatch].endpos[seq] -
+                       allmatches->table[leftmatch].startpos[seq]);
+        }
       }
 
       /* update score */
       if (score > allmatches->table[rightmatch].score ||
          (score == allmatches->table[rightmatch].score &&
-         diff < allmatches->table[rightmatch].diff))
+          diff < allmatches->table[rightmatch].diff))
       {
         allmatches->table[rightmatch].score = score;
         allmatches->table[rightmatch].diff = diff;
@@ -247,48 +229,62 @@ GtUword gt_filter_apply(GtAllMatches *allmatches)
   return bestchain_end;
 }
 
-void gt_filter_call(GtAllMatches *allmatches, GtFilter *filter)
+void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
+                             GtUword *sum_distance_chain,
+                             GtUword *sum_aligned_len_chain,
+                             GtWLisFilterMatches *allmatches,
+                             bool forward)
 {
-  GtUword bestchain_idx, idx, tmp;
+  GtUword bestchain_idx, idx;
+  GtUword *fwd, *bck;
 
+  gt_assert((chain == NULL && sum_distance_chain != NULL
+                           && sum_aligned_len_chain != NULL) ||
+            (chain != NULL && sum_distance_chain == NULL
+                           && sum_aligned_len_chain == NULL));
   /* adjust coordinates */
-  if (allmatches->reverse)
+  if (!forward)
   {
     for (idx = 0; idx < allmatches->nextfree; idx++)
     {
-      allmatches->table[idx].startpos[1] =
-                      allmatches->qmax -allmatches->table[idx].startpos[1];
-      allmatches->table[idx].endpos[1] =
-                      allmatches->qmax -allmatches->table[idx].endpos[1];
+      allmatches->table[idx].startpos[1]
+        = allmatches->qmax - allmatches->table[idx].startpos[1];
+      allmatches->table[idx].endpos[1]
+        = allmatches->qmax - allmatches->table[idx].endpos[1];
     }
   }
   /* sort by query seuqence */
   qsort(allmatches->table,(size_t) allmatches->nextfree,
-        sizeof (*allmatches->table), querycomparefunc);
+        sizeof *allmatches->table, gt_alignment_link_compare);
 
   /* call filter algorithm */
   bestchain_idx = gt_filter_apply(allmatches);
 
   /* get the chain by backtracing */
   do {
-
-    if (filter->nextfree >= filter->allocated)
+    if (chain != NULL)
     {
-      filter->allocated += ADD_SIZE;
-      filter->chain = gt_realloc(filter->chain,
-                                 filter->allocated * sizeof (*filter->chain));
+      GT_STOREINARRAY(chain,GtUword,chain->allocatedGtUword * 0.2 + 256,
+                      allmatches->table[bestchain_idx].orgidx);
+    } else
+    {
+      gt_assert(sum_distance_chain != NULL && sum_aligned_len_chain != NULL);
+      *sum_distance_chain += allmatches->table[bestchain_idx].distance;
+      *sum_aligned_len_chain +=
+         gt_wlis_filter_aligned_len(allmatches->table + bestchain_idx);
     }
-    filter->chain[filter->nextfree] = allmatches->table[bestchain_idx].orgidx;
-    filter->nextfree += 1;
     bestchain_idx = allmatches->table[bestchain_idx].prev;
+  } while (bestchain_idx != GT_WLIS_FILTER_UNDEF(allmatches));
 
-  } while (bestchain_idx != GT_UNDEFPREVIOUS);
-
-  /* invert the order */
-  for (idx = 0; idx < filter->nextfree/2; idx++)
+  if (chain != NULL)
   {
-    tmp = filter->chain[idx];
-    filter->chain[idx] = filter->chain[filter->nextfree-idx-1];
-    filter->chain[filter->nextfree-1-idx] = tmp;
+  /* invert the order */
+    for (fwd = chain->spaceGtUword, bck = fwd + chain->nextfreeGtUword - 1;
+         fwd < bck; fwd++, bck--)
+    {
+      GtUword tmp = *fwd;
+      *fwd = *bck;
+      *bck = tmp;
+    }
   }
 }

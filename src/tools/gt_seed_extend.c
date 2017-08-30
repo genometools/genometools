@@ -96,6 +96,7 @@ typedef struct {
   bool use_apos, use_apos_track_all;
   GtStr *estimation_mode;
   bool snd_pass;
+  bool delta_filter;
   bool noinseqseeds;
   GtUword maxmat;
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
@@ -164,7 +165,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
     *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics,
-    *op_estim, *op_benchmark, *op_snd_pass;
+    *op_estim, *op_benchmark, *op_snd_pass, *op_delta_filter;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
@@ -250,6 +251,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    diagband_statistics_choices[0],
                                    diagband_statistics_choices);
   gt_option_parser_add_option(op, op_diagband_statistics);
+  gt_option_is_development_option(op_diagband_statistics);
   arguments->ref_diagband_statistics = gt_option_ref(op_diagband_statistics);
 
   /* -maxfreq */
@@ -547,7 +549,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                   "output estimations of pairwise "
                                   "similarities/differences "
                                   "of sequences in the given sets. Estimations "
-                                  "are determined from computed matches",
+                                  "are determined from computed matches. "
+                                  "Optional argument JKD triggers output of "
+                                  "Jukes Cantor corrected distances. "
+                                  "Optional argument ANI triggers output of "
+                                  "average nucleotide identities.",
                                   arguments->estimation_mode,
                                   estimation_choices[0],
                                   estimation_choices);
@@ -559,14 +565,24 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               "ignore seeds that are in same sequence"
                               "(triggered by option -estim)",
                               &arguments->noinseqseeds,false);
+  gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -snd_pass */
   op_snd_pass = gt_option_new_bool("snd_pass",
-                              "perform a second pass over each seedpair list"
-                              "sorted in apos order",
-                              &arguments->snd_pass,false);
+                                   "perform a second pass over each seedpair "
+                                   "list sorted in apos order",
+                                   &arguments->snd_pass,false);
+  gt_option_is_development_option(op_snd_pass);
   gt_option_parser_add_option(op, op_snd_pass);
+
+  /* -delta-filter */
+  op_delta_filter = gt_option_new_bool("delta-filter",
+                                       "apply weighted delta filter to matches "
+                                       "of segment",
+                                       &arguments->delta_filter,false);
+  gt_option_is_development_option(op_delta_filter);
+  gt_option_parser_add_option(op, op_delta_filter);
 
   /* -no-reverse */
   op_norev = gt_option_new_bool("no-reverse",
@@ -798,6 +814,7 @@ static int gt_seed_extend_runner(int argc,
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
   GtAccumulateMatchValues *accu_match_values = NULL;
+  GtQuerymatchSegmentBuffer *querymatch_segment_buffer = NULL;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -986,6 +1003,10 @@ static int gt_seed_extend_runner(int argc,
       = gt_accumulate_match_values_new(aencseq, bencseq,
                                        arguments->snd_pass,
                                        strcmp(es_m,"ANI") == 0 ? true : false);
+  }
+  if (arguments->delta_filter)
+  {
+    querymatch_segment_buffer = gt_querymatch_segment_buffer_new();
   }
   if (arguments->dbs_seedlength == UINT_MAX)
   {
@@ -1273,6 +1294,7 @@ static int gt_seed_extend_runner(int argc,
                                     1024 *
                                     (size_t) arguments->file_buffer_size_kb,
                                     arguments->snd_pass,
+                                    querymatch_segment_buffer,
                                     !arguments->noinseqseeds,
                                     extp);
 
@@ -1293,6 +1315,7 @@ static int gt_seed_extend_runner(int argc,
     gt_diagbandseed_info_delete(info);
   }
   gt_accumulate_match_values_delete(accu_match_values);
+  gt_querymatch_segment_buffer_delete(querymatch_segment_buffer);
   gt_encseq_delete(aencseq);
   gt_encseq_delete(bencseq);
 

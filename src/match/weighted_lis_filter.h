@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 #include "core/types_api.h"
+#include "core/arraydef.h"
 
 /*
   This module implements a filter algorithm to leave only those alignments,
@@ -40,47 +41,30 @@
   publisher={BioMed Central}
 }*/
 
-/* the following type is used to store a chain of indices, whose corresponding
-   alignments have passed the filter */
-typedef struct
-{
-  GtUword *chain,
-           nextfree,
-           allocated;
-}GtFilter;
-
-/* the constructor for the filter */
-GtFilter      *gt_filter_new();
-
-/* function to reset the filter, to reuse it */
-void          gt_filter_reset(GtFilter *filter);
-
-/* the destructor for the filter */
-void          gt_filter_delete(GtFilter *filter);
-
 /* the following type is used for the table of matches */
-typedef struct GtAllMatches GtAllMatches;
+typedef struct GtWLisFilterMatches GtWLisFilterMatches;
 
-/* the constructor for the table of matches, setting the orientation to
-   reverse if <reverse> is set */
-GtAllMatches *gt_filter_all_matches_new(bool reverse);
+/* the constructor for the table of matches; */
+GtWLisFilterMatches *gt_wlis_filter_matches_new(void);
 
-/* function to reset the table of matches, to reuse it, setting the orientation
-   for the next use to be reverse if <reverse> is set */
-void          gt_filter_all_matches_reset(GtAllMatches *allmatches,
-                                          bool reverse);
+/* function to reset the table of matches, to reuse it. */
+void          gt_wlis_filter_matches_reset(GtWLisFilterMatches *allmatches);
+
 /* the destructor for the filter */
-void          gt_filter_all_matches_delete(GtAllMatches *allmatches);
+void          gt_wlis_filter_matches_delete(GtWLisFilterMatches *allmatches);
 
 /* function to add matches to the table of matches */
-void           gt_filter_all_matches_add(GtAllMatches *allmatches,
+void           gt_wlis_filter_matches_add(GtWLisFilterMatches *allmatches,
                                          GtUword s_start, GtUword s_end,
                                          GtUword q_start, GtUword q_end,
-                                         float weight);
+                                         GtUword distance);
 
 /* function that applies the filter-algorithm to a given table of matches
    <allmatches> and stores the result in <filter> */
-void          gt_filter_call(GtAllMatches *allmatches,
-                             GtFilter *filter);
+void gt_wlis_filter_evaluate(GtArrayGtUword *result,
+                             GtUword *sum_distance,
+                             GtUword *sum_aligned_len_chain,
+                             GtWLisFilterMatches *allmatches,
+                             bool forward);
 
 #endif
