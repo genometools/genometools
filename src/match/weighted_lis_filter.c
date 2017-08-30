@@ -100,9 +100,9 @@ void gt_wlis_filter_matches_add(GtWLisFilterMatches *allmatches,
   prob_id = (float) (aligned_len - 2 * distance)/aligned_len;
   current_match->weight = 10000.0 * prob_id * prob_id;
   current_match->orgidx = allmatches->nextfree++;
-  if (s_end > allmatches->qmax)
+  if (q_end > allmatches->qmax)
   {
-    allmatches->qmax = s_end;
+    allmatches->qmax = q_end;
   }
 }
 
@@ -252,9 +252,9 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
     for (idx = 0; idx < allmatches->nextfree; idx++)
     {
       allmatches->table[idx].startpos[1]
-        = allmatches->qmax - allmatches->table[idx].startpos[1];
-      allmatches->table[idx].endpos[1]
         = allmatches->qmax - allmatches->table[idx].endpos[1];
+      allmatches->table[idx].endpos[1]
+        = allmatches->qmax - allmatches->table[idx].startpos[1];
     }
   }
   /* sort by query seuqence */
