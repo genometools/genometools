@@ -811,7 +811,6 @@ static int gt_seed_extend_runner(int argc,
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
   GtAccumulateMatchValues *accu_match_values = NULL;
-  GtQuerymatchSegmentBuffer *querymatch_segment_buffer = NULL;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -1000,10 +999,6 @@ static int gt_seed_extend_runner(int argc,
       = gt_accumulate_match_values_new(aencseq, bencseq,
                                        arguments->snd_pass,
                                        strcmp(es_m,"ANI") == 0 ? true : false);
-  }
-  if (arguments->delta_filter)
-  {
-    querymatch_segment_buffer = gt_querymatch_segment_buffer_new();
   }
   if (arguments->dbs_seedlength == UINT_MAX)
   {
@@ -1291,7 +1286,7 @@ static int gt_seed_extend_runner(int argc,
                                     1024 *
                                     (size_t) arguments->file_buffer_size_kb,
                                     arguments->snd_pass,
-                                    querymatch_segment_buffer,
+                                    arguments->delta_filter,
                                     !arguments->noinseqseeds,
                                     extp);
 
@@ -1312,7 +1307,6 @@ static int gt_seed_extend_runner(int argc,
     gt_diagbandseed_info_delete(info);
   }
   gt_accumulate_match_values_delete(accu_match_values);
-  gt_querymatch_segment_buffer_delete(querymatch_segment_buffer);
   gt_encseq_delete(aencseq);
   gt_encseq_delete(bencseq);
 
