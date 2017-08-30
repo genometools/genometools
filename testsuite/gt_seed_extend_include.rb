@@ -67,6 +67,10 @@ Test do
              "-snd_pass -bias-parameters -parts #{parts}"
     run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-U8-all.txt"
   end
+  run_test "#{$bin}/gt seed_extend -ii U8-all -estim JKD -delta-filter " +
+           "-seedlength 10 -histogram no -noinseqseeds -cam encseq,encseq " +
+           "-snd_pass -bias-parameters"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-df-U8-all.txt"
 end
 
 Name "gt seed_extend: blast like output"

@@ -513,6 +513,15 @@ static double gt_seed_extend_ani_evaluate(GtUword sum_of_distance,
 
 static double gt_jukes_cantor_correction(double dist)
 {
+  gt_assert(0.0 <= dist && dist <= 1.0);
+  if (dist == 0.0)
+  {
+    return 0.0;
+  }
+  if (dist > 3.0/4.0)
+  {
+    return 1.0;
+  }
   return -3.0/4.0 * log(1.0 - 4.0/3.0 * dist);
 }
 
