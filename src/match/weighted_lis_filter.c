@@ -18,7 +18,6 @@
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
-#include "core/unused_api.h"
 #include "weighted_lis_filter.h"
 
 
@@ -92,7 +91,7 @@ void gt_wlis_filter_matches_add(GtWLisFilterMatches *wlismatches,
   GtUword aligned_len;
   float prob_id;
   GtWlisItem *current_match;
-  //printf("add %lu 0 %lu P %lu 0 %lu\n", s_end-s_start+1, s_start, q_end-q_start+1, q_start); 
+
   gt_assert(wlismatches != NULL);
   GT_GETNEXTFREEINARRAY(current_match,&wlismatches->items,GtWlisItem,
                         wlismatches->items.
@@ -101,6 +100,7 @@ void gt_wlis_filter_matches_add(GtWLisFilterMatches *wlismatches,
   current_match->startpos[1] = q_start;
   current_match->endpos[0] = s_end;
   current_match->endpos[1] = q_end;
+
   if (store_querymatch)
   {
     gt_assert(wlismatches->items.nextfreeGtWlisItem > 0);
@@ -112,7 +112,8 @@ void gt_wlis_filter_matches_add(GtWLisFilterMatches *wlismatches,
   }
   aligned_len = gt_wlis_filter_aligned_len(current_match);
   prob_id = (float) (aligned_len - 2 * distance)/aligned_len;
-  current_match->weight = 10000.0 * prob_id * prob_id;
+  current_match->weight = prob_id * prob_id;
+
 
   if (q_end > wlismatches->qmax)
   {
@@ -183,7 +184,7 @@ static GtUword gt_filter_apply(GtWLisFilterMatches *wlismatches)
       int dim;
       GtUword diff, overlap, ovtab[2] = {0};
       GtWord score;
-
+      
       /* handle overlaps and calculate Alignment gap */
       diff = GT_WLIS_ACC(leftmatch).diff;
       for (dim = 0; dim < 2; dim++)
@@ -205,12 +206,12 @@ static GtUword gt_filter_apply(GtWLisFilterMatches *wlismatches)
                        GT_WLIS_ACC(leftmatch).startpos[dim]);
         }
       }
-
       overlap = MAX(ovtab[0], ovtab[1]);
+      
       /* calculate score */
       score = GT_WLIS_ACC(leftmatch).score +
-              ((GtWord) len - (GtWord) overlap) *
-              GT_WLIS_ACC(rightmatch).weight;
+              (GtWord)(((GtWord) len - (GtWord) overlap) *
+              GT_WLIS_ACC(rightmatch).weight);
 
       /* update score */
       if (score > GT_WLIS_ACC(rightmatch).score ||
@@ -238,7 +239,7 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
                              GtUword *sum_distance_chain,
                              GtUword *sum_aligned_len_chain,
                              GtWLisFilterMatches *wlismatches,
-                             GT_UNUSED bool forward)
+                             bool forward)
 {
   GtUword bestchain_idx, *fwd, *bck;
   
@@ -251,8 +252,9 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
             (chain != NULL && sum_distance_chain == NULL
                            && sum_aligned_len_chain == NULL));
   /* adjust coordinates */
-  /*if (!forward)
+  if (!forward)
   {
+    GtUword idx;
     for (idx = 0; idx < wlismatches->items.nextfreeGtWlisItem; idx++)
     {
       GtUword tmp = GT_WLIS_ACC(idx).startpos[1];
@@ -261,16 +263,14 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
       GT_WLIS_ACC(idx).endpos[1]
         = wlismatches->qmax - tmp;
     }
-  }*/
+  }
+
   /* sort by query seuqence */
   qsort(wlismatches->items.spaceGtWlisItem,
         (size_t) wlismatches->items.nextfreeGtWlisItem,
         sizeof *wlismatches->items.spaceGtWlisItem,
         gt_alignment_link_compare);
-  /*for (idx = 0; idx < wlismatches->items.nextfreeGtWlisItem; idx++)
-  {
-    printf("after sort: %lu 0 %lu P %lu 0 %lu\n", GT_WLIS_ACC(idx).endpos[0]-GT_WLIS_ACC(idx).startpos[0]+1, GT_WLIS_ACC(idx).startpos[0], GT_WLIS_ACC(idx).endpos[1]-GT_WLIS_ACC(idx).startpos[1]+1, GT_WLIS_ACC(idx).startpos[1]); 
-  }*/
+
   /* call filter algorithm */
   bestchain_idx = gt_filter_apply(wlismatches);
 

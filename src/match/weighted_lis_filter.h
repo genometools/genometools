@@ -50,18 +50,21 @@ GtWLisFilterMatches *gt_wlis_filter_matches_new(void);
 /* function to reset the table of matches, to reuse it. */
 void          gt_wlis_filter_matches_reset(GtWLisFilterMatches *allmatches);
 
-/* the destructor for the filter */
+/* the destructor for the table of matches */
 void          gt_wlis_filter_matches_delete(GtWLisFilterMatches *allmatches);
 
-/* function to add matches to the table of matches */
+/* function to add a match, described by its coordinates <s_start>, <s_end>,
+   <q_start>,<q_end> and <distance> value, to the table of matches */
 void           gt_wlis_filter_matches_add(GtWLisFilterMatches *allmatches,
-                                         GtUword s_start, GtUword s_end,
-                                         GtUword q_start, GtUword q_end,
-                                         GtUword distance,
-                                         bool store_querymatch);
+                                          GtUword s_start, GtUword s_end,
+                                          GtUword q_start, GtUword q_end,
+                                          GtUword distance,
+                                          bool store_querymatch);
 
 /* function that applies the filter-algorithm to a given table of matches
-   <allmatches> and stores the result in <filter> */
+   <allmatches> and stores the result in <result>. If <forward> is set, the
+   algorithm interprets the q-coordinates regarding to the forward strand,
+   else regarding to the reverse strand */
 void gt_wlis_filter_evaluate(GtArrayGtUword *result,
                              GtUword *sum_distance,
                              GtUword *sum_aligned_len_chain,
