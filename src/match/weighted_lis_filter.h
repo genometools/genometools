@@ -68,7 +68,7 @@ void           gt_wlis_filter_matches_add(GtWLisFilterMatches *allmatches,
 void gt_wlis_filter_evaluate(GtArrayGtUword *result,
                              GtUword *sum_distance,
                              GtUword *sum_aligned_len_chain,
-                             GtWLisFilterMatches *allmatches,
-                             bool forward);
+                             GtUword *chain_weighted_score,
+                             GtWLisFilterMatches *allmatches);
 
 #endif

@@ -349,11 +349,13 @@ static void gt_querymatch_segment_buffer_add(GtQuerymatchSegmentBuffer *buf,
 typedef struct
 {
   GtUword sum_of_distance,
-          sum_of_aligned_len;
+          sum_of_aligned_len,
+          weighted_score; /* score of chain whose elements have the
+                             sum_of_distance and sum_of_aligned_len value */
 } GtAniAccumulateEntry;
 
 static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
-                                                bool forward,
+                                                GT_UNUSED bool forward,
                                                 const GtSeedExtendDisplayFlag
                                                   *out_display_flag,
                                                 GtAniAccumulateEntry
@@ -367,8 +369,8 @@ static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
     gt_wlis_filter_evaluate(&buf->wlis_filter_result,
                             NULL,
                             NULL,
-                            buf->wlis_filter_matches,
-                            forward);
+                            NULL, /* score argument*/
+                            buf->wlis_filter_matches);
     for (idx = 0; idx < buf->wlis_filter_result.nextfreeGtUword; idx++)
     {
       GtUword matchnum = buf->wlis_filter_result.spaceGtUword[idx];
@@ -385,8 +387,8 @@ static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
     gt_wlis_filter_evaluate(NULL,
                             &accu_match_values_entry->sum_of_distance,
                             &accu_match_values_entry->sum_of_aligned_len,
-                            buf->wlis_filter_matches,
-                            forward);
+                            &accu_match_values_entry->weighted_score,
+                            buf->wlis_filter_matches);
   }
 }
 
@@ -528,13 +530,12 @@ static double gt_jukes_cantor_correction(double dist)
   return -3.0/4.0 * log(1.0 - 4.0/3.0 * dist);
 }
 
-static double gt_se_final_corrected_distance(const double *values)
+/* Minimization for values from different strands outside of this function */
+static double gt_se_final_corrected_distance(const double value12,
+                                             const double value21)
 {
-  double min_dist_fwd0 = MIN(values[0],values[1]),
-         min_dist_fwd1 = MIN(values[2],values[3]);
-
-  return (gt_jukes_cantor_correction(min_dist_fwd0) +
-          gt_jukes_cantor_correction(min_dist_fwd1))/2.0;
+  return (gt_jukes_cantor_correction(value12) +
+          gt_jukes_cantor_correction(value21))/2.0;
 }
 
 void gt_accumulate_match_values_delete(GtAccumulateMatchValues
@@ -602,9 +603,23 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
           }
         } else
         {
+          /* AS: maximierung "uber den kettenscore */
+          double value12,value21;
+
+          value12 = (accu_match_values->matrix[0][row][column].weighted_score
+                      >=
+                     accu_match_values->matrix[1][row][column].weighted_score)
+                     ? values[0]
+                     : values[1];
+          value21 = (accu_match_values->matrix[0][column][row].weighted_score
+                      >=
+                     accu_match_values->matrix[1][column][row].weighted_score)
+                     ? values[2]
+                     : values[3];
+
           printf("%s " GT_WU " " GT_WU " %.*f\n",
                  key,row,column,
-                 jkdprecision,gt_se_final_corrected_distance(values));
+                 jkdprecision,gt_se_final_corrected_distance(value12, value21));
         }
       }
     }
@@ -641,7 +656,20 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
     if (!accu_match_values->output_ani)
     {
       gt_assert(accu_match_values->rows == 2);
-      printf(" %.*f\n",jkdprecision,gt_se_final_corrected_distance(values));
+
+      double value12,value21;
+      /* AS: maximierung "uber den kettenscore */
+      value12 = (accu_match_values->matrix[0][0][0].weighted_score >=
+                 accu_match_values->matrix[1][0][0].weighted_score)
+                 ? values[0]
+                 : values[1];
+      value21 = (accu_match_values->matrix[0][1][0].weighted_score >=
+                 accu_match_values->matrix[1][1][0].weighted_score)
+                 ? values[2]
+                 : values[3];
+
+      printf(" %.*f\n",jkdprecision,
+                       gt_se_final_corrected_distance(value12, value21));
     }
   }
   for (idx = 0; idx < 2; idx++)

@@ -20,7 +20,6 @@
 #include "core/minmax.h"
 #include "weighted_lis_filter.h"
 
-
 typedef struct
 {
   GtWord score;
@@ -54,7 +53,6 @@ GT_DECLAREARRAYSTRUCT(GtWlisItem);
 struct GtWLisFilterMatches
 {
   GtArrayGtWlisItem items;
-  GtUword qmax;
 };
 
 GtWLisFilterMatches *gt_wlis_filter_matches_new(void)
@@ -62,7 +60,6 @@ GtWLisFilterMatches *gt_wlis_filter_matches_new(void)
   GtWLisFilterMatches *wlismatches = gt_malloc(sizeof *wlismatches);
 
   GT_INITARRAY(&wlismatches->items,GtWlisItem);
-  wlismatches->qmax = 0;
   return wlismatches;
 }
 
@@ -70,7 +67,6 @@ void gt_wlis_filter_matches_reset(GtWLisFilterMatches *wlismatches)
 {
   gt_assert(wlismatches != NULL);
   wlismatches->items.nextfreeGtWlisItem = 0;
-  wlismatches->qmax = 0;
 }
 
 void gt_wlis_filter_matches_delete(GtWLisFilterMatches *wlismatches)
@@ -113,12 +109,6 @@ void gt_wlis_filter_matches_add(GtWLisFilterMatches *wlismatches,
   aligned_len = gt_wlis_filter_aligned_len(current_match);
   prob_id = (float) (aligned_len - 2 * distance)/aligned_len;
   current_match->weight = prob_id * prob_id;
-
-
-  if (q_end > wlismatches->qmax)
-  {
-    wlismatches->qmax = q_end;
-  }
 }
 
 static int gt_alignment_link_compare(const void *vlinka, const void *vlinkb)
@@ -184,7 +174,7 @@ static GtUword gt_filter_apply(GtWLisFilterMatches *wlismatches)
       int dim;
       GtUword diff, overlap, ovtab[2] = {0};
       GtWord score;
-      
+
       /* handle overlaps and calculate Alignment gap */
       diff = GT_WLIS_ACC(leftmatch).diff;
       for (dim = 0; dim < 2; dim++)
@@ -207,7 +197,7 @@ static GtUword gt_filter_apply(GtWLisFilterMatches *wlismatches)
         }
       }
       overlap = MAX(ovtab[0], ovtab[1]);
-      
+
       /* calculate score */
       score = GT_WLIS_ACC(leftmatch).score +
               (GtWord)(((GtWord) len - (GtWord) overlap) *
@@ -238,11 +228,11 @@ static GtUword gt_filter_apply(GtWLisFilterMatches *wlismatches)
 void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
                              GtUword *sum_distance_chain,
                              GtUword *sum_aligned_len_chain,
-                             GtWLisFilterMatches *wlismatches,
-                             bool forward)
+                             GtUword *chain_weighted_score,
+                             GtWLisFilterMatches *wlismatches)
 {
   GtUword bestchain_idx, *fwd, *bck;
-  
+
   if (wlismatches->items.nextfreeGtWlisItem == 0)
   {
     return;
@@ -251,19 +241,6 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
                            && sum_aligned_len_chain != NULL) ||
             (chain != NULL && sum_distance_chain == NULL
                            && sum_aligned_len_chain == NULL));
-  /* adjust coordinates */
-  if (!forward)
-  {
-    GtUword idx;
-    for (idx = 0; idx < wlismatches->items.nextfreeGtWlisItem; idx++)
-    {
-      GtUword tmp = GT_WLIS_ACC(idx).startpos[1];
-      GT_WLIS_ACC(idx).startpos[1]
-        = wlismatches->qmax - GT_WLIS_ACC(idx).endpos[1];
-      GT_WLIS_ACC(idx).endpos[1]
-        = wlismatches->qmax - tmp;
-    }
-  }
 
   /* sort by query seuqence */
   qsort(wlismatches->items.spaceGtWlisItem,
@@ -275,6 +252,7 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
   bestchain_idx = gt_filter_apply(wlismatches);
 
   /* get the chain by backtracing */
+  *chain_weighted_score = GT_WLIS_ACC(bestchain_idx).score;
   do {
     if (chain != NULL)
     {

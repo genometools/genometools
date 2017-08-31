@@ -51,7 +51,7 @@ Test do
   run "cut -f 4-5 -d ' ' #{last_stdout}"
   run "sort #{last_stdout}"
   run "diff #{last_stdout} tmp.invert"
-  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -estim JKD -seedlength 11 -histogram no  -cam encseq,encseq -snd_pass -bias-parameters"
+  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -estim JKD -seedlength 11 -histogram no -cam encseq,encseq -snd_pass -bias-parameters"
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-at1MB-U8.txt"
   run "cp #{$testdata}/U89959_genomic.fas U8-mutate0.fna"
   seqnum = 3
@@ -61,16 +61,22 @@ Test do
   end
   file_list = Range.new(0,seqnum).to_a.map {|idx| "U8-mutate#{idx}.fna"}
   run_test "#{$bin}gt encseq encode -indexname U8-all " + file_list.join(" ")
+  common = "-ii U8-all -seedlength 10 -histogram no -noinseqseeds " +
+           "-cam encseq,encseq -snd_pass -bias-parameters -estim JKD"
   1.upto(2).each do |parts|
-    run_test "#{$bin}/gt -j #{parts} seed_extend -ii U8-all -estim JKD " +
-             "-seedlength 10 -histogram no -noinseqseeds -cam encseq,encseq " +
-             "-snd_pass -bias-parameters -parts #{parts}"
+    run_test "#{$bin}/gt -j #{parts} seed_extend #{common} -parts #{parts}"
     run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-U8-all.txt"
+    run_test "#{$bin}/gt -j #{parts} seed_extend #{common} -parts #{parts}" +
+             " -delta-filter"
+    run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-df-U8-all.txt"
   end
-  run_test "#{$bin}/gt seed_extend -ii U8-all -estim JKD -delta-filter " +
-           "-seedlength 10 -histogram no -noinseqseeds -cam encseq,encseq " +
-           "-snd_pass -bias-parameters"
-  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-df-U8-all.txt"
+  run_test "#{$bin}gt encseq encode -indexname ebola " +
+           "#{$testdata}/ebola-genomes.fna.gz"
+  common = "-ii ebola -seedlength 12 -diagbandwidth 4 -histogram no " +
+           "-noinseqseeds -minidentity 80 -delta-filter -cam encseq,encseq " +
+           "-snd_pass -bias-parameters -estim JKD"
+  run_test "#{$bin}/gt seed_extend #{common}"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-jkd-ebola.txt"
 end
 
 Name "gt seed_extend: blast like output"
