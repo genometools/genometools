@@ -143,8 +143,8 @@ struct GtDiagbandseedInfo
        use_kmerfile,
        trimstat_on,
        snd_pass,
+       delta_filter,
        inseqseeds;
-  GtQuerymatchSegmentBuffer *querymatch_segment_buffer;
 };
 
 struct GtDiagbandseedExtendParams
@@ -277,16 +277,16 @@ static GtDiagbandseedBaseListType gt_diagbandseed_base_type(size_t bytes,
   return bt;
 }
 
-struct GtQuerymatchSegmentBuffer
+typedef struct
 {
   GtArrayGtQuerymatch matchtable;
   GtArraydouble evaluetable, bitscoretable;
   GtWLisFilterMatches *wlis_filter_matches;
   GtArrayGtUword wlis_filter_result;
   bool store_querymatch;
-};
+} GtQuerymatchSegmentBuffer;
 
-GtQuerymatchSegmentBuffer *gt_querymatch_segment_buffer_new(void)
+static GtQuerymatchSegmentBuffer *gt_querymatch_segment_buffer_new(void)
 {
   GtQuerymatchSegmentBuffer *buf = gt_malloc(sizeof *buf);
 
@@ -298,7 +298,7 @@ GtQuerymatchSegmentBuffer *gt_querymatch_segment_buffer_new(void)
   return buf;
 }
 
-void gt_querymatch_segment_buffer_delete(GtQuerymatchSegmentBuffer *buf)
+static void gt_querymatch_segment_buffer_delete(GtQuerymatchSegmentBuffer *buf)
 {
   if (buf != NULL)
   {
@@ -415,8 +415,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                                *diagband_statistics_arg,
                                              size_t file_buffer_size,
                                              bool snd_pass,
-                                             GtQuerymatchSegmentBuffer
-                                               *querymatch_segment_buffer,
+                                             bool delta_filter,
                                              bool inseqseeds,
                                              const GtDiagbandseedExtendParams
                                                *extp)
@@ -456,7 +455,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->diagband_statistics_arg = diagband_statistics_arg;
   info->file_buffer_size = file_buffer_size;
   info->snd_pass = snd_pass;
-  info->querymatch_segment_buffer = querymatch_segment_buffer;
+  info->delta_filter = delta_filter;
   info->inseqseeds = inseqseeds;
   info->extp = extp;
   return info;
@@ -3032,17 +3031,18 @@ typedef bool (*GtExtendRelativeCoordsFunc)(void *,
 
 static bool gt_diagbandseed_has_overlap_with_previous_match(
      const GtArrayGtDiagbandseedRectangle *previous_extensions,
-     GtUword previous_match_a_start,
-     GtUword previous_match_a_end,
-     GtUword previous_match_b_start,
-     GtUword previous_match_b_end,
+     GT_UNUSED GtUword previous_match_a_start,
+     GT_UNUSED GtUword previous_match_a_end,
+     GT_UNUSED GtUword previous_match_b_start,
+     GT_UNUSED GtUword previous_match_b_end,
      GtUword apos,
      GtUword bpos,
      GtUword matchlength,
-     bool debug)
+     GT_UNUSED bool debug)
 {
   GtDiagbandseedRectangle maxmatch;
 
+#ifdef SKDEBUG
   if (debug)
   {
     printf("# overlap of " GT_WU " " GT_WU " " GT_WU " " GT_WU " "
@@ -3053,29 +3053,36 @@ static bool gt_diagbandseed_has_overlap_with_previous_match(
            previous_match_b_start,
            previous_match_b_end);
   }
+#endif
 
   maxmatch.a_start = apos + 1 - matchlength;
   maxmatch.a_end = apos;
   maxmatch.b_start = bpos + 1 - matchlength;
   maxmatch.b_end = bpos;
 
+#ifdef SKDEBUG
   if (debug)
   {
     gt_rectangle_store_show(previous_extensions);
   }
+#endif
   if (gt_rectangle_overlap(previous_extensions,&maxmatch))
   {
+#ifdef SKDEBUG
     if (debug)
     {
       printf("# overlap with previous_ext (both dim) => return true\n");
     }
+#endif
     return true;
   } else
   {
+#ifdef SKDEBUG
     if (debug)
     {
       printf("# not overlap with previous_ext (both dim) => return false\n");
     }
+#endif
     return false;
   }
 }
@@ -3285,6 +3292,7 @@ typedef struct
   GtReadmode query_readmode;
   bool same_encseq, debug;
   GtQuerymatchSegmentBuffer *querymatch_segment_buffer;
+  GtRadixsortinfo *snd_pass_radix_sort_info;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
   GtExtendRelativeCoordsFunc extend_relative_coords_function;
   GtSegmentRejectFunc segment_reject_func;
@@ -3353,6 +3361,8 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                            *dbs_state,
                                          GtQuerymatchSegmentBuffer
                                            *querymatch_segment_buffer,
+                                         GtRadixsortinfo
+                                           *snd_pass_radix_sort_info,
                                          GtSegmentRejectFunc
                                            segment_reject_func,
                                          GtSegmentRejectInfo
@@ -3405,6 +3415,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->out_display_flag = extp->out_display_flag;
   esi->benchmark = extp->benchmark;
   esi->querymatch_segment_buffer = querymatch_segment_buffer;
+  esi->snd_pass_radix_sort_info = snd_pass_radix_sort_info;
   if (extp->accu_match_values != NULL)
   {
     if (GT_ISDIRREVERSE(query_readmode))
@@ -3446,11 +3457,13 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
 {
   int ret = 0;
 
+#ifdef SKDEBUG
   if (esi->debug)
   {
     printf("# %s haspreviousmatch=%s\n",__func__,
            haspreviousmatch ? "true" : "false");
   }
+#endif
   if (!haspreviousmatch ||
       (use_apos == 0 &&
       ((bpos_sorted && esi->info_querymatch.previous_match_b_end < bpos) ||
@@ -4013,11 +4026,13 @@ static void gt_diagbandseed_segment2matches(
       apos = segment_positions[idx].apos;
       bpos = segment_positions[idx].bpos;
     }
+#ifdef SKDEBUG
     if (esi->debug)
     {
       printf("# apos=%u,bpos=%u,matchlength=" GT_WU "\n",
              apos,bpos,matchlength);
     }
+#endif
 
     /* The filter sums the score of the current diagonalband
        as well as the maximum of the score of the previous and next
@@ -4077,6 +4092,7 @@ static void gt_diagbandseed_segment2matches(
             = esi->info_querymatch.previous_match_b_start;
           newrectangle.b_end
             = esi->info_querymatch.previous_match_b_end;
+#ifdef SKDEBUG
           if (esi->debug)
           {
             printf("# add rectangle (%u,%u) (%u,%u) from seed (%u,%u,"
@@ -4087,6 +4103,7 @@ static void gt_diagbandseed_segment2matches(
                     newrectangle.b_end,
                     apos,bpos,matchlength);
           }
+#endif
           gt_rectangle_store_add(previous_extensions,&newrectangle);
         }
         if (ret == 2 && esi->dbs_state != NULL)
@@ -4112,12 +4129,14 @@ static void gt_diagbandseed_segment2matches(
       {
         esi->dbs_state->filteredbydiagonalscore++;
       }
+#ifdef SKDEBUG
       if (esi->debug)
       {
         printf("# filtered as diagonal score " GT_WU " < " GT_WU "\n",
                coverage,
                esi->mincoverage);
       }
+#endif
     }
   }
   if (esi->use_apos > 0)
@@ -4191,8 +4210,9 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
                         seedlength);\
               }\
               gt_assert(segment_length > 0);\
-              gt_radixsort_inplace_ulong((GtUword *) segment_positions,\
-                                         segment_length);\
+              gt_radixsort_inplace_ulong_generic(snd_pass_radix_sort_info,\
+                                                 (GtUword *) segment_positions,\
+                                                 segment_length);\
             }\
           }\
           if (diagband_struct != NULL)\
@@ -4407,9 +4427,10 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                           const GtStr *diagband_statistics_arg,
                                           GtDiagbandseedState
                                             *dbs_state,
-                                          bool snd_pass,
                                           GtQuerymatchSegmentBuffer
                                             *querymatch_segment_buffer,
+                                          GtRadixsortinfo
+                                            *snd_pass_radix_sort_info,
                                           GtSegmentRejectFunc
                                             segment_reject_func,
                                           GtSegmentRejectInfo
@@ -4428,7 +4449,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandStatistics *diagband_statistics = NULL;
   GtDiagbandseedProcessSegmentFunc segment_proc_func = NULL;
   int process_run;
-  const int max_process_runs = snd_pass ? 2 : 1;
+  const int max_process_runs = (snd_pass_radix_sort_info != NULL) ? 2 : 1;
   void *segment_proc_info = NULL;
 
   gt_assert(extp->mincoverage >= seedlength && minsegmentlen >= 1);
@@ -4477,6 +4498,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                          stream,
                                          dbs_state,
                                          querymatch_segment_buffer,
+                                         snd_pass_radix_sort_info,
                                          segment_reject_func,
                                          segment_reject_info);
       if (verbose)
@@ -4845,6 +4867,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtArrayGtDiagbandseedMaximalmatch *memstore = NULL;
   GtChain2Dimmode *chainmode = NULL;
   GtKmerPosListEncodeInfo *aencode_info, *bencode_info;
+  GtQuerymatchSegmentBuffer *querymatch_segment_buffer = NULL;
+  GtRadixsortinfo *snd_pass_radix_sort_info = NULL;
 
   gt_assert(arg != NULL);
   aencode_info = gt_kmerpos_encode_info_new(arg->kmplt,
@@ -5064,7 +5088,14 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   use_blist = false;
   gt_diagbandseed_kmer_iter_delete(biter);
   biter = NULL;
-
+  if (arg->delta_filter)
+  {
+    querymatch_segment_buffer = gt_querymatch_segment_buffer_new();
+  }
+  if (arg->snd_pass)
+  {
+    snd_pass_radix_sort_info = gt_radixsort_new_ulong(0);
+  }
   /* Create extension info objects */
   if (!had_err)
   {
@@ -5152,8 +5183,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   stream,
                                   arg->diagband_statistics_arg,
                                   dbs_state,
-                                  arg->snd_pass,
-                                  arg->querymatch_segment_buffer,
+                                  querymatch_segment_buffer,
+                                  snd_pass_radix_sort_info,
                                   segment_reject_func,
                                   segment_reject_info);
     gt_seedpairlist_reset(seedpairlist);
@@ -5286,8 +5317,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   stream,
                                   arg->diagband_statistics_arg,
                                   dbs_state,
-                                  arg->snd_pass,
-                                  arg->querymatch_segment_buffer,
+                                  querymatch_segment_buffer,
+                                  snd_pass_radix_sort_info,
                                   segment_reject_func,
                                   segment_reject_info);
   }
@@ -5323,6 +5354,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   {
     gt_kmerpos_encode_info_delete(bencode_info);
   }
+  gt_querymatch_segment_buffer_delete(querymatch_segment_buffer);
+  gt_radixsort_delete(snd_pass_radix_sort_info);
   return had_err;
 }
 

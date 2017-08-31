@@ -198,12 +198,12 @@ static GtUword gt_filter_apply(GtWLisFilterMatches *wlismatches)
         if (GT_WLIS_ACC(leftmatch).startpos[dim] <
             GT_WLIS_ACC(rightmatch).startpos[dim])
         {
-          diff += labs(GT_WLIS_ACC(leftmatch).endpos[dim] -
-                       GT_WLIS_ACC(rightmatch).startpos[dim]);
+          diff += labs((GtWord) GT_WLIS_ACC(leftmatch).endpos[dim] -
+                       (GtWord) GT_WLIS_ACC(rightmatch).startpos[dim]);
         } else
         {
-          diff += labs(GT_WLIS_ACC(rightmatch).endpos[dim] -
-                       GT_WLIS_ACC(leftmatch).startpos[dim]);
+          diff += labs((GtWord) GT_WLIS_ACC(rightmatch).endpos[dim] -
+                       (GtWord) GT_WLIS_ACC(leftmatch).startpos[dim]);
         }
       }
       overlap = MAX(ovtab[0], ovtab[1]);

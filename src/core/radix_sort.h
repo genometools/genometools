@@ -90,6 +90,9 @@ void             gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,
 /* sort an array of values of type <GtUword> */
 void             gt_radixsort_inplace_ulong(GtUword *source, GtUword len);
 
+void gt_radixsort_inplace_ulong_generic(GtRadixsortinfo *radixsortinfo,
+                                        GtUword *source, GtUword len);
+
 /* Determine the maximum number of entries in an array of <GtUword> such
    that the given memory limit <memlimit> (in bytes) for the array itself and
    the auxiliary array is not exceeded. */

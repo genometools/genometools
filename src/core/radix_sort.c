@@ -736,6 +736,14 @@ void gt_radixsort_inplace_ulong(GtUword *source, GtUword len)
   gt_radixsort_delete(radixsortinfo);
 }
 
+void gt_radixsort_inplace_ulong_generic(GtRadixsortinfo *radixsortinfo,
+                                        GtUword *source, GtUword len)
+{
+  GtRadixvalues radixvalues;
+  radixvalues.ulongptr = source;
+  gt_radixsort_inplace(radixsortinfo,&radixvalues,len);
+}
+
 void gt_radixsort_inplace_GtUwordPair(GtUwordPair *source, GtUword len)
 {
   GtRadixvalues radixvalues;
