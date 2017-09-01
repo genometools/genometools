@@ -117,7 +117,7 @@ Test do
   run "mv #{last_stdout} u8-rev.fas"
   run_test build_encseq("u8-rev", "u8-rev.fas")
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  options = "-ii at1MB -minidentity 70 -l 30 -maxmat 2 -use-apos "
+  options = "-ii at1MB -minidentity 70 -l 30 -maxmat 3 -use-apos "
   run "#{$bin}gt seed_extend #{options} -qii u8 -no-reverse"
   run "mv #{last_stdout} u8.matches"
   run "#{$bin}gt seed_extend #{options} -qii u8-rev -no-forward"
@@ -275,7 +275,7 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment=n", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment=-1", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment cigar", :retval => 1
-  run_test "#{$bin}gt seed_extend -ii at1MB -maxmat 2 -l 100 -chain xx", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -maxmat 3 -l 100 -chain xx", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2 identity dtrace", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt cigar"

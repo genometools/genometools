@@ -121,7 +121,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool only_selected_seqpairs,
                                 GtAccumulateMatchValues *accu_match_values);
 
-bool gt_diagbandseed_derive_maxmat_show(GtUword maxmat);
+int gt_diagbandseed_derive_maxmat_show(GtUword maxmat);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
