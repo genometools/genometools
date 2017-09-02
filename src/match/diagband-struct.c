@@ -94,12 +94,6 @@ void gt_diagband_struct_bpos_sorted_set(GtDiagbandStruct *diagband_struct,
   diagband_struct->bpos_sorted = value;
 }
 
-bool gt_diagband_struct_bpos_sorted_get(const GtDiagbandStruct *diagband_struct)
-{
-  gt_assert(diagband_struct != NULL);
-  return diagband_struct->bpos_sorted;
-}
-
 void gt_diagbandseed_maxlen_update(GtDiagbandStruct *diagband_struct,
                                    GtUword amaxlen,GtUword bmaxlen)
 {
@@ -351,6 +345,7 @@ static void gt_diagband_statistics_score_add(
 }
 
 void gt_diagband_statistics_add(void *v_diagband_statistics,
+                                GT_UNUSED bool bpos_sorted,
                                 /* remove GT_UNUSED once arguments are used */
                                 GT_UNUSED const GtEncseq *aencseq,
                                 GT_UNUSED const GtEncseq *bencseq,

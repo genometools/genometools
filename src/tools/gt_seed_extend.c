@@ -47,6 +47,7 @@ typedef struct {
   GtStr *dbs_queryname;
   unsigned int dbs_spacedseedweight;
   unsigned int dbs_seedlength;
+  GtStr *opt_diagbandwidth;
   GtUword dbs_logdiagbandwidth;
   GtUword dbs_mincoverage;
   GtUword dbs_maxfreq;
@@ -99,6 +100,7 @@ typedef struct {
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
   GtOption *se_ref_op_evalue,
            *se_ref_op_spacedseed,
+           *se_ref_op_diagbandwidth,
            *se_ref_op_maxmat,
            *se_ref_op_estim,
            *ref_diagband_statistics,
@@ -110,6 +112,7 @@ static void* gt_seed_extend_arguments_new(void)
 {
   GtSeedExtendArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->dbs_indexname = gt_str_new();
+  arguments->opt_diagbandwidth = gt_str_new();
   arguments->dbs_queryname = gt_str_new();
   arguments->dbs_pick_str = gt_str_new();
   arguments->chainarguments = gt_str_new();
@@ -128,6 +131,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
   GtSeedExtendArguments *arguments = tool_arguments;
   if (arguments != NULL) {
     gt_str_delete(arguments->dbs_indexname);
+    gt_str_delete(arguments->opt_diagbandwidth);
     gt_str_delete(arguments->dbs_queryname);
     gt_str_delete(arguments->dbs_pick_str);
     gt_str_delete(arguments->chainarguments);
@@ -139,6 +143,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->kmplt_string);
     gt_option_delete(arguments->se_ref_op_gre);
     gt_option_delete(arguments->se_ref_op_spacedseed);
+    gt_option_delete(arguments->se_ref_op_diagbandwidth);
     gt_option_delete(arguments->se_ref_op_xdr);
     gt_option_delete(arguments->se_ref_op_evalue);
     gt_option_delete(arguments->se_ref_op_maxmat);
@@ -219,13 +224,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   arguments->se_ref_op_spacedseed = gt_option_ref(op_spacedseed);
 
   /* -diagbandwidth */
-  op_diagbandwidth = gt_option_new_uword_min_max("diagbandwidth",
+  op_diagbandwidth = gt_option_new_string("diagbandwidth",
                                "Logarithm of diagonal band width in the "
-                               "range\nfrom 0 to 10 (for filter)",
-                               &arguments->dbs_logdiagbandwidth,
-                               6UL,
-                               0,
-                               10);
+                               "range\nfrom 0 to 10 (for filter), default: 6",
+                               arguments->opt_diagbandwidth,
+                               "6");
+  arguments->se_ref_op_diagbandwidth = gt_option_ref(op_diagbandwidth);
   gt_option_parser_add_option(op, op_diagbandwidth);
 
   /* -mincoverage */
@@ -1175,6 +1179,35 @@ static int gt_seed_extend_runner(int argc,
     }
   }
 
+  if (!had_err)
+  {
+    if (gt_option_is_set(arguments->se_ref_op_diagbandwidth))
+    {
+      const char *opt = gt_str_get(arguments->opt_diagbandwidth);
+
+      if (strcmp(opt,"no") == 0)
+      {
+        arguments->dbs_logdiagbandwidth = GT_UWORD_MAX;
+      } else
+      {
+        GtWord parse_int;
+
+        if (sscanf(opt,GT_WD,&parse_int) != 1 || parse_int < 0 ||
+            parse_int > 10)
+        {
+          gt_error_set(err,"argument of option -diagbandwidth must be keyword "
+                           "\"no\" or integer in the range from 0 to 10");
+          had_err = -1;
+        } else
+        {
+          arguments->dbs_logdiagbandwidth = (GtUword) parse_int;
+        }
+      }
+    } else
+    {
+      arguments->dbs_logdiagbandwidth = 6;
+    }
+  }
   /* Fill struct of algorithm arguments */
   if (!had_err) {
     GtDiagbandseedExtendParams *extp = NULL;

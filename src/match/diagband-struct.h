@@ -62,9 +62,6 @@ bool gt_diagband_struct_empty(const GtDiagbandStruct *diagband_struct);
 void gt_diagband_struct_bpos_sorted_set(GtDiagbandStruct *diagband_struct,
                                         bool value);
 
-bool gt_diagband_struct_bpos_sorted_get(const GtDiagbandStruct
-                                          *diagband_struct);
-
 typedef uint32_t GtDiagbandseedPosition;
 
 /* for a given pair of positions <apos> and <bpos> on the A- and on the
@@ -165,6 +162,7 @@ void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics);
 */
 
 void gt_diagband_statistics_add(void *v_diagband_statistics,
+                                bool bpos_sorted,
                                 const GtEncseq *aencseq,
                                 const GtEncseq *bencseq,
                                 GtUword aseqnum,
