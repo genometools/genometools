@@ -3,7 +3,7 @@
 sleeptime=0.1
 
 if [ $# -eq 0 ]; then
-  echo "Usage: $0 <command> [args]"
+  echo "Usage: $0 [-hashmark] <command> [args]"
   echo
   echo "The following information is polled each $sleeptime seconds"
   echo "from /proc/[pid]/status:"
@@ -25,6 +25,15 @@ fi
 #   http://stackoverflow.com/questions/1080461/
 #         /peak-memory-measurement-of-long-running-process-in-linux
 function __measure_space_peak {
+  hashmark=""
+  if test $# -gt 0
+  then
+    if test "$1" == "-hashmark"
+    then
+      hashmark="#"
+      shift
+    fi
+  fi
   types="Peak Size Lck HWM RSS Data Stk Exe Lib PTE"
   declare -A maxVm
   for vm in $types; do maxVm[$vm]=0; done
@@ -51,8 +60,11 @@ function __measure_space_peak {
   done
   wait ${savedtpid} # don't wait, job is finished
   exitstatus=$?   # catch the exit status of wait, the same of $@
-  echo "Memory usage for $@:"
-  for vm in $types; do echo "  Vm$vm: ${maxVm[$vm]} kB"; done
-  echo "Exit status: ${exitstatus}"
+  echo "${hashmark}Memory usage for $@:"
+  for vm in $types
+  do 
+    echo "${hashmark}  Vm$vm: ${maxVm[$vm]} kB"
+  done
+  echo "${hashmark}Exit status: ${exitstatus}"
 }
 __measure_space_peak $*

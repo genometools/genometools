@@ -114,11 +114,6 @@ void gt_diagband_struct_reset_counts(const GtDiagbandStruct *diagband_struct,
   fprintf(stream,"# number of resets of all used diagonal bands: " GT_WU,
           diagband_struct->reset_with_memset +
           diagband_struct->reset_from_matches);
-  if (diagband_struct->reset_with_memset > 0)
-  {
-    fprintf(stream,"; simple resets: " GT_WU,
-            diagband_struct->reset_with_memset);
-  }
   if (diagband_struct->reset_from_matches > 0)
   {
     fprintf(stream,"; resets from matches: " GT_WU,
