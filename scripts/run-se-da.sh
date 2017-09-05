@@ -49,7 +49,7 @@ else
 fi
 
 ${gtbin} seed_extend -parts 4 -ii ${reference} ${qiioption} -t ${maxfreq} -l ${minlen} \
-                    -seedlength 14 -minidentity ${minidentity} \
+                    -seedlength 14 -diagbandwidth no -minidentity ${minidentity} \
                     -v -overlappingseeds -bias-parameters -no-reverse \
                     -history 60 > ${outputprefix}-se.matches
 rm -f ${query}.ssp ${query}.fasta ${query}.esq
@@ -75,9 +75,9 @@ then
   ${MYERSPROG}/DAZZ_DB/fasta2DB ${query}.db ${query}.fasta
 fi
 
-echo "# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity"
-scripts/rdj-spacepeak.sh ${MYERSPROG}/DALIGNER/daligner -t${maxfreq} -I -A -Y -e0.${minidentity} \
+echo "# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity" > ${outputprefix}-da.matches
+scripts/rdj-spacepeak.sh -hashmark ${MYERSPROG}/DALIGNER/daligner -t${maxfreq} -I -A -Y -e0.${minidentity} \
                    -k${seedlength} -l${minlen} \
-                   ${query}.db ${reference}.db > ${outputprefix}-da.matches
+                   ${query}.db ${reference}.db >> ${outputprefix}-da.matches
 rm -f ${reference}.db ${query}.db .${reference}.idx .${reference}.bps
 rm -f ${query}.${reference}*.las .${query}.idx .${query}.bps

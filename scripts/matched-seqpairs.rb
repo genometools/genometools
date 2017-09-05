@@ -18,13 +18,17 @@ end
 
 seqnumpair_sets = Array.new()
 [0,1].each do |idx|
-  puts "input matches from #{ARGV[idx]} (set #{idx+1})"
+  puts "input matches from #{ARGV[idx]} (set #{idx})"
   matchset = SEmatch.new(ARGV[idx])
   seqnumpair_sets.push(matchset2seqnumpairs(matchset))
 end
 [[0,1],[1,0]].each do |i,j|
-  size = seqnumpair_sets[i].difference(seqnumpair_sets[j]).length
+  diffset = seqnumpair_sets[i].difference(seqnumpair_sets[j])
+  size = diffset.length
   puts "in #{i} but not in #{j}: #{size}"
+  diffset.each do |a,b|
+    puts "#{a} #{b}"
+  end
   if i < j
     size = seqnumpair_sets[i].intersection(seqnumpair_sets[j]).length
     puts "common #{i} and #{j}: #{size}"
