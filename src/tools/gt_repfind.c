@@ -899,7 +899,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
   {
     GtEncseq *encseq_for_desc = NULL;
     GtProcessinfo_and_querymatchspaceptr info_querymatch
-      = Initializer_GtProcessinfo_and_querymatchspaceptr;
+      = Gt_Initializer_GtProcessinfo_and_querymatchspaceptr;
     info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
     info_querymatch.out_display_flag = out_display_flag;
     if (gt_querymatch_alignment_display(out_display_flag) ||
@@ -949,6 +949,8 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
     if (!haserr)
     {
       info_querymatch.querymatchspaceptr = gt_querymatch_new();
+      info_querymatch.querymatchspaceptr_only_left = gt_querymatch_new();
+      info_querymatch.querymatchspaceptr_only_right = gt_querymatch_new();
       if (querymatchoutoptions != NULL)
       {
         gt_querymatch_outoptions_set(info_querymatch.querymatchspaceptr,
@@ -1104,6 +1106,8 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
     gt_encseq_delete(encseq_for_desc);
     gt_querymatchoutoptions_delete(querymatchoutoptions);
     gt_querymatch_delete(info_querymatch.querymatchspaceptr);
+    gt_querymatch_delete(info_querymatch.querymatchspaceptr_only_left);
+    gt_querymatch_delete(info_querymatch.querymatchspaceptr_only_right);
   }
   gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   gt_xdrop_matchinfo_delete(xdropmatchinfo);

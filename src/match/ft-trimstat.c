@@ -10,6 +10,7 @@ struct GtFtTrimstat
   GtArrayGtUword distance_dist, maxvalid_dist;
   size_t spaceforfront_total;
   double sum_meanvalid;
+  bool show_distance;
 };
 
 GtFtTrimstat *gt_ft_trimstat_new(void)
@@ -27,10 +28,20 @@ GtFtTrimstat *gt_ft_trimstat_new(void)
   GT_INITARRAY(&trimstat->maxvalid_dist,GtUword);
   trimstat->spaceforfront_total = 0;
   trimstat->sum_meanvalid = 0.0;
+  trimstat->show_distance = false;
   return trimstat;
 }
 
 #ifndef NDEBUG
+
+void gt_ft_trimstat_show_distance_set(GtFtTrimstat *trimstat)
+{
+  if (trimstat != NULL)
+  {
+    trimstat->show_distance = true;
+  }
+}
+
 void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         bool diedout,
                         GtUword sumvalid,
@@ -41,6 +52,16 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
   if (trimstat == NULL)
   {
     return;
+  }
+  if (trimstat->show_distance)
+  {
+    if (diedout)
+    {
+      printf("inf\n");
+    } else
+    {
+      printf(GT_WU "\n",d);
+    }
   }
   while (maxvalid >= trimstat->maxvalid_dist.allocatedGtUword)
   {

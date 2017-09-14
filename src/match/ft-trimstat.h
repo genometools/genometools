@@ -9,6 +9,7 @@ typedef struct GtFtTrimstat GtFtTrimstat;
 GtFtTrimstat *gt_ft_trimstat_new(void);
 
 #ifndef NDEBUG
+void gt_ft_trimstat_show_distance_set(GtFtTrimstat *trimstat);
 void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         bool diedout,
                         GtUword sumvalid,

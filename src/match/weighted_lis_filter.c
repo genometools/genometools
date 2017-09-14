@@ -238,9 +238,11 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
     return;
   }
   gt_assert((chain == NULL && sum_distance_chain != NULL
-                           && sum_aligned_len_chain != NULL) ||
+                           && sum_aligned_len_chain != NULL
+                           && chain_weighted_score != NULL) ||
             (chain != NULL && sum_distance_chain == NULL
-                           && sum_aligned_len_chain == NULL));
+                           && sum_aligned_len_chain == NULL
+                           && chain_weighted_score == NULL));
 
   /* sort by query seuqence */
   qsort(wlismatches->items.spaceGtWlisItem,
@@ -252,7 +254,10 @@ void gt_wlis_filter_evaluate(GtArrayGtUword *chain,
   bestchain_idx = gt_filter_apply(wlismatches);
 
   /* get the chain by backtracing */
-  *chain_weighted_score = GT_WLIS_ACC(bestchain_idx).score;
+  if (chain == NULL)
+  {
+    *chain_weighted_score = GT_WLIS_ACC(bestchain_idx).score;
+  }
   do {
     if (chain != NULL)
     {

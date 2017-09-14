@@ -1,12 +1,12 @@
-# Options: -ii U8-all -estim JKD -seedlength 10 -histogram no -noinseqseeds -cam encseq,encseq -snd_pass -bias-parameters -delta-filter -minidentity 80 -history 60
+# Options: -ii U8-all -seedlength 10 -histogram no -noinseqseeds -cam encseq,encseq -snd_pass -bias-parameters -estim JKD -parts 1 -delta-filter -minidentity 80 -history 60
 # pairwise JKD values for 4 sequences
 0	gi|1877523|gb|U89959.1| Arabidopsis thaliana BAC T7I23, complete sequence
 1	gi|1877523|gb|U89959.1| Arabidopsis thaliana BAC T7I23, complete sequence [mutated with rate 10]
 2	gi|1877523|gb|U89959.1| Arabidopsis thaliana BAC T7I23, complete sequence [mutated with rate 10] [mutated with rate 10]
 3	gi|1877523|gb|U89959.1| Arabidopsis thaliana BAC T7I23, complete sequence [mutated with rate 10] [mutated with rate 10] [mutated with rate 10]
 JKD 0 1 0.08601090
-JKD 0 2 0.16089728
-JKD 0 3 0.18590686
+JKD 0 2 0.16116097
+JKD 0 3 0.18700315
 JKD 1 2 0.08364664
-JKD 1 3 0.15920624
+JKD 1 3 0.15949899
 JKD 2 3 0.08435378

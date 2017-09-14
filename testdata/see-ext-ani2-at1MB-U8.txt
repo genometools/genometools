@@ -1,3 +1,3 @@
-# Options: -ii at1MB -qii U89959_genomic -ani -snd_pass -minidentity 80 -history 60
-ANI at1MB U89959_genomic 83.5046 82.9379
-ANI U89959_genomic at1MB 84.0707 82.6302
+# Options: -ii at1MB -qii U89959_genomic -estim ANI -snd_pass -minidentity 80 -history 60
+ANI at1MB U89959_genomic 83.3685 82.8472
+ANI U89959_genomic at1MB 83.8427 82.4705

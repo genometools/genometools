@@ -354,7 +354,7 @@ void gt_querymatch_delete(GtQuerymatch *querymatch)
   }
 }
 
-static bool gt_querymatch_ordered(const GtQuerymatch *querymatch)
+bool gt_querymatch_ordered(const GtQuerymatch *querymatch)
 {
   return (!querymatch->selfmatch ||
           (querymatch->force_order &&
@@ -729,12 +729,13 @@ bool gt_querymatch_check_final_generic(
                                GtUword mismatches,
                                GtUword userdefinedleastlength,
                                GtUword error_percentage_th,
-                               double evalue_threshold,
-                               GT_UNUSED FILE *fp)
+                               double evalue_threshold)
 {
 #undef SKDEBUG
 #ifdef SKDEBUG
-  fprintf(fp, "# errorrate = %.2f <=? " GT_WU " = errorpercentage_threshold ",
+  printf("# distance=" GT_WU ", aligned_len=" GT_WU ", errorrate = %.2f "
+              " <=? " GT_WU " = errorpercentage_threshold ",
+          distance,aligned_len,
           gt_querymatch_error_percentage(distance,aligned_len),
           error_percentage_th);
 #endif
@@ -742,28 +743,27 @@ bool gt_querymatch_check_final_generic(
         > (double) error_percentage_th)
   {
 #ifdef SKDEBUG
-    fprintf(fp, "false => reject\n");
+    printf("false => reject\n");
 #endif
     return false;
   }
 #ifdef SKDEBUG
   else
   {
-    fprintf(fp, "true => accept\n");
+    printf("true => accept\n");
   }
-  fprintf(fp, "# aligned_len = " GT_WU " >=? " GT_WU
-         " = 2 * userdefinedleastlen ",
+  printf("# aligned_len = " GT_WU " >=? " GT_WU " = 2 * userdefinedleastlen ",
          aligned_len, 2 * userdefinedleastlength);
 #endif
   if (aligned_len < 2 * userdefinedleastlength)
   {
 #ifdef SKDEBUG
-    fprintf(fp, "false => reject\n");
+    printf("false => reject\n");
 #endif
     return false;
   }
 #ifdef SKDEBUG
-  fprintf(fp, "true => accept\n");
+  printf("true => accept\n");
 #endif
   if (karlin_altschul_stat != NULL)
   {
@@ -779,20 +779,20 @@ bool gt_querymatch_check_final_generic(
                                            mismatches,
                                            indels);
 #ifdef SKDEBUG
-    fprintf(querymatch->fp, "# evalue_ptr = %.2e <=? %.2e = evalue_threshold ",
+    printf("# evalue_ptr = %.2e <=? %.2e = evalue_threshold ",
                              *evalue_ptr,evalue_threshold);
 #endif
     if (*evalue_ptr > evalue_threshold)
     {
 #ifdef SKDEBUG
-      fprintf(fp, "false => reject\n");
+      printf("false => reject\n");
 #endif
       return false;
     }
 #ifdef SKDEBUG
     else
     {
-      fprintf(fp, "true => accept\n");
+      printf("true => accept\n");
     }
 #endif
   }
@@ -807,28 +807,21 @@ bool gt_querymatch_check_final(double *evalue_ptr,
                                GtUword error_percentage_th,
                                double evalue_threshold)
 {
-  GtUword aligned_len;
-
   if (!gt_querymatch_ordered(querymatch))
   {
-#ifdef SKDEBUG
-    fprintf(querymatch->fp, "# !gt_querymatch_ordered => reject\n");
-#endif
     return false;
   }
-  aligned_len = gt_querymatch_aligned_len(querymatch);
   return gt_querymatch_check_final_generic(
                                evalue_ptr,
                                bit_score_ptr,
                                karlin_altschul_stat,
                                querymatch->query_seqlen,
-                               aligned_len,
+                               gt_querymatch_aligned_len(querymatch),
                                querymatch->distance,
                                querymatch->mismatches,
                                userdefinedleastlength,
                                error_percentage_th,
-                               evalue_threshold,
-                               querymatch->fp);
+                               evalue_threshold);
 }
 
 static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)

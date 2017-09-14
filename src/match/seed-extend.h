@@ -74,20 +74,34 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 
 typedef struct
 {
+  GtUword a_start,
+          a_end,
+          b_start,
+          b_end,
+          distance,
+          mismatches;
+} GtPreviousMatchStruct;
+
+typedef struct
+{
   void *processinfo;
-  GtQuerymatch *querymatchspaceptr;
+  GtQuerymatch *querymatchspaceptr,
+               *querymatchspaceptr_only_left,
+               *querymatchspaceptr_only_right;
   const GtKarlinAltschulStat *karlin_altschul_stat;
   const GtSeedExtendDisplayFlag *out_display_flag;
-  GtUword previous_match_a_start,
-          previous_match_a_end,
-          previous_match_b_start,
-          previous_match_b_end,
-          previous_match_distance,
-          previous_match_mismatches;
+  GtUword userdefinedleastlength,
+          errorpercentage;
+  double evalue_threshold;
+  GtPreviousMatchStruct previous_match,
+                        previous_match_only_left,
+                        previous_match_only_right;
 } GtProcessinfo_and_querymatchspaceptr;
 
-#define Initializer_GtProcessinfo_and_querymatchspaceptr\
-        {NULL,NULL,NULL,NULL,0,0,0,0,0,0}
+#define Gt_Initializer_GtProcessinfo_and_querymatchspaceptr\
+        {NULL,NULL,NULL,NULL,NULL,NULL,0,0,0.0,{0,0,0,0,0,0},\
+                                               {0,0,0,0,0,0},\
+                                               {0,0,0,0,0,0}}
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
@@ -314,6 +328,15 @@ bool gt_greedy_extend_seed_relative(void *info,
                                     GtUword querystart_relative,
                                     GtUword len,
                                     GtReadmode query_readmode);
+
+GtQuerymatch *gt_extend_seed_mode2querymatchspaceptr(
+                    int mode,
+                    const GtProcessinfo_and_querymatchspaceptr
+                        *info_querymatch);
+
+GtPreviousMatchStruct *gt_extend_seed_previous_match(
+                    int mode,
+                    GtProcessinfo_and_querymatchspaceptr *info_querymatch);
 
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,

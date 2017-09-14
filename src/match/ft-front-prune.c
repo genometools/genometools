@@ -276,7 +276,7 @@ static int gt_sequenceobject_longest_func_index(const GtFtSequenceObject *useq,
          (haswildcards ? ft_longest_common_func_first_wildcard : 0);
 }
 
-#define GT_FRONT_DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
+#define GT_FRONT_DIAGONAL(FRONTPTR,MID) (GtWord) ((FRONTPTR) - (MID))
 
 static void inline front_prune_add_matches(
                                   GtLongestCommonFunc ft_longest_common,
@@ -289,7 +289,9 @@ static void inline front_prune_add_matches(
 {
   fv->localmatch_count
     = (GtFtRowvaluetype)ft_longest_common(useq,fv->row,
-                                          vseq,fv->row + GT_FRONT_DIAGONAL(fv));
+                                          vseq,
+                                          fv->row +
+                                            GT_FRONT_DIAGONAL(fv,midfront));
   if (fv->localmatch_count > 0)
   {
     const uint64_t match_mask
@@ -331,7 +333,8 @@ static GtUword front_next_inplace(GtLongestCommonFunc ft_longest_common,
   lowfront->backreference = FT_EOP_DELETION;
   front_prune_add_matches(ft_longest_common,midfront,lowfront,
                           max_history,useq,vseq,trimstat);
-  maxalignedlen = GT_MULT2(lowfront->row) + GT_FRONT_DIAGONAL(lowfront);
+  maxalignedlen = GT_MULT2(lowfront->row) +
+                  GT_FRONT_DIAGONAL(lowfront,midfront);
 
   replacement_value = *(lowfront+1);
   if (bestfront.row < replacement_value.row + 1)
@@ -356,7 +359,8 @@ static GtUword front_next_inplace(GtLongestCommonFunc ft_longest_common,
   *(lowfront+1) = bestfront;
   front_prune_add_matches(ft_longest_common,midfront,lowfront + 1,
                           max_history,useq,vseq,trimstat);
-  alignedlen = GT_MULT2((lowfront+1)->row) + GT_FRONT_DIAGONAL(lowfront + 1);
+  alignedlen = GT_MULT2((lowfront+1)->row) +
+               GT_FRONT_DIAGONAL(lowfront + 1,midfront);
   if (maxalignedlen < alignedlen)
   {
     maxalignedlen = alignedlen;
@@ -409,7 +413,7 @@ static GtUword front_next_inplace(GtLongestCommonFunc ft_longest_common,
     *frontptr = bestfront;
     front_prune_add_matches(ft_longest_common,midfront,frontptr,
                             max_history,useq,vseq,trimstat);
-    alignedlen = GT_MULT2(frontptr->row) + GT_FRONT_DIAGONAL(frontptr);
+    alignedlen = GT_MULT2(frontptr->row) + GT_FRONT_DIAGONAL(frontptr,midfront);
     if (maxalignedlen < alignedlen)
     {
       maxalignedlen = alignedlen;
@@ -435,7 +439,8 @@ static GtUword front_second_inplace(GtLongestCommonFunc ft_longest_common,
   front_prune_add_matches(ft_longest_common,midfront,lowfront,
                           max_history,useq,vseq,
                           trimstat);
-  maxalignedlen = GT_MULT2(lowfront->row) + GT_FRONT_DIAGONAL(lowfront);
+  maxalignedlen = GT_MULT2(lowfront->row) +
+                  GT_FRONT_DIAGONAL(lowfront,midfront);
 
   (lowfront+1)->row++;
   (lowfront+1)->backreference = FT_EOP_MISMATCH;
@@ -443,7 +448,8 @@ static GtUword front_second_inplace(GtLongestCommonFunc ft_longest_common,
   GT_UPDATE_MATCH_HISTORY(lowfront+1);
   front_prune_add_matches(ft_longest_common,midfront,lowfront + 1,
                           max_history,useq,vseq,trimstat);
-  alignedlen = GT_MULT2((lowfront+1)->row) + GT_FRONT_DIAGONAL(lowfront + 1);
+  alignedlen = GT_MULT2((lowfront+1)->row) +
+               GT_FRONT_DIAGONAL(lowfront + 1,midfront);
   if (maxalignedlen < alignedlen)
   {
     maxalignedlen = alignedlen;
@@ -453,7 +459,8 @@ static GtUword front_second_inplace(GtLongestCommonFunc ft_longest_common,
   GT_UPDATE_MATCH_HISTORY(lowfront+2);
   front_prune_add_matches(ft_longest_common,midfront,lowfront + 2,
                           max_history,useq,vseq,trimstat);
-  alignedlen = GT_MULT2((lowfront+2)->row) + GT_FRONT_DIAGONAL(lowfront + 2);
+  alignedlen = GT_MULT2((lowfront+2)->row) + GT_FRONT_DIAGONAL(lowfront + 2,
+                                                            midfront);
   if (maxalignedlen < alignedlen)
   {
     maxalignedlen = alignedlen;
@@ -526,9 +533,9 @@ static GtUword trim_front(bool upward,
   for (frontptr = from; frontptr != stop; frontptr += step)
   {
     if (frontptr->row <= ulen &&
-        frontptr->row + GT_FRONT_DIAGONAL(frontptr) <= vlen &&
+        frontptr->row + GT_FRONT_DIAGONAL(frontptr,midfront) <= vlen &&
         !trimthisentry(frontptr->row,
-                       GT_FRONT_DIAGONAL(frontptr),
+                       GT_FRONT_DIAGONAL(frontptr,midfront),
                        frontptr,
                        minmatchpercentage128,
                        minlenfrommaxdiff,
@@ -591,10 +598,10 @@ static void ft_update_trace_and_polished(
 
   for (frontptr = lowfront; frontptr <= highfront; frontptr++)
   {
-    GtUword alignedlen = GT_MULT2(frontptr->row) + GT_FRONT_DIAGONAL(frontptr);
-
-    gt_assert(GT_FRONT_DIAGONAL(frontptr) >= 0 ||
-              frontptr->row >= -GT_FRONT_DIAGONAL(frontptr));
+    GtUword alignedlen = GT_MULT2(frontptr->row) +
+                         GT_FRONT_DIAGONAL(frontptr,midfront);
+    gt_assert(GT_FRONT_DIAGONAL(frontptr,midfront) >= 0 ||
+              frontptr->row >= -GT_FRONT_DIAGONAL(frontptr,midfront));
     if (alignedlen > best_polished_point->alignedlen)
     {
       uint64_t filled_matchhistory_bits = frontptr->matchhistory_bits;
@@ -650,7 +657,7 @@ GtUword front_prune_edist_inplace(
   /* so the space for allocating the fronts is
      sizeof (GtFtFrontvalue) * ((m+n)/1000 + maxvalid), where maxvalid is a
      small constant. */
-  GtUword distance, trimleft = 0, valid = 1UL, maxvalid = 0, sumvalid = 0;
+  GtUword distance, trimleft = 0, valid, maxvalid = 0, sumvalid = 0;
   GtFtFrontvalue *validbasefront;
   bool diedout = false;
   GtFtSequenceObject useq, vseq;
@@ -661,6 +668,7 @@ GtUword front_prune_edist_inplace(
   const uint64_t max_history_mask
     = max_history == 64 ? (~((uint64_t) 0))
                         : ((((uint64_t) 1) << max_history) - 1);
+
   GtLongestCommonFunc ft_longest_common;
 
   ft_sequenceobject_init(&useq,
@@ -858,7 +866,7 @@ static void inline gt_full_front_prune_add_matches(GtFtFrontvalue *midfront,
 {
   GtUword upos, vpos;
 
-  for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv);
+  for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv,midfront);
        upos < ulen && vpos < vlen &&
        useq[upos] == vseq[vpos]
        && ISNOTSPECIAL(useq[upos])

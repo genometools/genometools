@@ -349,9 +349,9 @@ static void gt_querymatch_segment_buffer_add(GtQuerymatchSegmentBuffer *buf,
 typedef struct
 {
   GtUword sum_of_distance,
-          sum_of_aligned_len,
+          sum_of_alignedlen,
           weighted_score; /* score of chain whose elements have the
-                             sum_of_distance and sum_of_aligned_len value */
+                             sum_of_distance and sum_of_alignedlen value */
 } GtAniAccumulateEntry;
 
 static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
@@ -386,7 +386,7 @@ static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
     gt_assert(out_display_flag == NULL && accu_match_values_entry != NULL);
     gt_wlis_filter_evaluate(NULL,
                             &accu_match_values_entry->sum_of_distance,
-                            &accu_match_values_entry->sum_of_aligned_len,
+                            &accu_match_values_entry->sum_of_alignedlen,
                             &accu_match_values_entry->weighted_score,
                             buf->wlis_filter_matches);
   }
@@ -508,11 +508,11 @@ GtAccumulateMatchValues *gt_accumulate_match_values_new(
 }
 
 static double gt_seed_extend_ani_evaluate(GtUword sum_of_distance,
-                                          GtUword sum_of_aligned_len)
+                                          GtUword sum_of_alignedlen)
 {
-  return sum_of_aligned_len > 0
+  return sum_of_alignedlen > 0
              ? (100.0 * (1.0 - gt_querymatch_error_rate(sum_of_distance,
-                                                        sum_of_aligned_len)))
+                                                        sum_of_alignedlen)))
              : 0.0;
 }
 
@@ -585,11 +585,11 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
           values[idx]
             = result_evaluate_func(
                 accu_match_values->matrix[idx][row][column].sum_of_distance,
-                accu_match_values->matrix[idx][row][column].sum_of_aligned_len);
+                accu_match_values->matrix[idx][row][column].sum_of_alignedlen);
           values[2+idx]
             = result_evaluate_func(
               accu_match_values->matrix[idx][column][row].sum_of_distance,
-              accu_match_values->matrix[idx][column][row].sum_of_aligned_len);
+              accu_match_values->matrix[idx][column][row].sum_of_alignedlen);
         }
         if (accu_match_values->output_ani)
         {
@@ -603,7 +603,7 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
           }
         } else
         {
-          /* AS: maximierung "uber den kettenscore */
+          /* AS: maximizing over the chain score */
           double value12,value21;
 
           value12 = (accu_match_values->matrix[0][row][column].weighted_score
@@ -646,7 +646,7 @@ void gt_accumulate_match_values_delete(GtAccumulateMatchValues
         values[2 * row + idx]
           = result_evaluate_func(
                   accu_match_values->matrix[idx][row][0].sum_of_distance,
-                  accu_match_values->matrix[idx][row][0].sum_of_aligned_len);
+                  accu_match_values->matrix[idx][row][0].sum_of_alignedlen);
       }
       if (accu_match_values->output_ani)
       {
@@ -3339,41 +3339,70 @@ typedef struct
 } GtDiagbandseedExtendSegmentInfo;
 
 static void gt_diagbandseed_info_qm_set(
-                                   GtProcessinfo_and_querymatchspaceptr *ifqm,
-                                   bool store_matches,
-                                   const GtDiagbandseedExtendParams *extp,
-                                   GtQuerymatchoutoptions *querymoutopt,
-                                   GtReadmode query_readmode,
-                                   FILE *stream,
-                                   const GtKarlinAltschulStat
-                                     *karlin_altschul_stat,
-                                   void *processinfo)
+                         GtProcessinfo_and_querymatchspaceptr *info_querymatch,
+                         bool store_matches,
+                         const GtDiagbandseedExtendParams *extp,
+                         GtQuerymatchoutoptions *querymoutopt,
+                         GtReadmode query_readmode,
+                         FILE *stream,
+                         const GtKarlinAltschulStat *karlin_altschul_stat,
+                         void *processinfo)
 {
-  ifqm->processinfo = processinfo;
+  info_querymatch->processinfo = processinfo;
   if (extp->accu_match_values != NULL && !store_matches)
   {
-    ifqm->querymatchspaceptr = NULL;
+    info_querymatch->querymatchspaceptr = NULL;
+    info_querymatch->querymatchspaceptr_only_left = NULL;
+    info_querymatch->querymatchspaceptr_only_right = NULL;
   } else
   {
-    ifqm->querymatchspaceptr = gt_querymatch_new();
+    info_querymatch->querymatchspaceptr = gt_querymatch_new();
+    info_querymatch->querymatchspaceptr_only_left = gt_querymatch_new();
+    info_querymatch->querymatchspaceptr_only_right = gt_querymatch_new();
     if (extp->verify_alignment)
     {
-      gt_querymatch_verify_alignment_set(ifqm->querymatchspaceptr);
+      gt_querymatch_verify_alignment_set(info_querymatch->querymatchspaceptr);
+      gt_querymatch_verify_alignment_set(info_querymatch->
+                                         querymatchspaceptr_only_left);
+      gt_querymatch_verify_alignment_set(info_querymatch->
+                                         querymatchspaceptr_only_right);
     }
-    if (querymoutopt != NULL) {
-      gt_querymatch_outoptions_set(ifqm->querymatchspaceptr,querymoutopt);
+    if (querymoutopt != NULL)
+    {
+      gt_querymatch_outoptions_set(info_querymatch->querymatchspaceptr,
+                                   querymoutopt);
+      gt_querymatch_outoptions_set(info_querymatch->
+                                   querymatchspaceptr_only_left,
+                                   querymoutopt);
+      gt_querymatch_outoptions_set(info_querymatch->
+                                   querymatchspaceptr_only_right,
+                                   querymoutopt);
     }
-    gt_querymatch_query_readmode_set(ifqm->querymatchspaceptr,query_readmode);
-    gt_querymatch_file_set(ifqm->querymatchspaceptr, stream);
+    gt_querymatch_query_readmode_set(info_querymatch->querymatchspaceptr,
+                                     query_readmode);
+    gt_querymatch_query_readmode_set(info_querymatch->
+                                     querymatchspaceptr_only_left,
+                                     query_readmode);
+    gt_querymatch_query_readmode_set(info_querymatch->
+                                     querymatchspaceptr_only_right,
+                                     query_readmode);
+    gt_querymatch_file_set(info_querymatch->querymatchspaceptr, stream);
+    gt_querymatch_file_set(info_querymatch->querymatchspaceptr_only_left,
+                           stream);
+    gt_querymatch_file_set(info_querymatch->querymatchspaceptr_only_right,
+                           stream);
   }
-  ifqm->karlin_altschul_stat = karlin_altschul_stat;
-  ifqm->out_display_flag = extp->out_display_flag;;
-  ifqm->previous_match_a_start = 0;
-  ifqm->previous_match_a_end = 0;
-  ifqm->previous_match_b_start = 0;
-  ifqm->previous_match_b_end = 0;
-  ifqm->previous_match_distance = 0;
-  ifqm->previous_match_mismatches = 0;
+  info_querymatch->karlin_altschul_stat = karlin_altschul_stat;
+  info_querymatch->out_display_flag = extp->out_display_flag;
+  info_querymatch->previous_match.a_start = 0;
+  info_querymatch->previous_match.a_end = 0;
+  info_querymatch->previous_match.b_start = 0;
+  info_querymatch->previous_match.b_end = 0;
+  info_querymatch->previous_match.distance = 0;
+  info_querymatch->previous_match.mismatches = 0;
+  info_querymatch->userdefinedleastlength = extp->userdefinedleastlength;
+  info_querymatch->errorpercentage = extp->errorpercentage;
+  info_querymatch->evalue_threshold = extp->evalue_threshold;
 }
 
 static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
@@ -3471,6 +3500,8 @@ static void gt_diagbandseed_extendSI_delete(
   if (esi != NULL)
   {
     gt_querymatch_delete(esi->info_querymatch.querymatchspaceptr);
+    gt_querymatch_delete(esi->info_querymatch.querymatchspaceptr_only_left);
+    gt_querymatch_delete(esi->info_querymatch.querymatchspaceptr_only_right);
     gt_diagbandseed_plainsequence_delete(&esi->plainsequence_info);
     gt_free(esi);
   }
@@ -3499,21 +3530,22 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
 #endif
   if (!haspreviousmatch ||
       (use_apos == 0 &&
-      ((bpos_sorted && esi->info_querymatch.previous_match_b_end < bpos) ||
-      (!bpos_sorted && esi->info_querymatch.previous_match_b_end < apos))) ||
+      ((bpos_sorted && esi->info_querymatch.previous_match.b_end < bpos) ||
+      (!bpos_sorted && esi->info_querymatch.previous_match.b_end < apos))) ||
       /* no overlap */
       (use_apos > 0 && !gt_diagbandseed_has_overlap_with_previous_match(
                              previous_extensions,
-                             esi->info_querymatch.previous_match_a_start,
-                             esi->info_querymatch.previous_match_a_end,
-                             esi->info_querymatch.previous_match_b_start,
-                             esi->info_querymatch.previous_match_b_end,
+                             esi->info_querymatch.previous_match.a_start,
+                             esi->info_querymatch.previous_match.a_end,
+                             esi->info_querymatch.previous_match.b_start,
+                             esi->info_querymatch.previous_match.b_end,
                              apos,
                              bpos,
                              matchlength,
                              esi->debug)))
   {
-    bool success;
+    bool instances_ordered;
+    int mode;
 
     /* relative seed start position in A and B */
     const GtUword bstart = bpos + 1 - matchlength;
@@ -3538,7 +3570,8 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     }
     if (bpos_sorted)
     {
-      success = esi->extend_relative_coords_function(&esi->info_querymatch,
+      instances_ordered = esi->extend_relative_coords_function(
+                                                     &esi->info_querymatch,
                                                      &esi->plainsequence_info.
                                                        aseqorencseq,
                                                      aseqnum,
@@ -3552,7 +3585,8 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                                      esi->query_readmode);
     } else
     {
-      success = esi->extend_relative_coords_function(&esi->info_querymatch,
+      instances_ordered = esi->extend_relative_coords_function(
+                                                     &esi->info_querymatch,
                                                      &esi->plainsequence_info.
                                                        bseqorencseq,
                                                      bseqnum,
@@ -3576,39 +3610,46 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
             + tvalAfter.tv_usec - tvalBefore.tv_usec;
     }
 #endif
-    if (success)
+    if (instances_ordered)
     {
-      double evalue, bit_score;
-
       if (esi->querymatch_segment_buffer != NULL)
       {
-        const GtQuerymatch *querymatch
-          = esi->info_querymatch.querymatchspaceptr;
-
-        gt_assert(querymatch != NULL);
-        if (gt_querymatch_check_final(&evalue,
-                                      &bit_score,
-                                      esi->karlin_altschul_stat,
-                                      querymatch,
-                                      esi->userdefinedleastlength,
-                                      esi->errorpercentage,
-                                      esi->evalue_threshold))
+        for (mode = 0; mode <= 2; mode++)
         {
-          gt_querymatch_segment_buffer_add(
+          double evalue, bit_score;
+          const GtPreviousMatchStruct *previous_match
+            = gt_extend_seed_previous_match(mode,&esi->info_querymatch);
+          const GtQuerymatch *querymatchspaceptr
+            = gt_extend_seed_mode2querymatchspaceptr(mode,
+                                                     &esi->info_querymatch);
+
+          if (gt_querymatch_check_final(&evalue,
+                                        &bit_score,
+                                        esi->karlin_altschul_stat,
+                                        querymatchspaceptr,
+                                        esi->userdefinedleastlength,
+                                        esi->errorpercentage,
+                                        esi->evalue_threshold))
+          {
+            gt_querymatch_segment_buffer_add(
                               esi->querymatch_segment_buffer,
                               esi->accu_match_values_entry == NULL ? true
                                                                    : false,
-                              querymatch,
-                              esi->info_querymatch.previous_match_a_start,
-                              esi->info_querymatch.previous_match_a_end,
-                              esi->info_querymatch.previous_match_b_start,
-                              esi->info_querymatch.previous_match_b_end,
-                              esi->info_querymatch.previous_match_distance,
+                              querymatchspaceptr,
+                              previous_match->a_start,
+                              previous_match->a_end,
+                              previous_match->b_start,
+                              previous_match->b_end,
+                              previous_match->distance,
                               evalue,
                               bit_score);
-          ret = 3;
-        } else
+            ret = 3;
+            break;
+          }
+        }
+        if (mode > 2)
         {
+          gt_assert(ret == 1);
           ret = 2;
         }
       } else
@@ -3616,75 +3657,100 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
         if (esi->accu_match_values_entry != NULL)
         {
           const GtUword query_seqlen
-            = esi->plainsequence_info.bseqorencseq.seqlength,
-          aligned_len
-            = esi->info_querymatch.previous_match_a_end -
-              esi->info_querymatch.previous_match_a_start + 1 +
-              esi->info_querymatch.previous_match_b_end -
-              esi->info_querymatch.previous_match_b_start + 1;
-          if (gt_querymatch_check_final_generic(
-                                 &evalue,
-                                 &bit_score,
-                                 esi->karlin_altschul_stat,
-                                 query_seqlen,
-                                 aligned_len,
-                                 esi->info_querymatch.previous_match_distance,
-                                 esi->info_querymatch.previous_match_mismatches,
-                                 esi->userdefinedleastlength,
-                                 esi->errorpercentage,
-                                 esi->evalue_threshold,
-                                 stdout))
+            = esi->plainsequence_info.bseqorencseq.seqlength;
+
+          /* as we do not use gt_querymatch_check_final but the generic
+             function we do not check for the ordering of the matches. So
+             in case we have a self match, we need to require that the matches
+             are not in the same sequence, which is actually triggered by
+             the option -noinseqseeds, implied by -estim. If we would allow
+             matches on the same sequence in self comparison, we would
+             use more for determinng the estimation than we would if we
+             output the matches. Hence we add the following assertion. */
+          gt_assert(!esi->same_encseq || aseqnum != bseqnum);
+          for (mode = 0; mode <= 2; mode++)
           {
-            esi->accu_match_values_entry->sum_of_aligned_len += aligned_len;
-            esi->accu_match_values_entry->sum_of_distance
-              += esi->info_querymatch.previous_match_distance;
-            ret = 3;
-          } else
+            double evalue, bit_score;
+            const GtPreviousMatchStruct *previous_match
+              = gt_extend_seed_previous_match(mode,&esi->info_querymatch);
+
+            GtUword alignedlen = previous_match->a_end -
+                                 previous_match->a_start + 1 +
+                                 previous_match->b_end -
+                                 previous_match->b_start + 1;
+            if (gt_querymatch_check_final_generic(
+                                   &evalue,
+                                   &bit_score,
+                                   esi->karlin_altschul_stat,
+                                   query_seqlen,
+                                   alignedlen,
+                                   previous_match->distance,
+                                   previous_match->mismatches,
+                                   esi->userdefinedleastlength,
+                                   esi->errorpercentage,
+                                   esi->evalue_threshold))
+            {
+              esi->accu_match_values_entry->sum_of_alignedlen += alignedlen;
+              esi->accu_match_values_entry->sum_of_distance
+                += previous_match->distance;
+              ret = 3;
+              break;
+            }
+          }
+          if (mode > 2)
           {
+            gt_assert(ret == 1);
             ret = 2; /* found match, which does not satisfy length or similarity
                         constraints */
           }
-        } else
+        } else /* no ANI and no matching storing */
         {
-          const GtQuerymatch *querymatch
-            = esi->info_querymatch.querymatchspaceptr;
+          for (mode = 0; mode <= 2; mode++)
+          {
+            double evalue, bit_score;
+            const GtQuerymatch *querymatchspaceptr
+              = gt_extend_seed_mode2querymatchspaceptr(mode,
+                                                       &esi->info_querymatch);
 
-          /* show extension results */
-          gt_assert(querymatch != NULL);
-          if (gt_querymatch_check_final(&evalue,
-                                        &bit_score,
-                                        esi->karlin_altschul_stat,
-                                        querymatch,
-                                        esi->userdefinedleastlength,
-                                        esi->errorpercentage,
-                                        esi->evalue_threshold))
-          {
-            if (!esi->benchmark)
+            if (gt_querymatch_check_final(&evalue,
+                                          &bit_score,
+                                          esi->karlin_altschul_stat,
+                                          querymatchspaceptr,
+                                          esi->userdefinedleastlength,
+                                          esi->errorpercentage,
+                                          esi->evalue_threshold))
             {
-              if (gt_querymatch_gfa2_display(esi->out_display_flag))
+              if (!esi->benchmark)
               {
-                gt_assert(esi->dbs_state != NULL);
-                gt_querymatch_gfa2_edge(querymatch,
-                                        esi->dbs_state->
-                                             current_gfa2_edge_num);
-                esi->dbs_state->current_gfa2_edge_num++;
-                gt_bittab_set_bit(esi->dbs_state->used_a_sequences,
-                                  aseqnum);
-                gt_bittab_set_bit(
-                   esi->dbs_state->used_b_sequences != NULL
-                     ? esi->dbs_state->used_b_sequences
-                     : esi->dbs_state->used_a_sequences,
-                     bseqnum);
+                if (gt_querymatch_gfa2_display(esi->out_display_flag))
+                {
+                  gt_assert(esi->dbs_state != NULL);
+                  gt_querymatch_gfa2_edge(querymatchspaceptr,
+                                          esi->dbs_state->
+                                               current_gfa2_edge_num);
+                  esi->dbs_state->current_gfa2_edge_num++;
+                  gt_bittab_set_bit(esi->dbs_state->used_a_sequences,aseqnum);
+                  gt_bittab_set_bit(esi->dbs_state->used_b_sequences != NULL
+                                      ? esi->dbs_state->used_b_sequences
+                                      : esi->dbs_state->used_a_sequences,
+                                      bseqnum);
+                }
+                gt_querymatch_prettyprint(evalue,bit_score,
+                                          esi->out_display_flag,
+                                          querymatchspaceptr);
               }
-              gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
-                                        querymatch);
+              ret = 3; /* output match */
+              break;
             }
-            ret = 3; /* output match */
-          } else
+          }
+          gt_assert(ret == 1 || ret == 3);
+          if (ret != 3)
           {
             if (!esi->benchmark)
             {
-              gt_querymatch_show_failed_seed(esi->out_display_flag,querymatch);
+              gt_querymatch_show_failed_seed(esi->out_display_flag,
+                                             esi->info_querymatch.
+                                             querymatchspaceptr);
             }
             ret = 2; /* found match, which does not satisfy length or similarity
                         constraints */
@@ -3692,7 +3758,8 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
         }
       }
     }
-    /* else reference and query are the same sequence and overlap so that
+    /* !instances_ordered:
+       else reference and query are the same sequence and overlap so that
        no extension was performed */
   }
   return ret;
@@ -4136,12 +4203,12 @@ static void gt_diagbandseed_segment2matches(
           GtDiagbandseedRectangle newrectangle;
 
           newrectangle.a_start
-            = esi->info_querymatch.previous_match_a_start;
-          newrectangle.a_end = esi->info_querymatch.previous_match_a_end;
+            = esi->info_querymatch.previous_match.a_start;
+          newrectangle.a_end = esi->info_querymatch.previous_match.a_end;
           newrectangle.b_start
-            = esi->info_querymatch.previous_match_b_start;
+            = esi->info_querymatch.previous_match.b_start;
           newrectangle.b_end
-            = esi->info_querymatch.previous_match_b_end;
+            = esi->info_querymatch.previous_match.b_end;
 #ifdef SKDEBUG
           if (esi->debug)
           {

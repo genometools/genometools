@@ -19,22 +19,21 @@ end
 reference=File.basename(referencefile)
 seedlength=14
 maxfreq=21
-gtbin=ENV["GTINSTALL"] + "/bin/gt"
+gtbin="env -i " + ENV["GTDIR"] + "/bin/gt"
 
 if not queryfile.nil?
   query=File.name(queryfile)
   outputprefix="#{reference}-#{query}"
 else
   query=reference
-  outputprefix=reference
+  outputprefix="#{reference}-#{minlen}-#{minidentity}"
 end
 
-encode_opts="-sds no -md5 no -des no -smap TransDNAlowermask"
-puts "/local/kurtz/genometools.niehus/bin/gt encseq encode -dust #{encode_opts} " +
+puts "#{gtbin} encseq encode " +
      "-indexname #{reference} #{referencefile}"
 
 if not queryfile.nil?
-  puts "/local/kurtz/genometools.niehus/bin/gt encseq encode #{encode_opts} -indexname #{query} #{queryfile}"
+  puts "#{gtbin} encseq encode -indexname #{query} #{queryfile}"
   qiioption="-qii #{query}"
 else
   qiioption=""
@@ -43,7 +42,7 @@ end
 puts "#{gtbin} seed_extend -ii #{reference} #{qiioption} " +
      "-l #{minlen} -seedlength 14 -diagbandwidth 6 " +
      "-minidentity #{minidentity} -v -overlappingseeds -bias-parameters " +
-     "-no-reverse -history 60 > #{outputprefix}-se.matches"
+     "-history 60 > #{outputprefix}-se.matches"
 
 # note that the following script randomly replaces wildcards by
 # characters over the base alphabet. So for the same sequence and parameters
@@ -65,7 +64,7 @@ if not queryfile.nil?
 end
 
 puts "scripts/rdj-spacepeak.sh -hashmark #{myersprog}/DALIGNER/daligner " +
-     "-t#{maxfreq} -I -A -Y -e0.#{minidentity} -k#{seedlength} -l#{minlen} " +
+     "-I -A -Y -e0.#{minidentity} -k#{seedlength} -l#{minlen} " +
      "#{query}.db #{reference}.db > tmp-da.matches"
 
 puts "head -n 1 tmp-da.matches > #{outputprefix}-da.matches"

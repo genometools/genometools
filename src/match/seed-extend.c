@@ -207,30 +207,62 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
          GT_WU "\n",sesp->queryseqnum,sesp->query_seqstart,sesp->query_seqlen);
 }
 
-static bool gt_combine_extensions(
+typedef enum
+{
+  GT_EXTENSION_COMBINE_BOTH,
+  GT_EXTENSION_COMBINE_ONLY_LEFT,
+  GT_EXTENSION_COMBINE_ONLY_RIGHT
+} GtExtensionCombination;
+
+static GtUword gt_combine_extensions(
          bool forxdrop,
-         GtProcessinfo_and_querymatchspaceptr *info_querymatch,
+         GtExtensionCombination mode,
+         GtQuerymatch *querymatchspaceptr,
+         GtPreviousMatchStruct *previous_match,
+         const GtSeedExtendDisplayFlag *out_display_flag,
          const GtSeqorEncseq *dbes,
          const GtSeqorEncseq *queryes,
          const GtSeedextendSeqpair *sesp,
          GtUword u_left_ext,
          GtUword v_left_ext,
+         GtXdropscore left_score,
+         GtUword left_distance,
+         GtUword left_mismatches,
+         GtXdropscore seed_score,
          GtUword u_right_ext,
          GtUword v_right_ext,
-         GtXdropscore total_score,
-         GtUword total_distance,
-         GtUword total_mismatches)
+         GtXdropscore right_score,
+         GtUword right_distance,
+         GtUword right_mismatches)
 {
-  GtUword dblen, querylen, total_alignedlen;
+  GtUword dblen, querylen, total_alignedlen, total_distance, total_mismatches;
+  GtXdropscore total_score;
+
+  if (mode == GT_EXTENSION_COMBINE_ONLY_LEFT)
+  {
+    u_right_ext = v_right_ext = right_distance = right_mismatches = 0;
+    right_score = 0;
+  } else
+  {
+    if (mode == GT_EXTENSION_COMBINE_ONLY_RIGHT)
+    {
+      u_left_ext = v_left_ext = left_distance = left_mismatches = 0;
+      left_score = 0;
+    }
+  }
 
   dblen = sesp->seedlength + u_left_ext + u_right_ext;
   querylen = sesp->seedlength + v_left_ext + v_right_ext;
   total_alignedlen = dblen + querylen;
   if (forxdrop)
   {
+    total_score = seed_score + left_score + right_score;
     total_distance = gt_querymatch_score2distance(total_score,total_alignedlen);
+    total_mismatches = 0;
   } else
   {
+    total_distance = left_distance + right_distance;
+    total_mismatches = left_mismatches + right_mismatches;
     total_score = gt_querymatch_distance2score(total_distance,total_alignedlen);
   }
   gt_assert(sesp->dbstart_relative >= u_left_ext &&
@@ -241,22 +273,18 @@ static bool gt_combine_extensions(
          GT_WU ", err=%.2f\n",total_distance,total_score,total_alignedlen,
           gt_querymatch_error_percentage(total_distance,total_alignedlen));
 #endif
-  info_querymatch->previous_match_a_start
-    = sesp->dbstart_relative - u_left_ext;
-  info_querymatch->previous_match_a_end
-    = info_querymatch->previous_match_a_start + dblen - 1;
-  info_querymatch->previous_match_b_start
-    = sesp->querystart_relative - v_left_ext;
-  info_querymatch->previous_match_b_end
-    = info_querymatch->previous_match_b_start + querylen - 1;
-  info_querymatch->previous_match_distance = total_distance;
-  info_querymatch->previous_match_mismatches = total_mismatches;
-  if (info_querymatch->querymatchspaceptr == NULL ||
-      gt_querymatch_complete(info_querymatch->querymatchspaceptr,
-                             info_querymatch->out_display_flag,
+  previous_match->a_start = sesp->dbstart_relative - u_left_ext;
+  previous_match->a_end = previous_match->a_start + dblen - 1;
+  previous_match->b_start = sesp->querystart_relative - v_left_ext;
+  previous_match->b_end = previous_match->b_start + querylen - 1;
+  previous_match->distance = total_distance;
+  previous_match->mismatches = total_mismatches;
+  if (querymatchspaceptr == NULL ||
+      gt_querymatch_complete(querymatchspaceptr,
+                             out_display_flag,
                              dblen,
                              sesp->dbseqnum,
-                             info_querymatch->previous_match_a_start,
+                             previous_match->a_start,
                              sesp->db_seqstart,
                              sesp->dbseqlength,
                              (GtWord) total_score,
@@ -265,7 +293,7 @@ static bool gt_combine_extensions(
                              sesp->same_encseq,
                              sesp->queryseqnum,
                              querylen,
-                             info_querymatch->previous_match_b_start,
+                             previous_match->b_start,
                              dbes,
                              queryes,
                              sesp->query_seqstart,
@@ -276,9 +304,9 @@ static bool gt_combine_extensions(
                              false)) /* greedyextension */
                              /*forxdrop ? false : true*/
   {
-    return true;
+    return total_alignedlen;
   }
-  return false;
+  return 0;
 }
 
 #ifdef SKDEBUG
@@ -967,14 +995,16 @@ static bool gt_extend_sesp(bool forxdrop,
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtXdropmatchinfo *xdropmatchinfo = NULL;
-  GtUword u_left_ext, v_left_ext, u_right_ext, v_right_ext, r_urightbound;
-  GtXdropscore total_score = 0;
+  GtUword u_left_ext, v_left_ext, u_right_ext, v_right_ext, r_urightbound,
+          total_alignedlen[3] = {0};
+  GtXdropscore seed_score = 0;
   GtFTsequenceResources ufsr, vfsr;
   GtFtPolished_point left_best_polished_point = {0,0,0,0,0},
                      right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;
   const GtUword vseqstartpos = queryes->encseq != NULL
                                   ? sesp->query_seqstart : 0;
+  int mode;
 
   if (sesp->same_encseq && sesp->dbseqnum == sesp->queryseqnum &&
       sesp->dbstart_relative + sesp->seedlength - 1 >=
@@ -1185,10 +1215,8 @@ static bool gt_extend_sesp(bool forxdrop,
     extensioncoords_show(true,rightextension,u_right_ext,v_right_ext,
                          xdropmatchinfo->best_right.score);
 #endif
-    total_score
-      = (GtXdropscore) sesp->seedlength * xdropmatchinfo->arbitscores.mat +
-        xdropmatchinfo->best_left.score +
-        xdropmatchinfo->best_right.score;
+    seed_score = (GtXdropscore) sesp->seedlength *
+                 xdropmatchinfo->arbitscores.mat;
   } else
   {
     u_right_ext = right_best_polished_point.row;
@@ -1207,21 +1235,87 @@ static bool gt_extend_sesp(bool forxdrop,
                 left_best_polished_point.distance);
     }
   }
-  return gt_combine_extensions(
-                 forxdrop,
-                 info_querymatch,
-                 dbes,
-                 queryes,
-                 sesp,
-                 u_left_ext,
-                 v_left_ext,
-                 u_right_ext,
-                 v_right_ext,
-                 forxdrop ? total_score : 0,
-                 forxdrop ? 0 : (left_best_polished_point.distance +
-                                 right_best_polished_point.distance),
-                 forxdrop ? 0 : (left_best_polished_point.max_mismatches +
-                                 right_best_polished_point.max_mismatches));
+  for (mode = 0; mode <= 2; mode++)
+  {
+    GtQuerymatch *querymatchspaceptr
+      = gt_extend_seed_mode2querymatchspaceptr(mode,info_querymatch);
+    GtPreviousMatchStruct *previous_match
+      = gt_extend_seed_previous_match(mode,info_querymatch);
+
+    total_alignedlen[mode]
+      = gt_combine_extensions(
+                       forxdrop,
+                       mode,
+                       querymatchspaceptr,
+                       previous_match,
+                       info_querymatch->out_display_flag,
+                       dbes,
+                       queryes,
+                       sesp,
+                       u_left_ext,
+                       v_left_ext,
+                       forxdrop ? xdropmatchinfo->best_left.score : 0,
+                       left_best_polished_point.distance,
+                       left_best_polished_point.max_mismatches,
+                       seed_score,
+                       u_right_ext,
+                       v_right_ext,
+                       forxdrop ? xdropmatchinfo->best_right.score : 0,
+                       right_best_polished_point.distance,
+                       right_best_polished_point.max_mismatches);
+    if (total_alignedlen[mode] > 0)
+    {
+      double evalue, bit_score;
+
+      if (gt_querymatch_check_final_generic(
+                               &evalue,
+                               &bit_score,
+                               info_querymatch->karlin_altschul_stat,
+                               sesp->query_seqlen,
+                               total_alignedlen[mode],
+                               previous_match->distance,
+                               previous_match->mismatches,
+                               info_querymatch->userdefinedleastlength,
+                               info_querymatch->errorpercentage,
+                               info_querymatch->evalue_threshold))
+      {
+        break;
+      }
+    }
+  }
+  return (total_alignedlen[GT_EXTENSION_COMBINE_BOTH] > 0) ? true : false;
+}
+
+GtQuerymatch *gt_extend_seed_mode2querymatchspaceptr(
+                    int mode,
+                    const GtProcessinfo_and_querymatchspaceptr *info_querymatch)
+{
+  if (mode == GT_EXTENSION_COMBINE_BOTH)
+  {
+    return info_querymatch->querymatchspaceptr;
+  }
+  if (mode == GT_EXTENSION_COMBINE_ONLY_LEFT)
+  {
+    return info_querymatch->querymatchspaceptr_only_left;
+  }
+  gt_assert(mode == GT_EXTENSION_COMBINE_ONLY_RIGHT);
+  return info_querymatch->querymatchspaceptr_only_right;
+}
+
+GtPreviousMatchStruct *gt_extend_seed_previous_match(
+                    int mode,
+                    GtProcessinfo_and_querymatchspaceptr *info_querymatch)
+{
+  if (mode == GT_EXTENSION_COMBINE_BOTH)
+  {
+    return &info_querymatch->previous_match;
+  }
+  if (mode == GT_EXTENSION_COMBINE_ONLY_LEFT)
+  {
+    return &info_querymatch->previous_match_only_left;
+  }
+  gt_assert(mode == GT_EXTENSION_COMBINE_ONLY_RIGHT);
+  return &info_querymatch->previous_match_only_right;
 }
 
 static bool gt_extend_seed_relative(bool forxdrop,
@@ -1337,7 +1431,8 @@ static void gt_rf_seed_extend_prettyprint(bool forxdrop,void *info)
     errorpercentage = ggemi->errorpercentage;
     evalue_threshold = ggemi->evalue_threshold;
   }
-  if (gt_querymatch_check_final(&evalue,
+  if (gt_querymatch_ordered(info_querymatch->querymatchspaceptr) &&
+      gt_querymatch_check_final(&evalue,
                                 &bit_score,
                                 info_querymatch->karlin_altschul_stat,
                                 info_querymatch->querymatchspaceptr,

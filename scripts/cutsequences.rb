@@ -14,7 +14,7 @@ def cutsinglesequence(sequence,header,maxnumber,minlength,
     pos += maxlength
     remaininglength -= maxlength
     count += 1
-    if count >= maxnumber
+    if not maxnumber.nil? and count >= maxnumber
       break
     end
   end
@@ -37,7 +37,7 @@ def cutsequences(inputfile,maxnumber,minlength,maxlength)
         puts ">#{header}"
         print_sequence(sequence,linelength)
       end
-      if count >= maxnumber
+      if not maxnumber.nil? and count >= maxnumber
         break
       end
     end
@@ -51,11 +51,11 @@ if __FILE__ == "#{$0}"
   end
   inputfile = ARGV[0]
   if ARGV[1] == "all"
-    maxnumber = INT_MAX
+    maxnumber = nil
   else
     maxnumber = ARGV[1].to_i
   end
   minlength = ARGV[2].to_i
   maxlength = ARGV[3].to_i
-  cutsequences(inputfile,minlength,maxlength)
+  cutsequences(inputfile,maxnumber,minlength,maxlength)
 end

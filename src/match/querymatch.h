@@ -131,6 +131,8 @@ void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
                                        *out_display_flag,
                                     const GtQuerymatch *querymatch);
 
+bool gt_querymatch_ordered(const GtQuerymatch *querymatch);
+
 bool gt_querymatch_check_final(double *evalue_ptr,
                                double *bit_score_ptr,
                                const GtKarlinAltschulStat *karlin_altschul_stat,
@@ -149,8 +151,7 @@ bool gt_querymatch_check_final_generic(
                                GtUword mismatches,
                                GtUword userdefinedleastlength,
                                GtUword errorpercentage,
-                               double evalue_threshold,
-                               GT_UNUSED FILE *fp);
+                               double evalue_threshold);
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode);
