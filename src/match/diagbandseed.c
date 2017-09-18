@@ -74,7 +74,9 @@ typedef struct { /* 8 + 4 + 4 bytes */
 typedef struct
 {
   GtBitcount_type bits_kmerpos, /* sum of code_bits, bits_seqnum, bits_endpos */
-                  code_bits;
+                  code_bits,
+                  bits_seqnum,
+                  bits_endpos;
   size_t bytes_kmerpos;
   GtUword first_seqnum, transfer_mask, b_endpos_mask;
   GtCodetype mask_seqnum, mask_endpos;
@@ -1268,6 +1270,8 @@ static GtKmerPosListEncodeInfo *gt_kmerpos_encode_info_new(
     GtUword seqrange_start = gt_sequence_parts_info_start_get(seqranges,idx);
 
     encode_info->bits_kmerpos = code_bits + bits_seqnum + bits_endpos;
+    encode_info->bits_seqnum = bits_seqnum;
+    encode_info->bits_endpos = bits_endpos;
     encode_info->bytes_kmerpos = bytes_kmerpos;
     encode_info->first_seqnum = seqrange_start;
     encode_info->code_shift = gt_uword_bits - code_bits;
@@ -1431,23 +1435,25 @@ static GtKmerPosList *gt_diagbandseed_get_kmers(
   }
   kmerpos_list = gt_kmerpos_list_new(kmerpos_list_len,encode_info);
   if (verbose) {
-    GtBitcount_type bits_kmerpos;
-
+    fprintf(stream, "# start fetching %u-mers",seedlength);
     if (encode_info != NULL)
     {
-      bits_kmerpos = encode_info->bits_kmerpos;
+      fprintf(stream, " (%hu=%hu+%hu+%hu bits=",
+                       encode_info->bits_kmerpos,
+                       encode_info->code_bits,
+                       encode_info->bits_seqnum,
+                       encode_info->bits_endpos);
     } else
     {
-      bits_kmerpos = sizeof (GtDiagbandseedKmerPos) * CHAR_BIT;
+      fprintf(stream," (" GT_WU " bits=",
+                       (GtUword) sizeof (GtDiagbandseedKmerPos) * CHAR_BIT);
     }
-    fprintf(stream, "# start fetching %u-mers (%hu bits/" GT_WU " bytes each, "
-                    "expect " GT_WU ", allocate %.0f MB) ...\n",
-            seedlength,
-            bits_kmerpos,
-            (GtUword) gt_kmerpos_list_elem_size(encode_info),
-            kmerpos_list_len,
-            GT_MEGABYTES(kmerpos_list_len *
-                         gt_kmerpos_list_elem_size(encode_info)));
+    fprintf(stream,GT_WU " bytes each, expect " GT_WU
+                   ", allocate %.0f MB) ...\n",
+               (GtUword) gt_kmerpos_list_elem_size(encode_info),
+               kmerpos_list_len,
+               GT_MEGABYTES(kmerpos_list_len *
+                            gt_kmerpos_list_elem_size(encode_info)));
     timer = gt_timer_new();
     gt_timer_start(timer);
   }
