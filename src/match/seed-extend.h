@@ -107,6 +107,7 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          double evalue_threshold,
                                          GtXdropscore xdropbelowscore,
+                                         int max_combine_mode,
                                          GtUword sensitivity);
 
 /* reset seqabstract objects for a new run */
@@ -215,6 +216,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtExtendCharAccess b_extend_char_access,
                                    bool cam_generic,
                                    GtUword sensitivity,
+                                   int max_combine_mode,
                                    const GtFtPolishing_info *pol_info);
 
 /* the destructor-method for the gven object. */

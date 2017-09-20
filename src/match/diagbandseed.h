@@ -119,6 +119,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool always_polished_ends,
                                 bool verify_alignment,
                                 bool only_selected_seqpairs,
+                                int max_combine_mode,
                                 GtAccumulateMatchValues *accu_match_values);
 
 int gt_diagbandseed_derive_maxmat_show(GtUword maxmat);

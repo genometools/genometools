@@ -95,7 +95,7 @@ typedef struct {
   GtStr *estimation_mode;
   bool snd_pass;
   bool delta_filter;
-  bool noinseqseeds;
+  bool noinseqseeds, no_combine_left_right;
   GtUword maxmat;
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
   GtOption *se_ref_op_evalue,
@@ -562,10 +562,21 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_estim, op_outfmt);
   gt_option_parser_add_option(op, op_estim);
 
+  /* -noinseqseeds */
   option = gt_option_new_bool("noinseqseeds",
                               "ignore seeds that are in same sequence"
                               "(triggered by option -estim)",
                               &arguments->noinseqseeds,false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -no_co_only_lr */
+  option = gt_option_new_bool("no_co_only_lr",
+                              "do not try to combine only left or only right "
+                              "extension of seed, if combination of both left"
+                              " and right extension does not satisfy the "
+                              "minimum identity constraint",
+                              &arguments->no_combine_left_right,false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -1294,6 +1305,9 @@ static int gt_seed_extend_runner(int argc,
                                              !arguments->relax_polish,
                                              arguments->verify_alignment,
                                              arguments->only_selected_seqpairs,
+                                             arguments->no_combine_left_right
+                                               ? 0
+                                               : 2,
                                              accu_match_values);
 
     info = gt_diagbandseed_info_new(aencseq,

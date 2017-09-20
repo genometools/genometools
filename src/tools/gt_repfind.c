@@ -847,6 +847,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
                                             arguments->minidentity),
                                arguments->evalue_threshold,
                                arguments->xdropbelowscore,
+                               2,
                                arguments->extendxdrop);
     gt_assert(xdropmatchinfo != NULL);
   }
@@ -883,6 +884,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
                                        cam_b,
                                        false,
                                        arguments->extendgreedy,
+                                       2,
                                        pol_info);
     if (arguments->check_extend_symmetry)
     {

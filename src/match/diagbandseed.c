@@ -169,6 +169,7 @@ struct GtDiagbandseedExtendParams
   double matchscore_bias;
   GtUword use_apos;
   GtAccumulateMatchValues *accu_match_values;
+  int max_combine_mode;
   bool extendgreedy,
        extendxdrop,
        weakends,
@@ -707,6 +708,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool always_polished_ends,
                                 bool verify_alignment,
                                 bool only_selected_seqpairs,
+                                int max_combine_mode,
                                 GtAccumulateMatchValues *accu_match_values)
 {
   GtDiagbandseedExtendParams *extp = gt_malloc(sizeof *extp);
@@ -733,6 +735,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->always_polished_ends = always_polished_ends;
   extp->verify_alignment = verify_alignment;
   extp->only_selected_seqpairs = only_selected_seqpairs;
+  extp->max_combine_mode = max_combine_mode;
   extp->accu_match_values = accu_match_values;
   return extp;
 }
@@ -3358,6 +3361,7 @@ typedef struct
   GtAniAccumulateEntry **accu_match_values_matrix,
                        *accu_match_values_entry;
   GtDiagbandseedState *dbs_state;
+  int max_combine_mode;
 } GtDiagbandseedExtendSegmentInfo;
 
 static void gt_diagbandseed_info_qm_set(
@@ -3513,6 +3517,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   {
     esi->accu_match_values_matrix = NULL;
   }
+  esi->max_combine_mode = extp->max_combine_mode;
   return esi;
 }
 
@@ -3636,7 +3641,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     {
       if (esi->querymatch_segment_buffer != NULL)
       {
-        for (mode = 0; mode <= 2; mode++)
+        for (mode = 0; mode <= esi->max_combine_mode; mode++)
         {
           double evalue, bit_score;
           const GtPreviousMatchStruct *previous_match
@@ -3669,7 +3674,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
             break;
           }
         }
-        if (mode > 2)
+        if (mode > esi->max_combine_mode)
         {
           gt_assert(ret == 1);
           ret = 2;
@@ -3690,7 +3695,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
              use more for determinng the estimation than we would if we
              output the matches. Hence we add the following assertion. */
           gt_assert(!esi->same_encseq || aseqnum != bseqnum);
-          for (mode = 0; mode <= 2; mode++)
+          for (mode = 0; mode <= esi->max_combine_mode; mode++)
           {
             double evalue, bit_score;
             const GtPreviousMatchStruct *previous_match
@@ -3719,7 +3724,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
               break;
             }
           }
-          if (mode > 2)
+          if (mode > esi->max_combine_mode)
           {
             gt_assert(ret == 1);
             ret = 2; /* found match, which does not satisfy length or similarity
@@ -3727,7 +3732,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
           }
         } else /* no ANI and no matching storing */
         {
-          for (mode = 0; mode <= 2; mode++)
+          for (mode = 0; mode <= esi->max_combine_mode; mode++)
           {
             double evalue, bit_score;
             const GtQuerymatch *querymatchspaceptr
@@ -5284,6 +5289,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                  extp->b_extend_char_access,
                                                  extp->cam_generic,
                                                  extp->sensitivity,
+                                                 extp->max_combine_mode,
                                                  pol_info);
       if (trimstat != NULL)
       {
@@ -5297,6 +5303,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                          extp->errorpercentage,
                                          extp->evalue_threshold,
                                          extp->xdropbelowscore,
+                                         extp->max_combine_mode,
                                          extp->sensitivity);
       processinfo = (void *) xdropinfo;
     }

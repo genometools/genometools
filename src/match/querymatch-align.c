@@ -149,6 +149,7 @@ void gt_querymatchoutoptions_extend(
                                        b_extend_char_access,
                                        cam_generic,
                                        sensitivity,
+                                       0,
                                        querymatchoutoptions->pol_info);
     if (always_polished_ends)
     {

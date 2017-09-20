@@ -47,6 +47,7 @@ struct GtXdropmatchinfo
   GtUword userdefinedleastlength,
           errorpercentage;
   double evalue_threshold;
+  int max_combine_mode;
 };
 
 #include "match/seed-extend-params.h"
@@ -62,6 +63,7 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          double evalue_threshold,
                                          GtXdropscore xdropbelowscore,
+                                         int max_combine_mode,
                                          GtUword sensitivity)
 {
   GtXdropmatchinfo *xdropmatchinfo = gt_malloc(sizeof *xdropmatchinfo);
@@ -84,6 +86,7 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   {
     xdropmatchinfo->belowscore = xdropbelowscore;
   }
+  xdropmatchinfo->max_combine_mode = max_combine_mode;
   return xdropmatchinfo;
 }
 
@@ -462,6 +465,7 @@ struct GtGreedyextendmatchinfo
        db_haswildcards,
        query_haswildcards,
        cam_generic;
+  int max_combine_mode;
 };
 
 static void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
@@ -552,6 +556,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtExtendCharAccess query_extend_char_access,
                                    bool cam_generic,
                                    GtUword sensitivity,
+                                   int max_combine_mode,
                                    const GtFtPolishing_info *pol_info)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
@@ -590,6 +595,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->db_haswildcards = true;
   ggemi->query_haswildcards = true;
   ggemi->cam_generic = cam_generic;
+  ggemi->max_combine_mode = max_combine_mode;
   return ggemi;
 }
 
@@ -1004,7 +1010,7 @@ static bool gt_extend_sesp(bool forxdrop,
   const bool rightextension = true;
   const GtUword vseqstartpos = queryes->encseq != NULL
                                   ? sesp->query_seqstart : 0;
-  int mode;
+  int mode, max_combine_mode;
 
   if (sesp->same_encseq && sesp->dbseqnum == sesp->queryseqnum &&
       sesp->dbstart_relative + sesp->seedlength - 1 >=
@@ -1021,6 +1027,7 @@ static bool gt_extend_sesp(bool forxdrop,
     xdropmatchinfo->best_right.ivalue = 0;
     xdropmatchinfo->best_right.jvalue = 0;
     xdropmatchinfo->best_right.score = 0;
+    max_combine_mode = xdropmatchinfo->max_combine_mode;
   } else
   {
     greedyextendmatchinfo = info_querymatch->processinfo;
@@ -1031,6 +1038,7 @@ static bool gt_extend_sesp(bool forxdrop,
                           sesp->query_readmode,
                           sesp->query_seqlen,
                           greedyextendmatchinfo);
+    max_combine_mode = greedyextendmatchinfo->max_combine_mode;
   }
   if (sesp->dbstart_relative > 0 && sesp->querystart_relative > 0)
   { /* there is something to align on the left of the seed */
@@ -1235,7 +1243,7 @@ static bool gt_extend_sesp(bool forxdrop,
                 left_best_polished_point.distance);
     }
   }
-  for (mode = 0; mode <= 2; mode++)
+  for (mode = 0; mode <= max_combine_mode; mode++)
   {
     GtQuerymatch *querymatchspaceptr
       = gt_extend_seed_mode2querymatchspaceptr(mode,info_querymatch);
