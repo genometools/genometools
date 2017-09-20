@@ -148,7 +148,8 @@ struct GtDiagbandseedInfo
        trimstat_on,
        snd_pass,
        delta_filter,
-       inseqseeds;
+       inseqseeds,
+       onlykmers;
 };
 
 struct GtDiagbandseedExtendParams
@@ -424,6 +425,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool snd_pass,
                                              bool delta_filter,
                                              bool inseqseeds,
+                                             bool onlykmers,
                                              const GtDiagbandseedExtendParams
                                                *extp)
 {
@@ -464,6 +466,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->snd_pass = snd_pass;
   info->delta_filter = delta_filter;
   info->inseqseeds = inseqseeds;
+  info->onlykmers = onlykmers;
   info->extp = extp;
   return info;
 }
@@ -5041,6 +5044,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
 
   gt_assert(arg != NULL);
+  if (arg->onlykmers)
+  {
+    return 0;
+  }
   aencode_info = gt_kmerpos_encode_info_new(arg->kmplt,
                                             a_numofchars,
                                             arg->spacedseedweight,

@@ -72,6 +72,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool snd_pass,
                                              bool delta_filter,
                                              bool inseqseeds,
+                                             bool onlykmers,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 

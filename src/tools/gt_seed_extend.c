@@ -95,7 +95,7 @@ typedef struct {
   GtStr *estimation_mode;
   bool snd_pass;
   bool delta_filter;
-  bool noinseqseeds, no_combine_left_right;
+  bool noinseqseeds, no_combine_left_right, onlykmers;
   GtUword maxmat;
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
   GtOption *se_ref_op_evalue,
@@ -570,6 +570,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -onlykmers */
+  option = gt_option_new_bool("onlykmers",
+                              "only computer .kmer files and stop computation",
+                              &arguments->onlykmers,false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -no_co_only_lr */
   option = gt_option_new_bool("no_co_only_lr",
                               "do not try to combine only left or only right "
@@ -794,6 +801,12 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   {
     gt_str_set(arguments->diagband_statistics_arg,"");
   }
+  if (arguments->onlykmers && !arguments->use_kmerfile)
+  {
+    gt_error_set(err, "options -onlykmers and '-kmerfile no' exclude "
+                      "each other");
+    had_err = -1;
+  }
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
@@ -874,7 +887,8 @@ static int gt_seed_extend_runner(int argc,
                                    arguments->se_historysize);
       if (gt_str_length(arguments->estimation_mode) == 0 &&
           !arguments->onlyseeds &&
-          !gt_diagbandseed_derive_maxmat_show(arguments->maxmat))
+          !gt_diagbandseed_derive_maxmat_show(arguments->maxmat) &&
+          !arguments->onlykmers)
       {
         gt_querymatch_Fields_output(stdout,out_display_flag);
       }
@@ -1335,6 +1349,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->snd_pass,
                                     arguments->delta_filter,
                                     !arguments->noinseqseeds,
+                                    arguments->onlykmers,
                                     extp);
 
     /* Start algorithm */
