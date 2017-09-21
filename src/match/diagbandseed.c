@@ -3042,11 +3042,21 @@ static void gt_diagbandseed_dbs_state_update(GtDiagbandseedState *dbs_state,
 }
 
 static void gt_diagbandseed_dbs_state_out(const GtDiagbandseedState *dbs_state,
-                                          int maxmat_show)
+                                          int maxmat_show,
+                                          bool snd_pass)
 {
   printf("# total number of seeds: " GT_WU,dbs_state->totalseeds);
   if (!maxmat_show && dbs_state->totalseeds > 0)
   {
+    GtUword seqpairs_with_minsegment;
+
+    if (snd_pass)
+    {
+      seqpairs_with_minsegment = dbs_state->seqpairs_with_minsegment / 2;
+    } else
+    {
+      seqpairs_with_minsegment = dbs_state->seqpairs_with_minsegment;
+    }
     printf("; " GT_WU ", i.e. %.2f%% of all seeds were filtered by "
                    "diagonal score"
                    "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
@@ -3064,9 +3074,8 @@ static void gt_diagbandseed_dbs_state_out(const GtDiagbandseedState *dbs_state,
             dbs_state->failedmatches);
     printf( "# sequence pairs with selected seeds: " GT_WU
                     " (%.2f%% of all " GT_WU ")\n",
-            dbs_state->seqpairs_with_minsegment,
-            100.0 * (double) dbs_state->seqpairs_with_minsegment/
-                             dbs_state->totalseqpairs,
+            seqpairs_with_minsegment,
+            100.0 * (double) seqpairs_with_minsegment/dbs_state->totalseqpairs,
             dbs_state->totalseqpairs);
   } else
   {
@@ -6125,7 +6134,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     const int maxmat_show = gt_diagbandseed_derive_maxmat_show(arg->maxmat);
 
     gt_assert(dbs_state != NULL);
-    gt_diagbandseed_dbs_state_out(dbs_state,maxmat_show);
+    gt_diagbandseed_dbs_state_out(dbs_state,maxmat_show,arg->snd_pass);
 #ifndef _WIN32
     gt_diagbandseed_process_seeds_times(
                  arg->extp->extendgreedy,
