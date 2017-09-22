@@ -368,9 +368,11 @@ bool gt_querymatch_ordered(const GtQuerymatch *querymatch)
                 : querymatch->querystart)))) ? true : false;
 }
 
-static double gt_querymatch_similarity(GtUword distance,GtUword aligned_len)
+static double gt_querymatch_similarity(const GtQuerymatch *querymatch)
 {
-  return 100.0 - gt_querymatch_error_percentage(distance,aligned_len);
+  return 100.0 -
+         gt_querymatch_error_percentage(querymatch->distance,
+                                        gt_querymatch_aligned_len(querymatch));
 }
 
 static int gt_non_white_space_prefix_length(const char *s)
@@ -617,10 +619,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
           {
             fprintf(querymatch->fp,"ID:f:");
           }
-          fprintf(querymatch->fp,"%.2f",
-                  gt_querymatch_similarity(
-                       querymatch->distance,
-                       gt_querymatch_aligned_len(querymatch)));
+          fprintf(querymatch->fp,"%.2f",gt_querymatch_similarity(querymatch));
         }
         break;
       case Gt_Seed_len_display:
@@ -716,6 +715,17 @@ void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
             querymatch->queryseqnum,
             separator,
             querymatch->query_seedpos_rel);
+  }
+}
+
+void gt_querymatch_stat_failed_seed(GtUword userdefinedleastlength,
+                                    const GtQuerymatch *querymatch)
+{
+  if (gt_querymatch_aligned_len(querymatch) >= 2 * userdefinedleastlength)
+  {
+    fprintf(querymatch->fp,"# failed_minid " GT_WU " %.2f\n",
+            gt_querymatch_aligned_len(querymatch)/2,
+            gt_querymatch_similarity(querymatch));
   }
 }
 

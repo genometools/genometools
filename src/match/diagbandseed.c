@@ -3789,7 +3789,10 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
             {
               gt_querymatch_show_failed_seed(esi->out_display_flag,
                                              esi->info_querymatch.
-                                             querymatchspaceptr);
+                                                   querymatchspaceptr);
+              /*gt_querymatch_stat_failed_seed(esi->userdefinedleastlength,
+                                             esi->info_querymatch.
+                                                   querymatchspaceptr);*/
             }
             ret = 2; /* found match, which does not satisfy length or similarity
                         constraints */

@@ -131,6 +131,9 @@ void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
                                        *out_display_flag,
                                     const GtQuerymatch *querymatch);
 
+void gt_querymatch_stat_failed_seed(GtUword userdefinedlieastlength,
+                                    const GtQuerymatch *querymatch);
+
 bool gt_querymatch_ordered(const GtQuerymatch *querymatch);
 
 bool gt_querymatch_check_final(double *evalue_ptr,
