@@ -39,7 +39,7 @@ Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -ani"
-  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani-at1MB-U8.txt"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}/see-ext-ani-at1MB-U8.txt"
 end
 
 Name "gt seed_extend: blast like output"
@@ -51,12 +51,12 @@ Test do
   options = "-ii subject -evalue 0.01 -outfmt alignment blast -seedlength 12 -minidentity 75"
   ["fwd","rev"].each do |direction|
     run_test "#{$bin}/gt seed_extend #{options} -qii query-#{direction}"
-    run "diff -I '^#' #{last_stdout} #{$testdata}/query-#{direction}.match"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}/query-#{direction}.match"
   end
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test "#{$bin}/gt seed_extend -seedlength 12 -mincoverage 350 -diagbandwidth 3 -outfmt blast -ii at1MB"
   run_test "#{$bin}/gt matchtool -type BLASTOUT -matchfile #{last_stdout}"
-  run "diff -I '^#' #{last_stdout} #{$testdata}/matchtool_see-ext.match"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}/matchtool_see-ext.match"
 end
 
 Name "gt seed_extend: maxmat"
@@ -65,9 +65,9 @@ Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 30 -maxmat"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-u8-maxmat30.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-u8-maxmat30.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 250 -maxmat"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-maxmat250.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-maxmat250.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 250 -maxmat -outfmt fstperquery"
   run "#{$scriptsdir}check-fstperquery.rb #{last_stdout} #{$testdata}see-ext-at1MB-maxmat250.matches"
 end
@@ -121,29 +121,29 @@ Test do
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt #{arg}"
   end
   run_test "#{$bin}gt seed_extend -ii at1MB -l 500 -outfmt alignment=70"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-al.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-al.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-evalue-bitscore.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-evalue-bitscore.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt subjectid queryid"
   run "#{$scriptsdir}se-permutation.rb #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigarX"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigarX.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigarX.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.seqlen q.seqlen"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqlength.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue s.seqlen q.seqlen cigar"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue s.seqlen q.seqlen cigarX"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigarX-seqlength.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigarX-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt bitscore evalue"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed failed_seed -l 600 -seedlength 20"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-failed_seed.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-failed_seed.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
-  run "diff #{last_stdout} #{$testdata}see-ext-at1MB-u8-failed_seed-evalue.matches"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}see-ext-at1MB-u8-failed_seed-evalue.matches"
   evalue_filter = 10e-30
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
   run "mv #{last_stdout} strong.matches"
@@ -153,32 +153,32 @@ Test do
     run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-400-#{ci}.matches -outfmt alignment"
     run "mv #{last_stdout} alignment-from-#{ci}.txt"
     run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt alignment"
-    run "diff -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
     run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-400-#{ci}.matches -outfmt #{ci}"
-    run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-#{ci}.matches"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-#{ci}.matches"
   end
   run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-400-cigarX.matches -outfmt cigar"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   ["cigar","cigarX"].each do |ci|
     run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-#{ci}-seqlength.matches -outfmt alignment"
     run "mv #{last_stdout} alignment-from-#{ci}.txt"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt alignment"
-    run "diff -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
   end
   run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigarX-seqlength.matches -outfmt bitscore evalue s.seqlen q.seqlen cigar"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
   run "#{$bin}/gt seed_extend -ii at1MB -mincoverage 200 -outfmt tabsep custom s.seqnum s.start s.len strand q.seqnum q.start q.len editdist"
   run "cmp -s #{last_stdout} #{$testdata}/see-ext-at1MB-mincoverage200-tabsep.matches"
   ["trace","dtrace"].each do |t|
     run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt #{t}=50"
-    run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-#{t}.matches"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-#{t}.matches"
     run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt #{t}"
     run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
-    run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-dtrace.matches"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-dtrace.matches"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 200 -outfmt #{t}=20 s.seqlen q.seqlen"
     run "mv #{last_stdout} tmp-with-#{t}.matches"
     run_test "#{$bin}gt dev show_seedext -f tmp-with-#{t}.matches -outfmt alignment"
-    run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-dtrace.matches"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-dtrace.matches"
     run_test "#{$bin}gt dev show_seedext -f tmp-with-#{t}.matches -outfmt s.seqlen"
   end
   run_test "#{$bin}gt seed_extend -ii at1MB -l 100 -outfmt gfa2 trace"
@@ -277,7 +277,7 @@ Test do
     run "mv #{last_stdout} seed_extend.out"
     run_test "#{$bin}gt dev show_seedext -f seed_extend.out " + outfmt_seed
     run "mv #{last_stdout} show_seed_ext.out"
-    run "diff -I '^#' seed_extend.out show_seed_ext.out"
+    run "diff --strip-trailing-cr -I '^#' seed_extend.out show_seed_ext.out"
     run_test "#{$bin}gt dev show_seedext -f seed_extend.out -optimal -outfmt alignment"
     $OUTFMT_ARGS.each do |arg|
       if arg != "subjectid" and arg != "queryid" and not arg.match(/^seed/)
@@ -297,7 +297,7 @@ Test do
     run_test "#{$bin}gt seed_extend -v -ii at1MB -l 783 -outfmt alignment"
     run "mv #{last_stdout} se.align"
     run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt alignment"
-    run "diff -I '^#' #{last_stdout} se.align"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} se.align"
   end
 end
 
@@ -316,7 +316,7 @@ Test do
           run "grep -v '^#' #{last_stdout}"
           run "sort #{last_stdout}"
           run "mv #{last_stdout} see-ext-at1MB-#{a_cam}-#{b_cam}.matches"
-          run "diff -I '^#' see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
+          run "diff --strip-trailing-cr -I '^#' see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
         end
       end
     end
@@ -334,7 +334,7 @@ if $gttestdata
     run "grep -v '^#' #{last_stdout}"
     run "mv #{last_stdout} splt-bytestring.matches"
     run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt struct -ii #{indexname}"
-    run "diff -I '^#' #{last_stdout} splt-bytestring.matches"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} splt-bytestring.matches"
   end
 end
 
@@ -353,22 +353,22 @@ Test do
         run "sort #{last_stdout}"
         run "mv #{last_stdout} default_run.out"
         if query == ""
-          run "diff -I '^#' default_run.out #{$testdata}see-ext-#{dataset}.matches"
+          run "diff --strip-trailing-cr -I '^#' default_run.out #{$testdata}see-ext-#{dataset}.matches"
         else
-          run "diff -I '^#' default_run.out #{$testdata}see-ext-#{dataset}-u8.matches"
+          run "diff --strip-trailing-cr -I '^#' default_run.out #{$testdata}see-ext-#{dataset}-u8.matches"
         end
         run_test "#{$bin}gt -j 4 seed_extend -ii #{dataset}#{query} -parts 4"
         run "sort #{last_stdout}"
-        run "diff -I '^#' default_run.out #{last_stdout}"
+        run "diff --strip-trailing-cr -I '^#' default_run.out #{last_stdout}"
         run_test "#{$bin}gt -j 2 seed_extend -ii #{dataset}#{query} -parts 5"
         run "sort #{last_stdout}"
-        run "diff -I '^#' default_run.out #{last_stdout}"
+        run "diff --strip-trailing-cr -I '^#' default_run.out #{last_stdout}"
         run_test "#{$bin}gt -j 8 seed_extend -ii #{dataset}#{query} -parts 2"
         run "sort #{last_stdout}"
-        run "diff -I '^#' default_run.out #{last_stdout}"
+        run "diff --strip-trailing-cr -I '^#' default_run.out #{last_stdout}"
         run_test "#{$bin}gt -j 3 seed_extend -ii #{dataset}#{query}"
         run "sort #{last_stdout}"
-        run "diff -I '^#' default_run.out #{last_stdout}"
+        run "diff --strip-trailing-cr -I '^#' default_run.out #{last_stdout}"
       end
     end
   end
@@ -403,10 +403,10 @@ Test do
     for splt in $SPLT_LIST do
       run_test "#{$bin}gt seed_extend -extendxdrop 97 " +
                "-l 10 -ii small_poly -verify-alignment #{splt} -kmplt #{kmplt}"
-      run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
+      run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
       run_test "#{$bin}gt seed_extend -extendgreedy 97 " +
                "-l 10 -ii small_poly -verify-alignment #{splt} -kmplt #{kmplt}"
-      run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
+      run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
     end
   end
 end
@@ -568,7 +568,7 @@ Test do
     run "mv #{last_stdout} default.out"
     run_test "#{$bin}gt seed_extend -ii at1MB -parts 4 -verify-alignment #{splt}"
     run "sort #{last_stdout}"
-    run "diff -I '^#'  default.out #{last_stdout}"
+    run "diff --strip-trailing-cr -I '^#'  default.out #{last_stdout}"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 " +
              "-parts 2 -pick 1,2 -verify-alignment #{splt}"
     grep last_stdout, /24 209 15 P 26 2 248 35 5 80.00/

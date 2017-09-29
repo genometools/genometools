@@ -40,14 +40,14 @@ def compare_encseqs(indexname1, indexname2)
   decoded1 = last_stdout
   run "#{$bin}gt encseq decode #{indexname2}"
   decoded2 = last_stdout
-  run "diff #{decoded1} #{decoded2}"
+  run "diff --strip-trailing-cr #{decoded1} #{decoded2}"
   run "#{$bin}gt encseq info #{indexname1}"
   run "grep -v 'index name' #{last_stdout}"
   info1 = last_stdout
   run "#{$bin}gt encseq info #{indexname2}"
   run "grep -v 'index name' #{last_stdout}"
   info2 = last_stdout
-  run "diff #{info1} #{info2}"
+  run "diff --strip-trailing-cr #{info1} #{info2}"
 end
 
 [false, true].each do |with_des|
@@ -773,7 +773,7 @@ Keywords "gt_readjoiner gt_readjoiner_correct"
 Test do
   run_correct("#{$testdata}/readjoiner/errors_1.fas", 12, 2)
   run "#{$bin}gt encseq decode reads"
-  run "diff #{last_stdout} #{$testdata}/readjoiner/errors_1.corrected.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}/readjoiner/errors_1.corrected.fas"
 end
 
 Name "gt readjoiner overlap: eqlen; minlen > readlen"
@@ -791,12 +791,12 @@ Test do
   run_overlap(4, "-singlestrand")
   run "#{spmtest} -test showlist -readset reads"
   spm = last_stdout
-  run_test "diff #{spm} " +
+  run_test "diff --strip-trailing-cr #{spm} " +
     "#$testdata/readjoiner/tiny_singlestrand.spm", :retval => 0
   run_overlap(4)
   run "#{spmtest} -test showlist -readset reads"
   spm = last_stdout
-  run_test "diff #{spm} " +
+  run_test "diff --strip-trailing-cr #{spm} " +
     "#$testdata/readjoiner/tiny_mirrored.spm", :retval => 0
 end
 =end
@@ -949,7 +949,7 @@ Test do
   run "mv reads.contigs.fas contigs"
   run_overlap(39, "-elimtrans false")
   run_assembly("-redtrans")
-  run "diff reads.contigs.fas contigs"
+  run "diff --strip-trailing-cr reads.contigs.fas contigs"
 end
 
 
@@ -962,7 +962,7 @@ Test do
   run "mv reads.contigs.fas contigs"
   run_overlap(20, "-elimtrans false")
   run_assembly("-redtrans")
-  run "diff reads.contigs.fas contigs"
+  run "diff --strip-trailing-cr reads.contigs.fas contigs"
 end
 
 Name "gt readjoiner: transitive spm determination test - 5"
@@ -974,7 +974,7 @@ Test do
   run "mv reads.contigs.fas contigs"
   run_overlap(20, "-elimtrans false")
   run_assembly("-redtrans")
-  run "diff reads.contigs.fas contigs"
+  run "diff --strip-trailing-cr reads.contigs.fas contigs"
 end
 
 Name "gt readjoiner: transitive spm determination test - 6"
@@ -1013,7 +1013,7 @@ Test do
   run "mv reads.contigs.fas contigs"
   run_overlap(20, "-singlestrand -elimtrans false")
   run_assembly("-redtrans")
-  run "diff reads.contigs.fas contigs"
+  run "diff --strip-trailing-cr reads.contigs.fas contigs"
 end
 
 Name "gt readjoiner: transitive spm determination test - 7"
@@ -1025,7 +1025,7 @@ Test do
   run "mv reads.contigs.fas contigs"
   run_overlap(4, "-elimtrans false")
   run_assembly("-redtrans")
-  run "diff reads.contigs.fas contigs"
+  run "diff --strip-trailing-cr reads.contigs.fas contigs"
 end
 
 Name "gt readjoiner: transitive spm determination test - 8"
@@ -1037,7 +1037,7 @@ Test do
   run "mv reads.contigs.fas contigs"
   run_overlap(4, "-elimtrans false")
   run_assembly("-redtrans")
-  run "diff reads.contigs.fas contigs"
+  run "diff --strip-trailing-cr reads.contigs.fas contigs"
 end
 
 Name "gt readjoiner: fastq vs fasta, 70x100nt"
@@ -1078,8 +1078,8 @@ Test do
   bf = last_stdout
   run_test "#{spmtest} -test kmp -readset reads -l 3", :retval => 0
   kmp = last_stdout
-  run "diff #{kmp} #{bf}"
-  run "diff #{bf} #$testdata/readjoiner/pw-ex.spm"
+  run "diff --strip-trailing-cr #{kmp} #{bf}"
+  run "diff --strip-trailing-cr #{bf} #$testdata/readjoiner/pw-ex.spm"
 end
 
 Name "gt readjoiner assembly -depthcutoff"
@@ -1090,7 +1090,7 @@ Test do
   run_assembly("-depthcutoff 3 -lengthcutoff 31")
   run "grep 'no contigs' #{last_stdout}"
   run_assembly("-depthcutoff 2 -lengthcutoff 31")
-  run "diff reads.contigs.fas #$testdata/readjoiner/3_varlen_seq.contigs.fas"
+  run "diff --strip-trailing-cr reads.contigs.fas #$testdata/readjoiner/3_varlen_seq.contigs.fas"
 end
 
 # gfa
@@ -1103,7 +1103,7 @@ end
       run_overlap(32)
       run_test "#{gfatest} -readset reads #{' -1' if gfa_version == 1}",
         :retval => 0
-      run "diff reads.gfa #$testdata/readjoiner/#{fasta}.gfa#{gfa_version}"
+      run "diff --strip-trailing-cr reads.gfa #$testdata/readjoiner/#{fasta}.gfa#{gfa_version}"
     end
   end
 end
@@ -1120,7 +1120,7 @@ end
       bf = last_stdout
       run_test "#{spmtest} -test kmp -readset reads -l 32", :retval => 0
       kmp = last_stdout
-      run "diff #{kmp} #{bf}"
+      run "diff --strip-trailing-cr #{kmp} #{bf}"
       prepare_esa("reads", mirrored)
       if (!%w{70x_100nt}.include?(fasta))
         run_test "#{spmtest} -test gusfield -readset reads -l 32", :retval => 0
@@ -1128,7 +1128,7 @@ end
         gf = last_stdout
         run "sort -u #{kmp}"
         kmp = last_stdout
-        run "diff #{gf} #{kmp}"
+        run "diff --strip-trailing-cr #{gf} #{kmp}"
       end
       if (!%w{contained_eqlen contained_varlen 30x_800nt}.include?(fasta))
         rdjO += " -singlestrand" if !mirrored
@@ -1138,7 +1138,7 @@ end
         our = last_stdout
         run "sort -u #{kmp}"
         kmp = last_stdout
-        run "diff #{our} #{kmp}"
+        run "diff --strip-trailing-cr #{our} #{kmp}"
       end
     end
   end
@@ -1156,16 +1156,16 @@ end
       bf = last_stdout
       run_test "#{cnttest} -test kmp -readset reads", :retval => 0
       kmp = last_stdout
-      run "diff #{kmp} #{bf}"
+      run "diff --strip-trailing-cr #{kmp} #{bf}"
       prepare_esa("reads", mirrored)
       run_test "#{cnttest} -test esa -readset reads", :retval => 0
       esa = last_stdout
-      run "diff #{esa} #{$testdata}readjoiner/#{fasta}#{'_ss' if !mirrored}.cnt"
+      run "diff --strip-trailing-cr #{esa} #{$testdata}readjoiner/#{fasta}#{'_ss' if !mirrored}.cnt"
       run "sort -u #{esa}"
       esas = last_stdout
       run "sort -u #{kmp}"
       kmps = last_stdout
-      run "diff #{esas} #{kmps}"
+      run "diff --strip-trailing-cr #{esas} #{kmps}"
     end
   end
 end
@@ -1239,7 +1239,7 @@ end
       sizeofint = is64bit ? 8 : 4
       unpackstr = is64bit ? "Q" : "L"
       unpack_array_file("i.suf", "i.suf.txt", 0, sizeofint, unpackstr)
-      run "diff i.suf.txt #{radixsort_results}"
+      run "diff --strip-trailing-cr i.suf.txt #{radixsort_results}"
     end
   end
 end
@@ -1256,16 +1256,16 @@ if $gttestdata
         readset="#{$gttestdata}/readjoiner/#{nofreads}x_100nt_reads"
         run_prefilter(readset, "-cnt")
         run "#{cnttest} -test showlist -readset reads"
-        run "diff #{last_stdout} #{readset}.cnt"
+        run "diff --strip-trailing-cr #{last_stdout} #{readset}.cnt"
         run_overlap(45)
         run "#{spmtest} -test showlist -readset reads.0"
         run "sort #{last_stdout}"
         spm = last_stdout
         run "sort #{readset}.l45.spm"
         ref = last_stdout
-        run "diff #{spm} #{ref}"
+        run "diff --strip-trailing-cr #{spm} #{ref}"
         run_assembly
-        run "diff reads.contigs.fas #{readset}.l45.contigs"
+        run "diff --strip-trailing-cr reads.contigs.fas #{readset}.l45.contigs"
       end
     end
 
@@ -1302,7 +1302,7 @@ if $gttestdata
     spm = last_stdout
     run "sort #{readset}.l45.spm"
     ref = last_stdout
-    run "diff #{spm} #{ref}"
+    run "diff --strip-trailing-cr #{spm} #{ref}"
   end
 
 end

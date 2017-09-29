@@ -3,7 +3,7 @@ def compare_encseqs3(indexname1, indexname2, cmpinfos)
   decoded1 = last_stdout
   run "#{$bin}gt encseq decode #{indexname2}"
   decoded2 = last_stdout
-  run "diff #{decoded1} #{decoded2}"
+  run "diff --strip-trailing-cr #{decoded1} #{decoded2}"
   if cmpinfos
     run "#{$bin}gt encseq info #{indexname1}"
     run "grep -v 'index name' #{last_stdout}"
@@ -11,7 +11,7 @@ def compare_encseqs3(indexname1, indexname2, cmpinfos)
     run "#{$bin}gt encseq info #{indexname2}"
     run "grep -v 'index name' #{last_stdout}"
     info2 = last_stdout
-    run "diff #{info1} #{info2}"
+    run "diff --strip-trailing-cr #{info1} #{info2}"
   end
 end
 

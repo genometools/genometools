@@ -4,7 +4,7 @@ Test do
   run_test "#{$bin}gt dev sambam -sam " +
            "-idxfile #{$testdata}/example_1.fa.fai " +
            "#{$testdata}/example_1.sam.gz"
-  run_test "diff #{$testdata}/example_1.sam.extract " +
+  run_test "diff --strip-trailing-cr #{$testdata}/example_1.sam.extract " +
            "#{last_stdout}"
 end
 
@@ -20,7 +20,7 @@ Keywords "gt_sambam read_sambam bam"
 Test do
   run_test "#{$bin}gt dev sambam " +
            "#{$testdata}/example_1.bam"
-  run_test "diff #{$testdata}/example_1.sam.extract " +
+  run_test "diff --strip-trailing-cr #{$testdata}/example_1.sam.extract " +
            "#{last_stdout}"
 end
 
@@ -32,7 +32,7 @@ Test do
              "-idxfile #{$testdata}/example_1.fa.fai " +
              "#{$testdata}/example_1.sam.gz"
     run_test "head -n #{i} #{$testdata}/example_1.sam.extract | " +
-             "diff #{last_stdout} -"
+             "diff --strip-trailing-cr #{last_stdout} -"
   end
 end
 
@@ -43,6 +43,6 @@ Test do
     run_test "#{$bin}gt dev sambam -lines #{i} " +
              "#{$testdata}/example_1.bam"
     run_test "head -n #{i} #{$testdata}/example_1.sam.extract | " +
-             "diff #{last_stdout} -"
+             "diff --strip-trailing-cr #{last_stdout} -"
   end
 end

@@ -27,7 +27,7 @@ if $gttestdata then
              + " -mirrored -dna -suf -lcp -tis -des -sds -ssp", :maxtime => 720
       run_test "#{$bin}gt -j 2 tirvish -index #{v} > #{k}.gff3", \
              :maxtime => 25000
-      #run "diff #{k}.gff3 #{$gttestdata}tirvish/s_cer/#{k}.gff3"
+      #run "diff --strip-trailing-cr #{k}.gff3 #{$gttestdata}tirvish/s_cer/#{k}.gff3"
     end
   end
 
@@ -45,7 +45,7 @@ if $gttestdata then
       run_test "#{$bin}gt suffixerator -db #{$gttestdata}ltrharvest/d_mel/#{v} " + \
                 "-mirrored -dna -suf -sds -lcp -tis -des -ssp", :maxtime => 36000
       run_test "#{$bin}gt tirvish -index #{v} > #{k}.gff3", :maxtime => 3600
-      #run "diff #{k}.gff3 #{$gttestdata}tirvish/d_mel/#{k}.gff3"
+      #run "diff --strip-trailing-cr #{k}.gff3 #{$gttestdata}tirvish/d_mel/#{k}.gff3"
     end
   end
 end

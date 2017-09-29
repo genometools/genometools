@@ -3,7 +3,7 @@ Keywords "gt_encseq_encode encseq gt_encseq_decode"
 Test do
   run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
   run "#{$bin}gt encseq decode foobar.fas"
-  run "diff #{last_stdout} #{$testdata}foobar.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}foobar.fas"
 end
 
 Name "gt encseq encode|decode w/ empty seq"
@@ -32,7 +32,7 @@ Test do
     run_test "#{$bin}gt encseq encode -clipdesc -indexname foo " + \
              "#{$testdata}/shorten_desc.#{sfx}"
     run "#{$bin}gt encseq decode foo"
-    run "diff #{last_stdout} #{$testdata}shorten_desc.clipped.fas"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}shorten_desc.clipped.fas"
   end
 end
 
@@ -137,7 +137,7 @@ def run_encseq_comparison(filename, mirrored, lossless, readmode, singlechars,
         f.write(outseq)
         f.write("\n")
       end
-      run "diff seqout #{last_stdout}"
+      run "diff --strip-trailing-cr seqout #{last_stdout}"
     end
   end
 end
@@ -171,7 +171,7 @@ def testformirrored(s, readmode)
               f.write(seq)
               f.write("\n")
             end
-            run "diff seqout #{last_stdout}"
+            run "diff --strip-trailing-cr seqout #{last_stdout}"
           end
         end
       end
@@ -224,8 +224,8 @@ emblfiles = fastafiles.collect{ |f| f.gsub(".fna",".embl") }
         run_test "#{$bin}gt encseq encode -v -indexname sfx infile"
         run_test "#{$bin}gt encseq decode -output concat sfx > sfx2.seq"
         run_test "#{$bin}gt encseq info sfx | grep -v 'longest description' > sfx2.info"
-        run "diff sfx.seq sfx2.seq"
-        run "diff sfx.info sfx2.info"
+        run "diff --strip-trailing-cr sfx.seq sfx2.seq"
+        run "diff --strip-trailing-cr sfx.info sfx2.info"
       end
     end
   end
@@ -240,7 +240,7 @@ Test do
   run "cp #{$testdata}wildcardatend_rev.fna infile"
   run_test "#{$bin}gt encseq encode infile"
   run_test "#{$bin}gt encseq info infile | grep range > rev.info"
-  run "diff mirr.info rev.info"
+  run "diff --strip-trailing-cr mirr.info rev.info"
 end
 
 Name "gt encseq mirrored no trailing wildcard"
@@ -252,7 +252,7 @@ Test do
   run "cp #{$testdata}nowildcardatend_rev.fna infile"
   run_test "#{$bin}gt encseq encode infile"
   run_test "#{$bin}gt encseq info infile | grep range > rev.info"
-  run "diff mirr.info rev.info"
+  run "diff --strip-trailing-cr mirr.info rev.info"
 end
 
 Name "gt encseq decode single sequence"
@@ -260,7 +260,7 @@ Keywords "encseq gt_encseq_decode single"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -seq 3 foo"
-  run "diff #{last_stdout} #{$testdata}Atinsert_single_3.fna"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}Atinsert_single_3.fna"
 end
 
 Name "gt encseq decode single sequence (reverse)"
@@ -268,7 +268,7 @@ Keywords "encseq gt_encseq_decode single"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -dir rev -seq 17 foo"
-  run "diff #{last_stdout} #{$testdata}Atinsert_single_3_rev.fna"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}Atinsert_single_3_rev.fna"
 end
 
 Name "gt encseq decode single sequence (invalid seqnumber)"
@@ -292,7 +292,7 @@ Keywords "encseq gt_encseq_decode seqrange"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -seqrange 3 7 foo"
-  run "diff #{last_stdout} #{$testdata}Atinsert_seqrange_3-7.fna"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}Atinsert_seqrange_3-7.fna"
 end
 
 Name "gt encseq decode sequence range (reverse)"
@@ -300,7 +300,7 @@ Keywords "encseq gt_encseq_decode seqrange"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -dir rev -seqrange 13 17 foo"
-  run "diff #{last_stdout} #{$testdata}Atinsert_seqrange_13-17_rev.fna"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}Atinsert_seqrange_13-17_rev.fna"
 end
 
 Name "gt encseq decode sequence range (invalid range start)"
@@ -344,9 +344,9 @@ Test do
     bit = "32"
   end
   run_test "#{$bin}gt encseq info -noindexname #{$testdata}foo.#{bit}"
-  run "diff #{last_stdout} #{$testdata}foo.#{bit}.info_map"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}foo.#{bit}.info_map"
   run_test "#{$bin}gt encseq info -noindexname -nomap #{$testdata}foo.#{bit}"
-  run "diff #{last_stdout} #{$testdata}foo.#{bit}.info_nomap"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}foo.#{bit}.info_nomap"
 end
 
 Name "gt encseq 64bit/32bit header (failure)"
@@ -408,7 +408,7 @@ end
       run "#{$bin}gt encseq encode -lossless #{yn} -indexname idx #{$testdata}/#{fn}"
       run_test "#{$bin}gt encseq md5 -force -o out1 idx"
       run_test "#{$bin}gt encseq md5 -force -fromindex no -o out2 idx"
-      run "diff out1 out2"
+      run "diff --strip-trailing-cr out1 out2"
     end
   end
 end
@@ -434,7 +434,7 @@ Test do
   Dir.glob("#{$cur}/gtdata/trans/TransDNA*") do |file|
     run_test "#{$bin}gt encseq encode -smap #{file} -indexname foo #{$testdata}at100K1"
     run "#{$bin}gt encseq info -show_alphabet foo"
-    alphainesq = File.open(last_stdout).read.match(/alphabet definition:\n([-1-9_a-zA-Z\n]+)\n\n/)
+    alphainesq = File.open(last_stdout).read.gsub(/\r/, '').match(/alphabet definition:\n([-1-9_a-zA-Z\n]+)\n\n/)
     if alphainesq.nil? then
       raise "saved alphabet definition is empty for file #{file}"
     elsif alphainesq[1]+"\n" != File.read(file) then

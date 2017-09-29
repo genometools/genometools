@@ -48,10 +48,10 @@ def checkrepfind(reffile,withextend = false)
   minlength = determineminlength(reffile)
   run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx", :maxtime => 600)
   resultfile="#{rdir}/#{reffile}.result"
-  run "diff -I '^#' #{last_stdout} #{resultfile}"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{resultfile}"
   run_test("#{$bin}gt repfind -l #{minlength} -r -ii sfxidx", :maxtime => 600)
   resultfile="#{rdir}/#{reffile}-r.result"
-  run "diff -I '^#' #{last_stdout} #{resultfile}"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{resultfile}"
   if withextend
     run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy " +
              "-minidentity 90 -maxalilendiff 30 -percmathistory 55",
@@ -61,7 +61,7 @@ def checkrepfind(reffile,withextend = false)
     else
       resultfile="#{$testdata}/repfind-result/#{reffile}-gr-ext.result"
     end
-    run "diff -I '^#' #{last_stdout} #{resultfile}"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{resultfile}"
   end
 end
 
@@ -80,7 +80,7 @@ def checkrepfindwithquery(reffile,queryfile)
   #    "#{queryfilepath}"
   #run "sed -e '/^#/d' #{last_stdout} | sort"
   # run "#{$scriptsdir}repfind-cmp.rb #{last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
-  run "diff -I '^#' #{last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
 end
 
 def crosstest(common,opts,key)
@@ -107,44 +107,44 @@ Test do
            "-indexname Atinsert -dna -tis -suf -lcp"
   run_test "#{$bin}gt repfind -minidentity 90 -l 20 -extendxdrop " +
            "-xdropbelow 5 -ii at1MB"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-xdrop-20-20-80-6"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-xdrop-20-20-80-6"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
            "-q #{$testdata}/U89959_genomic.fas"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
            "-qii U8"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6"
   run_test "#{$bin}gt repfind -minidentity 70 -l 700 -seedlength 15 " +
            "-extendgreedy -ii at1MB -q #{$testdata}Atinsert.fna"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-15-700-70-4-43"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-15-700-70-4-43"
   run_test "#{$bin}gt repfind -minidentity 70 -l 700 -seedlength 15 " +
            "-extendgreedy -ii at1MB -qii Atinsert"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-15-700-70-4-43"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-15-700-70-4-43"
   run_test "#{$bin}gt repfind -extendxdrop -ii at1MB -seedlength 70 -l 500 " +
            "-minidentity 90 -outfmt alignment=70 polinfo -verify-alignment"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-xdrop-70-500-90-1-39-a"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-xdrop-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -minidentity 75 -l 700 -seedlength 20 " +
            "-extendgreedy -ii at1MB -q #{$testdata}Atinsert.fna " +
            "-outfmt alignment=70 polinfo -verify-alignment"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-20-700-75-3-39-a"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-20-700-75-3-39-a"
   run_test "#{$bin}gt repfind -minidentity 75 -l 700 -seedlength 20 " +
            "-extendgreedy -ii at1MB -qii Atinsert " +
            "-outfmt alignment=70 polinfo -verify-alignment"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-20-700-75-3-39-a"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-20-700-75-3-39-a"
   run_test "#{$bin}gt repfind -extendgreedy -ii at1MB -seedlength 14 " +
            "-outfmt alignment=70 polinfo -verify-alignment"
   run_test "#{$bin}gt repfind -extendxdrop -ii at1MB -seedlength 14 " +
            "-outfmt alignment=70 polinfo -verify-alignment"
   run_test "#{$bin}gt repfind -extendgreedy -ii at1MB -seedlength 70 -l 500 " +
            "-minidentity 90 -outfmt alignment=70 polinfo -verify-alignment"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-greedy-70-500-90-1-39-a"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-greedy-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
            "-q #{$testdata}U89959_genomic.fas " +
            "-outfmt alignment=70 polinfo -verify-alignment"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
            "-qii U8 -outfmt alignment=70 polinfo -verify-alignment"
-  run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
+  run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
   ["xdrop","greedy"].each do |ext|
     if ext == "xdrop"
       params = "6"
@@ -155,15 +155,15 @@ Test do
              "-extend#{ext} -ii at1MB " +
              "-q #{$testdata}U89959_genomic.fas -r " +
              "-outfmt alignment=70 polinfo -verify-alignment"
-    run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
     run_test "#{$bin}gt repfind -minidentity 80 -l 30 -seedlength 12 " +
              "-extend#{ext} -ii at1MB " +
              "-qii U8 -r -outfmt alignment=70 polinfo -verify-alignment"
-    run "diff -I '^#' #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
     run_test "#{$bin}gt repfind -seedlength 14 -l 32 -r " +
              "-outfmt alignment=70 polinfo -verify-alignment " +
              "-extend#{ext} -ii at1MB"
-    run "diff -I '^#' #{last_stdout} #{$testdata}repfind-result/at1MB-#{ext}-r-14-32-80-#{params}-a"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} #{$testdata}repfind-result/at1MB-#{ext}-r-14-32-80-#{params}-a"
   end
   run_test "#{$bin}gt repfind -extendgreedy -outfmt evalue -evalue 10e-150 -ii at1MB"
   evalue_filter = 10e-150
@@ -176,13 +176,13 @@ Test do
     run "mv #{last_stdout} at1MB-vs-U8.#{ext}.matches"
     run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} " +
              "-ii at1MB -qii U8"
-    run "diff -I '^#' #{last_stdout} at1MB-vs-U8.#{ext}.matches"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} at1MB-vs-U8.#{ext}.matches"
     run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} -ii U8 " +
              "-q #{$testdata}/at1MB"
     run "mv #{last_stdout} U8-vs-at1MB.#{ext}.matches"
     run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} -ii U8 " +
              "-qii at1MB"
-    run "diff -I '^#' #{last_stdout} U8-vs-at1MB.#{ext}.matches"
+    run "diff --strip-trailing-cr -I '^#' #{last_stdout} U8-vs-at1MB.#{ext}.matches"
     run "#{$scriptsdir}cmp_db_query_exch.rb U8-vs-at1MB.#{ext}.matches " +
         "at1MB-vs-U8.#{ext}.matches"
   end
@@ -191,10 +191,10 @@ Test do
      run "mv #{last_stdout} U8-selfcompare.matches"
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8 "
               "-cam bytes,bytes"
-     run "diff -I '^#' #{last_stdout} U8-selfcompare.matches"
+     run "diff --strip-trailing-cr -I '^#' #{last_stdout} U8-selfcompare.matches"
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8 "
               "-cam encseq_reader,bytes"
-     run "diff -I '^#' #{last_stdout} U8-selfcompare.matches"
+     run "diff --strip-trailing-cr -I '^#' #{last_stdout} U8-selfcompare.matches"
   end
 end
 
@@ -219,9 +219,9 @@ Test do
       crosstest(common,"-ii db-query-r-index -r","#{ext}-db-query-r-index")
       crosstest(common,"-ii db-index -r -q query-r.fna","#{ext}-db-index-r-q")
       ["coords","al"].each do |suffix|
-        run "diff -I '^#' #{ext}-db-query-index.#{suffix} #{ext}-db-index-q.#{suffix}"
-        run "diff -I '^#' #{ext}-db-index-q.#{suffix} #{ext}-db-query-r-index.#{suffix}"
-        run "diff -I '^#' #{ext}-db-query-r-index.#{suffix} #{ext}-db-index-r-q.#{suffix}"
+        run "diff --strip-trailing-cr -I '^#' #{ext}-db-query-index.#{suffix} #{ext}-db-index-q.#{suffix}"
+        run "diff --strip-trailing-cr -I '^#' #{ext}-db-index-q.#{suffix} #{ext}-db-query-r-index.#{suffix}"
+        run "diff --strip-trailing-cr -I '^#' #{ext}-db-query-r-index.#{suffix} #{ext}-db-index-r-q.#{suffix}"
       end
     end
   end
@@ -247,10 +247,10 @@ Test do
            "-indexname sfx -dna -tis -suf -lcp -ssp -pl"
   run_test "#{$bin}gt repfind -l 8 -ii sfx"
   run "grep -v '^#' #{last_stdout}"
-  run "diff -w #{last_stdout} #{$testdata}repfind-result/Atinsert-8-8"
+  run "diff --strip-trailing-cr -w #{last_stdout} #{$testdata}repfind-result/Atinsert-8-8"
   run_test "#{$bin}gt repfind -scan -l 8 -ii sfx"
   run "grep -v '^#' #{last_stdout}"
-  run "diff -w #{last_stdout} #{$testdata}repfind-result/Atinsert-8-8"
+  run "diff --strip-trailing-cr -w #{last_stdout} #{$testdata}repfind-result/Atinsert-8-8"
   run_test "#{$bin}gt repfind -samples 10 -l 6 -ii sfx",:maxtime => 600
   run "#{$bin}gt repfind -samples 1000 -l 6 -ii sfx",:maxtime => 600
 end

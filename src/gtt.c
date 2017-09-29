@@ -292,7 +292,9 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
   gt_hashmap_add(unit_tests, "bit pack string module",
                                                     gt_bitPackString_unit_test);
+#ifndef _WIN32
   gt_hashmap_add(unit_tests, "bittab class", gt_bittab_unit_test);
+#endif
   gt_hashmap_add(unit_tests, "bittab example", gt_bittab_example);
   gt_hashmap_add(unit_tests, "bsearch module", gt_bsearch_unit_test);
   gt_hashmap_add(unit_tests, "codon iterator class, simple",
@@ -313,7 +315,9 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "disc distri class", gt_disc_distri_unit_test);
   gt_hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
+#ifndef _WIN32
   gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dyn_bittab_unit_test);
+#endif
   gt_hashmap_add(unit_tests, "editscript class", gt_editscript_unit_test);
   gt_hashmap_add(unit_tests, "elias gamma class", gt_elias_gamma_unit_test);
   gt_hashmap_add(unit_tests, "encdesc class", gt_encdesc_unit_test);
@@ -331,7 +335,9 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "gff3 escaping module",
                                                     gt_gff3_escaping_unit_test);
   gt_hashmap_add(unit_tests, "grep module", gt_grep_unit_test);
+#ifndef _WIN32
   gt_hashmap_add(unit_tests, "golomb class", gt_golomb_unit_test);
+#endif
   gt_hashmap_add(unit_tests, "hashmap class", gt_hashmap_unit_test);
   gt_hashmap_add(unit_tests, "hashtable class", gt_hashtable_unit_test);
   gt_hashmap_add(unit_tests, "hmm class", gt_hmm_unit_test);
@@ -343,7 +349,9 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "kmer_database class", gt_kmer_database_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                                                    gt_lua_serializer_unit_test);
+#ifndef _WIN32
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
+#endif
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
   gt_hashmap_add(unit_tests, "multieoplist", gt_multieoplist_unit_test);
   gt_hashmap_add(unit_tests, "MD5 seqid module", gt_md5_seqid_unit_test);
@@ -362,14 +370,18 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "priority queue class",
                              gt_priority_queue_unit_test);
   gt_hashmap_add(unit_tests, "safearith example", gt_safearith_example);
+#ifndef _WIN32
   gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
+#endif
   gt_hashmap_add(unit_tests, "sequence buffer class",
                                                   gt_sequence_buffer_unit_test);
   gt_hashmap_add(unit_tests, "splicedseq class", gt_splicedseq_unit_test);
   gt_hashmap_add(unit_tests, "splitter class", gt_splitter_unit_test);
   gt_hashmap_add(unit_tests, "string class", gt_str_unit_test);
+#ifndef _WIN32
   gt_hashmap_add(unit_tests, "string matching module",
                                                   gt_string_matching_unit_test);
+#endif
   gt_hashmap_add(unit_tests, "symbol module", gt_symbol_unit_test);
   gt_hashmap_add(unit_tests, "tag value map class", gt_tag_value_map_unit_test);
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
@@ -390,8 +402,10 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "track class", gt_track_unit_test);
 #endif
 #if defined (HAVE_MYSQL) || defined (HAVE_SQLITE)
+#ifndef _WIN32
   gt_hashmap_add(unit_tests, "database feature index class (GFF-like)",
                                                   gt_anno_db_gfflike_unit_test);
+#endif
 #endif
 
   return unit_tests;

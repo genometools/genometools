@@ -65,7 +65,7 @@ def checkdc(filelist)
            "-lcp -suf -tis -indexname sfx3 -db " + flattenfilelist(filelist)
   run_test "#{$bin}gt dev sfxmap -lcp -suf -ssp -v -esa sfx3",
            :maxtime => 600
-  run "diff sfx3.suf sfx.suf"
+  run "diff --strip-trailing-cr sfx3.suf sfx.suf"
 end
 
 def checkbwt(filelist)
@@ -112,7 +112,7 @@ Test do
   run_test "#{$bin}/gt encseq2spm -parts 3 -l #{minlen} -spm show " + \
            "-ii #{indexname}", :maxtime => 1000
   run "mv #{last_stdout} result.firstcodes"
-  run "diff -I '^#' result.repfind result.firstcodes"
+  run "diff --strip-trailing-cr -I '^#' result.repfind result.firstcodes"
 end
 
 allfiles = []
@@ -473,9 +473,9 @@ end
         run      "#{$scriptsdir}/add_revcmp.rb #{file[:filename]} > reverse.fna"
         run_test "#{$bin}/gt suffixerator -sat #{sat} -v -suf -lcp " + \
                  "-bwt -dir #{dir} -db reverse.fna -indexname myidx_r"
-        run      "diff myidx.suf myidx_r.suf"
-        run      "diff myidx.lcp myidx_r.lcp"
-        run      "diff myidx.bwt myidx_r.bwt"
+        run      "diff --strip-trailing-cr myidx.suf myidx_r.suf"
+        run      "diff --strip-trailing-cr myidx.lcp myidx_r.lcp"
+        run      "diff --strip-trailing-cr myidx.bwt myidx_r.bwt"
         run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa myidx", \
                  :maxtime => 600
         run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa " + \
@@ -589,7 +589,7 @@ Keywords "gt_suffixerator spmitv"
 Test do
   run "#{$bin}/gt suffixerator -db #{$testdata}/Reads2.fna -suf -lcp"
   run "#{$bin}/gt dev sfxmap -spmitv -esa Reads2.fna"
-  run "diff #{last_stdout} #{$testdata}/Reads2-spmitv.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}/Reads2-spmitv.txt"
 end
 
 Name "gt sfxmap lcp-interval trees bottomup"
@@ -599,5 +599,5 @@ Test do
       "-indexname sfx"
   run "#{$bin}/gt dev sfxmap -enumlcpitvtreeBU -esa sfx > withBU.txt"
   run "#{$bin}/gt dev sfxmap -enumlcpitvtree -esa sfx > noBU.txt"
-  run "diff withBU.txt noBU.txt"
+  run "diff --strip-trailing-cr withBU.txt noBU.txt"
 end

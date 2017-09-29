@@ -3,7 +3,7 @@ Keywords "gt_python"
 Test do
   run_python "#{$testdata}gtpython/gff3.py #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
 Name "gtpython: genome_visitor bindings (output stream)"
@@ -11,7 +11,7 @@ Keywords "gt_python"
 Test do
   run_python "#{$testdata}gtpython/genome_visitor.py #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
 Name "gtpython: feature_index and feature_stream bindings"
@@ -67,7 +67,7 @@ if not $arguments["nocairo"] then
     run_python "#{$testdata}gtpython/block_stuff.py " +
              "#{$testdata}gff3_file_1_short.txt"
     run "env LC_ALL=C sort #{last_stdout}"
-    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.blocks"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.blocks"
   end
 
   Name "gtpython: AnnotationSketch bindings (style)"
@@ -91,7 +91,7 @@ if not $arguments["nocairo"] then
              "out.svg"
     # will fail e.g. if cairo toy font setup is different from test machine
     # disabled for now
-    # run "diff out.svg #{$testdata}graphics_test.out"
+    # run "diff --strip-trailing-cr out.svg #{$testdata}graphics_test.out"
   end
 
   Name "gtpython: AnnotationSketch bindings (FeatureNode(Iterator))"
@@ -104,7 +104,7 @@ if not $arguments["nocairo"] then
   Keywords "gt_python"
   Test do
     run_python "#{$testdata}gtpython/show_seqids.py #{$testdata}encode_known_genes_Mar07.gff3"
-    run "diff #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
   end
 
   Name "gtpython: used_types"
@@ -112,7 +112,7 @@ if not $arguments["nocairo"] then
   Test do
     run_python "#{$testdata}gtpython/used_types.py " +
                "#{$testdata}standard_gene_as_tree.gff3"
-    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.types"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.types"
   end
 
   Name "gtpython: show_recmaps"
@@ -120,7 +120,7 @@ if not $arguments["nocairo"] then
   Test do
     run_python "#{$testdata}gtpython/show_recmaps.py " +
                "#{$testdata}standard_gene_as_tree.gff3"
-    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
 
   Name "gtpython: unicode strings"

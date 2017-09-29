@@ -282,7 +282,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pbstrnaoffset 10 20 #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 1
     grep(last_stderr, /option "-pbstrnaoffset" requires option "-trnas"/)
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   if $arguments["hmmer"] then
@@ -329,7 +329,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -ppttprob 0.1 -pptaprob 0.1 -pptgprob 0.2 -pptcprob 0.2 #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 1
     # positive test
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -ppttprob 0.25 -pptaprob 0.25 -pptgprob 0.25 -pptcprob 0.25 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   Name "gt ltrdigest PPT HMM parameters (U-box U frequency)"
@@ -340,7 +340,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pptuprob 1.3 #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 1
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pptuprob 0.0 #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 0
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pptuprob 0.91 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   Name "gt ltrdigest PPT HMM parameters (PPT R/Y frequencies)"
@@ -351,9 +351,9 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pptrprob 1.3 #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 1
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pptyprob 1.3 #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 1
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pptrprob 0.97 -pptyprob 0.03 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
     run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -pptrprob 0.6 -pptyprob 0.4 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3", :retval => 1
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3", :retval => 1
   end
 
   Name "gt ltrdigest GFF and sequence do not match"
@@ -375,7 +375,7 @@ if $gttestdata then
         run_test "#{$bin}gt suffixerator -lossless  -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
         run_test "#{$bin}gt ltrdigest -encseq #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz -outfileprefix result#{chr} -trnas Dm-tRNAs-uniq.fa -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_md5_#{chr}.gff3", :retval => 0, :maxtime => 12000
         check_ppt_pbs(last_stdout, chr)
-        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
+        #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
       end
     else
       Name "gt ltrdigest D. mel. chromosome #{chr} basic test, no HMM"
@@ -386,7 +386,7 @@ if $gttestdata then
         run_test "#{$bin}gt -j 2 ltrdigest -encseq #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz -outfileprefix result#{chr} -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_md5_#{chr}.gff3",\
        :retval => 0, :maxtime => 700
         check_ppt_pbs(last_stdout, chr)
-        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
+        #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
       end
     end
   end
@@ -537,7 +537,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -pbstrnaoffset 10 20 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     grep(last_stderr, /option "-pbstrnaoffset" requires option "-trnas"/)
     run_test "#{$bin}gt ltrdigest -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   if $arguments["hmmer"] then
@@ -592,7 +592,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -ppttprob 0.1 -pptaprob 0.1 -pptgprob 0.2 -pptcprob 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     # positive test
     run_test "#{$bin}gt ltrdigest -ppttprob 0.25 -pptaprob 0.25 -pptgprob 0.25 -pptcprob 0.25 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   Name "gt ltrdigest PPT HMM parameters (U-box U frequency, legacy syntax)"
@@ -603,7 +603,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -pptuprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     run_test "#{$bin}gt ltrdigest -pptuprob 0.0 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
     run_test "#{$bin}gt ltrdigest -pptuprob 0.91 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   Name "gt ltrdigest PPT HMM parameters (PPT R/Y frequencies, legacy syntax)"
@@ -614,9 +614,9 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -pptrprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     run_test "#{$bin}gt ltrdigest -pptyprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     run_test "#{$bin}gt ltrdigest -pptrprob 0.97 -pptyprob 0.03 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
     run_test "#{$bin}gt ltrdigest -pptrprob 0.6 -pptyprob 0.4 -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3", :retval => 1
+    #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3", :retval => 1
   end
 
   Name "gt ltrdigest GFF and sequence do not match (legacy syntax)"
@@ -638,7 +638,7 @@ if $gttestdata then
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :maxtime => 600
         run_test "#{$bin}gt ltrdigest -outfileprefix result#{chr} -trnas Dm-tRNAs-uniq.fa -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
         check_ppt_pbs(last_stdout, chr)
-        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
+        #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
       end
     else
       Name "gt ltrdigest D. mel. #{chr} basic test, no HMM (legacy syntax)"
@@ -649,7 +649,7 @@ if $gttestdata then
         run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result#{chr} -trnas Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
        :retval => 0, :maxtime => 700
         check_ppt_pbs(last_stdout, chr)
-        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
+        #run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
       end
     end
   end

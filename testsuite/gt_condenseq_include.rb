@@ -81,7 +81,7 @@ opt_arr.each do |opt|
       "#{basename} > #{basename}.fas"
     run_test "#{$bin}gt condenseq extract " \
       "#{basename}_nr > #{basename}_nr.fas"
-    run "diff #{basename}.fas #{basename}_nr.fas"
+    run "diff --strip-trailing-cr #{basename}.fas #{basename}_nr.fas"
   end
 
   Name "gt condenseq compress + extract #{opt}"
@@ -179,7 +179,7 @@ opt_arr.each do |opt|
       "-range #{info[1]} #{info[2]} -output concat " \
       "#{basename}_nr > " \
       "#{basename}_nr_#{info[1]}_#{info[2]}.fas"
-    run "diff #{basename}_#{info[1]}_#{info[2]}.fas " \
+    run "diff --strip-trailing-cr #{basename}_#{info[1]}_#{info[2]}.fas " \
       "#{basename}_nr_#{info[1]}_#{info[2]}.fas"
   end
 
@@ -211,7 +211,7 @@ opt_arr.each do |opt|
       "-range 16 35 -output concat " \
       "#{basename}_nr > " \
       "#{basename}_nr_16_35.fas"
-    run "diff #{basename}_16_35.fas " \
+    run "diff --strip-trailing-cr #{basename}_16_35.fas " \
       "#{basename}_nr_16_35.fas"
   end
 end

@@ -16,7 +16,7 @@ Name "gt gff3 revision numbers"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}revision_numbers.gff3"
-  run "diff #{last_stdout} #{$testdata}revision_numbers.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}revision_numbers.out"
 end
 
 Name "gt gff3 short test (stdin)"
@@ -24,7 +24,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 < #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
 Name "gt gff3 short test (file)"
@@ -32,7 +32,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
 Name "gt gff3 short test (compressed output)"
@@ -52,7 +52,7 @@ Name "gt gff3 prob 2"
 Keywords "gt_gff3"
 Test do
   run "env LC_ALL=C #{$bin}gt gff3 -sort #{$testdata}gt_gff3_prob_2.in"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_2.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_2.out"
 end
 
 Name "gt gff3 prob 3"
@@ -65,7 +65,7 @@ Name "gt gff3 prob 5"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -sort #{$testdata}gt_gff3_prob_5.in"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_5.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_5.out"
 end
 
 Name "gt gff3 prob 6"
@@ -79,42 +79,42 @@ Name "gt gff3 prob 7 (unsorted)"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_7.in | #{$bin}gt gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_7.unsorted"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_7.unsorted"
 end
 
 Name "gt gff3 prob 7 (sorted)"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -sort #{$testdata}gt_gff3_prob_7.in | #{$bin}gt gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_7.sorted"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_7.sorted"
 end
 
 Name "gt gff3 prob 8"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_8.in"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_8.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_8.out"
 end
 
 Name "gt gff3 prob 9"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_9.in"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_9.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_9.out"
 end
 
 Name "gt gff3 prob 10"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_10.in"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_10.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_10.out"
 end
 
 Name "gt gff3 prob 11"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_11.in"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_prob_11.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_prob_11.out"
 end
 
 Name "gt gff3 prob 12"
@@ -180,7 +180,7 @@ Name "gt gff3 (standard gene as DAG)"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}standard_gene_as_dag.gff3"
-  run "diff #{last_stdout} #{$testdata}standard_gene_as_dag_sorted.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_dag_sorted.gff3"
 end
 
 4.upto(14) do |i|
@@ -196,7 +196,7 @@ Name "gt gff3 test 15"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_15.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_test_15.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_test_15.out"
 end
 
 Name "gt gff3 test 16"
@@ -216,7 +216,7 @@ Name "gt gff3 test 18"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_18.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_test_18.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_test_18.gff3"
 end
 
 Name "gt gff3 test 19"
@@ -250,35 +250,35 @@ Name "gt gff3 test 22"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_22.gff3 | #{$bin}gt gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_test_22.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_test_22.gff3"
 end
 
 Name "gt gff3 test 22 (-sort)"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -sort #{$testdata}gt_gff3_test_22.gff3 | #{$bin}gt gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_test_22.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_test_22.gff3"
 end
 
 Name "gt gff3 test 23"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_23.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_test_23.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_test_23.gff3"
 end
 
 Name "gt gff3 test 24"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_24.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_test_23.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_test_23.gff3"
 end
 
 Name "gt gff3 test 25"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_25.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_test_25.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_test_25.out"
 end
 
 Name "gt gff3 test 26"
@@ -298,7 +298,7 @@ Name "gt gff3 test additional attribute"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}additional_attribute.gff3"
-  run "diff #{last_stdout} #{$testdata}additional_attribute.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}additional_attribute.gff3"
 end
 
 Name "gt gff3 fail 1"
@@ -313,42 +313,42 @@ Test do
   run_test "#{$bin}gt gff3 -addintrons " + \
            "#{$testdata}gt_gff3_addintrons_overlapping_exons.gff3"
   grep last_stderr, /overlapping boundary .* not placing 'intron' inter-feature/
-  run "diff #{last_stdout} #{$testdata}gt_gff3_addintrons_overlapping_exons_with_introns.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_addintrons_overlapping_exons_with_introns.gff3"
 end
 
 Name "gt gff3 test option -addintrons"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -addintrons #{$testdata}addintrons.gff3"
-  run "diff #{last_stdout} #{$testdata}addintrons.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}addintrons.out"
 end
 
 Name "gt gff3 test option -setsource"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -setsource GFF3spec #{$testdata}resetsource.gff3"
-  run "diff #{last_stdout} #{$testdata}resetsource.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}resetsource.out"
 end
 
 Name "gt gff3 test option -offset 1000"
 Keywords "gt_gff3 offset"
 Test do
   run_test "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_gff3_offset_test.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_offset_test.out1000"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_offset_test.out1000"
 end
 
 Name "gt gff3 test option -offset -1"
 Keywords "gt_gff3 offset"
 Test do
   run_test "#{$bin}gt gff3 -offset -1 #{$testdata}gt_gff3_offset_test.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_offset_test.out-1"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_offset_test.out-1"
 end
 
 Name "gt gff3 test option -offset -999"
 Keywords "gt_gff3 offset"
 Test do
   run_test "#{$bin}gt gff3 -offset -999 #{$testdata}gt_gff3_offset_test.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_offset_test.out-999"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_offset_test.out-999"
 end
 
 Name "gt gff3 test option -offset -1000 (start 0)"
@@ -371,14 +371,14 @@ Name "gt gff3 test option -offsetfile"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -offsetfile #{$testdata}gt_gff3_offsetfile_test.offsetfile #{$testdata}gt_gff3_offsetfile_test.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_offsetfile_test.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_offsetfile_test.out"
 end
 
 Name "gt gff3 test option -mergefeat"
 Keywords "gt_gff3 mergefeat"
 Test do
   run_test "#{$bin}gt gff3 -sort -mergefeat #{$testdata}mergefeat.gff3"
-  run "diff #{last_stdout} #{$testdata}mergefeat.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}mergefeat.out"
 end
 
 Name "gt gff3 fail option -offsetfile"
@@ -778,7 +778,7 @@ Name "gt gff3 minimal fasta file"
 Keywords "gt_gff3 fasta"
 Test do
   run_test "#{$bin}gt gff3 -width 50 #{$testdata}minimal_fasta.gff3"
-  run "diff #{last_stdout} #{$testdata}minimal_fasta.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}minimal_fasta.gff3"
 end
 
 Name "gt gff3 minimal fasta file (without directive)"
@@ -786,7 +786,7 @@ Keywords "gt_gff3 fasta"
 Test do
   run_test "#{$bin}gt gff3 -width 50 " +
            "#{$testdata}minimal_fasta_without_directive.gff3"
-  run "diff #{last_stdout} #{$testdata}minimal_fasta.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}minimal_fasta.gff3"
 end
 
 Name "gt gff3 standard fasta example"
@@ -805,21 +805,21 @@ Name "gt gff3 two fasta sequences"
 Keywords "gt_gff3 fasta"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}two_fasta_seqs.gff3"
-  run "diff #{last_stdout} #{$testdata}two_fasta_seqs.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}two_fasta_seqs.gff3"
 end
 
 Name "gt gff3 two fasta sequences without sequence region"
 Keywords "gt_gff3 fasta"
 Test do
   run_test "#{$bin}gt gff3 -sort #{$testdata}two_fasta_seqs_without_sequence_regions.gff3"
-  run "diff #{last_stdout} #{$testdata}two_fasta_seqs.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}two_fasta_seqs.gff3"
 end
 
 Name "gt gff3 (-retainids)"
 Keywords "gt_gff3 retainids"
 Test do
   run_test "#{$bin}gt gff3 -retainids #{$testdata}retainids.gff3"
-  run "diff #{last_stdout} #{$testdata}retainids.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}retainids.gff3"
 end
 
 Name "gt gff3 ID not unique (-retainids)"
@@ -827,14 +827,14 @@ Keywords "gt_gff3 retainids"
 Test do
   run_test "#{$bin}gt gff3 -retainids #{$testdata}retain_1.gff3 " +
            "#{$testdata}retain_2.gff3"
-  run "diff #{last_stdout} #{$testdata}retain_both.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}retain_both.gff3"
 end
 
 Name "gt gff3 multi-feature (-retainids)"
 Keywords "gt_gff3 multi-feature retainids"
 Test do
   run_test "#{$bin}gt gff3 -retainids #{$testdata}multi_feature_simple.gff3"
-  run "diff #{last_stdout} #{$testdata}multi_feature_simple.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}multi_feature_simple.gff3"
 end
 
 Name "gt gff3 multi-feature, ID not unique (-retainids)"
@@ -843,21 +843,21 @@ Test do
   run_test "#{$bin}gt gff3 -retainids #{$testdata}multi_feature_simple.gff3 " +
            "#{$testdata}multi_feature_simple.gff3 " +
            "#{$testdata}multi_feature_simple.gff3"
-  run "diff #{last_stdout} #{$testdata}multi_feature_multi.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}multi_feature_multi.gff3"
 end
 
 Name "gt gff3 simple multi-feature (round-trip)"
 Keywords "gt_gff3 multi-feature"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}multi_feature_simple.gff3"
-  run "diff #{last_stdout} #{$testdata}multi_feature_simple.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}multi_feature_simple.gff3"
 end
 
 Name "gt gff3 simple multi-feature (reverted)"
 Keywords "gt_gff3 multi-feature"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}multi_feature_simple_reverted.gff3"
-  run "diff #{last_stdout} #{$testdata}multi_feature_simple.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}multi_feature_simple.gff3"
 end
 
 Name "gt gff3 simple multi-feature (undefined parent)"
@@ -881,14 +881,14 @@ Keywords "gt_gff3 multi-feature pseudo-feature"
 Test do
   run_test "#{$bin}gt gff3 -width 50 " +
            "#{$testdata}standard_fasta_example_with_id.gff3"
-  run "diff #{last_stdout} #{$testdata}standard_fasta_example_with_id.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_fasta_example_with_id.out"
 end
 
 Name "gt gff3 pseudo-feature minimal"
 Keywords "gt_gff3 pseudo-feature"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}pseudo_feature_minimal.gff3"
-  run "diff #{last_stdout} #{$testdata}pseudo_feature_minimal.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}pseudo_feature_minimal.gff3"
 end
 
 Name "gt gff3 negative sequence region start"
@@ -932,7 +932,7 @@ Name "gt gff3 multiple top-level parents"
 Keywords "gt_gff3 pseudo-feature"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}multiple_top_level_parents.gff3"
-  run "diff #{last_stdout} #{$testdata}multiple_top_level_parents.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}multiple_top_level_parents.gff3"
 end
 
 Name "gt gff3 undefined parent (one of two)"
@@ -953,7 +953,7 @@ Name "gt gff3 missing gff3 header (-tidy)"
 Keywords "gt_gff3 missing_gff3_header"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}missing_gff3_header.gff3"
-  run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
 Name "gt gff3 empty attribute value"
@@ -981,7 +981,7 @@ Name "gt gff3 duplicate attribute (-tidy)"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}duplicate_attribute.gff3"
-  run "diff #{last_stdout} #{$testdata}duplicate_attribute_fixed.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}duplicate_attribute_fixed.gff3"
 end
 
 Name "gt gff3 multi-feature with different parent 1"
@@ -998,7 +998,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -tidy " +
            "#{$testdata}multi_feature_with_different_parent_1.gff3"
-  run "diff #{last_stdout} " +
+  run "diff --strip-trailing-cr #{last_stdout} " +
       "#{$testdata}multi_feature_with_different_parent_1_tidy.gff3"
 end
 
@@ -1016,7 +1016,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -tidy " +
            "#{$testdata}multi_feature_with_different_parent_2.gff3"
-  run "diff #{last_stdout} " +
+  run "diff --strip-trailing-cr #{last_stdout} " +
       "#{$testdata}multi_feature_with_different_parent_2_tidy.gff3"
 end
 
@@ -1025,7 +1025,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -sort #{$testdata}sequence_region_1.gff3 " +
            "#{$testdata}sequence_region_2.gff3 "
-  run "diff #{last_stdout} #{$testdata}sequence_region_joined.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}sequence_region_joined.gff3"
 end
 
 Name "gt gff3 print very long attributes"
@@ -1053,7 +1053,7 @@ Name "custom_stream (C)"
 Keywords "gt_gff3 examples"
 Test do
   run_test "#{$bin}examples/custom_stream"
-  run "diff #{last_stdout} #{$testdata}standard_gene_simple.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_simple.gff3"
 end
 
 1.upto(12) do |i|
@@ -1075,7 +1075,7 @@ Name "gt gff3 (CDS check fail 1, -tidy)"
 Keywords "gt_gff3 cds_check"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_1.gff3"
-  run "diff #{last_stdout} #{$testdata}cds_check_succ_1.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}cds_check_succ_1.gff3"
 end
 
 Name "gt gff3 (CDS check fail 2)"
@@ -1089,7 +1089,7 @@ Name "gt gff3 (CDS check fail 2, -tidy)"
 Keywords "gt_gff3 cds_check"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_2.gff3"
-  run "diff #{last_stdout} #{$testdata}cds_check_succ_5.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}cds_check_succ_5.gff3"
 end
 
 Name "gt gff3 (CDS check fail 3)"
@@ -1103,7 +1103,7 @@ Name "gt gff3 (CDS check fail 3, -tidy)"
 Keywords "gt_gff3 cds_check"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_3.gff3"
-  run "diff #{last_stdout} #{$testdata}cds_check_succ_9.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}cds_check_succ_9.gff3"
 end
 
 Name "gt gff3 (CDS check fail 4)"
@@ -1117,14 +1117,14 @@ Name "gt gff3 (CDS check fail 4, -tidy)"
 Keywords "gt_gff3 cds_check"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_check_fail_4.gff3"
-  run "diff #{last_stdout} #{$testdata}cds_check_succ_12.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}cds_check_succ_12.gff3"
 end
 
 Name "gt gff3 (CDS check with short exons 1)"
 Keywords "gt_gff3 cds_check"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_phases1.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_phases1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_phases1.out"
 end
 
 Name "gt gff3 (CDS check with short exons 2)"
@@ -1132,14 +1132,14 @@ Keywords "gt_gff3 cds_check"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}gt_gff3_phases2.gff3 > out"
   grep last_stderr, /has the wrong phase 0 -> correcting it to 1/
-  run "diff out #{$testdata}gt_gff3_phases1.out"
+  run "diff --strip-trailing-cr out #{$testdata}gt_gff3_phases1.out"
 end
 
 Name "gt gff3 (CDS check with short exons 3)"
 Keywords "gt_gff3 cds_check"
 Test do
   run_test "#{$bin}gt gff3 -tidy -retainids #{$testdata}gt_gff3_phases3.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_gff3_phases3.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_phases3.out"
 end
 
 4.upto(7) do |i|
@@ -1154,7 +1154,7 @@ Name "gt gff3 (-addids no)"
 Keywords "gt_gff3 addids"
 Test do
   run_test "#{$bin}gt gff3 -addids no #{$testdata}standard_gene_simple.gff3"
-  run "diff #{last_stdout} #{$testdata}standard_gene_simple.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_simple.gff3"
 end
 
 Name "gt gff3 lone node with undefined range"
@@ -1170,7 +1170,7 @@ Keywords "gt_gff3 undefinedrange"
 Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}gt_gff3_undefined_range.gff3"
   grep last_stderr, /has undefined range, discarding/
-  run "diff #{last_stdout} #{$testdata}gt_gff3_undefined_range_tidy.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gff3_undefined_range_tidy.gff3"
 end
 
 Name "gt gff3 parent node with undefined range"
@@ -1201,7 +1201,7 @@ Name "gt gff3 reverse feature order"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}reverse_feature_order.gff3"
-  run "diff #{last_stdout} #{$testdata}reverse_feature_order.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}reverse_feature_order.out"
 end
 
 Name "gt gff3 reverse feature order (-strict)"
@@ -1215,7 +1215,7 @@ Name "gt gff3 reverse feature order, multiple parents"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}reverse_feature_order_multiple_parents.gff3"
-  run "diff #{last_stdout} #{$testdata}reverse_feature_order_multiple_parents.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}reverse_feature_order_multiple_parents.out"
 end
 
 Name "gt gff3 reverse feature order, multiple parents (-strict)"
@@ -1229,7 +1229,7 @@ Name "gt gff3 reverse feature order, multi-level orphans"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}reverse_standard_gene_as_tree.gff3"
-  run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.gff3"
 end
 
 Name "gt gff3 reverse feature order, multi-level orphans (-strict)"
@@ -1278,14 +1278,14 @@ Name "gt gff3 header file"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}header.gff3"
-  run "diff #{last_stdout} #{$testdata}header.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}header.gff3"
 end
 
 Name "gt gff3 header 3.1.21 file"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}header_3_1_21.gff3"
-  run "diff #{last_stdout} #{$testdata}header.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}header.gff3"
 end
 
 Name "gt gff3 fasta sequence file"
@@ -1313,7 +1313,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}meta_directives.gff3"
   grep last_stderr, ".*", true
-  run "diff #{last_stdout} #{$testdata}meta_directives.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}meta_directives.gff3"
 end
 
 Name "gt gff3 unknown meta directive"
@@ -1321,7 +1321,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}unknown_meta_directive.gff3"
   grep last_stderr, "unknown meta-directive encountered in line"
-  run "diff #{last_stdout} #{$testdata}unknown_meta_directive.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}unknown_meta_directive.gff3"
 end
 
 Name "gt gff3 unknown meta directive (without argument)"
@@ -1330,7 +1330,7 @@ Test do
   run_test "#{$bin}gt gff3 " +
            "#{$testdata}unknown_meta_directive_without_argument.gff3"
   grep last_stderr, "unknown meta-directive encountered in line"
-  run "diff #{last_stdout} " +
+  run "diff --strip-trailing-cr #{last_stdout} " +
       "#{$testdata}unknown_meta_directive_without_argument.gff3"
 end
 
@@ -1400,7 +1400,7 @@ Name "gt gff3 Is_circular example"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}is_circular_example.gff3"
-  run "diff #{last_stdout} #{$testdata}is_circular_example_with_sequence_region.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}is_circular_example_with_sequence_region.gff3"
 end
 
 Name "gt gff3 Is_circular example (with sequence-region)"
@@ -1414,7 +1414,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}cds_feature_with_multiple_parents_tidied.gff3"
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_feature_with_multiple_parents.gff3"
-  run "diff #{last_stdout} #{$testdata}cds_feature_with_multiple_parents_tidied.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}cds_feature_with_multiple_parents_tidied.gff3"
 end
 
 Name "gt gff3 cds_with_multiple_parents_1.gff3"
@@ -1422,7 +1422,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}cds_with_multiple_parents_1_tidied.gff3"
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_with_multiple_parents_1.gff3"
-  run "diff #{last_stdout} #{$testdata}cds_with_multiple_parents_1_tidied.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}cds_with_multiple_parents_1_tidied.gff3"
 end
 
 Name "gt gff3 cds_with_multiple_parents_2.gff3"
@@ -1430,7 +1430,7 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}cds_with_multiple_parents_2_tidied.gff3"
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_with_multiple_parents_2.gff3"
-  run "diff #{last_stdout} #{$testdata}cds_with_multiple_parents_2_tidied.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}cds_with_multiple_parents_2_tidied.gff3"
 end
 
 Name "gt gff3 MD5 seqid (missing seqid)"
@@ -1482,7 +1482,7 @@ Test do
   run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}gt_gff3_linesort.in.gff3 > 2"
   run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
   run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
-  run "diff 1 3"
+  run "diff --strip-trailing-cr 1 3"
 end
 
 Name "gt gff3 -sortlines (multiple sequences)"
@@ -1500,7 +1500,7 @@ Keywords "gt_gff3 linesorting"
 Test do
   run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}empty.gff3 > 1"
   run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}empty.gff3 > 2"
-  run "diff 1 2"
+  run "diff --strip-trailing-cr 1 2"
 end
 
 Name "gt gff3 -sortlines (annotation with sequence)"
@@ -1512,7 +1512,7 @@ Test do
   run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}standard_fasta_example.gff3 > 2"
   run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
   run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
-  run "diff 1 3"
+  run "diff --strip-trailing-cr 1 3"
 end
 
 Name "gt gff3 -sortlines (spaces)"
@@ -1520,7 +1520,7 @@ Keywords "gt_gff3 linesorting"
 Test do
   1.upto(3) do |i|
     run_test "#{$bin}gt gff3 -sortlines #{$testdata}linesort_test_#{i}.gff3"
-    run "diff #{last_stdout} #{$testdata}linesort_test_#{i}.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}linesort_test_#{i}.out"
   end
 end
 
@@ -1529,21 +1529,21 @@ Keywords "gt_gff3 numsorting"
 Test do
   run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}eden.gff3 > 1"
   run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}eden.gff3"
-  run "diff #{last_stdout} 1"
+  run "diff --strip-trailing-cr #{last_stdout} 1"
 end
 
 Name "gt gff3 -sortnum (numeric seqids only)"
 Keywords "gt_gff3 numsorting"
 Test do
   run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}gff3_numeric_only.gff3"
-  run "diff #{last_stdout} #{$testdata}gff3_numeric_only.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_numeric_only.out"
 end
 
 Name "gt gff3 -sortnum (mixed numeric + alphanumeric seqids)"
 Keywords "gt_gff3 numsorting"
 Test do
   run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}gff3_numeric_mixed.gff3"
-  run "diff #{last_stdout} #{$testdata}gff3_numeric_mixed.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_numeric_mixed.out"
 end
 
 Name "gt gff3 -sortnum (implicit -sort)"
@@ -1551,7 +1551,7 @@ Keywords "gt_gff3 numsorting"
 Test do
   run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}gff3_numeric_a.gff #{$testdata}gff3_numeric_a.gff  > 1"
   run_test "#{$bin}gt gff3 -retainids -sortnum #{$testdata}gff3_numeric_a.gff #{$testdata}gff3_numeric_a.gff "
-  run "diff #{last_stdout} 1"
+  run "diff --strip-trailing-cr #{last_stdout} 1"
 end
 
 Name "gt gff3 (double free regression)"
@@ -1572,7 +1572,7 @@ def large_gff3_test(name, file)
   Test do
     run_test("#{$bin}gt gff3 -sort -width 80 #{$gttestdata}gff3/#{file}",
              :maxtime => 320)
-    run      "diff #{last_stdout} #{$gttestdata}gff3/#{file}.sorted"
+    run      "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}gff3/#{file}.sorted"
   end
 
   Name "gt gff3 #{name} (sorted)"
@@ -1580,7 +1580,7 @@ def large_gff3_test(name, file)
   Test do
     run_test("#{$bin}gt gff3 -width 80 #{$gttestdata}gff3/#{file}.sorted",
              :maxtime => 320)
-    run      "diff #{last_stdout} #{$gttestdata}gff3/#{file}.sorted"
+    run      "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}gff3/#{file}.sorted"
   end
 end
 
@@ -1594,7 +1594,7 @@ if $gttestdata then
     run_test "#{$bin}gt gff3 -tidy -sort " +
              "#{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3",
              :maxtime => 3600
-    run      "diff #{last_stdout} #{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3"
+    run      "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3"
   end
 
   Name "gt gff3 TAIR10"
@@ -1603,7 +1603,7 @@ if $gttestdata then
     run_test "#{$bin}gt gff3 -tidy -sort " +
              "#{$gttestdata}gff3testruns/TAIR10_GFF3_genes.gff",
              :maxtime => 3600
-    run      "diff #{last_stdout} #{$gttestdata}gff3testruns/tair.gff3"
+    run      "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}gff3testruns/tair.gff3"
   end
 
   Name "gt gff3 Fruitfly ESTs"
@@ -1611,7 +1611,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt gff3 -sort #{$gttestdata}gff3testruns/EST.gff",
              :maxtime => 3600
-    run      "diff #{last_stdout} #{$gttestdata}gff3testruns/fruitfly.gff3"
+    run      "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}gff3testruns/fruitfly.gff3"
   end
 
   Name "gt gff3 Homo sapiens ENSEMBL"
@@ -1620,6 +1620,6 @@ if $gttestdata then
     run_test "#{$bin}gt gff3 -sort " +
              "#{$gttestdata}gff3testruns/Homo_sapiens_ENSEMBL.gff3",
              :maxtime => 3600
-    run      "diff #{last_stdout} #{$gttestdata}gff3testruns/ensembl.gff3"
+    run      "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}gff3testruns/ensembl.gff3"
   end
 end

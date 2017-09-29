@@ -49,5 +49,5 @@ Test do
   FileUtils.copy("#{$testdata}Duplicate.fna", ".")
   run_test "#{$bin}gt shredder -minlength 30 -maxlength 30 " \
            "Duplicate.fna"
-  run "diff #{last_stdout} #{$testdata}Duplicate.shreddered"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}Duplicate.shreddered"
 end

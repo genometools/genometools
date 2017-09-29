@@ -417,7 +417,11 @@ int gt_bittab_unit_test(GtError *err)
   }
 
   /* test gt_bittab_show */
-  fp = gt_fa_xfopen("/dev/null", "w");
+  #ifdef _WIN32
+    fp = gt_fa_xfopen("nul", "w");
+  #else
+    fp = gt_fa_xfopen("/dev/null", "w");
+  #endif
   b = gt_bittab_new(80);
   for (i = 0; i < 80; i++) {
     if (i % 2)

@@ -14,14 +14,14 @@ Name "gt merge test 3"
 Keywords "gt_merge"
 Test do
   run_test "#{$bin}gt merge #{$testdata}gt_merge_prob_1.in1 #{$testdata}gt_merge_prob_1.in2"
-  run "diff #{last_stdout} #{$testdata}gt_merge_prob_1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_merge_prob_1.out"
 end
 
 Name "gt merge test 4"
 Keywords "gt_merge"
 Test do
   run_test "#{$bin}gt merge #{$testdata}gt_merge_prob_2.in1 #{$testdata}gt_merge_prob_2.in2"
-  run "diff #{last_stdout} #{$testdata}gt_merge_prob_2.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_merge_prob_2.out"
 end
 
 Name "gt merge unsorted file"
@@ -51,5 +51,5 @@ Name "gt merge with sequence"
 Keywords "gt_merge"
 Test do
   run_test "#{$bin}gt merge #{$testdata}minimal_fasta.gff3 #{$testdata}two_fasta_seqs.gff3"
-  run "diff #{last_stdout} #{$testdata}merge_with_seq.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}merge_with_seq.gff3"
 end

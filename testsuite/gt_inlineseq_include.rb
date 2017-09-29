@@ -2,8 +2,8 @@ Name "gt inlineseq_split (standard gene)"
 Keywords "gt_inlineseq_split gt_inlineseq"
 Test do
   run_test "#{$bin}gt inlineseq_split -seqfile tmp.fas -gff3file tmp.gff3 #{$testdata}/standard_fasta_example.gff3"
-  run "diff tmp.fas #{$testdata}standard_fasta_example.fas"
-  run "diff tmp.gff3 #{$testdata}standard_fasta_example_only_annotation.gff3"
+  run "diff --strip-trailing-cr tmp.fas #{$testdata}standard_fasta_example.fas"
+  run "diff --strip-trailing-cr tmp.gff3 #{$testdata}standard_fasta_example_only_annotation.gff3"
 end
 
 Name "gt inlineseq_split (nonexistant input)"
@@ -33,16 +33,16 @@ Name "gt inlineseq_split (no annotation)"
 Keywords "gt_inlineseq_split gt_inlineseq"
 Test do
   run_test "#{$bin}gt inlineseq_split -seqfile tmp.fas #{$testdata}fasta_seq.gff3"
-  run "diff #{last_stdout} #{$testdata}empty.gff3"
-  run "diff tmp.fas #{$testdata}fasta_seq.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}empty.gff3"
+  run "diff --strip-trailing-cr tmp.fas #{$testdata}fasta_seq.fas"
 end
 
 Name "gt inlineseq_split (no sequence)"
 Keywords "gt_inlineseq_split gt_inlineseq"
 Test do
   run_test "#{$bin}gt inlineseq_split -seqfile tmp.fas #{$testdata}eden.gff3"
-  run "diff #{last_stdout} #{$testdata}eden_only_annotation.gff3"
-  run "diff tmp.fas #{$testdata}empty_file"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}eden_only_annotation.gff3"
+  run "diff --strip-trailing-cr tmp.fas #{$testdata}empty_file"
 end
 
 Name "gt inlineseq_add (split & add)"
@@ -51,7 +51,7 @@ Test do
   run "#{$bin}gt gff3 -sort -tidy #{$testdata}/standard_fasta_example.gff3 > in.gff3"
   run "#{$bin}gt inlineseq_split -seqfile tmp.fas -gff3file tmp.gff3 < in.gff3"
   run_test "#{$bin}gt inlineseq_add -seqfile tmp.fas -matchdesc tmp.gff3"
-  run "diff #{last_stdout} #{$testdata}standard_fasta_example_rejoined.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_fasta_example_rejoined.gff3"
 end
 
 Name "gt inlineseq_add (MD5)"

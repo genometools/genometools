@@ -4,7 +4,7 @@ Test do
   seq = "gt_seqorder_test.fas"
   run "#{$bin}gt encseq encode #$testdata#{seq}"
   run_test "#{$bin}gt seqorder -sort #{seq}"
-  run "diff #{last_stdout} #{$testdata}gt_seqorder_test_sort.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_seqorder_test_sort.fas"
 end
 
 Name "gt seqorder -sorthdr test"
@@ -13,7 +13,7 @@ Test do
   seq = "gt_seqorder_test.fas"
   run "#{$bin}gt encseq encode #$testdata#{seq}"
   run_test "#{$bin}gt seqorder -sorthdr #{seq}"
-  run "diff #{last_stdout} #{$testdata}gt_seqorder_test_sorthdr.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_seqorder_test_sorthdr.fas"
 end
 
 Name "gt seqorder -sortlength test"
@@ -22,7 +22,7 @@ Test do
   seq = "gt_seqorder_test.fas"
   run "#{$bin}gt encseq encode #$testdata#{seq}"
   run_test "#{$bin}gt seqorder -sortlength #{seq}"
-  run "diff #{last_stdout} #{$testdata}gt_seqorder_test_sortlength.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_seqorder_test_sortlength.fas"
 end
 
 Name "gt seqorder -sorthdrnum test"
@@ -33,7 +33,7 @@ Test do
   run_test "#{$bin}gt seqorder -shuffle #{seq} > out"
   run "#{$bin}gt encseq encode out"
   run_test "#{$bin}gt seqorder -sorthdrnum #{seq}"
-  run "diff #{last_stdout} #{$testdata}gt_seqorder_test.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_seqorder_test.fas"
 end
 
 Name "gt seqorder -revsort test"
@@ -42,7 +42,7 @@ Test do
   seq = "gt_seqorder_test.fas"
   run "#{$bin}gt encseq encode #$testdata#{seq}"
   run_test "#{$bin}gt seqorder -revsort #{seq}"
-  run "diff #{last_stdout} #{$testdata}gt_seqorder_test_revsort.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_seqorder_test_revsort.fas"
 end
 
 Name "gt seqorder -invert test"
@@ -69,7 +69,7 @@ Test do
   sorted_original = last_stdout
   run_test "#{$bin}gt seqorder -shuffle #{seq}"
   run "sort #{last_stdout}"
-  run "diff #{last_stdout} #{sorted_original}"
+  run "diff --strip-trailing-cr #{last_stdout} #{sorted_original}"
 end
 
 Name "gt seqorder without description support"

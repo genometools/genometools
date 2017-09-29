@@ -5,7 +5,7 @@ Keywords "gt_fingerprint"
 Test do
   FileUtils.copy "#{$testdata}U89959_ests.fas", "."
   run_test "#{$bin}gt fingerprint U89959_ests.fas | sort | uniq"
-  run "diff #{last_stdout} #{$testdata}U89959_ests.checklist_uniq"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_ests.checklist_uniq"
 end
 
 Name "fingerprint (nonexistent file)"
@@ -19,7 +19,7 @@ Keywords "gt_fingerprint"
 Test do
   FileUtils.copy "#{$testdata}U89959_ests_gi_8690080_soft_masked.fas", "."
   run_test("#{$bin}gt fingerprint U89959_ests_gi_8690080_soft_masked.fas")
-  run "diff #{last_stdout} #{$testdata}U89959_ests_gi_8690080_unmasked.checklist"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_ests_gi_8690080_unmasked.checklist"
 end
 
 Name "fingerprint -check (success)"
@@ -52,9 +52,9 @@ Name "fingerprint -check (failure)"
 Keywords "gt_fingerprint"
 Test do
   FileUtils.copy "#{$testdata}U89959_ests.fas", "."
-  run_test("#{$bin}gt sequniq U89959_ests.fas | #{$memcheck}" +
-           "#{$bin}gt fingerprint -check #{$testdata}U89959_ests.checklist -",
-           :retval => 1)
+  run("#{$bin}gt sequniq U89959_ests.fas > U89959_ests.out")
+  run_test("#{$memcheck} #{$bin}gt fingerprint -check " + 
+            "#{$testdata}U89959_ests.checklist U89959_ests.out", :retval => 1)
   grep last_stderr, /fingerprint comparison failed/
 end
 
@@ -87,7 +87,7 @@ Test do
   FileUtils.copy "#{$testdata}U89959_ests.fas", "."
   run_test "#{$bin}gt fingerprint -extract 6d3b4b9db4531cda588528f2c69c0a57 " +
            "U89959_ests.fas"
-  run "diff #{last_stdout} #{$testdata}gt_fingerprint_extract.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_fingerprint_extract.out"
 end
 
 Name "fingerprint -extract (not found)"

@@ -217,7 +217,7 @@ void gt_progressbar_start(GT_UNUSED const GtUint64
 #else
   /* XXX */
   fprintf(stderr, "gt_progressbar_start() not implemented\n");
-  exit(EXIT_FAILURE);
+  /* exit(EXIT_FAILURE); */
 #endif
 }
 
@@ -239,6 +239,6 @@ void gt_progressbar_stop(void)
 #else
   /* XXX */
   fprintf(stderr, "gt_progressbar_stop() not implemented\n");
-  exit(EXIT_FAILURE);
+  /* exit(EXIT_FAILURE); */
 #endif
 }

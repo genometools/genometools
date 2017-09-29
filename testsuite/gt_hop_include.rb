@@ -9,7 +9,7 @@ Test do
   run_test "#{$bin}gt hop -c genome.fas "+
            "-map #{$testdata}hop/map.bam -aggressive "+
            "-reads #{$testdata}hop/reads.fastq"
-  run "diff using_sam.fastq hop_reads.fastq"
+  run "diff --strip-trailing-cr using_sam.fastq hop_reads.fastq"
 end
 
 Name "gt hop: -aggressive"
@@ -19,7 +19,7 @@ Test do
   run_test "#{$bin}gt hop -c genome.fas "+
            "-map #{$testdata}hop/map.bam -aggressive "+
            "-reads #{$testdata}hop/reads.fastq"
-  run "diff #{$testdata}hop/hop_aggressive.fastq hop_reads.fastq"
+  run "diff --strip-trailing-cr #{$testdata}hop/hop_aggressive.fastq hop_reads.fastq"
 end
 
 Name "gt hop: -moderate"
@@ -29,7 +29,7 @@ Test do
   run_test "#{$bin}gt hop -c genome.fas "+
            "-map #{$testdata}hop/map.bam -moderate "+
            "-reads #{$testdata}hop/reads.fastq"
-  run "diff #{$testdata}hop/hop_moderate.fastq hop_reads.fastq"
+  run "diff --strip-trailing-cr #{$testdata}hop/hop_moderate.fastq hop_reads.fastq"
 end
 
 Name "gt hop: -conservative"
@@ -39,7 +39,7 @@ Test do
   run_test "#{$bin}gt hop -c genome.fas "+
            "-map #{$testdata}hop/map.bam -conservative "+
            "-reads #{$testdata}hop/reads.fastq"
-  run "diff #{$testdata}hop/hop_conservative.fastq hop_reads.fastq"
+  run "diff --strip-trailing-cr #{$testdata}hop/hop_conservative.fastq hop_reads.fastq"
 end
 
 Name "gt hop: -expert -hmin 4"
@@ -49,7 +49,7 @@ Test do
   run_test "#{$bin}gt hop -c genome.fas "+
            "-map #{$testdata}hop/map.bam -expert -hmin 4 "+
            "-reads #{$testdata}hop/reads.fastq"
-  run "diff #{$testdata}hop/hop_hmin4.fastq hop_reads.fastq"
+  run "diff --strip-trailing-cr #{$testdata}hop/hop_hmin4.fastq hop_reads.fastq"
 end
 
 Name "gt hop: -expert -read-hmin 3"
@@ -59,7 +59,7 @@ Test do
   run_test "#{$bin}gt hop -c genome.fas "+
            "-map #{$testdata}hop/map.bam -expert -read-hmin 3 "+
            "-reads #{$testdata}hop/reads.fastq"
-  run "diff #{$testdata}hop/hop_read-hmin3.fastq hop_reads.fastq"
+  run "diff --strip-trailing-cr #{$testdata}hop/hop_read-hmin3.fastq hop_reads.fastq"
 end
 
 Name "gt hop: -reads with 2 input files"
@@ -70,8 +70,8 @@ Test do
            "-map #{$testdata}hop/map2.bam -aggressive "+
            "-reads #{$testdata}hop/10reads.fastq "+
            "#{$testdata}hop/other10reads.fastq"
-  run "diff #{$testdata}hop/hop_10reads.fastq hop_10reads.fastq"
-  run "diff #{$testdata}hop/hop_other10reads.fastq hop_other10reads.fastq"
+  run "diff --strip-trailing-cr #{$testdata}hop/hop_10reads.fastq hop_10reads.fastq"
+  run "diff --strip-trailing-cr #{$testdata}hop/hop_other10reads.fastq hop_other10reads.fastq"
 end
 
 Name "gt hop: -expert -cogmin"

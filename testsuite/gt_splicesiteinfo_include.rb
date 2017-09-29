@@ -26,7 +26,7 @@ Keywords "gt_splicesiteinfo"
 Test do
   FileUtils.copy "#{$testdata}gt_splicesiteinfo_test_1.fas", "."
   run_test "#{$bin}gt splicesiteinfo -seqfile gt_splicesiteinfo_test_1.fas -matchdesc #{$testdata}gt_splicesiteinfo_test_1.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_splicesiteinfo_test_1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_splicesiteinfo_test_1.out"
 end
 
 Name "gt splicesiteinfo test 2"
@@ -34,7 +34,7 @@ Keywords "gt_splicesiteinfo"
 Test do
   FileUtils.copy "#{$testdata}gt_splicesiteinfo_test_2.fas", "."
   run_test "#{$bin}gt splicesiteinfo -seqfile gt_splicesiteinfo_test_2.fas -matchdesc #{$testdata}gt_splicesiteinfo_test_2.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_splicesiteinfo_test_2.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_splicesiteinfo_test_2.out"
 end
 
 Name "gt splicesiteinfo test 3"
@@ -50,7 +50,7 @@ Keywords "gt_splicesiteinfo"
 Test do
   FileUtils.copy "#{$testdata}gt_splicesiteinfo_test_4.fas", "."
   run_test "#{$bin}gt splicesiteinfo -seqfile gt_splicesiteinfo_test_4.fas -matchdesc #{$testdata}gt_splicesiteinfo_test_4.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_splicesiteinfo_test_4.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_splicesiteinfo_test_4.out"
 end
 
 Name "gt splicesiteinfo test 5 (-addintrons)"
@@ -58,7 +58,7 @@ Keywords "gt_splicesiteinfo"
 Test do
   FileUtils.copy "#{$testdata}gt_splicesiteinfo_test_5.fas", "."
   run_test "#{$bin}gt splicesiteinfo -addintrons -seqfile gt_splicesiteinfo_test_5.fas -matchdesc #{$testdata}gt_splicesiteinfo_test_5.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_splicesiteinfo_test_5.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_splicesiteinfo_test_5.out"
 end
 
 Name "gt splicesiteinfo test 6"

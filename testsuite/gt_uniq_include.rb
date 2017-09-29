@@ -29,7 +29,7 @@ Keywords "gt_uniq"
 Test do
   run_test "#{$bin}gt uniq -v -o test.out " +
            "#{$testdata}standard_gene_as_tree.gff3"
-  run "diff test.out #{$testdata}standard_gene_as_tree.gff3"
+  run "diff --strip-trailing-cr test.out #{$testdata}standard_gene_as_tree.gff3"
 end
 
 1.upto(6) do |i|
@@ -37,6 +37,6 @@ end
   Keywords "gt_uniq"
   Test do
     run_test "#{$bin}gt uniq #{$testdata}gt_uniq_test_#{i}.gff3"
-    run "diff #{last_stdout} #{$testdata}gt_uniq_test_#{i}.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_uniq_test_#{i}.out"
   end
 end

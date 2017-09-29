@@ -5,7 +5,7 @@ Test do
   FileUtils.copy("#{$testdata}nGASP/protein_100.fas", ".")
   run_test "#{$bin}gt seqfilter -minlength 1000 " \
     "./protein_100.fas"
-  run "diff #{last_stdout} #{$testdata}nGASP/protein_long.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}nGASP/protein_long.fas"
 end
 
 Name "gt seqfilter -maxlength"
@@ -14,7 +14,7 @@ Test do
   FileUtils.copy("#{$testdata}nGASP/protein_100.fas", ".")
   run_test "#{$bin}gt seqfilter -maxlength 499 " \
     "./protein_100.fas"
-  run "diff #{last_stdout} #{$testdata}nGASP/protein_short.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}nGASP/protein_short.fas"
 end
 
 Name "gt seqfilter -maxseqnum"
@@ -23,7 +23,7 @@ Test do
   FileUtils.copy("#{$testdata}nGASP/protein_100.fas", ".")
   run_test "#{$bin}gt seqfilter -maxseqnum 10 " \
     "./protein_100.fas"
-  run "diff #{last_stdout} #{$testdata}nGASP/protein_10.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}nGASP/protein_10.fas"
 end
 
 Name "gt seqfilter -step"
@@ -32,7 +32,7 @@ Test do
   FileUtils.copy("#{$testdata}nGASP/protein_100.fas", ".")
   run_test "#{$bin}gt seqfilter -step 10 " \
     "./protein_100.fas"
-  run "diff #{last_stdout} #{$testdata}nGASP/protein_10th.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}nGASP/protein_10th.fas"
 end
 
 Name "gt seqfilter -sample"
@@ -49,9 +49,9 @@ Test do
   FileUtils.copy("#{$testdata}U89959_ests.fas", ".")
   run_test "#{$bin}gt seqfilter -nowildcards " \
     "./U89959_ests.fas"
-  run "diff #{last_stdout} #{$testdata}U89959_ests_no_wildcards.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_ests_no_wildcards.fas"
   FileUtils.copy("#{$testdata}seqfilter_prot_wildcard.fas", ".")
   run_test "#{$bin}gt seqfilter -nowildcards " \
     "./seqfilter_prot_wildcard.fas"
-  run "diff #{last_stdout} #{$testdata}seqfilter_prot_wildcard_no_wildcards.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}seqfilter_prot_wildcard_no_wildcards.fas"
 end

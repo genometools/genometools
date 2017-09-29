@@ -26,10 +26,10 @@ def checkgreedyfwdmat(queryfile,ms)
   run "mv #{last_stdout} tmp.fmi"
   run_test(makegreedyfwdmatcall(queryfile,"-esa sfx",ms), :maxtime => 1200)
   run "mv #{last_stdout} tmp.esa"
-  run "diff tmp.esa tmp.fmi"
+  run "diff --strip-trailing-cr tmp.esa tmp.fmi"
   run_test(makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 1200)
   run "mv #{last_stdout} tmp.pck"
-  run "diff tmp.pck tmp.fmi"
+  run "diff --strip-trailing-cr tmp.pck tmp.fmi"
 end
 
 def checktagerator(queryfile,ms)

@@ -81,7 +81,7 @@ Test do
   run_test "#{$bin}gt sketch -force -style " + \
            "#{$testdata}trackname1.style out.png #{$testdata}eden.gff3 " + \
            "eden2.gff3"
-  run "diff #{last_stdout} #{$testdata}trackname1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}trackname1.out"
   run "test -e out.png"
 end
 
@@ -97,7 +97,7 @@ Keywords "gt_sketch"
 Test do
   run "#{$bin}gt gff3 #{$testdata}gff3_file_1_short.txt > in.gff3"
   run_test "#{$bin}gt sketch -pipe out.png in.gff3 > out.gff3", :maxtime => 600
-  run "diff in.gff3 out.gff3"
+  run "diff --strip-trailing-cr in.gff3 out.gff3"
 end
 
 Name "gt sketch streams <-> file output"
@@ -110,7 +110,7 @@ Test do
     run_test "#{$bin}gt sketch -streams -format #{format} streamout.#{format} #{$testdata}eden.gff3"
     # some formats will diff in their creation date, remove it
     run "sed -i '/CreationDate/d' out.#{format} streamout.#{format}"
-    run "diff out.#{format} streamout.#{format}"
+    run "diff --strip-trailing-cr out.#{format} streamout.#{format}"
   end
 end
 
@@ -119,7 +119,7 @@ Keywords "gt_sketch showrecmaps"
 Test do
   run_test "#{$bin}gt sketch -showrecmaps out.png " +
            "#{$testdata}standard_gene_as_tree.gff3", :maxtime => 600
-  run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
 end
 
 Name "gt sketch -showrecmaps (normal text size)"
@@ -127,7 +127,7 @@ Keywords "gt_sketch showrecmaps"
 Test do
   run_test "#{$bin}gt sketch -showrecmaps out.png " +
            "#{$testdata}gt_sketch_textwidth.gff3", :maxtime => 600
-  run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_0.recmaps"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_sketch_textwidth_0.recmaps"
 end
 
 Name "gt sketch -showrecmaps (narrow image)"
@@ -135,7 +135,7 @@ Keywords "gt_sketch showrecmaps"
 Test do
   run_test "#{$bin}gt sketch -width 300 -showrecmaps out.png " +
            "#{$testdata}gt_sketch_textwidth.gff3", :maxtime => 600
-  run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_1.recmaps"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_sketch_textwidth_1.recmaps"
 end
 
 Name "gt sketch -showrecmaps (large text size)"
@@ -144,7 +144,7 @@ Test do
   run_test "#{$bin}gt sketch -style #{$testdata}bigfonts.style " + \
            "-showrecmaps out.png #{$testdata}gt_sketch_textwidth.gff3", \
            :maxtime => 600
-  run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
 end
 
 Name "gt sketch for transcript (neg. coords in ruler)"
@@ -192,7 +192,7 @@ Test do
            "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
            "#{$testdata}eden.gff3 ", \
            :maxtime => 600
-  run "diff #{last_stdout} #{$testdata}order_sketch_out.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}order_sketch_out.txt"
 end
 
 Name "sketch_constructed (Lua)"

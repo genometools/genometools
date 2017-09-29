@@ -38,14 +38,14 @@ Test do
   run_test "#{$bin}gt chseqids -v -o test.out " +
            "#{$testdata}gt_chseqids_test_1.chseqids " +
            "#{$testdata}gt_chseqids_test_1.gff3"
-  run "diff test.out #{$testdata}gt_chseqids_test_1.out"
+  run "diff --strip-trailing-cr test.out #{$testdata}gt_chseqids_test_1.out"
 end
 
 Name "gt chseqids test 2"
 Keywords "gt_chseqids"
 Test do
   run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_2.chseqids #{$testdata}gt_chseqids_test_2.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_chseqids_test_2.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_chseqids_test_2.out"
 end
 
 Name "gt chseqids test 3"
@@ -58,26 +58,26 @@ Name "gt chseqids test 4"
 Keywords "gt_chseqids"
 Test do
   run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_4.chseqids #{$testdata}gt_chseqids_test_4.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_chseqids_test_4.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_chseqids_test_4.out"
 end
 
 Name "gt chseqids test 5"
 Keywords "gt_chseqids"
 Test do
   run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_5.chseqids #{$testdata}gt_chseqids_test_5.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_chseqids_test_5.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_chseqids_test_5.out"
 end
 
 Name "gt chseqids test 5 (-sort)"
 Keywords "gt_chseqids"
 Test do
   run_test "#{$bin}gt chseqids -sort #{$testdata}gt_chseqids_test_5.chseqids #{$testdata}gt_chseqids_test_5.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_chseqids_test_5.sorted_out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_chseqids_test_5.sorted_out"
 end
 
 Name "gt chseqids test 6"
 Keywords "gt_chseqids"
 Test do
   run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_6.chseqids #{$testdata}gt_chseqids_test_6.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_chseqids_test_6.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_chseqids_test_6.out"
 end

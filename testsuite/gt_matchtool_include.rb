@@ -2,7 +2,7 @@ Name "gt matchtool test (open match format)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -matchfile #{$testdata}matchtool_open.match"
-  run "diff #{last_stdout} #{$testdata}matchtool_open.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_open.out"
 end
 
 Name "gt matchtool test (open match format corrupt)"
@@ -17,7 +17,7 @@ Name "gt matchtool test (open match format empty)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -matchfile #{$testdata}matchtool_open_empty.match"
-  run "diff #{last_stdout} #{$testdata}matchtool_open_empty.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_open_empty.out"
 end
 
 Name "gt matchtool test (open match format neg value)"
@@ -48,21 +48,21 @@ Name "gt matchtool test (open match format gz)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -matchfile #{$testdata}matchtool_open.match.gz"
-  run "diff #{last_stdout} #{$testdata}matchtool_open.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_open.out"
 end
 
 Name "gt matchtool test (open match format bz2)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -matchfile #{$testdata}matchtool_open.match.bz2"
-  run "diff #{last_stdout} #{$testdata}matchtool_open.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_open.out"
 end
 
 Name "gt matchtool test (blast match format)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -type BLASTOUT -matchfile #{$testdata}matchtool_blast.match"
-  run "diff #{last_stdout} #{$testdata}matchtool_blast.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_blast.out"
 end
 
 Name "gt matchtool test (blast match format corrupt)"
@@ -77,7 +77,7 @@ Name "gt matchtool test (blast match format empty)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -type BLASTOUT -matchfile #{$testdata}matchtool_blast_empty.match"
-  run "diff #{last_stdout} #{$testdata}matchtool_blast_empty.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_blast_empty.out"
 end
 
 Name "gt matchtool test (blast match format too few columns)"
@@ -108,12 +108,12 @@ Name "gt matchtool test (blast match format gz)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -type BLASTOUT -matchfile #{$testdata}matchtool_blast.match.gz"
-  run "diff #{last_stdout} #{$testdata}matchtool_blast.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_blast.out"
 end
 
 Name "gt matchtool test (blast match format bz2)"
 Keywords "gt_matchtool"
 Test do
   run_test "#{$bin}gt matchtool -type BLASTOUT -matchfile #{$testdata}matchtool_blast.match.bz2"
-  run "diff #{last_stdout} #{$testdata}matchtool_blast.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}matchtool_blast.out"
 end

@@ -5,7 +5,7 @@ Keywords "gt_scriptfilter"
 Test do
   run "#{$bin}gt scriptfilter -scriptname false " + \
       " #{$testdata}/gtscripts/filter_metadata_test_all_strings.lua"
-  run_test "diff #{$testdata}/script_filter_output.txt #{last_stdout}"
+  run_test "diff --strip-trailing-cr #{$testdata}/script_filter_output.txt #{last_stdout}"
 end
 
 ["", "-oneline"].each do |par|
@@ -18,7 +18,7 @@ end
     SCRIPT_FILTER_FIELDS.each do |field|
       run_test "#{$bin}gt scriptfilter -scriptname false #{par} " + \
                "#{$testdata}/gtscripts/filter_metadata_test_#{field}_function.lua"
-      run_test "diff strings.txt #{last_stdout}"
+      run_test "diff --strip-trailing-cr strings.txt #{last_stdout}"
     end
   end
 end
