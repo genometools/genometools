@@ -667,6 +667,8 @@ static void push_invalid (lua_State *L, STAT_STRUCT *info) {
   luaL_error(L, "invalid attribute name");
 #ifndef _WIN32
   info->st_blksize = 0; /* never reached */
+#else
+  info = info; /* workaround so parameter is not unused */
 #endif
 }
 

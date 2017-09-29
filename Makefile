@@ -232,6 +232,10 @@ SERVER=satta@genometools.org
 WWWBASEDIR=/var/www/servers
 
 # process arguments
+ifeq ($(SYSTEM),Windows)
+  GTSHAREDLIB_LIBDEP += -ldl
+endif
+
 ifeq ($(assert),no)
   EXP_CPPFLAGS += -DNDEBUG
 endif
