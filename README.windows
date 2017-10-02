@@ -1,0 +1,39 @@
+How to compile genometools on Windows with MSYS2 and Mingw64:
+
+1. Download the MSYS2 installer from http://www.msys2.org/ (usually you want the
+x86_64 installer no matter what you want to compile, unless you are still
+running a 32bit version of Windows).
+
+2. Run the installer and install MSYS2 into C:\msys64 and launch the MSYS2
+shell (C:\msys64\msys2).
+
+3. In the MSYS2 shell enter: pacman -Syu
+(to update the package DB and install the core system packages).
+
+4. Close the MSYS2 shell and launch it again (C:\msys64\msys2).
+Update the rest with pacman -Su
+
+5. Close the MSYS2 shell and launch it again (C:\msys64\msys2).
+Install MinGW 64bit and all dependencies and tools needed to compile genometools:
+
+  pacman -S mingw-w64-x86_64-gcc make git mingw-w64-x86_64-cairo mingw-w64-x86_64-pango mingw-w64-x86_64-dlfcn pkgconfig ruby diffutils
+
+(You can search the repository by pacman -Ss name_of_package
+and install a package by pacman -S name_of_package.)
+
+6. To compile the GenomeTools for Windows (MinGW) 64bit lauch C:\msys64\mingw64
+and enter the following commands:
+
+  git clone http://github.com/niehus/genometools
+  cd genometools
+  git checkout windows
+  ln -s ~/genometools/src/external/samtools-0.1.18/ ~/genometools/src/samtools
+  export CFLAGS=-I/mingw64/include/cairo\ -I/mingw64/include/pango-1.0\ -I/mingw64/include/glib-2.0\ -I/mingw64/lib/glib-2.0/include
+  make
+  make test
+
+
+Please note:
+This is a work in progress and many tools do not work properly on Windows yet!
+7 unit tests are currently disabled on Windows because they do not work.
+In the testsuite, 1110 testcases work properly, 584 do not.
