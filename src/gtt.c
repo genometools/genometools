@@ -278,6 +278,10 @@ GtHashmap* gtt_unit_tests(void)
 {
   GtHashmap *unit_tests = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
 
+  #ifdef _WIN32
+    fprintf(stderr,"NOTE: 7 Unit tests are disabled on Windows for now.\n");
+  #endif
+
   /* add unit tests */
 
   gt_hashmap_add(unit_tests, "alphabet class", gt_alphabet_unit_test);
