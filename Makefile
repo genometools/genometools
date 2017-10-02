@@ -232,7 +232,7 @@ SERVER=satta@genometools.org
 WWWBASEDIR=/var/www/servers
 
 # process arguments
-ifeq ($(SYSTEM),Windows)
+ifneq (,$(findstring MINGW,$(SYSTEM)))
   GTSHAREDLIB_LIBDEP += -ldl
 endif
 
