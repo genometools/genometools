@@ -96,6 +96,7 @@ typedef struct {
   bool snd_pass;
   bool delta_filter;
   bool noinseqseeds, no_combine_left_right, onlykmers;
+  unsigned int kenv_score_threshold;
   GtUword maxmat;
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
   GtOption *se_ref_op_evalue,
@@ -165,9 +166,10 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_mem, *op_bia, *op_onlyseeds, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_outfmt,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
-    *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
+    *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_kenv, *op_maxmat,
     *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics,
-    *op_estim, *op_benchmark, *op_snd_pass, *op_delta_filter;
+    *op_estim, *op_benchmark, *op_snd_pass, *op_delta_filter, *op_onlykmers,
+    *op_qii;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
@@ -193,12 +195,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -qii */
-  option = gt_option_new_string("qii",
+  op_qii = gt_option_new_string("qii",
                                 "Query input index (encseq)",
                                 arguments->dbs_queryname,
                                 "");
-  gt_option_hide_default(option);
-  gt_option_parser_add_option(op, option);
+  gt_option_hide_default(op_qii);
+  gt_option_parser_add_option(op, op_qii);
 
   /* -seedlength */
   op_seedlength = gt_option_new_uint_min_max("seedlength",
@@ -222,6 +224,17 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_argument_is_optional(op_spacedseed);
   gt_option_parser_add_option(op, op_spacedseed);
   arguments->se_ref_op_spacedseed = gt_option_ref(op_spacedseed);
+
+  /* -kenv */
+  op_kenv = gt_option_new_uint_min("kenv",
+                                   "specify score threshold for k-environment "
+                                   "which is used to generate seeds. Works "
+                                   "for protein sequences only",
+                                   &arguments->kenv_score_threshold,
+                                   UINT_MAX, 1UL);
+  gt_option_exclude(op_kenv, op_qii);
+  gt_option_exclude(op_kenv, op_spacedseed);
+  gt_option_parser_add_option(op, op_kenv);
 
   /* -diagbandwidth */
   op_diagbandwidth = gt_option_new_string("diagbandwidth",
@@ -571,11 +584,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -onlykmers */
-  option = gt_option_new_bool("onlykmers",
-                              "only computer .kmer files and stop computation",
-                              &arguments->onlykmers,false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  op_onlykmers = gt_option_new_bool("onlykmers",
+                                    "only computer .kmer files and stop "
+                                    "computation",
+                                    &arguments->onlykmers,false);
+  gt_option_is_development_option(op_onlykmers);
+  gt_option_exclude(op_onlykmers, op_kenv);
+  gt_option_parser_add_option(op, op_onlykmers);
 
   /* -no_co_only_lr */
   option = gt_option_new_bool("no_co_only_lr",
@@ -801,11 +816,22 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   {
     gt_str_set(arguments->diagband_statistics_arg,"");
   }
-  if (arguments->onlykmers && !arguments->use_kmerfile)
+  if (!arguments->use_kmerfile)
   {
-    gt_error_set(err, "options -onlykmers and '-kmerfile no' exclude "
-                      "each other");
-    had_err = -1;
+    if (arguments->onlykmers)
+    {
+      gt_error_set(err, "options -onlykmers and '-kmerfile no' exclude "
+                        "each other");
+      had_err = -1;
+    } else
+    {
+      if (arguments->kenv_score_threshold != UINT_MAX)
+      {
+        gt_error_set(err, "options -kenv and '-kmerfile no' exclude "
+                          "each other");
+        had_err = -1;
+      }
+    }
   }
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
@@ -839,6 +865,8 @@ static int gt_seed_extend_runner(int argc,
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
   GtAccumulateMatchValues *accu_match_values = NULL;
+  GtKenvGenerator *kenv_generator = NULL;
+  GtKenvAlphabet *kenv_alphabet = NULL;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -1150,6 +1178,25 @@ static int gt_seed_extend_runner(int argc,
     }
   }
 
+  if (!had_err && arguments->kenv_score_threshold != UINT_MAX)
+  {
+    if (!gt_alphabet_is_protein(gt_encseq_alphabet(aencseq)))
+    {
+      gt_error_set(err, "option -kenv is only allowed for Protein sequences");
+      had_err = -1;
+    }
+    kenv_alphabet = gt_kenv_alphabet_new(false,arguments->dbs_seedlength);
+    gt_assert(kenv_alphabet != NULL);
+    kenv_generator = gt_kenv_generator_new(kenv_alphabet,
+                                           arguments->dbs_seedlength,
+                                           arguments->kenv_score_threshold,
+                                           false,false,err);
+    if (kenv_generator == NULL)
+    {
+      had_err = -1;
+    }
+  }
+
   /* Parse pick option */
   if (!had_err && strcmp(gt_str_get(arguments->dbs_pick_str),
                          "use all combinations successively") != 0) {
@@ -1350,6 +1397,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->delta_filter,
                                     !arguments->noinseqseeds,
                                     arguments->onlykmers,
+                                    kenv_generator,
                                     extp);
 
     /* Start algorithm */
@@ -1371,6 +1419,8 @@ static int gt_seed_extend_runner(int argc,
   gt_accumulate_match_values_delete(accu_match_values);
   gt_encseq_delete(aencseq);
   gt_encseq_delete(bencseq);
+  gt_kenv_generator_delete(kenv_generator);
+  gt_kenv_alphabet_delete(kenv_alphabet);
 
   if (!had_err && gt_showtime_enabled()) {
     char *keystring;

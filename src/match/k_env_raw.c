@@ -47,7 +47,7 @@ static GtKenvScoreStructure *gt_kenv_score_structure_new(unsigned dim)
 {
   GtKenvScoreStructure *scores = gt_malloc(1 * sizeof (*scores));
   gt_array2dim_calloc(scores->score_pairs, dim, dim);
-  scores->max_scores = gt_calloc(dim, sizeof (scores->max_scores));
+  scores->max_scores = gt_calloc(dim, sizeof (*scores->max_scores));
 
   return scores;
 }
@@ -119,7 +119,7 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
                                        bool allow_x_val, bool preprocess,
                                        GtError *err)
 {
-  const char* blosum_file = "BLOSUM62";
+  const char* blosum_file = "testdata/BLOSUM62";
   const char* dna_file = "DNA_SCORES";
   GtScoreMatrix* score_matrix;
   GtKenvGenerator *kenv_gen = gt_malloc(sizeof (*kenv_gen));

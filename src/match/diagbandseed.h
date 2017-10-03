@@ -26,6 +26,7 @@
 #include "match/ft-front-prune.h"
 #include "match/seed_extend_parts.h"
 #include "match/querymatch-display.h"
+#include "match/k_env_raw.h"
 #include "match/xdrop.h"
 
 typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
@@ -73,6 +74,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool delta_filter,
                                              bool inseqseeds,
                                              bool onlykmers,
+                                             GtKenvGenerator *kenv_generator,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 
