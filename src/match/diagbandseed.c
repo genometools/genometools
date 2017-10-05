@@ -1818,18 +1818,18 @@ static void gt_diagbandseed_kmer_iter_delete(GtDiagbandseedKmerIterator *ki)
         if (ki->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
         {
           gt_free(ki->kmerstream_uword.bufferedfilespace);
-          gt_fa_fclose(ki->kmerstream_uword.fp);
+          fclose(ki->kmerstream_uword.fp);
           gt_free(ki->section.spaceGtUword);
         } else
         {
           gt_free(ki->kmerstream_uint8_t.bufferedfilespace);
-          gt_fa_fclose(ki->kmerstream_uint8_t.fp);
+          fclose(ki->kmerstream_uint8_t.fp);
           gt_free(ki->section.bytestring);
         }
       } else
       {
         gt_free(ki->kmerstream_struct.bufferedfilespace);
-        gt_fa_fclose(ki->kmerstream_struct.fp);
+        fclose(ki->kmerstream_struct.fp);
       }
       gt_free(ki->section.spaceGtDiagbandseedKmerPos);
       ki->section.allocated = 0;
@@ -5322,18 +5322,13 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                       anumseqranges,
                                       aidx,
                                       aencode_info);
-    FILE *alist_fp = gt_fa_fopen(alist_file, "rb", err);
-    if (alist_fp == NULL)
-    {
-      gt_kmerpos_encode_info_delete(aencode_info);
-      gt_kmerpos_encode_info_delete(bencode_info);
-      return -1;
-    }
+    FILE *alist_fp = fopen(alist_file, "rb");
+    gt_assert (alist_fp != NULL); /* file must exist,
+                                     as it was created before */
     alen = gt_numof_kmerpos_in_file(alist_file,aencode_info);
     aiter = gt_diagbandseed_kmer_iter_new_file(alist_fp,aencode_info,
                                                arg->file_buffer_size);
     gt_free(alist_file);
-    alist_file = NULL;
   } else
   {
     alen = alist->nextfree;
@@ -5385,15 +5380,12 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                        bnumseqranges,
                                                        bidx,
                                                        bencode_info);
-      FILE *blist_fp = gt_fa_fopen(blist_file, "rb",err);
+      FILE *blist_fp = fopen(blist_file, "rb");
       if (blist_fp != NULL)
       {
         blen = gt_numof_kmerpos_in_file(blist_file,bencode_info);
         biter = gt_diagbandseed_kmer_iter_new_file(blist_fp,bencode_info,
                                                    arg->file_buffer_size);
-      } else
-      {
-        gt_error_unset(err);
       }
       gt_free(blist_file);
     }
@@ -5422,7 +5414,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     }
   }
   gt_assert(aiter != NULL && biter != NULL);
-
   len_used = alen;
   if (!selfcomp || !arg->norev)
   {
@@ -5628,39 +5619,30 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     /* Third (reverse) k-mer list */
     if (both_strands)
     {
-      char *blist_file = NULL;
       GtUword mrevlen = 0;
       GtKmerPosList *clist = NULL;
 
       seedpairdistance.start = 0UL;
       if (arg->use_kmerfile)
       {
-        blist_file = gt_diagbandseed_kmer_filename(arg->bencseq,
-                                                   arg->spacedseedweight,
-                                                   arg->seedlength,
-                                                   false,
-                                                   bnumseqranges,
-                                                   bidx,
-                                                   bencode_info);
-        if (!gt_file_exists(blist_file))
+        char *blist_file = gt_diagbandseed_kmer_filename(arg->bencseq,
+                                                         arg->spacedseedweight,
+                                                         arg->seedlength,
+                                                         false,
+                                                         bnumseqranges,
+                                                         bidx,
+                                                         bencode_info);
+        FILE *blist_fp = fopen(blist_file, "rb");
+
+        if (blist_fp != NULL)
         {
-          gt_free(blist_file);
-          blist_file = NULL;
-        }
-      }
-      if (blist_file != NULL)
-      {
-        FILE *blist_fp = gt_fa_fopen(blist_file, "rb", err);
-        if (blist_fp == NULL)
-        {
-          had_err = -1;
-        } else
-        {
+          gt_assert(blen = gt_numof_kmerpos_in_file(blist_file,bencode_info));
           biter = gt_diagbandseed_kmer_iter_new_file(blist_fp,bencode_info,
                                                      arg->file_buffer_size);
         }
         gt_free(blist_file);
-      } else
+      }
+      if (biter == NULL)
       {
         const GtReadmode readmode_kmerscan = GT_READMODE_COMPL;
         clist = gt_diagbandseed_get_kmers(
@@ -5677,29 +5659,27 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                               arg->verbose,
                               blen,
                               stream);
+        gt_assert(blen == clist->nextfree);
         biter = gt_diagbandseed_kmer_iter_new_list(clist);
       }
 
-      if (!had_err)
+      gt_diagbandseed_kmer_iter_reset(aiter);
+      if (!seedpairlist->maxmat_show && arg->memlimit < GT_UWORD_MAX)
       {
-        gt_diagbandseed_kmer_iter_reset(aiter);
-        if (!seedpairlist->maxmat_show && arg->memlimit < GT_UWORD_MAX)
-        {
-          had_err = gt_diagbandseed_get_mlistlen_maxfreq(&mrevlen,
-                                                         &maxfreq,
-                                                         aiter,
-                                                         biter,
-                                                         arg->memlimit,
-                                                         sizeofunit,
-                                                         &seedpairdistance,
-                                                         len_used,
-                                                         selfcomp,
-                                                         arg->inseqseeds,
-                                                         alist_blist_identical,
-                                                         arg->verbose,
-                                                         stream,
-                                                         err);
-        }
+        had_err = gt_diagbandseed_get_mlistlen_maxfreq(&mrevlen,
+                                                       &maxfreq,
+                                                       aiter,
+                                                       biter,
+                                                       arg->memlimit,
+                                                       sizeofunit,
+                                                       &seedpairdistance,
+                                                       len_used,
+                                                       selfcomp,
+                                                       arg->inseqseeds,
+                                                       alist_blist_identical,
+                                                       arg->verbose,
+                                                       stream,
+                                                       err);
       }
 
       if (!had_err)
