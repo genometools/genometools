@@ -5241,7 +5241,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtDiagbandseedKmerIterator *aiter = NULL, *biter = NULL;
   GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used;
   GtRange seedpairdistance;
-  char *blist_file = NULL;
   int had_err = 0;
   bool alist_blist_identical, both_strands, selfcomp, equalranges;
   size_t sizeofunit;
@@ -5379,42 +5378,26 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   {
     if (arg->use_kmerfile)
     {
-      blist_file = gt_diagbandseed_kmer_filename(arg->bencseq,
-                                                 arg->spacedseedweight,
-                                                 arg->seedlength,
-                                                 !arg->nofwd,
-                                                 bnumseqranges,
-                                                 bidx,
-                                                 bencode_info);
-      if (!gt_file_exists(blist_file))
+      char *blist_file = gt_diagbandseed_kmer_filename(arg->bencseq,
+                                                       arg->spacedseedweight,
+                                                       arg->seedlength,
+                                                       !arg->nofwd,
+                                                       bnumseqranges,
+                                                       bidx,
+                                                       bencode_info);
+      FILE *blist_fp = gt_fa_fopen(blist_file, "rb",err);
+      if (blist_fp != NULL)
       {
-        gt_free(blist_file);
-        blist_file = NULL;
+        blen = gt_numof_kmerpos_in_file(blist_file,bencode_info);
+        biter = gt_diagbandseed_kmer_iter_new_file(blist_fp,bencode_info,
+                                                   arg->file_buffer_size);
+      } else
+      {
+        gt_error_unset(err);
       }
-    }
-  }
-  if (blist_file != NULL) /* blist_file exists */
-  {
-    FILE *blist_fp = gt_fa_fopen(blist_file, "rb", err);
-
-    if (blist_fp == NULL)
-    {
       gt_free(blist_file);
-      gt_diagbandseed_kmer_iter_delete(aiter);
-      aiter = NULL;
-      gt_kmerpos_encode_info_delete(aencode_info);
-      gt_kmerpos_encode_info_delete(bencode_info);
-      return -1;
     }
-    blen = gt_numof_kmerpos_in_file(blist_file,bencode_info);
-    gt_assert(biter == NULL);
-    biter = gt_diagbandseed_kmer_iter_new_file(blist_fp,bencode_info,
-                                               arg->file_buffer_size);
-    gt_free(blist_file);
-    blist_file = NULL;
-  } else
-  {
-    if (!alist_blist_identical)
+    if (biter == NULL)
     {
       const GtReadmode readmode_kmerscan = arg->nofwd ? GT_READMODE_COMPL
                                                       : GT_READMODE_FORWARD;
@@ -5438,6 +5421,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       biter = gt_diagbandseed_kmer_iter_new_list(blist);
     }
   }
+  gt_assert(aiter != NULL && biter != NULL);
 
   len_used = alen;
   if (!selfcomp || !arg->norev)
@@ -5644,10 +5628,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     /* Third (reverse) k-mer list */
     if (both_strands)
     {
+      char *blist_file = NULL;
       GtUword mrevlen = 0;
       GtKmerPosList *clist = NULL;
 
-      gt_assert(blist_file == NULL);
       seedpairdistance.start = 0UL;
       if (arg->use_kmerfile)
       {
