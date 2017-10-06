@@ -589,7 +589,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                     "computation",
                                     &arguments->onlykmers,false);
   gt_option_is_development_option(op_onlykmers);
-  gt_option_exclude(op_onlykmers, op_kenv);
   gt_option_parser_add_option(op, op_onlykmers);
 
   /* -no_co_only_lr */
@@ -823,14 +822,6 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
       gt_error_set(err, "options -onlykmers and '-kmerfile no' exclude "
                         "each other");
       had_err = -1;
-    } else
-    {
-      if (arguments->kenv_score_threshold != UINT_MAX)
-      {
-        gt_error_set(err, "options -kenv and '-kmerfile no' exclude "
-                          "each other");
-        had_err = -1;
-      }
     }
   }
   /* no extra arguments */

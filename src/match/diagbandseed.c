@@ -5145,7 +5145,8 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
                                      GtBitcount_type score_bits,
                                      unsigned int numofchars,
                                      GtDiagbandseedKmerIterator *aiter,
-                                     const GtKmerPosListEncodeInfo *encode_info)
+                                     const GtKmerPosListEncodeInfo *encode_info,
+                                     bool verbose)
 {
   GtUword kmer_env_size = 0,
           kmer_count = 0,
@@ -5171,31 +5172,37 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
                                         kenv_generator);
     if (this_kmer_env_size > 0)
     {
-      const GtKenvRawElement *raw_ptr;
       kmer_env_size += alist->nextfree * this_kmer_env_size;
       gt_assert(raw_list != NULL);
-      for (raw_ptr = raw_list; raw_ptr < raw_list + this_kmer_env_size;
-           raw_ptr++)
+      if (verbose)
       {
-        gt_assert(raw_ptr->score < 100);
-        score_tab[raw_ptr->score]++;
+        const GtKenvRawElement *raw_ptr;
+        for (raw_ptr = raw_list; raw_ptr < raw_list + this_kmer_env_size;
+             raw_ptr++)
+        {
+          gt_assert(raw_ptr->score < 100);
+          score_tab[raw_ptr->score]++;
+        }
       }
     }
     kmer_count += alist->nextfree;
     alist = gt_diagbandseed_kmer_iter_next(aiter);
   }
-  for (idx = 0; idx < 100; idx++)
+  if (verbose)
   {
-    if (score_tab[idx] > 0)
+    for (idx = 0; idx < 100; idx++)
     {
-      printf("# score %d: " GT_WU " times\n",idx,score_tab[idx]);
+      if (score_tab[idx] > 0)
+      {
+        printf("# score %d: " GT_WU " times\n",idx,score_tab[idx]);
+      }
     }
+    printf("# environment has " GT_WU " elements (%.0f MB, "
+           "%.2f per kmer in sequence)\n",
+           kmer_env_size,
+           GT_MEGABYTES(kmer_env_size * sizeof (GtUword)),
+           (double) kmer_env_size/kmer_count);
   }
-  printf("# environment has " GT_WU " elements (%.0f MB, "
-         "%.2f per kmer in sequence)\n",
-         kmer_env_size,
-         GT_MEGABYTES(kmer_env_size * sizeof (GtUword)),
-         (double) kmer_env_size/kmer_count);
   gt_diagbandseed_kmer_iter_reset(aiter);
   alist = gt_diagbandseed_kmer_iter_next(aiter);
   kmerpos_list->allocated = kmerpos_list->nextfree = kmer_env_size;
@@ -5355,7 +5362,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                      GtFtTrimstat *trimstat,
                                      GtError *err)
 {
-  GtKmerPosList *blist = NULL;
+  GtKmerPosList *blist = NULL, *kenv_list = NULL;
   GtSeedpairlist *seedpairlist = NULL;
   GtDiagbandseedKmerIterator *aiter = NULL, *biter = NULL;
   GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used;
@@ -5381,7 +5388,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
 
   gt_assert(arg != NULL);
-  if (arg->onlykmers)
+  if (arg->onlykmers && arg->kenv_generator == NULL)
   {
     return 0;
   }
@@ -5451,103 +5458,138 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
   if (arg->kenv_generator != NULL)
   {
-    int ret;
     const int score_threshold = gt_kenv_generator_get_th(arg->kenv_generator),
               max_score = gt_kenv_generator_get_max_score(arg->kenv_generator) *
                           gt_kenv_generator_get_q(arg->kenv_generator);
-    GtBitcount_type score_bits;
 
     gt_assert(score_threshold <= max_score);
-    score_bits
-      = (GtBitcount_type) gt_radixsort_bits(max_score - score_threshold);
-    if (aencode_info->bits_kmerpos + score_bits > sizeof (GtUword) * CHAR_BIT)
-    {
-      gt_error_set(err,"bits_kmerpos + score_bits = %hu + %hu > %d",
-                   aencode_info->bits_kmerpos,score_bits,
-                   (int) (sizeof (GtUword) * CHAR_BIT));
-      ret = -1;
-    } else
-    {
-      char *path;
-      GtKmerPosList *kenv_list
-        = gt_diagbandseed_kenv_generate(arg->kenv_generator,score_bits,
-                                        a_numofchars,aiter,aencode_info);
-      path = gt_diagbandseed_kmer_filename(arg->aencseq,
-                                           arg->spacedseedweight,
-                                           arg->seedlength,
-                                           true,
-                                           anumseqranges,
-                                           aidx,
-                                           score_threshold,
-                                           aencode_info);
-      if (arg->use_kmerfile)
-      {
-        had_err = gt_diagbandseed_write_kmers(kenv_list,
-                                              path,
-                                              arg->spacedseedweight,
-                                              arg->seedlength,
-                                              arg->verbose,
-                                              err);
-      } else
-      {
-        gt_assert(false);
-      }
-      gt_free(path);
-      gt_kmerpos_list_delete(kenv_list);
-      ret = had_err;
-    }
-    gt_diagbandseed_kmer_iter_delete(aiter);
-    gt_kmerpos_encode_info_delete(aencode_info);
-    if (aencode_info != bencode_info)
-    {
-      gt_kmerpos_encode_info_delete(bencode_info);
-    }
-    return ret;
-  }
-
-  /* Second k-mer list */
-  if (alist_blist_identical && alist != NULL)
-  {
-    /* use a second iterator for the same list */
-    biter = gt_diagbandseed_kmer_iter_new_list(alist);
-    blen = alen;
-  } else
-  {
-    if (arg->use_kmerfile)
-    {
-      biter = gt_diagbandseed_kmer_iter_new_from_file(&blen,
-                                                      arg->bencseq,
-                                                      arg->spacedseedweight,
-                                                      arg->seedlength,
-                                                      !arg->nofwd,
-                                                      bnumseqranges,
-                                                      bidx,
-                                                      bencode_info,
-                                                      0,
-                                                      arg->file_buffer_size);
-    }
+    biter = gt_diagbandseed_kmer_iter_new_from_file(&blen,
+                                                    arg->aencseq,
+                                                    arg->spacedseedweight,
+                                                    arg->seedlength,
+                                                    true,
+                                                    anumseqranges,
+                                                    aidx,
+                                                    aencode_info,
+                                                    score_threshold,
+                                                    arg->file_buffer_size);
     if (biter == NULL)
     {
-      const GtReadmode readmode_kmerscan = arg->nofwd ? GT_READMODE_COMPL
-                                                      : GT_READMODE_FORWARD;
-      const GtUword known_size = (selfcomp && equalranges) ? alen : 0;
+      GtBitcount_type score_bits
+        = (GtBitcount_type) gt_radixsort_bits(max_score - score_threshold);
+      if (aencode_info->bits_kmerpos + score_bits > sizeof (GtUword) * CHAR_BIT)
+      {
+        gt_error_set(err,"seedlength is too large so that "
+                         "bits_kmerpos + score_bits = %hu + %hu > %d",
+                     aencode_info->bits_kmerpos,score_bits,
+                     (int) (sizeof (GtUword) * CHAR_BIT));
+        had_err = -1;
+      } else
+      {
+        char *path;
+        kenv_list = gt_diagbandseed_kenv_generate(arg->kenv_generator,
+                                                  score_bits,
+                                                  a_numofchars,
+                                                  aiter,
+                                                  aencode_info,
+                                                  arg->verbose);
+        path = gt_diagbandseed_kmer_filename(arg->aencseq,
+                                             arg->spacedseedweight,
+                                             arg->seedlength,
+                                             true,
+                                             anumseqranges,
+                                             aidx,
+                                             score_threshold,
+                                             aencode_info);
+        if (arg->use_kmerfile)
+        {
+          had_err = gt_diagbandseed_write_kmers(kenv_list,
+                                                path,
+                                                arg->spacedseedweight,
+                                                arg->seedlength,
+                                                arg->verbose,
+                                                err);
+          biter = gt_diagbandseed_kmer_iter_new_from_file(&blen,
+                                                          arg->aencseq,
+                                                          arg->spacedseedweight,
+                                                          arg->seedlength,
+                                                          true,
+                                                          anumseqranges,
+                                                          bidx,
+                                                          bencode_info,
+                                                          score_threshold,
+                                                          arg->
+                                                            file_buffer_size);
+          gt_kmerpos_list_delete(kenv_list);
+          kenv_list = NULL;
+        } else
+        {
+          blen = kenv_list->nextfree;
+          biter = gt_diagbandseed_kmer_iter_new_list(kenv_list);
+        }
+        gt_free(path);
+      }
+    }
+    if (arg->onlykmers)
+    {
+      gt_kmerpos_list_delete(kenv_list);
+      kenv_list = NULL;
+      gt_diagbandseed_kmer_iter_delete(aiter);
+      gt_diagbandseed_kmer_iter_delete(biter);
+      gt_kmerpos_encode_info_delete(aencode_info);
+      if (aencode_info != bencode_info)
+      {
+        gt_kmerpos_encode_info_delete(bencode_info);
+      }
+      return had_err;
+    }
+  } else
+  {
+    /* Second k-mer list */
+    if (alist_blist_identical && alist != NULL)
+    {
+      /* use a second iterator for the same list */
+      biter = gt_diagbandseed_kmer_iter_new_list(alist);
+      blen = alen;
+    } else
+    {
+      if (arg->use_kmerfile)
+      {
+        biter = gt_diagbandseed_kmer_iter_new_from_file(&blen,
+                                                        arg->bencseq,
+                                                        arg->spacedseedweight,
+                                                        arg->seedlength,
+                                                        !arg->nofwd,
+                                                        bnumseqranges,
+                                                        bidx,
+                                                        bencode_info,
+                                                        0,
+                                                        arg->file_buffer_size);
+      }
+      if (biter == NULL)
+      {
+        const GtReadmode readmode_kmerscan = arg->nofwd ? GT_READMODE_COMPL
+                                                        : GT_READMODE_FORWARD;
+        const GtUword known_size = (selfcomp && equalranges) ? alen : 0;
 
-      blist = gt_diagbandseed_get_kmers(
-                              arg->bencseq,
-                              b_numofchars,
-                              arg->spacedseedweight,
-                              arg->seedlength,
-                              arg->spaced_seed_spec,
-                              readmode_kmerscan,
-                              gt_sequence_parts_info_start_get(bseqranges,bidx),
-                              gt_sequence_parts_info_end_get(bseqranges,bidx),
-                              bencode_info,
-                              arg->debug_kmer,
-                              arg->verbose,
-                              known_size,
-                              stream);
-      blen = blist->nextfree;
-      biter = gt_diagbandseed_kmer_iter_new_list(blist);
+        blist = gt_diagbandseed_get_kmers(
+                                arg->bencseq,
+                                b_numofchars,
+                                arg->spacedseedweight,
+                                arg->seedlength,
+                                arg->spaced_seed_spec,
+                                readmode_kmerscan,
+                                gt_sequence_parts_info_start_get(bseqranges,
+                                                                 bidx),
+                                gt_sequence_parts_info_end_get(bseqranges,bidx),
+                                bencode_info,
+                                arg->debug_kmer,
+                                arg->verbose,
+                                known_size,
+                                stream);
+        blen = blist->nextfree;
+        biter = gt_diagbandseed_kmer_iter_new_list(blist);
+      }
     }
   }
   gt_assert(aiter != NULL && biter != NULL);
@@ -5642,6 +5684,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
   gt_kmerpos_list_delete(blist);
   gt_diagbandseed_kmer_iter_delete(biter);
+  gt_kmerpos_list_delete(kenv_list);
   biter = NULL;
   if (arg->delta_filter)
   {
