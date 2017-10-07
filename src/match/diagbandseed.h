@@ -47,6 +47,11 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtUwordPair *pick,
                         GtError *err);
 
+void gt_diagbandseed_info_unset_onlykmers(GtDiagbandseedInfo *info);
+
+void gt_diagbandseed_info_set_kenv_gen(GtDiagbandseedInfo *info,
+                                       GtKenvGenerator *kenv_generator);
+
 /* The constructor for GtDiagbandseedInfo*/
 GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtEncseq *bencseq,

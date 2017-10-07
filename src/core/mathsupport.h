@@ -54,6 +54,10 @@ unsigned int gt_gcd_uint(unsigned int m, unsigned int n);
 unsigned int gt_lcm_uint(unsigned int m, unsigned int n);
 /* Compute the logarith of <x> to the base <b> */
 double       gt_log_base(double x, double b);
+/* Compute number of bits required for value */
+size_t gt_required_bits(GtUword value);
+/* convert number of bits to bytes */
+size_t gt_bits2bytes(size_t bits);
 
 int          gt_mathsupport_unit_test(GtError *err);
 

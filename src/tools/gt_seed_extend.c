@@ -1387,8 +1387,12 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->snd_pass,
                                     arguments->delta_filter,
                                     !arguments->noinseqseeds,
-                                    arguments->onlykmers,
-                                    kenv_generator,
+                                    arguments->dbs_parts > 1
+                                       ? true
+                                       : arguments->onlykmers,
+                                    arguments->dbs_parts > 1
+                                       ? NULL
+                                       : kenv_generator,
                                     extp);
 
     /* Start algorithm */
@@ -1397,6 +1401,17 @@ static int gt_seed_extend_runner(int argc,
                                   bseqranges,
                                   &pick,
                                   err);
+    if (!had_err && arguments->dbs_parts > 1
+         && (!arguments->onlykmers || kenv_generator != NULL))
+    {
+      gt_diagbandseed_info_unset_onlykmers(info);
+      gt_diagbandseed_info_set_kenv_gen(info,kenv_generator);
+      had_err = gt_diagbandseed_run(info,
+                                    aseqranges,
+                                    bseqranges,
+                                    &pick,
+                                    err);
+    }
 
     /* clean up */
     if (bseqranges != aseqranges)

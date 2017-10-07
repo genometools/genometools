@@ -246,6 +246,16 @@ double gt_log_base(double x, double b)
   return log(x) / log(b);
 }
 
+size_t gt_required_bits(GtUword value)
+{
+  return (size_t) ceil(log2((double) value));
+}
+
+size_t gt_bits2bytes(size_t bits)
+{
+  return bits/CHAR_BIT + ((bits % CHAR_BIT == 0) ? 0 : 1);
+}
+
 /* Make some unit tests for this? */
 void gt_out_power_for_small_exponents(void)
 {

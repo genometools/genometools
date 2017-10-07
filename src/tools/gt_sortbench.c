@@ -598,8 +598,8 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     bool alloc_array;
     if (strcmp(gt_str_get(arguments->impl),"radixflba") == 0)
     {
-      size_t bits = gt_radixsort_bits(arguments->maxvalue);
-      flba_unitsize = gt_radixsort_bits2bytes(bits);
+      size_t bits = gt_required_bits(arguments->maxvalue);
+      flba_unitsize = gt_bits2bytes(bits);
       flba = gt_malloc(sizeof (*flba) * arguments->num_values * flba_unitsize);
       alloc_array = arguments->verify;
     } else

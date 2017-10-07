@@ -800,13 +800,3 @@ Gtuint64keyPair *gt_radixsort_space_uint64keypair(
   gt_assert(radixsortinfo->elemtype == GtRadixelemtypeGtUwordPair);
   return radixsortinfo->sortspace.uint64keypairptr;
 }
-
-size_t gt_radixsort_bits(GtUword maxvalue)
-{
-  return (size_t) ceil(log2((double) maxvalue));
-}
-
-size_t gt_radixsort_bits2bytes(size_t bits)
-{
-  return bits/CHAR_BIT + ((bits % CHAR_BIT == 0) ? 0 : 1);
-}
