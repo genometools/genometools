@@ -1616,10 +1616,14 @@ typedef struct {
   /* common for list/file based iterator */
   GtKmerPosList section;
   bool at_list_end;
+  uint8_t *kenv_score_tab;
+  GtUword kenv_score_tab_length;
+  GtBitcount_type score_bits;
+  GtUword mask_score_bits;
   /* for list based iterator */
   const GtKmerPosList *original;
   const GtDiagbandseedKmerPos *listend_struct;
-  GtDiagbandseedKmerPos *listptr_struct;
+  GtDiagbandseedKmerPos *listptr_struct, *listptr_struct_ref;
   const GtUword *listend_uword;
   GtUword *listptr_uword;
   const uint8_t *listend_uint8_t;
@@ -1659,166 +1663,197 @@ static uint8_t *gt_readnextfromstream_uint8_t (GtBufferedfile_uint8_t *buf)
   return ptr;
 }
 
-static void gt_diagbandseed_kmer_iter_reset(GtDiagbandseedKmerIterator *ki)
+static void gt_diagbandseed_kmer_iter_reset(GtDiagbandseedKmerIterator *kmi)
 {
-  gt_assert(ki != NULL);
-  ki->at_list_end = false;
-  if (ki->original != NULL) /* list based */
+  gt_assert(kmi != NULL);
+  kmi->at_list_end = false;
+  if (kmi->original != NULL) /* list based */
   {
-    if (ki->section.encode_info != NULL)
+    if (kmi->section.encode_info != NULL)
     {
-      if (ki->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
+      if (kmi->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
       {
-        ki->listptr_uword = ki->original->spaceGtUword;
-        ki->section.spaceGtUword = ki->original->spaceGtUword;
+        kmi->listptr_uword = kmi->original->spaceGtUword;
+        kmi->section.spaceGtUword = kmi->original->spaceGtUword;
       } else
       {
-        ki->listptr_uint8_t = ki->original->bytestring;
-        ki->section.bytestring = ki->original->bytestring;
+        kmi->listptr_uint8_t = kmi->original->bytestring;
+        kmi->section.bytestring = kmi->original->bytestring;
       }
-      ki->listptr_struct = ki->section.spaceGtDiagbandseedKmerPos;
+      kmi->listptr_struct_ref = kmi->listptr_struct
+                              = kmi->section.spaceGtDiagbandseedKmerPos;
     } else
     {
-      ki->listptr_struct = ki->original->spaceGtDiagbandseedKmerPos;
-      ki->section.spaceGtDiagbandseedKmerPos
-        = ki->original->spaceGtDiagbandseedKmerPos;
+      kmi->listptr_struct_ref = kmi->listptr_struct
+                              = kmi->original->spaceGtDiagbandseedKmerPos;
+      kmi->section.spaceGtDiagbandseedKmerPos
+        = kmi->original->spaceGtDiagbandseedKmerPos;
     }
-    if (gt_kmerpos_list_num_entries(ki->original) == 0)
+    if (gt_kmerpos_list_num_entries(kmi->original) == 0)
     {
-      ki->at_list_end = true;
+      kmi->at_list_end = true;
     }
   } else /* file based */
   {
-    if (ki->section.encode_info != NULL)
+    if (kmi->section.encode_info != NULL)
     {
-      if (ki->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
+      if (kmi->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
       {
-        ki->kmerstream_uword.nextread = ki->kmerstream_uword.nextfree = 0;
-        fseek(ki->kmerstream_uword.fp,sizeof (GtKmerPosListHeaderInfo),
+        kmi->kmerstream_uword.nextread = kmi->kmerstream_uword.nextfree = 0;
+        fseek(kmi->kmerstream_uword.fp,sizeof (GtKmerPosListHeaderInfo),
               SEEK_SET);
-        if (gt_readnextfromstream_GtUword(&ki->buffer_uword,
-                                          &ki->kmerstream_uword) != 1)
+        if (gt_readnextfromstream_GtUword(&kmi->buffer_uword,
+                                          &kmi->kmerstream_uword) != 1)
         {
-          ki->at_list_end = true;
+          kmi->at_list_end = true;
         }
       } else
       {
-        ki->kmerstream_uint8_t.nextread = ki->kmerstream_uint8_t.nextfree
-                                        = 0;
-        fseek(ki->kmerstream_uint8_t.fp,sizeof (GtKmerPosListHeaderInfo),
+        kmi->kmerstream_uint8_t.nextread = kmi->kmerstream_uint8_t.nextfree
+                                         = 0;
+        fseek(kmi->kmerstream_uint8_t.fp,sizeof (GtKmerPosListHeaderInfo),
               SEEK_SET);
-        ki->buffer_uint8_t
-          = gt_readnextfromstream_uint8_t(&ki->kmerstream_uint8_t);
-        if (ki->buffer_uint8_t == NULL)
+        kmi->buffer_uint8_t
+          = gt_readnextfromstream_uint8_t(&kmi->kmerstream_uint8_t);
+        if (kmi->buffer_uint8_t == NULL)
         {
-          ki->at_list_end = true;
+          kmi->at_list_end = true;
         }
       }
     } else
     {
-      ki->kmerstream_struct.nextread = ki->kmerstream_struct.nextfree = 0;
-      fseek(ki->kmerstream_struct.fp,sizeof (GtKmerPosListHeaderInfo),SEEK_SET);
-      if (gt_readnextfromstream_GtDiagbandseedKmerPos(ki->listptr_struct,
-                                                      &ki->kmerstream_struct)
+      kmi->kmerstream_struct.nextread = kmi->kmerstream_struct.nextfree = 0;
+      fseek(kmi->kmerstream_struct.fp,sizeof (GtKmerPosListHeaderInfo),
+            SEEK_SET);
+      if (gt_readnextfromstream_GtDiagbandseedKmerPos(kmi->listptr_struct,
+                                                      &kmi->kmerstream_struct)
                                                       != 1)
       {
-        ki->at_list_end = true;
+        kmi->at_list_end = true;
       }
     }
   }
 }
 
 static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new_list(
-                               const GtKmerPosList *original)
+                               const GtKmerPosList *original,
+                               GtBitcount_type score_bits)
 {
-  GtDiagbandseedKmerIterator *ki = gt_malloc(sizeof *ki);
+  GtDiagbandseedKmerIterator *kmi = gt_malloc(sizeof *kmi);
 
   gt_assert(original != NULL);
-  ki->original = original;
+  kmi->original = original;
+  kmi->score_bits = score_bits;
+  kmi->mask_score_bits = (((GtUword) 1) << score_bits) - 1;
+  if (score_bits > 0)
+  {
+    kmi->kenv_score_tab_length = original->longest_code_run;
+    kmi->kenv_score_tab = gt_malloc(sizeof *kmi->kenv_score_tab *
+                                    kmi->kenv_score_tab_length);
+  } else
+  {
+    kmi->kenv_score_tab = NULL;
+    kmi->kenv_score_tab_length = 0;
+  }
   if (original->encode_info != NULL)
   {
     if (original->encode_info->bytes_kmerpos <= sizeof (GtUword))
     {
       gt_assert(original->spaceGtUword != NULL);
-      ki->listend_uword = original->spaceGtUword + original->nextfree;
+      kmi->listend_uword = original->spaceGtUword + original->nextfree;
     } else
     {
       gt_assert(original->bytestring != NULL);
-      ki->listend_uint8_t = original->bytestring +
-                            original->nextfree *
-                            original->encode_info->bytes_kmerpos;
+      kmi->listend_uint8_t = original->bytestring +
+                             original->nextfree *
+                             original->encode_info->bytes_kmerpos;
     }
-    ki->section.spaceGtDiagbandseedKmerPos
-      = gt_malloc(sizeof *ki->section.spaceGtDiagbandseedKmerPos
+    kmi->section.spaceGtDiagbandseedKmerPos
+      = gt_malloc(sizeof *kmi->section.spaceGtDiagbandseedKmerPos
                   * original->longest_code_run);
-    ki->listend_struct = ki->section.spaceGtDiagbandseedKmerPos +
-                         original->longest_code_run;
+    kmi->listend_struct = kmi->section.spaceGtDiagbandseedKmerPos +
+                          original->longest_code_run;
   } else
   {
     gt_assert(original->spaceGtDiagbandseedKmerPos != NULL);
-    ki->listend_uword = NULL;
-    ki->listend_uint8_t = NULL;
-    ki->listend_struct = original->spaceGtDiagbandseedKmerPos +
-                         original->nextfree;
+    kmi->listend_uword = NULL;
+    kmi->listend_uint8_t = NULL;
+    kmi->listend_struct = original->spaceGtDiagbandseedKmerPos +
+                          original->nextfree;
   }
-  ki->section.encode_info = original->encode_info;
-  gt_diagbandseed_kmer_iter_reset(ki);
-  return ki;
+  kmi->section.encode_info = original->encode_info;
+  gt_diagbandseed_kmer_iter_reset(kmi);
+  return kmi;
 }
 
 static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new_from_fp(
                                    FILE *fp,
                                    const GtKmerPosListEncodeInfo *encode_info,
+                                   GtBitcount_type score_bits,
                                    size_t file_buffer_size)
 {
-  GtDiagbandseedKmerIterator *ki = gt_malloc(sizeof *ki);
+  GtDiagbandseedKmerIterator *kmi = gt_malloc(sizeof *kmi);
   GtKmerPosListHeaderInfo kmer_pos_list_header_info;
 
-  ki->original = NULL;
-  ki->listend_uword = ki->listptr_uword = NULL;
-  ki->listend_uint8_t = ki->listptr_uint8_t = NULL;
+  kmi->original = NULL;
+  kmi->score_bits = score_bits;
+  kmi->mask_score_bits = (((GtUword) 1) << score_bits) - 1;
+  kmi->listend_uword = kmi->listptr_uword = NULL;
+  kmi->listend_uint8_t = kmi->listptr_uint8_t = NULL;
   gt_assert(fp != NULL);
   gt_xfread(&kmer_pos_list_header_info,sizeof kmer_pos_list_header_info,1,fp);
+  if (score_bits > 0)
+  {
+    kmi->kenv_score_tab_length = kmer_pos_list_header_info.longest_code_run;
+    kmi->kenv_score_tab = gt_malloc(sizeof *kmi->kenv_score_tab *
+                                    kmi->kenv_score_tab_length);
+  } else
+  {
+    kmi->kenv_score_tab = NULL;
+    kmi->kenv_score_tab_length = 0;
+  }
   if (encode_info != NULL)
   {
-    ki->section.spaceGtUword = NULL;
-    ki->section.bytestring = NULL;
-    ki->section.allocated = kmer_pos_list_header_info.longest_code_run;
+    kmi->section.spaceGtUword = NULL;
+    kmi->section.bytestring = NULL;
+    kmi->section.allocated = kmer_pos_list_header_info.longest_code_run;
     if (encode_info->bytes_kmerpos <= sizeof (GtUword))
     {
-      ki->kmerstream_uword.fp = fp;
-      GT_BUFFEREDFILE_BUFFER_SET(&ki->kmerstream_uword,
+      kmi->kmerstream_uword.fp = fp;
+      GT_BUFFEREDFILE_BUFFER_SET(&kmi->kmerstream_uword,
                                  file_buffer_size,
-                                 sizeof *ki->kmerstream_uword.
+                                 sizeof *kmi->kmerstream_uword.
                                         bufferedfilespace);
     } else
     {
-      ki->kmerstream_uint8_t.fp = fp;
-      GT_BUFFEREDFILE_BUFFER_SET(&ki->kmerstream_uint8_t,
+      kmi->kmerstream_uint8_t.fp = fp;
+      GT_BUFFEREDFILE_BUFFER_SET(&kmi->kmerstream_uint8_t,
                                  file_buffer_size,
                                  encode_info->bytes_kmerpos *
-                                 sizeof *ki->kmerstream_uint8_t.
+                                 sizeof *kmi->kmerstream_uint8_t.
                                         bufferedfilespace);
     }
   } else
   {
-    ki->kmerstream_struct.fp = fp;
-    GT_BUFFEREDFILE_BUFFER_SET(&ki->kmerstream_struct,
+    kmi->kmerstream_struct.fp = fp;
+    GT_BUFFEREDFILE_BUFFER_SET(&kmi->kmerstream_struct,
                                file_buffer_size,
-                               sizeof *ki->kmerstream_struct.bufferedfilespace);
-    ki->section.allocated
+                               sizeof *kmi->kmerstream_struct.bufferedfilespace
+                               );
+    kmi->section.allocated
       = kmer_pos_list_header_info.longest_code_run + 1;
         /* one larger for reading first of next run */
   }
-  ki->section.spaceGtDiagbandseedKmerPos
-    = gt_malloc(sizeof *ki->section.spaceGtDiagbandseedKmerPos *
-                ki->section.allocated);
-  ki->listptr_struct = ki->section.spaceGtDiagbandseedKmerPos;
-  ki->listend_struct = ki->section.spaceGtDiagbandseedKmerPos +
-                       ki->section.allocated;
-  ki->section.encode_info = encode_info;
-  gt_diagbandseed_kmer_iter_reset(ki);
-  return ki;
+  kmi->section.spaceGtDiagbandseedKmerPos
+    = gt_malloc(sizeof *kmi->section.spaceGtDiagbandseedKmerPos *
+                kmi->section.allocated);
+  kmi->listptr_struct_ref = kmi->listptr_struct
+                          = kmi->section.spaceGtDiagbandseedKmerPos;
+  kmi->listend_struct = kmi->section.spaceGtDiagbandseedKmerPos +
+                        kmi->section.allocated;
+  kmi->section.encode_info = encode_info;
+  gt_diagbandseed_kmer_iter_reset(kmi);
+  return kmi;
 }
 
 static GtUword gt_numof_kmerpos_in_file(const char *filename,
@@ -1889,6 +1924,7 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new_from_file(
                                                GtUword idx,
                                                const GtKmerPosListEncodeInfo
                                                  *encode_info,
+                                               GtBitcount_type score_bits,
                                                int score_threshold,
                                                size_t file_buffer_size)
 {
@@ -1910,177 +1946,202 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new_from_file(
       *listlen = gt_numof_kmerpos_in_file(list_file,encode_info);
     }
     kmeriterator = gt_diagbandseed_kmer_iter_new_from_fp(list_fp,encode_info,
+                                                         score_bits,
                                                          file_buffer_size);
   }
   gt_free(list_file);
   return kmeriterator;
 }
 
-static void gt_diagbandseed_kmer_iter_delete(GtDiagbandseedKmerIterator *ki)
+static void gt_diagbandseed_kmer_iter_delete(GtDiagbandseedKmerIterator *kmi)
 {
-  if (ki != NULL)
+  if (kmi != NULL)
   {
-    if (ki->original == NULL)
+    if (kmi->original == NULL)
     { /* file based */
-      if (ki->section.encode_info != NULL)
+      if (kmi->section.encode_info != NULL)
       {
-        if (ki->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
+        if (kmi->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
         {
-          gt_free(ki->kmerstream_uword.bufferedfilespace);
-          fclose(ki->kmerstream_uword.fp);
-          gt_free(ki->section.spaceGtUword);
+          gt_free(kmi->kmerstream_uword.bufferedfilespace);
+          fclose(kmi->kmerstream_uword.fp);
+          gt_free(kmi->section.spaceGtUword);
         } else
         {
-          gt_free(ki->kmerstream_uint8_t.bufferedfilespace);
-          fclose(ki->kmerstream_uint8_t.fp);
-          gt_free(ki->section.bytestring);
+          gt_free(kmi->kmerstream_uint8_t.bufferedfilespace);
+          fclose(kmi->kmerstream_uint8_t.fp);
+          gt_free(kmi->section.bytestring);
         }
       } else
       {
-        gt_free(ki->kmerstream_struct.bufferedfilespace);
-        fclose(ki->kmerstream_struct.fp);
+        gt_free(kmi->kmerstream_struct.bufferedfilespace);
+        fclose(kmi->kmerstream_struct.fp);
       }
-      gt_free(ki->section.spaceGtDiagbandseedKmerPos);
-      ki->section.allocated = 0;
+      gt_free(kmi->section.spaceGtDiagbandseedKmerPos);
+      kmi->section.allocated = 0;
     } else
     {
-      if (ki->section.encode_info != NULL)
+      if (kmi->section.encode_info != NULL)
       {
-        gt_free(ki->section.spaceGtDiagbandseedKmerPos);
+        gt_free(kmi->section.spaceGtDiagbandseedKmerPos);
       }
     }
-    gt_free(ki);
+    gt_free(kmi->kenv_score_tab);
+    gt_free(kmi);
   }
 }
 
+#define GT_DIAGBANDSEED_SET_SCORE(WORD)\
+        if (kmi->kenv_score_tab != NULL)\
+        {\
+          GtUword idx = (GtUword) (kmi->listptr_struct -\
+                                   kmi->listptr_struct_ref);\
+          gt_assert(idx < kmi->kenv_score_tab_length);\
+          kmi->kenv_score_tab[idx] = (WORD) & kmi->mask_score_bits;\
+        }
+
 static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
-                                              GtDiagbandseedKmerIterator *ki)
+                                              GtDiagbandseedKmerIterator *kmi)
 {
   GtCodetype code;
 
-  if (ki->at_list_end)
+  if (kmi->at_list_end)
   {
     return NULL;
   }
   /* reset section list */
-  if (ki->original != NULL)
+  if (kmi->original != NULL)
   { /* list based */
-    if (ki->section.encode_info != NULL)
+    if (kmi->section.encode_info != NULL)
     {
-      ki->listptr_struct = ki->section.spaceGtDiagbandseedKmerPos;
-      if (ki->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
+      kmi->listptr_struct_ref = kmi->listptr_struct
+                              = kmi->section.spaceGtDiagbandseedKmerPos;
+      if (kmi->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
       {
-        code = gt_kmerpos_ulong_code(ki->section.encode_info,
-                                     *ki->listptr_uword);
+        code = gt_kmerpos_ulong_code(kmi->section.encode_info,
+                                     *kmi->listptr_uword);
         do
         {
-          gt_assert(ki->listptr_struct < ki->listend_struct);
-          gt_kmerpos_ulong_decode(ki->listptr_struct++,
-                                  ki->section.encode_info,*ki->listptr_uword);
-          ki->listptr_uword++;
-        } while (ki->listptr_uword < ki->listend_uword &&
-                 code == gt_kmerpos_ulong_code(ki->section.encode_info,
-                                               *ki->listptr_uword));
-        if (ki->listptr_uword >= ki->listend_uword)
+          GT_DIAGBANDSEED_SET_SCORE(*kmi->listptr_uword);
+          gt_kmerpos_ulong_decode(kmi->listptr_struct++,
+                                  kmi->section.encode_info,*kmi->listptr_uword);
+          kmi->listptr_uword++;
+        } while (kmi->listptr_uword < kmi->listend_uword &&
+                 code == gt_kmerpos_ulong_code(kmi->section.encode_info,
+                                               *kmi->listptr_uword));
+        if (kmi->listptr_uword >= kmi->listend_uword)
         {
-          ki->at_list_end = true;
+          kmi->at_list_end = true;
         }
       } else
       {
-        code = gt_kmerpos_bytestring_code(ki->section.encode_info,
-                                          ki->listptr_uint8_t);
+        code = gt_kmerpos_bytestring_code(kmi->section.encode_info,
+                                          kmi->listptr_uint8_t);
         do
         {
-          gt_assert(ki->listptr_struct < ki->listend_struct);
-          gt_kmerpos_bytestring_decode(ki->listptr_struct++,
-                                       ki->section.encode_info,
-                                       ki->listptr_uint8_t);
-          ki->listptr_uint8_t += ki->section.encode_info->bytes_kmerpos;
-        } while (ki->listptr_uint8_t < ki->listend_uint8_t &&
-                 code == gt_kmerpos_bytestring_code(ki->section.encode_info,
-                                                    ki->listptr_uint8_t));
-        if (ki->listptr_uint8_t >= ki->listend_uint8_t)
+          gt_assert(kmi->listptr_struct < kmi->listend_struct);
+          /* XXX: also extract score from kenv here, but only later */
+          gt_kmerpos_bytestring_decode(kmi->listptr_struct++,
+                                       kmi->section.encode_info,
+                                       kmi->listptr_uint8_t);
+          kmi->listptr_uint8_t += kmi->section.encode_info->bytes_kmerpos;
+        } while (kmi->listptr_uint8_t < kmi->listend_uint8_t &&
+                 code == gt_kmerpos_bytestring_code(kmi->section.encode_info,
+                                                    kmi->listptr_uint8_t));
+        if (kmi->listptr_uint8_t >= kmi->listend_uint8_t)
         {
-          ki->at_list_end = true;
+          kmi->at_list_end = true;
         }
       }
     } else
     {
-      code = ki->listptr_struct->code;
-      ki->section.spaceGtDiagbandseedKmerPos = ki->listptr_struct;
+      code = kmi->listptr_struct->code;
+      kmi->section.spaceGtDiagbandseedKmerPos = kmi->listptr_struct;
       /* add element to section until code differs */
       do
       {
-        ki->listptr_struct++;
-      } while (ki->listptr_struct < ki->listend_struct &&
-               code == ki->listptr_struct->code);
-      if (ki->listptr_struct >= ki->listend_struct)
+        kmi->listptr_struct++;
+      } while (kmi->listptr_struct < kmi->listend_struct &&
+               code == kmi->listptr_struct->code);
+      if (kmi->listptr_struct >= kmi->listend_struct)
       {
-        ki->at_list_end = true;
+        kmi->at_list_end = true;
       }
     }
   } else
   { /* file based */
     int rval;
 
-    if (ki->section.encode_info != NULL)
+    if (kmi->section.encode_info != NULL)
     {
-      ki->listptr_struct = ki->section.spaceGtDiagbandseedKmerPos;
-      if (ki->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
+      kmi->listptr_struct_ref = kmi->listptr_struct
+                              = kmi->section.spaceGtDiagbandseedKmerPos;
+      if (kmi->section.encode_info->bytes_kmerpos <= sizeof (GtUword))
       {
-        code = gt_kmerpos_ulong_code(ki->section.encode_info,ki->buffer_uword);
+        /* kmplt == ULONG */
+        code = gt_kmerpos_ulong_code(kmi->section.encode_info,
+                                     kmi->buffer_uword);
         do
         {
-          gt_assert(ki->listptr_struct < ki->listend_struct);
-          gt_kmerpos_ulong_decode(ki->listptr_struct++,
-                                  ki->section.encode_info,ki->buffer_uword);
-          rval = gt_readnextfromstream_GtUword(&ki->buffer_uword,
-                                               &ki->kmerstream_uword);
+          gt_assert(kmi->listptr_struct < kmi->listend_struct);
+          if (kmi->kenv_score_tab != NULL)
+          {
+            GtUword idx = (GtUword) (kmi->listptr_struct -
+                                     kmi->listptr_struct_ref);
+            gt_assert(idx < kmi->kenv_score_tab_length);
+            kmi->kenv_score_tab[idx] = kmi->buffer_uword & kmi->mask_score_bits;
+          }
+          gt_kmerpos_ulong_decode(kmi->listptr_struct++,
+                                  kmi->section.encode_info,kmi->buffer_uword);
+          rval = gt_readnextfromstream_GtUword(&kmi->buffer_uword,
+                                               &kmi->kmerstream_uword);
         } while (rval == 1 &&
-                 code == gt_kmerpos_ulong_code(ki->section.encode_info,
-                                               ki->buffer_uword));
+                 code == gt_kmerpos_ulong_code(kmi->section.encode_info,
+                                               kmi->buffer_uword));
       } else
       {
-        code = gt_kmerpos_bytestring_code(ki->section.encode_info,
-                                          &ki->buffer_uint8_t[0]);
+        /* kmplt == BYTESTRING */
+        code = gt_kmerpos_bytestring_code(kmi->section.encode_info,
+                                          &kmi->buffer_uint8_t[0]);
         do
         {
-          gt_assert(ki->listptr_struct < ki->listend_struct);
-          gt_kmerpos_bytestring_decode(ki->listptr_struct++,
-                                       ki->section.encode_info,
-                                       &ki->buffer_uint8_t[0]);
-          ki->buffer_uint8_t
-            = gt_readnextfromstream_uint8_t(&ki->kmerstream_uint8_t);
-          rval = ki->buffer_uint8_t != NULL ? 1 : 0;
+          gt_assert(kmi->listptr_struct < kmi->listend_struct);
+          gt_kmerpos_bytestring_decode(kmi->listptr_struct++,
+                                       kmi->section.encode_info,
+                                       &kmi->buffer_uint8_t[0]);
+          kmi->buffer_uint8_t
+            = gt_readnextfromstream_uint8_t(&kmi->kmerstream_uint8_t);
+          rval = kmi->buffer_uint8_t != NULL ? 1 : 0;
         } while (rval == 1 &&
-                 code == gt_kmerpos_bytestring_code(ki->section.encode_info,
-                                                    &ki->buffer_uint8_t[0]));
+                 code == gt_kmerpos_bytestring_code(kmi->section.encode_info,
+                                                    &kmi->buffer_uint8_t[0]));
       }
     } else
     {
-      if (ki->section.spaceGtDiagbandseedKmerPos < ki->listptr_struct)
+      /* kmplt == STRUCT */
+      if (kmi->section.spaceGtDiagbandseedKmerPos < kmi->listptr_struct)
       {
-        ki->section.spaceGtDiagbandseedKmerPos[0] = *ki->listptr_struct;
-        ki->listptr_struct = ki->section.spaceGtDiagbandseedKmerPos;
+        kmi->section.spaceGtDiagbandseedKmerPos[0] = *kmi->listptr_struct;
+        kmi->listptr_struct = kmi->section.spaceGtDiagbandseedKmerPos;
       }
-      code = ki->listptr_struct->code;
+      code = kmi->listptr_struct->code;
       do
       {
-        ki->listptr_struct++;
-        gt_assert(ki->listptr_struct < ki->listend_struct);
-        rval = gt_readnextfromstream_GtDiagbandseedKmerPos(ki->listptr_struct,
-                                                           &ki->
-                                                             kmerstream_struct);
-      } while (rval == 1 && code == ki->listptr_struct->code);
+        kmi->listptr_struct++;
+        gt_assert(kmi->listptr_struct < kmi->listend_struct);
+        rval = gt_readnextfromstream_GtDiagbandseedKmerPos(
+                                                       kmi->listptr_struct,
+                                                       &kmi->kmerstream_struct);
+      } while (rval == 1 && code == kmi->listptr_struct->code);
     }
     if (rval != 1)
     {
-      ki->at_list_end = true;
+      kmi->at_list_end = true;
     }
   }
-  ki->section.nextfree = (GtUword) (ki->listptr_struct -
-                                    ki->section.spaceGtDiagbandseedKmerPos);
-  return &ki->section;
+  kmi->section.nextfree = (GtUword) (kmi->listptr_struct -
+                                    kmi->section.spaceGtDiagbandseedKmerPos);
+  return &kmi->section;
 }
 
 /* Evaluate the results of the seed count histogram */
@@ -2193,19 +2254,21 @@ typedef struct
   GtUword mask_tab[4], transfer_mask,
           aseqrange_start, bseqrange_start,
           aseqrange_end, bseqrange_end,
-          aseqrange_max_length, bseqrange_max_length;
+          aseqrange_max_length, bseqrange_max_length,
+          mask_score_bits;
   GtBitcount_type bits_seedpair,
+                  score_bits,
                   bits_values[4],
                   bits_units[2],
-                  bits_left_adjust[4],
-                  score_bits;
+                  bits_left_adjust[4];
   size_t bytes_seedpair;
   int shift_tab[4],
       transfer_shift,
-      bits_unused_in2GtUwords;
-  bool maxmat_compute, inseqseeds;
-  int maxmat_show;
+      bits_unused_in2GtUwords,
+      maxmat_show,
+      score_threshold;
   GtUword amaxlen;
+  bool maxmat_compute, inseqseeds;
 } GtSeedpairlist;
 
 #define GT_DIAGBANDSEED_ENCODE_SEQNUMS(ASEQNUM,BSEQNUM)\
@@ -2237,6 +2300,7 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
                         GtUword maxmat,
                         bool inseqseeds,
                         GtBitcount_type score_bits,
+                        int score_threshold,
                         GtUword amaxlen)
 {
   GtSeedpairlist *seedpairlist = gt_malloc(sizeof *seedpairlist);
@@ -2251,6 +2315,8 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
   seedpairlist->amaxlen = amaxlen;
   seedpairlist->inseqseeds = inseqseeds;
   seedpairlist->score_bits = score_bits;
+  seedpairlist->mask_score_bits = (((GtUword) 1) << score_bits) - 1;
+  seedpairlist->score_threshold = score_threshold;
   seedpairlist->aseqrange_max_length
     = gt_sequence_parts_info_max_length_get(aseqranges,aidx);
   seedpairlist->bseqrange_max_length
@@ -2284,6 +2350,7 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
     = gt_uword_bits - seedpairlist->bits_values[idx_aseqnum];
   seedpairlist->bits_left_adjust[idx_bseqnum]
     = gt_uword_bits - seedpairlist->bits_units[0];
+  gt_assert(seedpairlist->bits_units[1] + score_bits <= gt_uword_bits);
   seedpairlist->bits_left_adjust[idx_bpos]
     = gt_uword_bits - (seedpairlist->bits_values[idx_bpos] + score_bits);
   seedpairlist->bits_left_adjust[idx_apos]
@@ -2505,6 +2572,7 @@ const uint8_t *gt_seedpairlist_mlist_bytestring(
 
 static void gt_diagbandseed_decode_seedpair_gen(
                                             GtDiagbandseedSeedPair *seedpair,
+                                            int *bpos_score_ptr,
                                             const GtSeedpairlist *seedpairlist,
                                             const uint8_t *bytestring);
 
@@ -2513,7 +2581,8 @@ static void gt_diagbandseed_encode_seedpair(uint8_t *bytestring,
                                             GtDiagbandseedSeqnum aseqnum,
                                             GtDiagbandseedSeqnum bseqnum,
                                             GtDiagbandseedPosition bpos,
-                                            GtDiagbandseedPosition apos)
+                                            GtDiagbandseedPosition apos,
+                                            uint8_t bpos_score_diff)
 {
   GtUword value_seqnums, value_positions;
 
@@ -2523,6 +2592,10 @@ static void gt_diagbandseed_encode_seedpair(uint8_t *bytestring,
   value_positions
     = (((GtUword) bpos) << seedpairlist->bits_left_adjust[idx_bpos]) |
       (((GtUword) apos) << seedpairlist->bits_left_adjust[idx_apos]);
+  if (seedpairlist->score_bits > 0)
+  {
+    value_positions |= (GtUword) bpos_score_diff;
+  }
   value_seqnums |= (value_positions >> seedpairlist->bits_units[0]);
   gt_diagbandseed_one_GtUword2bytestring(bytestring,sizeof (GtUword),
                                          value_seqnums);
@@ -2534,12 +2607,8 @@ static void gt_diagbandseed_encode_seedpair(uint8_t *bytestring,
 #ifdef SKDEBUG
   {
     GtDiagbandseedSeedPair thisseedpair;
-    gt_diagbandseed_decode_seedpair_gen(&thisseedpair,seedpairlist,bytestring);
-    if (thisseedpair.bpos != bpos)
-    {
-      printf("thisseedpair.bpos = %u != %u = bpos\n",
-              thisseedpair.bpos,bpos);
-    }
+    gt_diagbandseed_decode_seedpair_gen(&thisseedpair,NULL,seedpairlist,
+                                        bytestring);
     gt_assert(thisseedpair.aseqnum == aseqnum);
     gt_assert(thisseedpair.bseqnum == bseqnum);
     gt_assert(thisseedpair.apos == apos);
@@ -2553,7 +2622,8 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                                 GtDiagbandseedSeqnum aseqnum,
                                 GtDiagbandseedSeqnum bseqnum,
                                 GtDiagbandseedPosition bpos,
-                                GtDiagbandseedPosition apos)
+                                GtDiagbandseedPosition apos,
+                                uint8_t bpos_score_diff)
 {
   gt_assert(seedpairlist != NULL &&
             aseqnum >= seedpairlist->aseqrange_start &&
@@ -2591,12 +2661,16 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
   {
     if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_ULONG)
     {
-      const GtUword encoding
+      GtUword encoding
         = GT_DIAGBANDSEED_ENCODE_SEEDPAIR(aseqnum -
                                           seedpairlist->aseqrange_start,
                                           bseqnum -
                                           seedpairlist->bseqrange_start,
                                           bpos,apos); /*set splt ulong */
+      if (seedpairlist->score_bits > 0)
+      {
+        encoding |= (GtUword) bpos_score_diff;
+      }
       if (knownsize)
       {
         gt_assert(seedpairlist->mlist_ulong->nextfreeGtUword <
@@ -2639,7 +2713,8 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                                        aseqnum - seedpairlist->aseqrange_start,
                                        bseqnum - seedpairlist->bseqrange_start,
                                        bpos,
-                                       apos);
+                                       apos,
+                                       bpos_score_diff);
     }
   }
 }
@@ -2703,6 +2778,7 @@ static GtUword gt_seedpairlist_extract_ulong_at(
 
 static void gt_diagbandseed_decode_seedpair_gen(
                                             GtDiagbandseedSeedPair *seedpair,
+                                            int *bpos_score_ptr,
                                             const GtSeedpairlist *seedpairlist,
                                             const uint8_t *bytestring)
 {
@@ -2730,20 +2806,28 @@ static void gt_diagbandseed_decode_seedpair_gen(
                                    seedpairlist->mask_tab[idx_apos]);
   bpos = (GtDiagbandseedPosition) (value_positions >>
                                    seedpairlist->bits_values[idx_apos]);
+  if (bpos_score_ptr != NULL)
+  {
+    *bpos_score_ptr = seedpairlist->score_threshold +
+                  (value_positions & seedpairlist->mask_score_bits);
+  }
   GT_DIAGBANDSEED_SETPOS(seedpair,apos,bpos); /* for splt bytestring */
 }
 
 static void gt_diagbandseed_decode_seedpair(GtDiagbandseedSeedPair *seedpair,
+                                            int *bpos_score_ptr,
                                             const GtSeedpairlist *seedpairlist,
                                             GtUword offset)
 {
   gt_diagbandseed_decode_seedpair_gen(seedpair,
+                                      bpos_score_ptr,
                                       seedpairlist,
                                       seedpairlist->mlist_bytestring->
                                               spaceuint8_t + offset);
 }
 
 static void gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
+                               int *bpos_score_ptr,
                                const GtSeedpairlist *seedpairlist,
                                GtUword spidx)
 {
@@ -2762,10 +2846,17 @@ static void gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
         = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_bseqnum);
       apos = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_apos),
       bpos = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_bpos);
+      if (bpos_score_ptr != NULL)
+      {
+        *bpos_score_ptr
+          = (int) (seedpairlist->score_threshold +
+                   (seedpairlist->mlist_ulong->spaceGtUword[spidx] &
+                   seedpairlist->mask_score_bits));
+      }
       GT_DIAGBANDSEED_SETPOS(seedpair,apos,bpos); /* set for ulong */
     } else
     {
-      gt_diagbandseed_decode_seedpair(seedpair,seedpairlist,
+      gt_diagbandseed_decode_seedpair(seedpair,bpos_score_ptr,seedpairlist,
                                       spidx * seedpairlist->bytes_seedpair);
     }
   }
@@ -2777,15 +2868,23 @@ static void gt_diagbandseed_show_seed(FILE *stream,
 {
   GtDiagbandseedSeedPair seedpair;
   GtDiagbandseedPosition apos;
+  int bpos_score;
 
-  gt_seedpairlist_at(&seedpair,seedpairlist,spidx);
+  gt_seedpairlist_at(&seedpair,&bpos_score,seedpairlist,spidx);
   apos = GT_DIAGBANDSEED_GETPOS_A(&seedpair);
-  fprintf(stream, "(%" PRIu32 ",%" PRIu32 ",%" PRIu32 ",%" GT_WUS ")",
+  fprintf(stream, "(%" PRIu32 ",%" PRIu32 ",%" PRIu32 ",%" GT_WUS,
                   seedpair.aseqnum,
                   seedpair.bseqnum,
                   apos,
                   GT_DIAGBANDSEED_CONV_B(apos,
                                          GT_DIAGBANDSEED_GETPOS_B(&seedpair)));
+  if (seedpairlist->score_bits > 0)
+  {
+    printf(",%d)",bpos_score);
+  } else
+  {
+    printf(")");
+  }
 }
 
 #ifndef NDEBUG
@@ -2796,8 +2895,8 @@ static int gt_diagbandseed_seeds_compare(const GtSeedpairlist *seedpairlist,
   GtDiagbandseedPosition p_apos, c_apos, p_bpos, c_bpos;
 
   gt_assert(current > 0);
-  gt_seedpairlist_at(&p_seedpair,seedpairlist,current - 1);
-  gt_seedpairlist_at(&c_seedpair,seedpairlist,current);
+  gt_seedpairlist_at(&p_seedpair,NULL,seedpairlist,current - 1);
+  gt_seedpairlist_at(&c_seedpair,NULL,seedpairlist,current);
   if (p_seedpair.aseqnum < c_seedpair.aseqnum)
   {
     return -1;
@@ -2877,8 +2976,8 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
   {
     const GtDiagbandseedKmerPos *asegment = alist->spaceGtDiagbandseedKmerPos,
                                 *bsegment = blist->spaceGtDiagbandseedKmerPos;
-    GtUword alen = alist->nextfree,
-            blen = blist->nextfree;
+    const GtUword alen = alist->nextfree,
+                  blen = blist->nextfree;
     if (asegment->code < bsegment->code)
     {
       alist = gt_diagbandseed_kmer_iter_next(aiter);
@@ -2902,6 +3001,9 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
           } else
           {
             const GtDiagbandseedKmerPos *aptr, *bptr;
+
+            gt_assert(biter->kenv_score_tab == NULL ||
+                      blen <= biter->kenv_score_tab_length);
             for (aptr = asegment; aptr < asegment + alen; aptr++)
             {
               for (bptr = bsegment; bptr < bsegment + blen; bptr++)
@@ -2915,13 +3017,17 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
                   /* no duplicates from the same dataset */
                   if (histogram == NULL)
                   {
-                    /* save SeedPair in seedpairlist */
+                    uint8_t bpos_score_diff
+                      = biter->kenv_score_tab == NULL
+                          ? 0
+                          : biter->kenv_score_tab[(GtUword) (bptr - bsegment)];
                     gt_seedpairlist_add(seedpairlist,
                                         knowthesize,
                                         aptr->seqnum,
                                         bptr->seqnum,
                                         bptr->endpos,
-                                        aptr->endpos);
+                                        aptr->endpos,
+                                        bpos_score_diff);
                   } else
                   {
                     /* count seed frequency in histogram */
@@ -2970,7 +3076,7 @@ static int gt_diagbandseed_verify(const GtSeedpairlist *seedpairlist,
     GtDiagbandseedSeedPair seedpair;
     GtDiagbandseedPosition abs_apos, abs_bpos;
 
-    gt_seedpairlist_at(&seedpair,seedpairlist,idx);
+    gt_seedpairlist_at(&seedpair,NULL,seedpairlist,idx);
     /* extract decoded k-mers at seed positions */
     abs_apos = GT_DIAGBANDSEED_GETPOS_A(&seedpair) +
                gt_encseq_seqstartpos(aencseq, seedpair.aseqnum);
@@ -4943,6 +5049,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       *last_segment_start = mlistend - minsegmentlen,
       *nextsegm = mlist;
 
+    /* we do not need to handle scores from kenvironments, as they are
+       splt = STRUCT cannot be used with scores */
+
     gt_assert(nextsegm <= last_segment_start);
     /* iterate through segments of equal k-mers */
     while (nextsegm <= last_segment_start)
@@ -5030,7 +5139,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
           continue; /* process next segment */
         }
 
-        /* this segment begining with nextsegm pssibly has enough seeds */
+        /* this segment begining with nextsegm possibly has enough seeds */
         currsegm_aseqnum = gt_seedpairlist_extract_ulong(seedpairlist,*currsegm,
                                                          idx_aseqnum) +
                            seedpairlist->aseqrange_start;
@@ -5085,7 +5194,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 
       gt_assert(seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_BYTESTRING);
       /* iterate through segments of equal k-mers, segment has length > 0 */
-      gt_diagbandseed_decode_seedpair(&nextsegment,seedpairlist,0);
+      gt_diagbandseed_decode_seedpair(&nextsegment,NULL,seedpairlist,0);
       while (nextsegment_offset <= last_segment_offset)
       {
         GtSeedpairPositions *spp_ptr, *segment_positions;
@@ -5093,7 +5202,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         GtDiagbandseedSeqnum currsegm_aseqnum = nextsegment.aseqnum;
         GtDiagbandseedSeqnum currsegm_bseqnum = nextsegment.bseqnum;
 
-        gt_diagbandseed_decode_seedpair(&endminsegment,seedpairlist,
+        gt_diagbandseed_decode_seedpair(&endminsegment,NULL,seedpairlist,
                                         nextsegment_offset +
                                         minsegmentlen_offset);
         if (currsegm_aseqnum != endminsegment.aseqnum ||
@@ -5107,7 +5216,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
             {
               break;
             }
-            gt_diagbandseed_decode_seedpair(&nextsegment,seedpairlist,
+            gt_diagbandseed_decode_seedpair(&nextsegment,NULL,seedpairlist,
                                             nextsegment_offset);
             if (currsegm_aseqnum != nextsegment.aseqnum ||
                 currsegm_bseqnum != nextsegment.bseqnum)
@@ -5132,7 +5241,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
           {
             break;
           }
-          gt_diagbandseed_decode_seedpair(&nextsegment,seedpairlist,
+          gt_diagbandseed_decode_seedpair(&nextsegment,NULL,seedpairlist,
                                           nextsegment_offset);
         } while (currsegm_aseqnum == nextsegment.aseqnum &&
                  currsegm_bseqnum == nextsegment.bseqnum);
@@ -5208,7 +5317,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
   GtUword kmer_env_size = 0,
           kmer_count = 0,
           *kmer_environ_ptr,
-          score_tab[100] = {0};
+          score_dist[100] = {0};
   const GtKmerPosList *alist = gt_diagbandseed_kmer_iter_next(kenv_source_iter);
   int idx;
   const int score_threshold = gt_kenv_generator_get_th(kenv_generator);
@@ -5238,7 +5347,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
              raw_ptr++)
         {
           gt_assert(raw_ptr->score < 100);
-          score_tab[raw_ptr->score]++;
+          score_dist[raw_ptr->score]++;
         }
       }
     }
@@ -5249,9 +5358,9 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
   {
     for (idx = 0; idx < 100; idx++)
     {
-      if (score_tab[idx] > 0)
+      if (score_dist[idx] > 0)
       {
-        printf("# score %d: " GT_WU " times\n",idx,score_tab[idx]);
+        printf("# score %d: " GT_WU " times\n",idx,score_dist[idx]);
       }
     }
     printf("# environment has " GT_WU " elements (%.0f MB, "
@@ -5457,6 +5566,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtQuerymatchSegmentBuffer *querymatch_segment_buffer = NULL;
   GtRadixsortinfo *snd_pass_radix_sort_info = NULL;
   GtBitcount_type score_bits = 0;
+  int score_threshold = 0;
   unsigned int a_numofchars = gt_encseq_alphabetnumofchars(arg->aencseq),
                b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
 
@@ -5522,22 +5632,24 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                     aidx,
                                                     aencode_info,
                                                     0,
+                                                    0,
                                                     arg->file_buffer_size);
     gt_assert(aiter != NULL);
   } else
   {
     alen = alist->nextfree;
-    aiter = gt_diagbandseed_kmer_iter_new_list(alist);
+    aiter = gt_diagbandseed_kmer_iter_new_list(alist,0);
   }
   if (arg->kenv_generator != NULL)
   {
-    const int score_threshold = gt_kenv_generator_get_th(arg->kenv_generator),
-              max_score = gt_kenv_generator_get_max_score(arg->kenv_generator) *
+    const int max_score = gt_kenv_generator_get_max_score(arg->kenv_generator) *
                           gt_kenv_generator_get_q(arg->kenv_generator);
+
+    score_threshold = gt_kenv_generator_get_th(arg->kenv_generator);
+    gt_assert(score_threshold <= max_score);
     score_bits
       = (GtBitcount_type) gt_required_bits(max_score - score_threshold);
-
-    gt_assert(score_threshold <= max_score);
+    gt_assert(score_bits <= CHAR_BIT);
     biter = gt_diagbandseed_kmer_iter_new_from_file(&blen,
                                                     arg->bencseq,
                                                     arg->spacedseedweight,
@@ -5546,17 +5658,18 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                     bnumseqranges,
                                                     bidx,
                                                     bencode_info,
+                                                    score_bits,
                                                     score_threshold,
                                                     arg->file_buffer_size);
     if (biter == NULL)
     {
-      if (aencode_info->bits_kmerpos + score_bits > sizeof (GtUword) * CHAR_BIT)
+      if (aencode_info->bits_kmerpos + score_bits > gt_uword_bits)
       {
         gt_error_set(err,"seedlength or sequence set is too large so that "
                          "bits_kmerpos + score_bits = %hu + %hu > %d; "
                          "either use smaller seedlength or option -parts",
                      aencode_info->bits_kmerpos,score_bits,
-                     (int) (sizeof (GtUword) * CHAR_BIT));
+                     gt_uword_bits);
         had_err = -1;
       } else
       {
@@ -5574,6 +5687,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                     bnumseqranges,
                                                     bidx,
                                                     bencode_info,
+                                                    0,
                                                     0,
                                                     arg->file_buffer_size);
           gt_assert(kenv_source_iter != NULL);
@@ -5612,6 +5726,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                           bnumseqranges,
                                                           bidx,
                                                           bencode_info,
+                                                          score_bits,
                                                           score_threshold,
                                                           arg->
                                                             file_buffer_size);
@@ -5620,7 +5735,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
         } else
         {
           blen = kenv_list->nextfree;
-          biter = gt_diagbandseed_kmer_iter_new_list(kenv_list);
+          biter = gt_diagbandseed_kmer_iter_new_list(kenv_list,score_bits);
         }
         if (kenv_source_iter != aiter)
         {
@@ -5649,7 +5764,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     if (alist_blist_identical && alist != NULL)
     {
       /* use a second iterator for the same list */
-      biter = gt_diagbandseed_kmer_iter_new_list(alist);
+      biter = gt_diagbandseed_kmer_iter_new_list(alist,0);
       blen = alen;
     } else
     {
@@ -5663,6 +5778,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                         bnumseqranges,
                                                         bidx,
                                                         bencode_info,
+                                                        0,
                                                         0,
                                                         arg->file_buffer_size);
       }
@@ -5688,7 +5804,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                 known_size,
                                 stream);
         blen = blist->nextfree;
-        biter = gt_diagbandseed_kmer_iter_new_list(blist);
+        biter = gt_diagbandseed_kmer_iter_new_list(blist,0);
       }
     }
   }
@@ -5705,6 +5821,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        bidx,
                                        arg->maxmat,arg->inseqseeds,
                                        score_bits,
+                                       score_threshold,
                                        amaxlen);
     gt_assert(score_bits == 0 ||
               seedpairlist->splt != GT_DIAGBANDSEED_BASE_LIST_STRUCT);
@@ -5923,6 +6040,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                         bidx,
                                                         bencode_info,
                                                         0,
+                                                        0,
                                                         arg->file_buffer_size);
       }
       if (biter == NULL)
@@ -5943,7 +6061,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                               blen,
                               stream);
         gt_assert(blen == clist->nextfree);
-        biter = gt_diagbandseed_kmer_iter_new_list(clist);
+        biter = gt_diagbandseed_kmer_iter_new_list(clist,0);
       }
 
       gt_diagbandseed_kmer_iter_reset(aiter);
