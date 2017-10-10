@@ -86,7 +86,10 @@ void gt_bitbuffer_write_ulongtab_FILE(GtBitbuffer *bb,
                                       const GtUword *tab,
                                       GtUword len);
 
-void gt_bitbuffer_flush(bool bruteforce,GtBitbuffer *bb,uint8_t *bytestring);
+void gt_bitbuffer_FILE_flush(GtBitbuffer *bb);
+
+void gt_bitbuffer_bytestring_flush(bool bruteforce,GtBitbuffer *bb,
+                                   uint8_t *bytestring);
 
 /* Deletes <bb> and frees all associated memory. */
 void         gt_bitbuffer_delete(GtBitbuffer *bb);

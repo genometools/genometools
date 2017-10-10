@@ -219,33 +219,42 @@ void gt_bitbuffer_write_ulongtab_FILE(GtBitbuffer *bb,
   }
 }
 
-void gt_bitbuffer_flush(bool bruteforce,GtBitbuffer *bb,uint8_t *bytestring)
+void gt_bitbuffer_FILE_flush(GtBitbuffer *bb)
 {
   gt_assert(bb != NULL);
+
   if (bb->remainingbitsinbuffer < bb->bitsinbuffer)
   {
-    if (bb->fp != NULL)
+    gt_assert(bb->fp != NULL);
+    (void) fwrite(&bb->currentbitbuffer,
+                  sizeof bb->currentbitbuffer,
+                  (size_t) 1,bb->fp);
+    if (bb->bitsperentry > 0)
     {
-      gt_assert(!bruteforce && bytestring == NULL);
-      (void) fwrite(&bb->currentbitbuffer,
-                    sizeof bb->currentbitbuffer,
-                    (size_t) 1,bb->fp);
-      if (bb->bitsperentry > 0)
-      {
-        uint64_t writtenbits = bb->numberofallvalues * bb->bitsperentry;
-        (void) fseek(bb->fp,0,SEEK_SET);
-        (void) fwrite(&writtenbits,sizeof writtenbits,(size_t) 1,bb->fp);
-      }
+      uint64_t writtenbits = bb->numberofallvalues * bb->bitsperentry;
+      (void) fseek(bb->fp,0,SEEK_SET);
+      (void) fwrite(&writtenbits,sizeof writtenbits,(size_t) 1,bb->fp);
+    }
+  }
+  bb->currentbitbuffer = 0;
+  bb->currentuint8 = 0;
+  bb->remainingbitsinbuffer = bb->bitsinbuffer;
+}
+
+void gt_bitbuffer_bytestring_flush(bool bruteforce,GtBitbuffer *bb,
+                                   uint8_t *bytestring)
+{
+  gt_assert(bb != NULL);
+
+  if (bb->remainingbitsinbuffer < bb->bitsinbuffer)
+  {
+    if (bruteforce)
+    {
+      *bytestring = bb->currentuint8;
     } else
     {
-      if (bruteforce)
-      {
-        *bytestring = bb->currentuint8;
-      } else
-      {
-        gt_assert(bb->fp == NULL && bb->currentbitbuffer <= UINT8_MAX);
-        *bytestring = (uint8_t) bb->currentbitbuffer;
-      }
+      gt_assert(bb->currentbitbuffer <= UINT8_MAX);
+      *bytestring = (uint8_t) bb->currentbitbuffer;
     }
   }
   bb->currentbitbuffer = 0;
@@ -259,7 +268,7 @@ void gt_bitbuffer_delete(GtBitbuffer *bb)
   {
     if (bb->fp != NULL)
     {
-      gt_bitbuffer_flush(false,bb,NULL);
+      gt_bitbuffer_FILE_flush(bb);
     }
     gt_free(bb);
   }
