@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "core/assert_api.h"
 #include "core/intbits.h"
-#include "bitbuffer.h"
+#include "core/bitbuffer.h"
 
 struct GtBitbuffer
 {
@@ -111,11 +111,11 @@ void gt_bitbuffer_generic_write_FILE(GtBitbuffer *bb,
 #define SHOWCURRENT /* Nothing */
 
 GtUword gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
-                                       uint8_t *bytestring,
-                                       GtUword bytestring_offset,
-                                       GT_UNUSED GtUword bytestring_length,
-                                       GtUword value,
-                                       GtBitcount_type bitsforvalue)
+                                      uint8_t *bytestring,
+                                      GtUword bytestring_offset,
+                                      GT_UNUSED GtUword bytestring_length,
+                                      GtUword value,
+                                      GtBitcount_type bitsforvalue)
 {
   GtBitcount_type bits2store = bitsforvalue;
 
@@ -272,10 +272,10 @@ void gt_bitbuffer_reset_for_read(GtBitbuffer *bb)
 }
 
 GtUword gt_bitbuffer_read_bytestring(GtBitbuffer *bb,
-                                      GtUword *value,
-                                      const uint8_t *bytestring,
-                                      GtUword bytestring_offset,
-                                      GtBitcount_type bitsforvalue)
+                                     GtUword *value,
+                                     const uint8_t *bytestring,
+                                     GtUword bytestring_offset,
+                                     GtBitcount_type bitsforvalue)
 {
   unsigned int bits2read = bitsforvalue;
 

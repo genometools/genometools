@@ -95,7 +95,7 @@ GtUword gt_bitbuffer_read_bytestring(GtBitbuffer *bb,
                                      GtUword *value,
                                      const uint8_t *bytestring,
                                      GtUword bytestring_offset,
-                                      GtBitcount_type bitsforvalue);
+                                     GtBitcount_type bitsforvalue);
 
 GtUword gt_bitbuffer_read_bytestring_bf(GtBitbuffer *bb,
                                         GtUword *value,
