@@ -54,18 +54,28 @@ GtDiagbandStruct *gt_diagband_struct_new(GtUword amaxlen,GtUword bmaxlen,
 
 void gt_diagband_struct_delete(GtDiagbandStruct *diagband_struct);
 
-/* Return true if and only if all scores of diagonal bands, stored in
-   <diagband_struct> are 0. */
+/* Return true if and only if all b-coverage value of all diagonal bands,
+  stored in <diagband_struct> are 0. */
 
 bool gt_diagband_struct_empty(const GtDiagbandStruct *diagband_struct);
+
+/* Set the bpos_sorted flag of the diagonalband structure. This flag is
+   true, whenever the seeds are sorted in ascending order by bpos.
+   The flag is flag false, whenever the seeds are sorted in ascending order
+   by apos. */
 
 void gt_diagband_struct_bpos_sorted_set(GtDiagbandStruct *diagband_struct,
                                         bool value);
 
+/* type for storing positions. This must be the same as
+   GtDiagbandseedPosition declared in diagbandseed.c, which is checked
+   in gt_diagbandseed_run */
+
 typedef uint32_t GtDiagbandseedPosition;
 
 /* for a given pair of positions <apos> and <bpos> on the A- and on the
-   B-sequence, respectively, determine the corresponding coverage. */
+   B-sequence, respectively, determine the coverage of the diagonal
+   band the pair of positions belong to. */
 
 GtUword gt_diagband_struct_coverage(const GtDiagbandStruct *diagband_struct,
                                     GtDiagbandseedPosition apos,
@@ -80,7 +90,7 @@ typedef struct
   GtDiagbandseedPosition apos, bpos, len;
 } GtDiagbandseedMaximalmatch;
 
-/* The following function updates the diagonal band score for
+/* The following function updates the diagonal band b-coverage for
    <numofmatches> MEMs stored in <memstore>. The matches have to be sorted
    by the B-position */
 
@@ -89,7 +99,8 @@ void gt_diagband_struct_mem_multi_update(GtDiagbandStruct *diagband_struct,
                                            *memstore,
                                          GtUword numofmatches);
 
-/* To store seeds in we use elements of the following type. */
+/* To store seeds of a segment (with constant A- and B-sequence number)
+   we use elements of the following type. */
 
 typedef struct
 {
@@ -97,7 +108,7 @@ typedef struct
   GtDiagbandseedPosition apos;
 } GtSeedpairPositions;
 
-/* The following function updates the diagonal band score for
+/* The following function updates the diagonal band b-coverage for
    <segment_length> seeds stored in <seedstore>, each of length seedlength.
    The matches have to be sorted by the B-position */
 
@@ -106,8 +117,8 @@ void gt_diagband_struct_seed_multi_update(GtDiagbandStruct *diagband_struct,
                                           GtUword segment_length,
                                           GtUword seedlength);
 
-/* The following function update the amaxlen and bmaxlen elements. This
-   is usefull in circumstances, where we want to process a segment for
+/* The following function updates the amaxlen and bmaxlen elements. This
+   is useful in circumstances, where we want to process a segment for
    two sequences as part of a larger index in the same way as the two
    sequences are processed without any other sequences. We achieve this
    behavior by supplying the length of the two sequences of the segment
@@ -116,7 +127,7 @@ void gt_diagband_struct_seed_multi_update(GtDiagbandStruct *diagband_struct,
 void gt_diagbandseed_maxlen_update(GtDiagbandStruct *diagband_struct,
                                    GtUword amaxlen,GtUword bmaxlen);
 
-/* The following function resets the diagonal band score for
+/* The following function resets the diagonal band b-coverage for
    <segment_length> seeds. */
 
 void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
@@ -136,7 +147,7 @@ void gt_diagband_struct_reset_counts(const GtDiagbandStruct *diagband_struct,
 typedef struct GtDiagbandStatistics GtDiagbandStatistics;
 
 /* The constructor. The first argument is the argument of option
-   -diagband-stat. Currently the only option is the keyword sum.
+   -diagband-stat. Currently the only option is the keyword total_bcov.
    One can extend the list of different options to compute other statistics,
    by adding a corresponding string to the array
    diagband_statistics_choices in src/tools/gt_seed_extend.c.
@@ -156,8 +167,8 @@ GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
 void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics);
 
 /* If the option -diagband-stat is used, the following function is called for
-   each pair of sequences, after completing the scores in
-   diagband_struct. The first argument refers to an object created by
+   each pair of sequences, after completing the computation of the b-coverage
+   values in diagband_struct. The first argument refers to an object created by
    gt_diagband_statistics_new.
 */
 

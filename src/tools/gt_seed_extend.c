@@ -174,7 +174,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
      the help message accordingly. */
-  static const char *diagband_statistics_choices[] = {"sum", NULL};
+  static const char *diagband_statistics_choices[] = {"total_bcov", NULL};
   static const char *estimation_choices[] = {"JKD","ANI",NULL};
   gt_assert(arguments != NULL);
 

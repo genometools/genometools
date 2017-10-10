@@ -37,7 +37,7 @@ struct GtDiagbandStruct
 {
   GtUword amaxlen, bmaxlen, logdiagbandwidth, num_diagbands, used_diagbands,
           reset_from_matches, reset_with_memset;
-  GtDiagbandseedScore *score;
+  GtDiagbandseedScore *bcov;
   GtDiagbandseedPosition *lastpos;
   bool bpos_sorted;
 };
@@ -73,12 +73,11 @@ GtDiagbandStruct *gt_diagband_struct_new(GtUword amaxlen,GtUword bmaxlen,
   diagband_struct->amaxlen = amaxlen;
   diagband_struct->bmaxlen = bmaxlen;
   diagband_struct->logdiagbandwidth = logdiagbandwidth;
-  /* diagband_score[0] and diagband_score[num_diagbands+1] remain zero as
-     boundaries */
-  diagband_struct->score = gt_calloc(diagband_struct->num_diagbands + 2,
-                                     sizeof *diagband_struct->score);
-  diagband_struct->score++; /* so we need not increment the index when
-                               accessing score */
+  /* bcov[0] and bcov[num_diagbands+1] remain zero as boundaries */
+  diagband_struct->bcov = gt_calloc(diagband_struct->num_diagbands + 2,
+                                    sizeof *diagband_struct->bcov);
+  diagband_struct->bcov++; /* so we need not increment the index when
+                               accessing bcov */
   diagband_struct->lastpos
     = gt_calloc(diagband_struct->num_diagbands,
                 sizeof *diagband_struct->lastpos);
@@ -120,8 +119,8 @@ void gt_diagband_struct_delete(GtDiagbandStruct *diagband_struct)
 {
   if (diagband_struct != NULL)
   {
-    diagband_struct->score--; /* need to recover original base adress */
-    gt_free(diagband_struct->score);
+    diagband_struct->bcov--; /* need to recover original base adress */
+    gt_free(diagband_struct->bcov);
     gt_free(diagband_struct->lastpos);
     gt_free(diagband_struct);
   }
@@ -129,8 +128,8 @@ void gt_diagband_struct_delete(GtDiagbandStruct *diagband_struct)
 
 /* for a given match of length <matchlength> ending a positions <apos> and
    <bpos> the sequence from A and from B, respectively, update the
-   diagonal band score, which is the number of positions on B covered by the
-   match. If previous matches have been added to the band before, then
+   diagonal band b-coverage, which is the number of positions on B covered by
+   the match. If previous matches have been added to the band before, then
    the positions overlapping with these on the B-sequence are not counted.*/
 
 static void gt_diagband_struct_single_update(GtDiagbandStruct *diagband_struct,
@@ -150,11 +149,11 @@ static void gt_diagband_struct_single_update(GtDiagbandStruct *diagband_struct,
   {
     /* no overlap */
     diagband_struct->lastpos[diagband_idx] = keypos;
-    if (diagband_struct->score[diagband_idx] == 0)
+    if (diagband_struct->bcov[diagband_idx] == 0)
     {
       diagband_struct->used_diagbands++;
     }
-    diagband_struct->score[diagband_idx] += matchlength;
+    diagband_struct->bcov[diagband_idx] += matchlength;
   } else
   {
     /* overlap: add positions after last counted position */
@@ -163,11 +162,11 @@ static void gt_diagband_struct_single_update(GtDiagbandStruct *diagband_struct,
       const GtUword addlength = keypos - diagband_struct->lastpos[diagband_idx];
 
       diagband_struct->lastpos[diagband_idx] = keypos;
-      if (diagband_struct->score[diagband_idx] == 0)
+      if (diagband_struct->bcov[diagband_idx] == 0)
       {
         diagband_struct->used_diagbands++;
       }
-      diagband_struct->score[diagband_idx] += addlength;
+      diagband_struct->bcov[diagband_idx] += addlength;
     }
   }
 }
@@ -177,9 +176,9 @@ static GtUword gt_diagband_struct_dband_coverage(
                                     GtUword diagband_idx)
 {
   gt_assert(diagband_struct != NULL);
-  return (GtUword) MAX(diagband_struct->score[diagband_idx + 1],
-                       diagband_struct->score[diagband_idx - 1])
-         + (GtUword) diagband_struct->score[diagband_idx];
+  return (GtUword) MAX(diagband_struct->bcov[diagband_idx + 1],
+                       diagband_struct->bcov[diagband_idx - 1])
+         + (GtUword) diagband_struct->bcov[diagband_idx];
 }
 
 GtUword gt_diagband_struct_coverage(const GtDiagbandStruct *diagband_struct,
@@ -240,8 +239,8 @@ void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
   gt_assert(diagband_struct != NULL);
   if (diagband_struct->used_diagbands * 3 >= diagband_struct->num_diagbands)
   { /* >= 33% of diagbands are used */
-    memset(diagband_struct->score,0,
-           sizeof *diagband_struct->score * diagband_struct->num_diagbands);
+    memset(diagband_struct->bcov,0,
+           sizeof *diagband_struct->bcov * diagband_struct->num_diagbands);
     memset(diagband_struct->lastpos,0,
            sizeof *diagband_struct->lastpos * diagband_struct->num_diagbands);
     diagband_struct->reset_with_memset++;
@@ -257,7 +256,7 @@ void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
           = gt_diagbandseed_diagonalband(diagband_struct,
                                          seedstore[idx].apos,
                                          seedstore[idx].bpos);
-        diagband_struct->score[diagband_idx] = 0;
+        diagband_struct->bcov[diagband_idx] = 0;
         diagband_struct->lastpos[diagband_idx] = 0;
       }
     } else
@@ -269,7 +268,7 @@ void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
           = gt_diagbandseed_diagonalband(diagband_struct,
                                          memstore[idx].apos,
                                          memstore[idx].bpos);
-        diagband_struct->score[diagband_idx] = 0;
+        diagband_struct->bcov[diagband_idx] = 0;
         diagband_struct->lastpos[diagband_idx] = 0;
       }
     }
@@ -280,9 +279,9 @@ void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
 
 struct GtDiagbandStatistics
 {
-  bool compute_sum;
+  bool compute_total_bcov;
   bool forward;
-  GtUword sumscore;
+  GtUword total_bcov;
   GtBitsequence *track;
 };
 
@@ -295,15 +294,15 @@ GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
     = gt_malloc(sizeof *diagband_statistics);
 
   diagband_statistics->forward = forward;
-  diagband_statistics->compute_sum = false;
-  if (strcmp(arg,"sum") == 0)
+  diagband_statistics->compute_total_bcov = false;
+  if (strcmp(arg,"total_bcov") == 0)
   {
-    diagband_statistics->compute_sum = true;
+    diagband_statistics->compute_total_bcov = true;
   } else
   {
     gt_assert(false);
   }
-  diagband_statistics->sumscore = 0;
+  diagband_statistics->total_bcov = 0;
   diagband_statistics->track = NULL;
   return diagband_statistics;
 }
@@ -321,25 +320,25 @@ void gt_diagband_statistics_display(const GtDiagbandStatistics
                                            *diagband_statistics)
 {
   gt_assert(diagband_statistics != NULL);
-  if (diagband_statistics->compute_sum)
+  if (diagband_statistics->compute_total_bcov)
   {
-    printf("# forward=%s, sum_diagband_score=" GT_WU "\n",
+    printf("# forward=%s, total_diagband_bcov=" GT_WU "\n",
             diagband_statistics->forward ? "true" : "false",
-            diagband_statistics->sumscore);
+            diagband_statistics->total_bcov);
   } else
   {
     gt_assert(false);
   }
 }
 
-static void gt_diagband_statistics_score_add(
+static void gt_diagband_statistics_bcov_add(
                                       GtDiagbandStatistics *diagband_statistics,
                                       const GtDiagbandStruct *diagband_struct,
                                       GtUword diagband_idx)
 {
   if (!GT_ISIBITSET(diagband_statistics->track,diagband_idx))
   {
-    diagband_statistics->sumscore += diagband_struct->score[diagband_idx];
+    diagband_statistics->total_bcov += diagband_struct->bcov[diagband_idx];
     GT_SETIBIT(diagband_statistics->track,diagband_idx);
   }
 }
@@ -376,8 +375,8 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
         = gt_diagbandseed_diagonalband(diagband_struct,
                                        seedstore[idx].apos,
                                        seedstore[idx].bpos);
-      gt_diagband_statistics_score_add(diagband_statistics,diagband_struct,
-                                       diagband_idx);
+      gt_diagband_statistics_bcov_add(diagband_statistics,diagband_struct,
+                                      diagband_idx);
     }
   } else
   {
@@ -388,8 +387,8 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
         = gt_diagbandseed_diagonalband(diagband_struct,
                                        memstore[idx].apos,
                                        memstore[idx].bpos);
-      gt_diagband_statistics_score_add(diagband_statistics,diagband_struct,
-                                       diagband_idx);
+      gt_diagband_statistics_bcov_add(diagband_statistics,diagband_struct,
+                                      diagband_idx);
     }
   }
 }

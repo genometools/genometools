@@ -81,4 +81,11 @@ const int *gt_kenv_generator_get_max_score_each_char(
 /* Returns the highest score defined in the ScoreMatrix inside <kenv_gen>. */
 int gt_kenv_generator_get_max_score(const GtKenvGenerator *kenv_gen);
 
+/* return score for two encoded sequences of the given length with respect
+   to the kenvironment */
+
+int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
+                       const GtUchar *a_encoded,
+                       const GtUchar *b_encoded,
+                       GtUword length);
 #endif
