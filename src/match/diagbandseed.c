@@ -43,6 +43,7 @@
 #include "core/log_api.h"
 #include "core/bittab_api.h"
 #include "core/array2dim_api.h"
+#include "core/bitbuffer.h"
 #include "match/chain2dim.h"
 #include "match/declare-readfunc.h"
 #include "match/kmercodes.h"
@@ -2245,7 +2246,7 @@ typedef struct
   GtArrayGtUword *mlist_ulong;
   GtArrayuint8_t *mlist_bytestring;
   GtDiagbandseedBaseListType splt;
-  GtUword mask_tab[4], transfer_mask,
+  GtUword mask_tab[4], spl_transfer_mask,
           aseqrange_start, bseqrange_start,
           aseqrange_end, bseqrange_end,
           aseqrange_max_length, bseqrange_max_length,
@@ -2254,15 +2255,17 @@ typedef struct
                   score_bits,
                   bits_values[4],
                   bits_units[2],
-                  bits_left_adjust[4];
+                  bits_left_adjust[4],
+                  bits_left_adjust_score;
   size_t bytes_seedpair;
   int shift_tab[4],
       transfer_shift,
-      bits_unused_in2GtUwords,
+      bits_unused_in2GtUword,
       maxmat_show,
       score_threshold;
   GtUword amaxlen;
   bool maxmat_compute, inseqseeds;
+  GtBitbuffer *bitbuffer;
 } GtSeedpairlist;
 
 #define GT_DIAGBANDSEED_ENCODE_SEQNUMS(ASEQNUM,BSEQNUM)\
@@ -2273,9 +2276,11 @@ typedef struct
              (((GtUword) (BPOS) << seedpairlist->shift_tab[idx_bpos]) | \
               ((GtUword) (APOS) << seedpairlist->shift_tab[idx_apos]))
 
-#define GT_DIAGBANDSEED_ENCODE_SEEDPAIR(ASEQNUM,BSEQNUM,BPOS,APOS)\
+#define GT_DIAGBANDSEED_ENCODE_SEEDPAIR(ASEQNUM,BSEQNUM,BPOS,APOS,\
+                                        BPOS_SCORE_DIFF)\
         (GT_DIAGBANDSEED_ENCODE_SEQNUMS(ASEQNUM,BSEQNUM) | \
-         GT_DIAGBANDSEED_ENCODE_POSITIONS(BPOS,APOS))
+         GT_DIAGBANDSEED_ENCODE_POSITIONS(BPOS,APOS) | \
+         (BPOS_SCORE_DIFF))
 
 int gt_diagbandseed_derive_maxmat_show(GtUword maxmat)
 {
@@ -2344,12 +2349,14 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
     = gt_uword_bits - seedpairlist->bits_values[idx_aseqnum];
   seedpairlist->bits_left_adjust[idx_bseqnum]
     = gt_uword_bits - seedpairlist->bits_units[0];
-  gt_assert(seedpairlist->bits_units[1] + score_bits <= gt_uword_bits);
   seedpairlist->bits_left_adjust[idx_bpos]
-    = gt_uword_bits - (seedpairlist->bits_values[idx_bpos] + score_bits);
+    = gt_uword_bits - seedpairlist->bits_values[idx_bpos];
   seedpairlist->bits_left_adjust[idx_apos]
+    = gt_uword_bits - seedpairlist->bits_units[1];
+  gt_assert(seedpairlist->bits_units[1] + score_bits <= gt_uword_bits);
+  seedpairlist->bits_left_adjust_score
     = gt_uword_bits - (seedpairlist->bits_units[1] + score_bits);
-  seedpairlist->transfer_mask
+  seedpairlist->spl_transfer_mask
     = (((GtUword) 1) << seedpairlist->bits_left_adjust[idx_bseqnum]) - 1;
   gt_assert(seedpairlist->bits_values[idx_apos] > 0);
   gt_assert(seedpairlist->bits_values[idx_bpos] > 0);
@@ -2362,8 +2369,8 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
   seedpairlist->bits_seedpair += score_bits;
   /* the following is only used for bits_seedpair > gt_uword_bits */
   seedpairlist->transfer_shift = seedpairlist->bits_seedpair - gt_uword_bits;
-  seedpairlist->bits_unused_in2GtUwords = 2 * gt_uword_bits -
-                                          seedpairlist->bits_seedpair;
+  seedpairlist->bits_unused_in2GtUword = 2 * gt_uword_bits -
+                                         seedpairlist->bits_seedpair;
   seedpairlist->bytes_seedpair = gt_bits2bytes(seedpairlist->bits_seedpair);
   if (seedpairlist->bytes_seedpair <= sizeof (GtUword))
   {
@@ -2410,6 +2417,7 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
     }
   }
   seedpairlist->splt = splt;
+  seedpairlist->bitbuffer = gt_bitbuffer_new();
   return seedpairlist;
 }
 
@@ -2442,7 +2450,7 @@ static void gt_seedpairlist_show_bits(FILE *stream,
   fprintf(stream,"apos=%hu bits",seedpairlist->bits_values[idx_apos]);
   if (seedpairlist->score_bits > 0)
   {
-    fprintf(stream," ,score=%hu bits\n",seedpairlist->score_bits);
+    fprintf(stream,", score=%hu bits\n",seedpairlist->score_bits);
   } else
   {
     fprintf(stream,"\n");
@@ -2512,6 +2520,7 @@ static void gt_seedpairlist_delete(GtSeedpairlist *seedpairlist)
       GT_FREEARRAY(seedpairlist->mlist_bytestring, uint8_t);
       gt_free(seedpairlist->mlist_bytestring);
     }
+    gt_bitbuffer_delete(seedpairlist->bitbuffer);
     gt_free(seedpairlist);
   }
 }
@@ -2564,11 +2573,90 @@ const uint8_t *gt_seedpairlist_mlist_bytestring(
   return seedpairlist->mlist_bytestring->spaceuint8_t;
 }
 
-static void gt_diagbandseed_decode_seedpair_gen(
+#ifdef SKDEBUG
+static uint8_t gt_diagbandseed_decode_seedpair_gen(
                                             GtDiagbandseedSeedPair *seedpair,
-                                            int *bpos_score_ptr,
                                             const GtSeedpairlist *seedpairlist,
                                             const uint8_t *bytestring);
+
+static char *gt_uint8_bits(const uint8_t byte)
+{
+  int idx;
+  char *out = malloc(sizeof *out * (CHAR_BIT+1));
+  uint8_t mask = ((uint8_t) 1) << 7;
+
+  out[CHAR_BIT] = '\0';
+  for (idx = 0; idx < CHAR_BIT; idx++)
+  {
+    out[idx] = (byte & mask) ? '1' : '0';
+    mask >>= 1;
+  }
+  return out;
+}
+
+static void gt_out_bytestring(const uint8_t *bytestring,GtUword length)
+{
+  GtUword idx;
+
+  for (idx = 0; idx < length; idx++)
+  {
+    char *s = gt_uint8_bits(bytestring[idx]);
+    printf("%s ",s);
+    free(s);
+  }
+  printf("\n");
+}
+
+static void gt_diagbandseed_encode_seedpair_bf(uint8_t *bytestring,
+                                            const GtSeedpairlist *seedpairlist,
+                                            GtDiagbandseedSeqnum aseqnum,
+                                            GtDiagbandseedSeqnum bseqnum,
+                                            GtDiagbandseedPosition bpos,
+                                            GtDiagbandseedPosition apos,
+                                            uint8_t bpos_score_diff)
+{
+  GtUword bytestring_offset
+    = gt_bitbuffer_write_bytestring(seedpairlist->bitbuffer,
+                                    bytestring,
+                                    0,
+                                    seedpairlist->bytes_seedpair,
+                                    (GtUword) aseqnum,
+                                    seedpairlist->bits_values[idx_aseqnum]);
+  bytestring_offset
+    = gt_bitbuffer_write_bytestring(seedpairlist->bitbuffer,
+                                    bytestring,
+                                    bytestring_offset,
+                                    seedpairlist->bytes_seedpair,
+                                    (GtUword) bseqnum,
+                                    seedpairlist->bits_values[idx_bseqnum]);
+  bytestring_offset
+    = gt_bitbuffer_write_bytestring(seedpairlist->bitbuffer,
+                                    bytestring,
+                                    bytestring_offset,
+                                    seedpairlist->bytes_seedpair,
+                                    (GtUword) bpos,
+                                    seedpairlist->bits_values[idx_bpos]);
+  bytestring_offset
+    = gt_bitbuffer_write_bytestring(seedpairlist->bitbuffer,
+                                    bytestring,
+                                    bytestring_offset,
+                                    seedpairlist->bytes_seedpair,
+                                    (GtUword) apos,
+                                    seedpairlist->bits_values[idx_apos]);
+  if (seedpairlist->score_bits > 0)
+  {
+    bytestring_offset
+      = gt_bitbuffer_write_bytestring(seedpairlist->bitbuffer,
+                                      bytestring,
+                                      bytestring_offset,
+                                      seedpairlist->bytes_seedpair,
+                                      (GtUword) bpos_score_diff,
+                                      seedpairlist->score_bits);
+  }
+  gt_bitbuffer_bytestring_flush(false,seedpairlist->bitbuffer,
+                                bytestring + bytestring_offset);
+}
+#endif
 
 static void gt_diagbandseed_encode_seedpair(uint8_t *bytestring,
                                             const GtSeedpairlist *seedpairlist,
@@ -2579,17 +2667,16 @@ static void gt_diagbandseed_encode_seedpair(uint8_t *bytestring,
                                             uint8_t bpos_score_diff)
 {
   GtUword value_seqnums, value_positions;
-
   value_seqnums
-    = (((GtUword) aseqnum) << seedpairlist->bits_left_adjust[idx_aseqnum]) |
-      (((GtUword) bseqnum) << seedpairlist->bits_left_adjust[idx_bseqnum]);
+    = (((GtUword) aseqnum) << seedpairlist->bits_left_adjust[idx_aseqnum]);
+  value_seqnums
+    |= (((GtUword) bseqnum) << seedpairlist->bits_left_adjust[idx_bseqnum]);
   value_positions
-    = (((GtUword) bpos) << seedpairlist->bits_left_adjust[idx_bpos]) |
-      (((GtUword) apos) << seedpairlist->bits_left_adjust[idx_apos]);
-  if (seedpairlist->score_bits > 0)
-  {
-    value_positions |= (GtUword) bpos_score_diff;
-  }
+    = (((GtUword) bpos) << seedpairlist->bits_left_adjust[idx_bpos]);
+  value_positions
+    |= (((GtUword) apos) << seedpairlist->bits_left_adjust[idx_apos]);
+  value_positions
+    |= (((GtUword) bpos_score_diff) << seedpairlist->bits_left_adjust_score);
   value_seqnums |= (value_positions >> seedpairlist->bits_units[0]);
   gt_diagbandseed_one_GtUword2bytestring(bytestring,sizeof (GtUword),
                                          value_seqnums);
@@ -2601,15 +2688,80 @@ static void gt_diagbandseed_encode_seedpair(uint8_t *bytestring,
 #ifdef SKDEBUG
   {
     GtDiagbandseedSeedPair thisseedpair;
-    gt_diagbandseed_decode_seedpair_gen(&thisseedpair,NULL,seedpairlist,
-                                        bytestring);
+    uint8_t thisbpos_score_diff;
+    gt_diagbandseed_decode_seedpair_gen(&thisseedpair,&thisbpos_score_diff,
+                                        seedpairlist,bytestring);
     gt_assert(thisseedpair.aseqnum == aseqnum);
     gt_assert(thisseedpair.bseqnum == bseqnum);
     gt_assert(thisseedpair.apos == apos);
     gt_assert(thisseedpair.bpos == bpos);
+    gt_assert(thisbpos_score_diff == bpos_score_diff);
   }
 #endif
 }
+
+#ifdef SKDEBUG
+static void gt_diagbandseed_encode_seedpair_verify(const GtSeedpairlist
+                                                      *seedpairlist)
+{
+  int idx;
+  GtUword max_values[5];
+  int bytestring_length = 9;
+  uint8_t bytestring[bytestring_length],
+          bytestring_bf[bytestring_length];
+  size_t trials;
+
+  gt_assert(seedpairlist->bytes_seedpair <= bytestring_length);
+  for (idx = 0; idx < 4; idx++)
+  {
+    max_values[idx] = (((GtUword) 1) << seedpairlist->bits_values[idx]) - 1;
+  }
+  max_values[4] = (((GtUword) 1) << seedpairlist->score_bits) - 1;
+  for (trials = 0; trials < 1000000; trials++)
+  {
+    GtDiagbandseedSeqnum
+      aseqnum = (GtDiagbandseedSeqnum) gt_rand_max(max_values[idx_aseqnum]),
+      bseqnum = (GtDiagbandseedSeqnum) gt_rand_max(max_values[idx_bseqnum]);
+    GtDiagbandseedPosition
+      bpos = (GtDiagbandseedPosition) gt_rand_max(max_values[idx_bpos]),
+      apos = (GtDiagbandseedPosition) gt_rand_max(max_values[idx_apos]);
+    uint8_t bpos_score_diff = 0;
+    if (seedpairlist->score_bits > 0)
+    {
+      bpos_score_diff = (uint8_t) gt_rand_max(max_values[4]);
+    }
+    gt_diagbandseed_encode_seedpair(bytestring,
+                                    seedpairlist,
+                                    aseqnum,
+                                    bseqnum,
+                                    bpos,
+                                    apos,
+                                    bpos_score_diff);
+    gt_diagbandseed_encode_seedpair_bf(bytestring_bf,
+                                       seedpairlist,
+                                       aseqnum,
+                                       bseqnum,
+                                       bpos,
+                                       apos,
+                                       bpos_score_diff);
+    if (memcmp(bytestring,bytestring_bf,seedpairlist->bytes_seedpair) != 0)
+    {
+      gt_out_bytestring(bytestring,seedpairlist->bytes_seedpair);
+      gt_out_bytestring(bytestring_bf,seedpairlist->bytes_seedpair);
+      exit(EXIT_FAILURE);
+    }
+    GtDiagbandseedSeedPair thisseedpair;
+    uint8_t thisbpos_score_diff
+      = gt_diagbandseed_decode_seedpair_gen(&thisseedpair,seedpairlist,
+                                            bytestring);
+    gt_assert(thisseedpair.aseqnum == aseqnum);
+    gt_assert(thisseedpair.bseqnum == bseqnum);
+    gt_assert(thisseedpair.apos == apos);
+    gt_assert(thisseedpair.bpos == bpos);
+    gt_assert(thisbpos_score_diff == bpos_score_diff);
+  }
+}
+#endif
 
 static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                                 bool knownsize,
@@ -2660,12 +2812,8 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                                           seedpairlist->aseqrange_start,
                                           bseqnum -
                                           seedpairlist->bseqrange_start,
-                                          bpos,apos); /*set splt ulong */
-      if (seedpairlist->score_bits > 0)
-      {
-        gt_assert((GtUword) bpos_score_diff <= seedpairlist->mask_score_bits);
-        encoding |= (GtUword) bpos_score_diff;
-      }
+                                          bpos,apos, /*set splt ulong */
+                                          bpos_score_diff);
       if (knownsize)
       {
         gt_assert(seedpairlist->mlist_ulong->nextfreeGtUword <
@@ -2701,8 +2849,8 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                     seedpairlist->mlist_bytestring->nextfreeuint8_t;
        seedpairlist->mlist_bytestring->nextfreeuint8_t
          += seedpairlist->bytes_seedpair;
-       gt_assert(aseqnum >= seedpairlist->aseqrange_start);
-       gt_assert(bseqnum >= seedpairlist->bseqrange_start);
+       gt_assert(aseqnum >= seedpairlist->aseqrange_start &&
+                 bseqnum >= seedpairlist->bseqrange_start);
        gt_diagbandseed_encode_seedpair(bytestring,
                                        seedpairlist,
                                        aseqnum - seedpairlist->aseqrange_start,
@@ -2771,14 +2919,14 @@ static GtUword gt_seedpairlist_extract_ulong_at(
                                        compidx);
 }
 
-static void gt_diagbandseed_decode_seedpair_gen(
+static uint8_t gt_diagbandseed_decode_seedpair_gen(
                                             GtDiagbandseedSeedPair *seedpair,
-                                            int *bpos_score_ptr,
                                             const GtSeedpairlist *seedpairlist,
                                             const uint8_t *bytestring)
 {
   GtUword transfer, value_seqnums, value_positions;
   GtDiagbandseedPosition apos, bpos;
+  uint8_t bpos_score_diff;
 
   value_seqnums
     = gt_diagbandseed_bytestring2GtUword(bytestring,sizeof (GtUword));
@@ -2790,70 +2938,72 @@ static void gt_diagbandseed_decode_seedpair_gen(
                       ((value_seqnums >>
                         seedpairlist->bits_left_adjust[idx_bseqnum]) &
                        seedpairlist->mask_tab[idx_bseqnum]);
-  transfer = value_seqnums & seedpairlist->transfer_mask;
+  transfer = value_seqnums & seedpairlist->spl_transfer_mask;
   value_positions
     = gt_diagbandseed_bytestring2GtUword(bytestring + sizeof (GtUword),
                                          seedpairlist->bytes_seedpair -
                                          sizeof (GtUword));
-  value_positions >>= seedpairlist->bits_unused_in2GtUwords;
+  value_positions >>= seedpairlist->bits_unused_in2GtUword;
   value_positions |= (transfer << seedpairlist->transfer_shift);
+  bpos_score_diff = (uint8_t) (value_positions & seedpairlist->mask_score_bits);
+  value_positions >>= seedpairlist->score_bits;
   apos = (GtDiagbandseedPosition) (value_positions &
                                    seedpairlist->mask_tab[idx_apos]);
   bpos = (GtDiagbandseedPosition) (value_positions >>
                                    seedpairlist->bits_values[idx_apos]);
-  if (bpos_score_ptr != NULL)
-  {
-    *bpos_score_ptr = seedpairlist->score_threshold +
-                  (value_positions & seedpairlist->mask_score_bits);
-  }
   GT_DIAGBANDSEED_SETPOS(seedpair,apos,bpos); /* for splt bytestring */
+  return bpos_score_diff;
 }
 
-static void gt_diagbandseed_decode_seedpair(GtDiagbandseedSeedPair *seedpair,
-                                            int *bpos_score_ptr,
+static int gt_diagbandseed_decode_seedpair(GtDiagbandseedSeedPair *seedpair,
                                             const GtSeedpairlist *seedpairlist,
                                             GtUword offset)
 {
-  gt_diagbandseed_decode_seedpair_gen(seedpair,
-                                      bpos_score_ptr,
-                                      seedpairlist,
-                                      seedpairlist->mlist_bytestring->
-                                              spaceuint8_t + offset);
+  uint8_t bpos_score_diff
+    = gt_diagbandseed_decode_seedpair_gen(seedpair,
+                                          seedpairlist,
+                                          seedpairlist->mlist_bytestring->
+                                                        spaceuint8_t + offset);
+  return seedpairlist->score_threshold + bpos_score_diff;
 }
 
-static void gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
-                               int *bpos_score_ptr,
-                               const GtSeedpairlist *seedpairlist,
-                               GtUword spidx)
+static int gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
+                              const GtSeedpairlist *seedpairlist,
+                              GtUword spidx)
 {
+
   if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_STRUCT)
   {
     *seedpair = seedpairlist->mlist_struct->spaceGtDiagbandseedSeedPair[spidx];
+    return 0;
   } else
   {
+    int bpos_score;
     if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_ULONG)
     {
       GtDiagbandseedPosition apos, bpos;
 
       seedpair->aseqnum
-        = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_aseqnum);
+        = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_aseqnum) +
+          seedpairlist->aseqrange_start;
       seedpair->bseqnum
-        = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_bseqnum);
+        = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_bseqnum) +
+          seedpairlist->bseqrange_start;
       apos = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_apos),
       bpos = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_bpos);
-      if (bpos_score_ptr != NULL)
-      {
-        *bpos_score_ptr
-          = (int) (seedpairlist->score_threshold +
-                   (seedpairlist->mlist_ulong->spaceGtUword[spidx] &
-                   seedpairlist->mask_score_bits));
-      }
+      bpos_score = (int) (seedpairlist->score_threshold +
+                          (seedpairlist->mlist_ulong->spaceGtUword[spidx] &
+                           seedpairlist->mask_score_bits));
       GT_DIAGBANDSEED_SETPOS(seedpair,apos,bpos); /* set for ulong */
     } else
     {
-      gt_diagbandseed_decode_seedpair(seedpair,bpos_score_ptr,seedpairlist,
-                                      spidx * seedpairlist->bytes_seedpair);
+      bpos_score
+        = gt_diagbandseed_decode_seedpair(seedpair,seedpairlist,
+                                          spidx * seedpairlist->bytes_seedpair);
+      seedpair->aseqnum += seedpairlist->aseqrange_start;
+      seedpair->bseqnum += seedpairlist->bseqrange_start;
     }
+    return bpos_score;
   }
 }
 
@@ -2863,9 +3013,8 @@ static void gt_diagbandseed_show_seed(FILE *stream,
 {
   GtDiagbandseedSeedPair seedpair;
   GtDiagbandseedPosition apos;
-  int bpos_score;
+  int bpos_score = gt_seedpairlist_at(&seedpair,seedpairlist,spidx);
 
-  gt_seedpairlist_at(&seedpair,&bpos_score,seedpairlist,spidx);
   apos = GT_DIAGBANDSEED_GETPOS_A(&seedpair);
   fprintf(stream, "(%" PRIu32 ",%" PRIu32 ",%" PRIu32 ",%" GT_WUS,
                   seedpair.aseqnum,
@@ -2888,10 +3037,11 @@ static int gt_diagbandseed_seeds_compare(const GtSeedpairlist *seedpairlist,
 {
   GtDiagbandseedSeedPair p_seedpair, c_seedpair;
   GtDiagbandseedPosition p_apos, c_apos, p_bpos, c_bpos;
+  int p_bpos_score, c_bpos_score;
 
   gt_assert(current > 0);
-  gt_seedpairlist_at(&p_seedpair,NULL,seedpairlist,current - 1);
-  gt_seedpairlist_at(&c_seedpair,NULL,seedpairlist,current);
+  p_bpos_score = gt_seedpairlist_at(&p_seedpair,seedpairlist,current - 1);
+  c_bpos_score = gt_seedpairlist_at(&c_seedpair,seedpairlist,current);
   if (p_seedpair.aseqnum < c_seedpair.aseqnum)
   {
     return -1;
@@ -3080,7 +3230,7 @@ static int gt_diagbandseed_verify(const GtSeedpairlist *seedpairlist,
     GtDiagbandseedPosition abs_apos, abs_bpos;
     int bpos_score;
 
-    gt_seedpairlist_at(&seedpair,&bpos_score,seedpairlist,idx);
+    bpos_score = gt_seedpairlist_at(&seedpair,seedpairlist,idx);
     /* extract decoded k-mers at seed positions */
     abs_apos = GT_DIAGBANDSEED_GETPOS_A(&seedpair) +
                gt_encseq_seqstartpos(aencseq, seedpair.aseqnum);
@@ -5229,6 +5379,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
     } else
     {
+      int bpos_score;
       GtDiagbandseedSeedPair nextsegment;
       const GtUword minsegmentlen_offset = (minsegmentlen - 1) *
                                            seedpairlist->bytes_seedpair,
@@ -5239,7 +5390,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 
       gt_assert(seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_BYTESTRING);
       /* iterate through segments of equal k-mers, segment has length > 0 */
-      gt_diagbandseed_decode_seedpair(&nextsegment,NULL,seedpairlist,0);
+      bpos_score = gt_diagbandseed_decode_seedpair(&nextsegment,seedpairlist,0);
       while (nextsegment_offset <= last_segment_offset)
       {
         GtSeedpairPositions *spp_ptr, *segment_positions;
@@ -5247,9 +5398,10 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         GtDiagbandseedSeqnum currsegm_aseqnum = nextsegment.aseqnum;
         GtDiagbandseedSeqnum currsegm_bseqnum = nextsegment.bseqnum;
 
-        gt_diagbandseed_decode_seedpair(&endminsegment,NULL,seedpairlist,
-                                        nextsegment_offset +
-                                        minsegmentlen_offset);
+        bpos_score = gt_diagbandseed_decode_seedpair(&endminsegment,
+                                                     seedpairlist,
+                                                     nextsegment_offset +
+                                                     minsegmentlen_offset);
         if (currsegm_aseqnum != endminsegment.aseqnum ||
             currsegm_bseqnum != endminsegment.bseqnum)
         {
@@ -5261,8 +5413,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
             {
               break;
             }
-            gt_diagbandseed_decode_seedpair(&nextsegment,NULL,seedpairlist,
-                                            nextsegment_offset);
+            bpos_score = gt_diagbandseed_decode_seedpair(&nextsegment,
+                                                         seedpairlist,
+                                                         nextsegment_offset);
             if (currsegm_aseqnum != nextsegment.aseqnum ||
                 currsegm_bseqnum != nextsegment.bseqnum)
             {
@@ -5286,8 +5439,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
           {
             break;
           }
-          gt_diagbandseed_decode_seedpair(&nextsegment,NULL,seedpairlist,
-                                          nextsegment_offset);
+          bpos_score = gt_diagbandseed_decode_seedpair(&nextsegment,
+                                                       seedpairlist,
+                                                       nextsegment_offset);
         } while (currsegm_aseqnum == nextsegment.aseqnum &&
                  currsegm_bseqnum == nextsegment.bseqnum);
 
@@ -5871,6 +6025,12 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        score_bits,
                                        score_threshold,
                                        amaxlen);
+#ifdef SKDEBUG
+    if (seedpairlist->bytes_seedpair > sizeof (GtUword))
+    {
+      gt_diagbandseed_encode_seedpair_verify(seedpairlist);
+    }
+#endif
     gt_assert(score_bits == 0 ||
               seedpairlist->splt != GT_DIAGBANDSEED_BASE_LIST_STRUCT);
     sizeofunit = gt_seedpairlist_sizeofunit(seedpairlist);
