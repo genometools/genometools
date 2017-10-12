@@ -3037,7 +3037,7 @@ static int gt_diagbandseed_seeds_compare(const GtSeedpairlist *seedpairlist,
 {
   GtDiagbandseedSeedPair p_seedpair, c_seedpair;
   GtDiagbandseedPosition p_apos, c_apos, p_bpos, c_bpos;
-  int p_bpos_score, c_bpos_score;
+  GT_UNUSED int p_bpos_score, c_bpos_score;
 
   gt_assert(current > 0);
   p_bpos_score = gt_seedpairlist_at(&p_seedpair,seedpairlist,current - 1);
@@ -5379,7 +5379,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
     } else
     {
-      int bpos_score;
+      GT_UNUSED int bpos_score;
       GtDiagbandseedSeedPair nextsegment;
       const GtUword minsegmentlen_offset = (minsegmentlen - 1) *
                                            seedpairlist->bytes_seedpair,
