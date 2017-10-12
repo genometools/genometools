@@ -16,6 +16,7 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #ifndef _WIN32
@@ -95,6 +96,38 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
       gt_free(pdom_model_set);
       return NULL;
     } else {
+      FILE *fp;
+      char line[BUFSIZ];
+      GtUword lineno = 0;
+      size_t len = 0;
+
+      fp = fopen(filename, "r");
+      if (fp == NULL) {
+        gt_error_set(err, "can't open HMM file: %s", filename);
+        gt_str_delete(concat_dbnames);
+        gt_free(pdom_model_set);
+        return NULL;
+      }
+
+      while (fgets(line, BUFSIZ, fp) != NULL) {
+        len = strlen(line);
+        lineno++;
+        if (len > 5 && strncmp(line, "ALPH", 4 * sizeof (char)) == 0) {
+          if (len > 9 && (strncmp(line, "ALPH  Amino", 11 * sizeof (char)) == 0
+                     || strncmp(line, "ALPH  amino", 11 * sizeof (char)) == 0
+                     || strncmp(line, "ALPH  AMINO", 11 * sizeof (char)) == 0)) {
+            break;
+          } else {
+            gt_error_set(err, "invalid (non-protein) alphabet definition "
+                              "in %s line "GT_WU, filename, lineno);
+            gt_str_delete(concat_dbnames);
+            gt_free(pdom_model_set);
+            fclose(fp);
+            return NULL;
+          }
+        }
+      }
+      fclose(fp);
       gt_str_append_cstr(concat_dbnames, filename);
     }
   }
