@@ -5533,9 +5533,12 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
           *kmer_environ_ptr,
           score_dist[100] = {0};
   const GtKmerPosList *alist = gt_diagbandseed_kmer_iter_next(kenv_source_iter);
-  int idx;
-  const int score_threshold = gt_kenv_generator_get_th(kenv_generator);
   GtKmerPosList *kmerpos_list = gt_malloc(sizeof *kmerpos_list);
+  const int score_threshold = gt_kenv_generator_get_th(kenv_generator);
+#ifndef NDEBUG
+  const int max_score = gt_kenv_generator_get_max_score(kenv_generator) *
+                        gt_kenv_generator_get_q(kenv_generator);
+#endif
 #ifdef SKDEBUG
   const GtUword mask_score_bits = (((GtUword) 1) << score_bits) - 1;
 #endif
@@ -5570,6 +5573,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
   }
   if (verbose)
   {
+    int idx;
     for (idx = 0; idx < 100; idx++)
     {
       if (score_dist[idx] > 0)
@@ -5612,6 +5616,9 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
       {
         const GtKenvRawElement *raw_ptr;
         GtUword seqnum, endpos;
+#ifndef NDEBUG
+        int previous_score = max_score;
+#endif
 
         gt_assert(aptr->seqnum >= encode_info->first_seqnum);
         seqnum = aptr->seqnum - encode_info->first_seqnum;
@@ -5632,8 +5639,12 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
           gt_assert(score_threshold + (this_enc & mask_score_bits)
                     == (GtUword) raw_ptr->score);
 #endif
-          gt_assert(kmer_environ_ptr < kmerpos_list->spaceGtUword
+          gt_assert(previous_score >= raw_ptr->score &&
+                    kmer_environ_ptr < kmerpos_list->spaceGtUword
                                        + kmer_env_size);
+#ifndef NDEBUG
+          previous_score = raw_ptr->score;
+#endif
           *kmer_environ_ptr++ = this_enc;
         }
       }
