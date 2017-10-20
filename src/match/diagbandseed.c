@@ -3580,46 +3580,55 @@ static void gt_diagbandseed_dbs_state_out(const GtDiagbandseedState *dbs_state,
                                           bool snd_pass)
 {
   printf("# total number of seeds: " GT_WU,dbs_state->totalseeds);
-  if (!maxmat_show && dbs_state->totalseeds > 0)
+  if (!maxmat_show)
   {
-    GtUword seqpairs_with_minsegment;
-
-    if (snd_pass)
+    if (dbs_state->totalseeds > 0)
     {
-      seqpairs_with_minsegment = dbs_state->seqpairs_with_minsegment / 2;
+      GtUword seqpairs_with_minsegment;
+
+      if (snd_pass)
+      {
+        seqpairs_with_minsegment = dbs_state->seqpairs_with_minsegment / 2;
+      } else
+      {
+        seqpairs_with_minsegment = dbs_state->seqpairs_with_minsegment;
+      }
+      printf("; " GT_WU ", i.e. %.2f%% of all seeds were filtered by "
+             "diagonal score"
+             "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
+             "; " GT_WU ", i.e. %.2f%% of all seeds were extended\n",
+             dbs_state->filteredbydiagonalscore,
+             100.0 * (double) dbs_state->filteredbydiagonalscore/
+                              dbs_state->totalseeds,
+             dbs_state->selected_seeds,
+             100.0 * (double) dbs_state->selected_seeds/
+                              dbs_state->totalseeds,
+             dbs_state->extended_seeds,
+             100.0 * (double) dbs_state->extended_seeds/
+                              dbs_state->totalseeds);
+      printf("# number of unsuccessful extensions: " GT_WU "\n",
+             dbs_state->failedmatches);
+      printf("# sequence pairs with selected seeds: " GT_WU
+             " (%.2f%% of all " GT_WU ")\n",
+             seqpairs_with_minsegment,
+             100.0 * (double) seqpairs_with_minsegment/dbs_state->totalseqpairs,
+             dbs_state->totalseqpairs);
     } else
     {
-      seqpairs_with_minsegment = dbs_state->seqpairs_with_minsegment;
+      printf("\n");
     }
-    printf("; " GT_WU ", i.e. %.2f%% of all seeds were filtered by "
-                   "diagonal score"
-                   "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
-                   "; " GT_WU ", i.e. %.2f%% of all seeds were extended\n",
-            dbs_state->filteredbydiagonalscore,
-            100.0 * (double) dbs_state->filteredbydiagonalscore/
-                             dbs_state->totalseeds,
-            dbs_state->selected_seeds,
-            100.0 * (double) dbs_state->selected_seeds/
-                             dbs_state->totalseeds,
-            dbs_state->extended_seeds,
-            100.0 * (double) dbs_state->extended_seeds/
-                             dbs_state->totalseeds);
-    printf( "# number of unsuccessful extensions: " GT_WU "\n",
-            dbs_state->failedmatches);
-    printf( "# sequence pairs with selected seeds: " GT_WU
-                    " (%.2f%% of all " GT_WU ")\n",
-            seqpairs_with_minsegment,
-            100.0 * (double) seqpairs_with_minsegment/dbs_state->totalseqpairs,
-            dbs_state->totalseqpairs);
   } else
   {
     printf("\n# maximum number of MEMs per segment: " GT_WU "\n",
             dbs_state->max_num_MEMs_per_segment);
   }
-  printf("# number of matches output: " GT_WU " (%.4f per seed)\n",
-          dbs_state->countmatches,
-          (double) dbs_state->countmatches/
-                   dbs_state->totalseeds);
+  if (dbs_state->totalseeds > 0)
+  {
+    printf("# number of matches output: " GT_WU " (%.4f per seed)\n",
+            dbs_state->countmatches,
+            (double) dbs_state->countmatches/
+                     dbs_state->totalseeds);
+  }
 }
 
 typedef bool (*GtExtendRelativeCoordsFunc)(void *,
@@ -5075,18 +5084,24 @@ static void gt_diagbandseed_process_seeds_times(
   process_seeds_usec = total_process_seeds_usec - total_extension_time_usec;
   if (!maxmat_show)
   {
-    printf("# ... %s extension of " GT_WU " seeds in "
-                   GT_WD ".%.06ld seconds.\n",
-            extendgreedy ? "greedy" : "xdrop",
+    if (mlistlen > 0)
+    {
+      printf("# ... %s extension of " GT_WU " seeds in " GT_WD
+             ".%.06ld seconds.\n",extendgreedy ? "greedy" : "xdrop",
             extended_seeds,
             GT_USEC2SEC(total_extension_time_usec),
             GT_USECREMAIN(total_extension_time_usec));
+    }
   }
-  printf( "# ... processed " GT_WU " seeds %sin "
-                  GT_WD ".%06ld seconds.\n",mlistlen,
-          maxmat_show ? "" : "(excluding extensions) ",
-          GT_USEC2SEC(process_seeds_usec),
-          GT_USECREMAIN(process_seeds_usec));
+  if (mlistlen > 0)
+  {
+    printf("# ... processed " GT_WU " seeds %sin "
+           GT_WD ".%06ld seconds.\n",
+           mlistlen,
+           maxmat_show ? "" : "(excluding extensions) ",
+           GT_USEC2SEC(process_seeds_usec),
+           GT_USECREMAIN(process_seeds_usec));
+  }
 }
 #endif
 
@@ -5546,7 +5561,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
              raw_ptr++)
         {
           gt_assert(raw_ptr->score < 100);
-          score_dist[raw_ptr->score]++;
+          score_dist[raw_ptr->score] += alist->nextfree;
         }
       }
     }
@@ -5810,14 +5825,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
             gt_sequence_parts_info_end_get(bseqranges,bidx));
   }
   extp = arg->extp;
-  if (gt_querymatch_fstperquery_display(extp->out_display_flag))
-  {
-    segment_reject_func = gt_segment_reject_check;
-    segment_reject_info
-      = gt_segment_reject_info_new(
-               gt_sequence_parts_info_start_get(bseqranges,bidx),
-               gt_sequence_parts_info_numofsequences_get(bseqranges,bidx));
-  }
 
   /* Create k-mer iterator for alist */
   if (alist == NULL)
@@ -5845,7 +5852,18 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                           gt_kenv_generator_get_q(arg->kenv_generator);
 
     score_threshold = gt_kenv_generator_get_th(arg->kenv_generator);
-    gt_assert(score_threshold <= max_score);
+    if (score_threshold > max_score)
+    {
+      if (aencode_info != bencode_info)
+      {
+        gt_kmerpos_encode_info_delete(bencode_info);
+      }
+      gt_kmerpos_encode_info_delete(aencode_info);
+      gt_diagbandseed_kmer_iter_delete(aiter);
+      gt_warning("score threshold = %d > %d = max_score",
+                 score_threshold,max_score);
+      return 0;
+    }
     score_bits
       = (GtBitcount_type) gt_required_bits(max_score - score_threshold);
     gt_assert(score_bits <= CHAR_BIT);
@@ -6019,7 +6037,18 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     {
       len_used += blen;
     }
-    seedpairlist = gt_seedpairlist_new(arg->splt,aseqranges,aidx,bseqranges,
+    if (gt_querymatch_fstperquery_display(extp->out_display_flag))
+    {
+      segment_reject_func = gt_segment_reject_check;
+      segment_reject_info
+        = gt_segment_reject_info_new(
+                 gt_sequence_parts_info_start_get(bseqranges,bidx),
+                 gt_sequence_parts_info_numofsequences_get(bseqranges,bidx));
+    }
+    seedpairlist = gt_seedpairlist_new(arg->splt,
+                                       aseqranges,
+                                       aidx,
+                                       bseqranges,
                                        bidx,
                                        arg->maxmat,arg->inseqseeds,
                                        score_bits,

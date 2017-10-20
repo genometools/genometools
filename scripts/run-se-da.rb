@@ -2,23 +2,22 @@
 
 # author: Stefan Kurtz, Nov. 2015
 
-if ARGV.length == 3 or ARGV.length == 4
-  minlen=ARGV[0].to_i
-  minidentity=ARGV[1].to_i
-  referencefile=ARGV[2]
-  if ARGV.length == 3
+if ARGV.length == 4 or ARGV.length == 5
+  seedlength=ARGV[0].to_i
+  minlen=ARGV[1].to_i
+  minidentity=ARGV[2].to_i
+  referencefile=ARGV[3]
+  if ARGV.length == 4
     queryfile=nil
   else
-    queryfile=ARGV[3]
+    queryfile=ARGV[4]
   end
 else
-  STDERR.puts "Usage: #{$0} <minlen> <minidentity> <referencefile> [queryfile]"
+  STDERR.puts "Usage: #{$0} <seedlength> <minlen> <minidentity> <referencefile> [queryfile]"
   exit 1
 end
 
 reference=File.basename(referencefile)
-seedlength=14
-maxfreq=21
 gtbin="env -i " + ENV["GTDIR"] + "/bin/gt"
 
 if not queryfile.nil?
@@ -40,7 +39,7 @@ else
 end
 
 puts "#{gtbin} seed_extend -ii #{reference} #{qiioption} " +
-     "-l #{minlen} -seedlength 14 -diagbandwidth 6 " +
+     "-l #{minlen} -seedlength #{seedlength} -diagbandwidth 6 " +
      "-minidentity #{minidentity} -v -overlappingseeds -bias-parameters " +
      "-history 60 > #{outputprefix}-se.matches"
 

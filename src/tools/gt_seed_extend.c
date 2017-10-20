@@ -353,9 +353,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* -only-seeds */
   op_onlyseeds = gt_option_new_bool("only-seeds",
-                              "Calculate seeds and do not extend",
-                              &arguments->onlyseeds,
-                              false);
+                                    "Calculate seeds and do not extend",
+                                    &arguments->onlyseeds,
+                                    false);
   gt_option_exclude(op_onlyseeds, op_xdr);
   gt_option_exclude(op_onlyseeds, op_gre);
   gt_option_is_development_option(op_onlyseeds);
@@ -815,14 +815,11 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   {
     gt_str_set(arguments->diagband_statistics_arg,"");
   }
-  if (!arguments->use_kmerfile)
+  if (!arguments->use_kmerfile && arguments->onlykmers)
   {
-    if (arguments->onlykmers)
-    {
-      gt_error_set(err, "options -onlykmers and '-kmerfile no' exclude "
-                        "each other");
-      had_err = -1;
-    }
+    gt_error_set(err, "options -onlykmers and '-kmerfile no' exclude "
+                      "each other");
+    had_err = -1;
   }
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
