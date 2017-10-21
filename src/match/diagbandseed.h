@@ -42,15 +42,11 @@ typedef enum
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
+                        bool onlykmers,
                         const GtSequencePartsInfo *aseqranges,
                         const GtSequencePartsInfo *bseqranges,
                         const GtUwordPair *pick,
                         GtError *err);
-
-void gt_diagbandseed_info_unset_onlykmers(GtDiagbandseedInfo *info);
-
-void gt_diagbandseed_info_set_kenv_gen(GtDiagbandseedInfo *info,
-                                       GtKenvGenerator *kenv_generator);
 
 /* The constructor for GtDiagbandseedInfo*/
 GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
@@ -78,7 +74,6 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool snd_pass,
                                              bool delta_filter,
                                              bool inseqseeds,
-                                             bool onlykmers,
                                              GtKenvGenerator *kenv_generator,
                                              const GtDiagbandseedExtendParams
                                                *extp);

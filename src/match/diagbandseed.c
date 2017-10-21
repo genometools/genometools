@@ -405,17 +405,6 @@ static void gt_querymatch_segment_buffer_select(GtQuerymatchSegmentBuffer *buf,
 
 /* * * * * CONSTRUCTORS AND DESTRUCTORS * * * * */
 
-void gt_diagbandseed_info_unset_onlykmers(GtDiagbandseedInfo *info)
-{
-  info->onlykmers = false;
-}
-
-void gt_diagbandseed_info_set_kenv_gen(GtDiagbandseedInfo *info,
-                                       GtKenvGenerator *kenv_generator)
-{
-  info->kenv_generator = kenv_generator;
-}
-
 GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtEncseq *bencseq,
                                              GtUword maxfreq,
@@ -441,7 +430,6 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool snd_pass,
                                              bool delta_filter,
                                              bool inseqseeds,
-                                             bool onlykmers,
                                              GtKenvGenerator *kenv_generator,
                                              const GtDiagbandseedExtendParams
                                                *extp)
@@ -483,7 +471,6 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->snd_pass = snd_pass;
   info->delta_filter = delta_filter;
   info->inseqseeds = inseqseeds;
-  info->onlykmers = onlykmers;
   info->kenv_generator = kenv_generator;
   info->extp = extp;
   return info;
@@ -5812,7 +5799,7 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
       char *path;
       GtDiagbandseedKmerIterator *kenv_source_iter = NULL;
 
-      if (aseqranges != bseqranges || aidx != bidx)
+      if (aiter == NULL || aseqranges != bseqranges || aidx != bidx)
       {
         kenv_source_iter = gt_diagbandseed_kmer_iter_new_from_file(NULL,
                                                   arg->bencseq,
@@ -5937,10 +5924,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtRadixsortinfo *snd_pass_radix_sort_info = NULL;
 
   gt_assert(arg != NULL);
-  if (arg->onlykmers && arg->kenv_generator == NULL)
-  {
-    return 0;
-  }
   aencode_info
     = gt_kmerpos_encode_info_new(arg->kmplt,
                                  gt_encseq_alphabetnumofchars(arg->aencseq),
@@ -6002,15 +5985,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     if (biter == NULL)
     {
       had_err = -1;
-    }
-    if (arg->onlykmers)
-    {
-      gt_kmerpos_list_delete(kenv_list);
-      kenv_list = NULL;
-      gt_diagbandseed_kmer_iter_delete(aiter);
-      gt_diagbandseed_kmer_iter_delete(biter);
-      gt_diagbandseed_encode_info_pair_delete(aencode_info,bencode_info);
-      return had_err;
     }
   } else
   {
@@ -6513,6 +6487,7 @@ static void gt_diagbandseed_thread_info_set(
 static void *gt_diagbandseed_thread_algorithm(void *info)
 {
   GtDiagbandseedThreadInfo *thread_info = (GtDiagbandseedThreadInfo *) info;
+
   if (gt_array_size(thread_info->combinations) > 0)
   {
     const GtUwordPair *last = gt_array_get_last(thread_info->combinations),
@@ -6587,6 +6562,7 @@ static void gt_diagbandseed_out_sequences_with_matches(
 
 /* Run the algorithm by iterating over all combinations of sequence ranges. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
+                        bool onlykmers,
                         const GtSequencePartsInfo *aseqranges,
                         const GtSequencePartsInfo *bseqranges,
                         const GtUwordPair *pick,
@@ -6604,19 +6580,22 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   GtKarlinAltschulStat *karlin_altschul_stat = NULL;
   GtDiagbandseedState *dbs_state = NULL;
 #ifdef GT_THREADS_ENABLED
-  GtDiagbandseedThreadInfo *thread_info
-    = gt_malloc(gt_jobs * sizeof *thread_info);
-  FILE **stream_tab;
+  GtDiagbandseedThreadInfo *thread_info = NULL;
+  FILE **stream_tab = NULL;
   unsigned int tidx;
   unsigned int a_numofchars = gt_encseq_alphabetnumofchars(arg->aencseq);
 
-  /* create output streams */
-  stream_tab = gt_malloc(gt_jobs * sizeof *stream_tab);
-  stream_tab[0] = stdout;
-  for (tidx = 1; !had_err && tidx < gt_jobs; tidx++)
+  if (!onlykmers)
   {
-    stream_tab[tidx]
-      = gt_xtmpfp_generic(NULL, TMPFP_OPENBINARY | TMPFP_AUTOREMOVE);
+    thread_info = gt_malloc(gt_jobs * sizeof *thread_info);
+    /* create output streams */
+    stream_tab = gt_malloc(gt_jobs * sizeof *stream_tab);
+    stream_tab[0] = stdout;
+    for (tidx = 1; !onlykmers && tidx < gt_jobs; tidx++)
+    {
+      stream_tab[tidx]
+        = gt_xtmpfp_generic(NULL, TMPFP_OPENBINARY | TMPFP_AUTOREMOVE);
+    }
   }
 #endif
   gt_assert(sizeof (GtDiagbandseedPosition) == sizeof (GtDiagbandseedPosition));
@@ -6641,13 +6620,17 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   {
     unsigned int count,
                  b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
-    for (count = 0; count < 2; count++)
+    unsigned int max_count = (arg->kenv_generator == NULL) ? 2 : 1;
+    for (count = 0; count < max_count; count++)
     {
       const bool fwd = count == 0 ? true : false;
 
-      if ((fwd && (self || arg->nofwd)) || (!fwd && arg->norev))
+      if (arg->kenv_generator == NULL)
       {
-        continue;
+        if ((fwd && (self || arg->nofwd)) || (!fwd && arg->norev))
+        {
+          continue;
+        }
       }
       for (bidx = 0; !had_err && bidx < bnumseqranges; bidx++)
       {
@@ -6788,13 +6771,34 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     {
       gt_free(path);
     }
+    if (!had_err && arg->kenv_generator != NULL)
+    {
+      GtKmerPosList *kenv_list = NULL;
+      GtDiagbandseedKmerIterator *kenv_iter
+        = gt_diagbandseed_kenv_iterator(arg,
+                                        &kenv_list,
+                                        NULL,
+                                        aseqranges,
+                                        aidx,
+                                        aencode_info,
+                                        aseqranges,
+                                        aidx,
+                                        aencode_info,
+                                        err);
+      if (kenv_iter == NULL)
+      {
+        had_err = -1;
+      }
+      gt_kmerpos_list_delete(kenv_list);
+      kenv_list = NULL;
+      gt_diagbandseed_kmer_iter_delete(kenv_iter);
+    }
     bidx = self ? aidx : 0;
-
 #ifdef GT_THREADS_ENABLED
     if (gt_jobs <= 1)
     {
 #endif
-      while (!had_err && bidx < bnumseqranges)
+      while (!onlykmers && !had_err && bidx < bnumseqranges)
       {
         if (!bpick || pick->b == bidx)
         {
@@ -6912,7 +6916,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     gt_kmerpos_encode_info_delete(aencode_info);
   }
 #ifdef GT_THREADS_ENABLED
-  if (gt_jobs > 1 && arg->use_kmerfile)
+  if (!onlykmers && gt_jobs > 1 && arg->use_kmerfile)
   {
     GtArray **combinations = gt_malloc(sizeof *combinations * gt_jobs);
     GtArray *threads = gt_array_new(sizeof (GtThread *));
@@ -6997,7 +7001,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   gt_free(thread_info);
 
   /* print the threads' output to stdout */
-  for (tidx = 1; tidx < gt_jobs; tidx++)
+  for (tidx = 1; !onlykmers && tidx < gt_jobs; tidx++)
   {
     int cc;
     rewind(stream_tab[tidx]);
@@ -7008,14 +7012,13 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     gt_fa_xfclose(stream_tab[tidx]);
   }
   gt_free(stream_tab);
-
 #endif
   if (arg->verbose)
   {
     const int maxmat_show = gt_diagbandseed_derive_maxmat_show(arg->maxmat);
 
     gt_assert(dbs_state != NULL);
-    if (!arg->onlykmers)
+    if (!onlykmers)
     {
       gt_diagbandseed_dbs_state_out(dbs_state,maxmat_show,arg->snd_pass);
 #ifndef _WIN32
