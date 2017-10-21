@@ -248,7 +248,7 @@ double gt_log_base(double x, double b)
 
 size_t gt_required_bits(GtUword value)
 {
-  return (size_t) ceil(log2((double) value));
+  return value == 0 ? 0 : ((size_t) ceil(log2((double) value)));
 }
 
 size_t gt_bits2bytes(size_t bits)

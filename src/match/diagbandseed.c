@@ -1390,7 +1390,7 @@ static uint32_t gt_diagbandseed_ulong_longest_code_run(
 static uint32_t gt_diagbandseed_longest_code_run(const GtKmerPosList
                                                    *kmerpos_list)
 {
-  gt_assert(kmerpos_list != NULL);
+  gt_assert(kmerpos_list != NULL && kmerpos_list->nextfree > 0);
   if (kmerpos_list->encode_info != NULL &&
       kmerpos_list->encode_info->bytes_kmerpos <= sizeof (GtUword))
   {
@@ -1597,9 +1597,15 @@ static GtKmerPosList *gt_diagbandseed_get_kmers(
     gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
     gt_timer_start(timer);
   }
-  gt_kmerpos_list_sort(kmerpos_list);
-  kmerpos_list->longest_code_run
-    = gt_diagbandseed_longest_code_run(kmerpos_list);
+  if (kmerpos_list->nextfree > 0)
+  {
+    gt_kmerpos_list_sort(kmerpos_list);
+    kmerpos_list->longest_code_run
+      = gt_diagbandseed_longest_code_run(kmerpos_list);
+  } else
+  {
+    kmerpos_list->longest_code_run = 0;
+  }
   if (verbose)
   {
     fprintf(stream, "# ... sorted " GT_WU " %u-mers ",
@@ -5641,11 +5647,17 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
     alist = gt_diagbandseed_kmer_iter_next(kenv_source_iter);
   }
   gt_assert(kmer_environ_ptr == kmerpos_list->spaceGtUword + kmer_env_size);
-  gt_radixsort_inplace_ulong(kmerpos_list->spaceGtUword,kmer_env_size);
-  kmerpos_list->longest_code_run
-    = gt_diagbandseed_ulong_longest_code_run(kmerpos_list->spaceGtUword,
-                                             kmer_env_size,
-                                             encode_info);
+  if (kmer_env_size > 0)
+  {
+    gt_radixsort_inplace_ulong(kmerpos_list->spaceGtUword,kmer_env_size);
+    kmerpos_list->longest_code_run
+      = gt_diagbandseed_ulong_longest_code_run(kmerpos_list->spaceGtUword,
+                                               kmer_env_size,
+                                               encode_info);
+  } else
+  {
+    kmerpos_list->longest_code_run = 0;
+  }
   kmerpos_list->numofchars = numofchars;
   gt_diagbandseed_kmer_iter_reset(kenv_source_iter);
   return kmerpos_list;
@@ -5769,8 +5781,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   const GtUword anumseqranges = gt_sequence_parts_info_number(aseqranges),
                 bnumseqranges = gt_sequence_parts_info_number(bseqranges);
   GtKmerPosListEncodeInfo *aencode_info, *bencode_info;
-  GtBitcount_type score_bits = 0;
-  int score_threshold = 0;
   int had_err = 0;
 
   /* from here vars used in context of seedpairlist */
@@ -5843,25 +5853,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
   if (arg->kenv_generator != NULL)
   {
-    const int max_score = gt_kenv_generator_get_max_score(arg->kenv_generator) *
-                          gt_kenv_generator_get_q(arg->kenv_generator);
+    int score_threshold = gt_kenv_generator_get_th(arg->kenv_generator);
+    GtBitcount_type score_bits
+      = gt_kenv_generator_get_score_bits(arg->kenv_generator);
 
-    score_threshold = gt_kenv_generator_get_th(arg->kenv_generator);
-    if (score_threshold > max_score)
-    {
-      if (aencode_info != bencode_info)
-      {
-        gt_kmerpos_encode_info_delete(bencode_info);
-      }
-      gt_kmerpos_encode_info_delete(aencode_info);
-      gt_diagbandseed_kmer_iter_delete(aiter);
-      gt_warning("score threshold = %d > %d = max_score",
-                 score_threshold,max_score);
-      return 0;
-    }
-    score_bits
-      = (GtBitcount_type) gt_required_bits(max_score - score_threshold);
-    gt_assert(score_bits <= CHAR_BIT);
     biter = gt_diagbandseed_kmer_iter_new_from_file(&blist_len,
                                                     arg->bencseq,
                                                     arg->spacedseedweight,
@@ -5966,11 +5961,11 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       kenv_list = NULL;
       gt_diagbandseed_kmer_iter_delete(aiter);
       gt_diagbandseed_kmer_iter_delete(biter);
-      gt_kmerpos_encode_info_delete(aencode_info);
       if (aencode_info != bencode_info)
       {
         gt_kmerpos_encode_info_delete(bencode_info);
       }
+      gt_kmerpos_encode_info_delete(aencode_info);
       return had_err;
     }
   } else
@@ -6057,9 +6052,16 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        aidx,
                                        bseqranges,
                                        bidx,
-                                       arg->maxmat,arg->inseqseeds,
-                                       score_bits,
-                                       score_threshold,
+                                       arg->maxmat,
+                                       arg->inseqseeds,
+                                       arg->kenv_generator == NULL
+                                         ? 0
+                                         : gt_kenv_generator_get_score_bits(
+                                              arg->kenv_generator),
+                                       arg->kenv_generator == NULL
+                                         ? 0
+                                         : gt_kenv_generator_get_th(
+                                              arg->kenv_generator),
                                        amaxlen);
 #ifdef SKDEBUG
     if (seedpairlist->bytes_seedpair > sizeof (GtUword))
@@ -6067,7 +6069,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       gt_diagbandseed_encode_seedpair_verify(seedpairlist);
     }
 #endif
-    gt_assert(score_bits == 0 ||
+    gt_assert(arg->kenv_generator == NULL ||
               seedpairlist->splt != GT_DIAGBANDSEED_BASE_LIST_STRUCT);
     sizeofunit = gt_seedpairlist_sizeofunit(seedpairlist);
     if (seedpairlist->maxmat_compute && !seedpairlist->maxmat_show)
@@ -6368,10 +6370,15 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       if (aencode_info != bencode_info)
       {
         gt_kmerpos_encode_info_delete(bencode_info);
+        bencode_info = NULL;
       }
     }
   }
   gt_diagbandseed_kmer_iter_delete(aiter);
+  if (bencode_info != aencode_info)
+  {
+    gt_kmerpos_encode_info_delete(bencode_info);
+  }
   gt_kmerpos_encode_info_delete(aencode_info);
 
   /* Process second (reverse) mlist */

@@ -69,6 +69,10 @@ unsigned int gt_kenv_generator_get_q(const GtKenvGenerator *kenv_gen);
    score threshold of the kmeres inside the environment. */
 unsigned int gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen);
 
+/* Returns the number of bits required for storing a score value in the
+   range from score_threshold to max_score_qgram */
+size_t gt_kenv_generator_get_score_bits(const GtKenvGenerator *kenv_gen);
+
 /* Returns the value for <allow_w> stored inside <kenv_gen>. This is the chosen
    handling for wildcard amino acid X. */
 bool gt_kenv_generator_get_allow_x(const GtKenvGenerator *kenv_gen);
@@ -78,8 +82,8 @@ bool gt_kenv_generator_get_allow_x(const GtKenvGenerator *kenv_gen);
 const int *gt_kenv_generator_get_max_score_each_char(
                                               const GtKenvGenerator *kenv_gen);
 
-/* Returns the highest score defined in the ScoreMatrix inside <kenv_gen>. */
-int gt_kenv_generator_get_max_score(const GtKenvGenerator *kenv_gen);
+/* Returns the highest score possible for a given q-gram. */
+int gt_kenv_generator_get_max_score_qgram(const GtKenvGenerator *kenv_gen);
 
 /* return score for two encoded sequences of the given length with respect
    to the kenvironment */
