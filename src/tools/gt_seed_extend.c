@@ -174,7 +174,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
      the help message accordingly. */
-  static const char *diagband_statistics_choices[] = {"total_bcov", NULL};
+  static const char *diagband_statistics_choices[] = {"total_bcov",
+                                                      "total_score_seqpair",
+                                                      NULL};
   static const char *estimation_choices[] = {"JKD","ANI",NULL};
   gt_assert(arguments != NULL);
 
@@ -904,7 +906,8 @@ static int gt_seed_extend_runner(int argc,
       if (gt_str_length(arguments->estimation_mode) == 0 &&
           !arguments->onlyseeds &&
           !gt_diagbandseed_derive_maxmat_show(arguments->maxmat) &&
-          !arguments->onlykmers)
+          !arguments->onlykmers &&
+          gt_str_length(arguments->diagband_statistics_arg) == 0)
       {
         gt_querymatch_Fields_output(stdout,out_display_flag);
       }

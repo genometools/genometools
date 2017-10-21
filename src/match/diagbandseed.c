@@ -4693,6 +4693,7 @@ static void gt_diagbandseed_segment2matches(
              const GtDiagbandseedMaximalmatch *memstore,
              unsigned int seedlength,
              const GtSeedpairPositions *segment_positions,
+             GT_UNUSED const uint8_t *segment_scores,
              GtUword segment_length)
 {
   GtDiagbandseedExtendSegmentInfo *esi
@@ -4991,6 +4992,10 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
                                       spaceGtDiagbandseedMaximalmatch,\
                                 seedlength,\
                                 segment_positions,\
+                                (seedpairlist->score_bits > 0 && \
+                                 diagband_statistics != NULL) \
+                                    ? segment_scores.spaceuint8_t\
+                                    : NULL,\
                                 segment_length);\
             }\
           }\
@@ -5110,6 +5115,7 @@ typedef void (*GtDiagbandseedProcessSegmentFunc)(
                         const GtDiagbandseedMaximalmatch *memstore,
                         unsigned int seedlength,
                         const GtSeedpairPositions *segment_positions,
+                        const uint8_t *segment_scores,
                         GtUword segment_length);
 
 /* start seed extension for seeds in mlist */
@@ -5160,8 +5166,11 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   const int max_process_runs = (snd_pass_radix_sort_info != NULL) ? 2 : 1;
   void *segment_proc_info = NULL;
   GtUword minsegmentlen;
+  GtArrayuint8_t segment_scores;
 
-  if (extp->logdiagbandwidth == GT_UWORD_MAX)
+  /* if we have switched off the diagonalband filter or we have seeds with
+     scores we do not care about a minimum segment length */
+  if (extp->logdiagbandwidth == GT_UWORD_MAX || seedpairlist->score_bits > 0)
   {
     minsegmentlen = 1;
   } else
@@ -5239,12 +5248,17 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       segment_proc_info = esi;
     } else
     {
+      const GtUword total_score_show_min_mult = 4;
       diagband_statistics = gt_diagband_statistics_new(diagband_statistics_arg,
                                                        forward);
+      gt_diagband_statistics_total_score_show_min_set(diagband_statistics,
+                                  total_score_show_min_mult
+                                  * seedpairlist->score_threshold);
       segment_proc_func = gt_diagband_statistics_add;
       segment_proc_info = diagband_statistics;
     }
   }
+  GT_INITARRAY(&segment_scores,uint8_t);
   if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_STRUCT)
   {
     const GtDiagbandseedSeedPair
@@ -5267,8 +5281,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       const GtDiagbandseedSeqnum currsegm_bseqnum = currsegm->bseqnum;
 
       /* if insuffienct number of kmers in segment: skip whole segment */
-      if (currsegm_aseqnum != currsegm[minsegmentlen - 1].aseqnum ||
-          currsegm_bseqnum != currsegm[minsegmentlen - 1].bseqnum)
+      if (minsegmentlen > 1 &&
+          (currsegm_aseqnum != currsegm[minsegmentlen - 1].aseqnum ||
+           currsegm_bseqnum != currsegm[minsegmentlen - 1].bseqnum))
       {
         do
         {
@@ -5309,6 +5324,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
     }
   } else
   {
+    int bpos_score;
     if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_ULONG)
     {
       const GtUword *mlist = gt_seedpairlist_mlist_ulong(seedpairlist),
@@ -5329,7 +5345,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         const GtUword currsegm_a_bseqnum = nextsegm_a_bseqnum;
 
         /* if insuffienct number of kmers in segment: skip whole segment */
-        if (currsegm_a_bseqnum !=
+        if (minsegmentlen > 1 &&
+            currsegm_a_bseqnum !=
             gt_seedpairlist_a_bseqnum_ulong (seedpairlist,
                                              currsegm[minsegmentlen-1]))
         {
@@ -5344,6 +5361,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         }
 
         /* this segment begining with nextsegm possibly has enough seeds */
+        segment_scores.nextfreeuint8_t = 0;
         currsegm_aseqnum = gt_seedpairlist_extract_ulong(seedpairlist,*currsegm,
                                                          idx_aseqnum) +
                            seedpairlist->aseqrange_start;
@@ -5358,6 +5376,14 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
           const GtUword apos
             = gt_seedpairlist_extract_ulong(seedpairlist,*nextsegm,idx_apos);
 
+          if (seedpairlist->score_bits > 0 && diagband_statistics != NULL)
+          {
+            bpos_score = (int) (seedpairlist->score_threshold +
+                                 ((*nextsegm) & seedpairlist->mask_score_bits));
+            GT_STOREINARRAY(&segment_scores,uint8_t,
+                            256 + segment_scores.allocateduint8_t * 0.2,
+                            bpos_score);
+          }
           spp_ptr->bpos
             = gt_seedpairlist_extract_ulong(seedpairlist,*nextsegm,idx_bpos);
           /* Now that bpos is written and all information is extracted
@@ -5388,7 +5414,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
     } else
     {
-      GT_UNUSED int bpos_score;
       GtDiagbandseedSeedPair nextsegment;
       const GtUword minsegmentlen_offset = (minsegmentlen - 1) *
                                            seedpairlist->bytes_seedpair,
@@ -5407,33 +5432,37 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         GtDiagbandseedSeqnum currsegm_aseqnum = nextsegment.aseqnum;
         GtDiagbandseedSeqnum currsegm_bseqnum = nextsegment.bseqnum;
 
-        bpos_score = gt_diagbandseed_decode_seedpair(&endminsegment,
-                                                     seedpairlist,
-                                                     nextsegment_offset +
-                                                     minsegmentlen_offset);
-        if (currsegm_aseqnum != endminsegment.aseqnum ||
-            currsegm_bseqnum != endminsegment.bseqnum)
+        if (minsegmentlen > 1)
         {
-          /* insuffienct number of kmers in segment: skip whole segment */
-          while (true)
+          (void) gt_diagbandseed_decode_seedpair(&endminsegment,
+                                                 seedpairlist,
+                                                 nextsegment_offset +
+                                                 minsegmentlen_offset);
+          if (currsegm_aseqnum != endminsegment.aseqnum ||
+              currsegm_bseqnum != endminsegment.bseqnum)
           {
-            nextsegment_offset += seedpairlist->bytes_seedpair;
-            if (nextsegment_offset >= mlistlen_offset)
+            /* insuffienct number of kmers in segment: skip whole segment */
+            while (true)
             {
-              break;
+              nextsegment_offset += seedpairlist->bytes_seedpair;
+              if (nextsegment_offset >= mlistlen_offset)
+              {
+                break;
+              }
+              (void) gt_diagbandseed_decode_seedpair(&nextsegment,
+                                                     seedpairlist,
+                                                     nextsegment_offset);
+              if (currsegm_aseqnum != nextsegment.aseqnum ||
+                  currsegm_bseqnum != nextsegment.bseqnum)
+              {
+                break;
+              }
             }
-            bpos_score = gt_diagbandseed_decode_seedpair(&nextsegment,
-                                                         seedpairlist,
-                                                         nextsegment_offset);
-            if (currsegm_aseqnum != nextsegment.aseqnum ||
-                currsegm_bseqnum != nextsegment.bseqnum)
-            {
-              break;
-            }
+            continue; /* process next segment */
           }
-          continue; /* process next segment */
         }
 
+        segment_scores.nextfreeuint8_t = 0;
         spp_ptr = segment_positions
                 = (GtSeedpairPositions *)
                   (gt_seedpairlist_mlist_bytestring(seedpairlist) +
@@ -5451,6 +5480,12 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
           bpos_score = gt_diagbandseed_decode_seedpair(&nextsegment,
                                                        seedpairlist,
                                                        nextsegment_offset);
+          if (seedpairlist->score_bits > 0 && diagband_statistics != NULL)
+          {
+            GT_STOREINARRAY(&segment_scores,uint8_t,
+                            256 + segment_scores.allocateduint8_t * 0.2,
+                            bpos_score);
+          }
         } while (currsegm_aseqnum == nextsegment.aseqnum &&
                  currsegm_bseqnum == nextsegment.bseqnum);
 
@@ -5506,6 +5541,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
     gt_diagband_statistics_display(diagband_statistics);
     gt_diagband_statistics_delete(diagband_statistics);
   }
+  GT_FREEARRAY(&segment_scores,uint8_t);
 }
 
 /* * * * * ALGORITHM STEPS * * * * */

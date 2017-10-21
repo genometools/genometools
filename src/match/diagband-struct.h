@@ -146,8 +146,16 @@ void gt_diagband_struct_reset_counts(const GtDiagbandStruct *diagband_struct,
 
 typedef struct GtDiagbandStatistics GtDiagbandStatistics;
 
-/* The constructor. The first argument is the argument of option
-   -diagband-stat. Currently the only option is the keyword total_bcov.
+/* The constructor. The first argument of the following function
+   is the argument of option -diagband-stat in a corresponding call.
+   of gt seed_extend
+   The following arguments are available:
+
+   1) total_bcov, which computed the total coverage of the matches on
+      the B-sequence. Overlaps on the B-sequence are only counted once
+   2) total_score_seqpair, which computes the total score of all seeds
+      in a sequence pair (corresponding to a segment). This
+
    One can extend the list of different options to compute other statistics,
    by adding a corresponding string to the array
    diagband_statistics_choices in src/tools/gt_seed_extend.c.
@@ -167,9 +175,11 @@ GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
 void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics);
 
 /* If the option -diagband-stat is used, the following function is called for
-   each pair of sequences, after completing the computation of the b-coverage
-   values in diagband_struct. The first argument refers to an object created by
-   gt_diagband_statistics_new.
+   each pair of sequences, after completing the computation according to
+   argument of option -diagband-struct. The first argument refers to
+   an object created by gt_diagband_statistics_new. It takes a void
+   argument as we have functions which request other types when
+   processing a segment.
 */
 
 void gt_diagband_statistics_add(void *v_diagband_statistics,
@@ -182,6 +192,7 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
                                 const GtDiagbandseedMaximalmatch *memstore,
                                 unsigned int seedlength,
                                 const GtSeedpairPositions *seedstore,
+                                GT_UNUSED const uint8_t *segment_scores,
                                 GtUword segment_length);
 
 /* The following function displays the computed statistics after all
@@ -190,5 +201,11 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
 
 void gt_diagband_statistics_display(const GtDiagbandStatistics
                                       *diagband_statistics);
+
+/* set the minimum score for which seqpairs with their minimum
+   score are shown */
+void gt_diagband_statistics_total_score_show_min_set(
+              GtDiagbandStatistics *diagband_statistics,
+              GtUword total_score_show_min);
 
 #endif
