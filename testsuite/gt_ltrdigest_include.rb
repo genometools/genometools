@@ -294,6 +294,14 @@ if $gttestdata then
       grep(last_stderr, /invalid HMMER format encountered/)
     end
 
+    Name "gt ltrdigest DNA pHMM given"
+    Keywords "gt_ltrdigest"
+    Test do
+      run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+      run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -hmms #{$testdata}/dna_hmmer.hmm -- #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 1
+      grep(last_stderr, /invalid \(non-protein\) alphabet definition/)
+    end
+
     Name "gt ltrdigest pHMM implied options"
     Keywords "gt_ltrdigest"
     Test do
