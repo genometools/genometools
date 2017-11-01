@@ -33,6 +33,23 @@ $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "seed.s","seed.q","seed_in_algn","s.seqlen",
                 "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
+Name "gt seed_extend: coords with/without alignment"
+Keywords "gt_seed_extend Al_coords"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
+  ["-qii U89959_genomic",""].each do |qornot|
+    gt_call = "#{$bin}/gt seed_extend -ii at1MB #{qornot} -l 50 -minidentity 80"
+    run_test gt_call
+    run "grep '^[0-9]' #{last_stdout}"
+    run "mv #{last_stdout} coords.matches"
+    run_test "#{gt_call} -outfmt alignment"
+    run "grep '^[0-9]' #{last_stdout}"
+    run "mv #{last_stdout} al_coords.matches"
+    run "diff coords.matches al_coords.matches"
+  end
+end
+
 Name "gt seed_extend: ANI computation"
 Keywords "gt_seed_extend ANI"
 Test do
