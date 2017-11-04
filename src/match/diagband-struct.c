@@ -22,6 +22,7 @@
 #include "core/str_api.h"
 #include "core/minmax.h"
 #include "core/intbits.h"
+#include "core/score_matrix.h"
 #include "match/diagband-struct.h"
 
 /* called with real bpos */
@@ -286,6 +287,10 @@ struct GtDiagbandStatistics
           total_score_seqpair,
           total_score_show_min;
   GtBitsequence *diagband_track;
+  const GtScoreMatrix *score_matrix;
+  GtUchar *a_buffer, *b_buffer;
+  GtUword a_len, b_len;
+  int score_threshold;
 };
 
 GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
@@ -316,6 +321,12 @@ GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
   diagband_statistics->total_bcov = 0;
   diagband_statistics->total_score_seqpair = 0;
   diagband_statistics->diagband_track = NULL;
+  diagband_statistics->score_matrix = NULL;
+  diagband_statistics->a_buffer = NULL;
+  diagband_statistics->b_buffer = NULL;
+  diagband_statistics->score_threshold = INT_MIN;
+  diagband_statistics->a_len = 0;
+  diagband_statistics->b_len = 0;
   return diagband_statistics;
 }
 
@@ -327,10 +338,22 @@ void gt_diagband_statistics_total_score_show_min_set(
   diagband_statistics->total_score_show_min = total_score_show_min;
 }
 
+void gt_diagband_statistics_score_matrix_set(
+                GtDiagbandStatistics *diagband_statistics,
+                const GtScoreMatrix *score_matrix,
+                int score_threshold)
+{
+  gt_assert(diagband_statistics != NULL);
+  diagband_statistics->score_matrix = score_matrix;
+  diagband_statistics->score_threshold = score_threshold;
+}
+
 void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics)
 {
   if (diagband_statistics != NULL)
   {
+    gt_free(diagband_statistics->a_buffer);
+    gt_free(diagband_statistics->b_buffer);
     gt_free(diagband_statistics->diagband_track);
     gt_free(diagband_statistics);
   }
@@ -363,16 +386,71 @@ static void gt_diagband_statistics_bcov_add(
   }
 }
 
+static int gt_diagband_statistics_eval_score(const GtScoreMatrix *score_matrix,
+                                             const GtUchar *a_encoded,
+                                             const GtUchar *b_encoded,
+                                             GtUword length)
+{
+  int score_sum = 0;
+  GtUword idx;
+
+  for (idx = 0; idx < length; idx++)
+  {
+    score_sum += gt_score_matrix_get_score(score_matrix,a_encoded[idx],
+                                           b_encoded[idx]);
+  }
+  return score_sum;
+}
+
+static int gt_diagband_statistics_total_score_in_seqpair(
+                                   const GtScoreMatrix *score_matrix,
+                                   unsigned int q_value,
+                                   int score_threshold,
+                                   const GtUchar *a_encoded,
+                                   GtUword alen,
+                                   const GtUchar *b_encoded,
+                                   GtUword blen)
+{
+  const GtUchar *aptr, *bptr;
+  int total_score = 0;
+
+  if (alen >= q_value && blen >= q_value)
+  {
+    for (aptr = a_encoded; aptr <= a_encoded + alen - q_value; aptr++)
+    {
+      for (bptr = b_encoded; bptr <= b_encoded + blen - q_value;
+           bptr++)
+      {
+
+        gt_assert(aptr + q_value - 1 <= a_encoded + alen - 1);
+        gt_assert(bptr + q_value - 1 <= b_encoded + blen - 1);
+        const int this_score = gt_diagband_statistics_eval_score(score_matrix,
+                                                                 aptr,
+                                                                 bptr,
+                                                                 q_value);
+        if (this_score >= score_threshold)
+        {
+          /*printf(GT_WU " " GT_WU " with score %d\n",
+                 (GtUword) (aptr - a_encoded),
+                 (GtUword) (bptr - b_encoded),this_score);*/
+          total_score += this_score;
+        }
+      }
+    }
+  }
+  return total_score;
+}
+
 void gt_diagband_statistics_add(void *v_diagband_statistics,
                                 GT_UNUSED bool bpos_sorted,
                                 /* remove GT_UNUSED once arguments are used */
-                                GT_UNUSED const GtEncseq *aencseq,
-                                GT_UNUSED const GtEncseq *bencseq,
+                                const GtEncseq *aencseq,
+                                const GtEncseq *bencseq,
                                 GtUword aseqnum,
                                 GtUword bseqnum,
                                 const GtDiagbandStruct *diagband_struct,
                                 const GtDiagbandseedMaximalmatch *memstore,
-                                GT_UNUSED unsigned int seedlength,
+                                unsigned int seedlength,
                                 const GtSeedpairPositions *seedstore,
                                 const uint8_t *segment_scores,
                                 GtUword segment_length)
@@ -389,6 +467,31 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
   {
     GT_CLEARBITTAB(diagband_statistics->diagband_track,
                    diagband_struct->num_diagbands);
+  }
+  if (diagband_statistics->score_matrix != NULL)
+  {
+    GtUword startpos;
+
+    if (diagband_statistics->a_buffer == NULL)
+    {
+      diagband_statistics->a_buffer
+        = gt_malloc(sizeof *diagband_statistics->a_buffer *
+                    gt_encseq_max_seq_length(aencseq));
+    }
+    startpos = gt_encseq_seqstartpos(aencseq, aseqnum);
+    diagband_statistics->a_len = gt_encseq_seqlength(aencseq, aseqnum);
+    gt_encseq_extract_encoded(aencseq, diagband_statistics->a_buffer,startpos,
+                              startpos + diagband_statistics->a_len - 1);
+    if (diagband_statistics->b_buffer == NULL)
+    {
+      diagband_statistics->b_buffer
+        = gt_malloc(sizeof *diagband_statistics->b_buffer *
+                    gt_encseq_max_seq_length(bencseq));
+    }
+    startpos = gt_encseq_seqstartpos(bencseq, bseqnum);
+    diagband_statistics->b_len = gt_encseq_seqlength(bencseq, bseqnum);
+    gt_encseq_extract_encoded(bencseq, diagband_statistics->b_buffer,startpos,
+                              startpos + diagband_statistics->b_len - 1);
   }
   if (seedstore != NULL)
   {
@@ -412,6 +515,25 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
         }
       }
     }
+#ifndef NDEBUG
+    if (segment_scores != NULL &&
+        diagband_statistics->compute_total_score_seqpair &&
+        diagband_statistics->score_matrix != NULL)
+    {
+      int bf_total_score_seqpair;
+
+      bf_total_score_seqpair = gt_diagband_statistics_total_score_in_seqpair(
+                                   diagband_statistics->score_matrix,
+                                   seedlength,
+                                   diagband_statistics->score_threshold,
+                                   diagband_statistics->a_buffer,
+                                   diagband_statistics->a_len,
+                                   diagband_statistics->b_buffer,
+                                   diagband_statistics->b_len);
+      gt_assert(bf_total_score_seqpair ==
+                diagband_statistics->total_score_seqpair);
+    }
+#endif
     if (diagband_statistics->total_score_seqpair >=
         diagband_statistics->total_score_show_min)
     {

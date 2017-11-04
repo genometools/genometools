@@ -474,6 +474,7 @@ int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
   int score_sum = 0;
   GtUword idx;
 
+  gt_assert(kenv_gen != NULL && kenv_gen->score_matrix != NULL);
   for (idx = 0; idx < length; idx++)
   {
     score_sum += gt_score_matrix_get_score(kenv_gen->score_matrix,
@@ -482,40 +483,8 @@ int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
   return score_sum;
 }
 
-int gt_kenv_total_score_in_seqpair(const GtKenvGenerator *kenv_gen,
-                                   const GtUchar *a_encoded,
-                                   GtUword alen,
-                                   const GtUchar *b_encoded,
-                                   GtUword blen)
+const GtScoreMatrix *gt_kenv_score_matrix(const GtKenvGenerator *kenv_gen)
 {
-  const GtUchar *aptr, *bptr;
-  int total_score = 0;
-
-  printf("q_value=%u,score_threshold=%d,alen=" GT_WU ",blen=" GT_WU "\n",
-          kenv_gen->q_value,kenv_gen->score_threshold,alen,blen);
-  if (alen >= kenv_gen->q_value && blen >= kenv_gen->q_value)
-  {
-    for (aptr = a_encoded; aptr <= a_encoded + alen - kenv_gen->q_value; aptr++)
-    {
-      for (bptr = b_encoded; bptr <= b_encoded + blen - kenv_gen->q_value;
-           bptr++)
-      {
-        const int this_score = gt_kenv_eval_score(kenv_gen,
-                                                  aptr,
-                                                  bptr,
-                                                  kenv_gen->q_value);
-        if (this_score >= 0)
-        {
-          printf(GT_WU " " GT_WU " with score %d\n",
-                 (GtUword) (aptr - a_encoded),
-                 (GtUword) (bptr - b_encoded),this_score);
-        }
-        if (this_score >= kenv_gen->score_threshold)
-        {
-          total_score += this_score;
-        }
-      }
-    }
-  }
-  return total_score;
+  gt_assert(kenv_gen != NULL);
+  return kenv_gen->score_matrix;
 }

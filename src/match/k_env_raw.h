@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include "core/error_api.h"
 #include "core/types_api.h"
+#include "core/score_matrix.h"
 #include "k_env_alphabet.h"
 
 /* Struct describing an element of the k-environment of a specific kmer.
@@ -93,13 +94,8 @@ int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
                        const GtUchar *b_encoded,
                        GtUword length);
 
-/* for two sequences referenced by <a_encoded> and <b_encoded> of length <alen>
-   and <blen>, respectively, determine the total score of all pairs of
-   q-mers achieving a score of at least <score_threshold> */
+/* return reference to a score_matrix (which can be NULL) */
 
-int gt_kenv_total_score_in_seqpair(const GtKenvGenerator *kenv_gen,
-                                   const GtUchar *a_encoded,
-                                   GtUword alen,
-                                   const GtUchar *b_encoded,
-                                   GtUword blen);
+const GtScoreMatrix *gt_kenv_score_matrix(const GtKenvGenerator *kenv_gen);
+
 #endif

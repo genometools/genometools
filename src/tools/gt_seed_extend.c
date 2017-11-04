@@ -77,6 +77,7 @@ typedef struct {
   bool bias_parameters;
   bool relax_polish;
   bool verify_alignment;
+  bool verify_total_score_seqpair;
   bool only_selected_seqpairs;
   bool cam_generic;
   /* general options */
@@ -169,7 +170,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_kenv, *op_maxmat,
     *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics,
     *op_estim, *op_benchmark, *op_snd_pass, *op_delta_filter, *op_onlykmers,
-    *op_qii;
+    *op_qii, *op_verify_total_score_seqpair;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
@@ -544,6 +545,18 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_maxmat, op_verify_alignment);
   gt_option_is_development_option(op_verify_alignment);
 
+  op_verify_total_score_seqpair
+    = gt_option_new_bool("verify-total-score-seqpair",
+                         "verify the total score of a sequence pair "
+                         "(very slow, so do not apply it to large sets "
+                         "of sequences)",
+                         &arguments->verify_total_score_seqpair,
+                         false);
+  gt_option_parser_add_option(op, op_verify_total_score_seqpair);
+  gt_option_imply(op_verify_total_score_seqpair,op_kenv);
+  gt_option_exclude(op_maxmat, op_verify_total_score_seqpair);
+  gt_option_is_development_option(op_verify_total_score_seqpair);
+
   /* -only-selected-seqpairs */
   op_only_selected_seqpairs
     = gt_option_new_bool("only-selected-seqpairs",
@@ -743,6 +756,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_estim, op_outfmt);
   gt_option_exclude(op_estim, op_onlyseeds);
   gt_option_exclude(op_estim, op_verify_alignment);
+  gt_option_exclude(op_estim, op_verify_total_score_seqpair);
   gt_option_exclude(op_estim, op_only_selected_seqpairs);
   gt_option_exclude(op_estim, op_benchmark);
   gt_option_exclude(op_cam, op_xbe);
@@ -1356,6 +1370,8 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->benchmark,
                                              !arguments->relax_polish,
                                              arguments->verify_alignment,
+                                             arguments->
+                                                verify_total_score_seqpair,
                                              arguments->only_selected_seqpairs,
                                              arguments->no_combine_left_right
                                                ? 0

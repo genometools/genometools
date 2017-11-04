@@ -20,6 +20,7 @@
 #include <inttypes.h>
 #include "core/types_api.h"
 #include "core/encseq_api.h"
+#include "core/score_matrix.h"
 
 /* This module implements all methods related to diagonal bands including
    statistics derived from them. The latter is currently under development. */
@@ -207,5 +208,10 @@ void gt_diagband_statistics_display(const GtDiagbandStatistics
 void gt_diagband_statistics_total_score_show_min_set(
               GtDiagbandStatistics *diagband_statistics,
               GtUword total_score_show_min);
+
+void gt_diagband_statistics_score_matrix_set(
+                GtDiagbandStatistics *diagband_statistics,
+                const GtScoreMatrix *score_matrix,
+                int score_threshold);
 
 #endif

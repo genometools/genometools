@@ -181,6 +181,7 @@ struct GtDiagbandseedExtendParams
        benchmark,
        always_polished_ends,
        verify_alignment,
+       verify_total_score_seqpair,
        only_selected_seqpairs,
        cam_generic;
 };
@@ -716,6 +717,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool benchmark,
                                 bool always_polished_ends,
                                 bool verify_alignment,
+                                bool verify_total_score_seqpair,
                                 bool only_selected_seqpairs,
                                 int max_combine_mode,
                                 GtAccumulateMatchValues *accu_match_values)
@@ -743,6 +745,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->benchmark = benchmark;
   extp->always_polished_ends = always_polished_ends;
   extp->verify_alignment = verify_alignment;
+  extp->verify_total_score_seqpair = verify_total_score_seqpair;
   extp->only_selected_seqpairs = only_selected_seqpairs;
   extp->max_combine_mode = max_combine_mode;
   extp->accu_match_values = accu_match_values;
@@ -3897,7 +3900,7 @@ typedef struct
   double evalue_threshold;
   GtDiagbandSeedPlainSequence plainsequence_info;
   GtReadmode query_readmode;
-  bool same_encseq, debug;
+  bool same_encseq;
   GtQuerymatchSegmentBuffer *querymatch_segment_buffer;
   GtRadixsortinfo *snd_pass_radix_sort_info;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
@@ -3911,7 +3914,9 @@ typedef struct
                        *accu_match_values_entry;
   GtDiagbandseedState *dbs_state;
   int max_combine_mode;
-  const GtKenvGenerator *kenv_generator;
+#ifdef SKDEBUG
+  bool debug;
+#endif
 } GtDiagbandseedExtendSegmentInfo;
 
 static void gt_diagbandseed_info_qm_set(
@@ -4001,7 +4006,6 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                            *querymatch_segment_buffer,
                                          GtRadixsortinfo
                                            *snd_pass_radix_sort_info,
-                                         const GtKenvGenerator *kenv_generator,
                                          GtSegmentRejectFunc
                                            segment_reject_func,
                                          GtSegmentRejectInfo
@@ -4047,7 +4051,9 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->evalue_threshold = extp->evalue_threshold;
   esi->query_readmode = query_readmode;
   esi->same_encseq = (aencseq == bencseq) ? true : false;
+#ifdef SKDEBUG
   esi->debug = gt_log_enabled() ? true : false;
+#endif
   esi->segment_reject_func = segment_reject_func;
   esi->segment_reject_info = segment_reject_info;
   esi->karlin_altschul_stat = karlin_altschul_stat;
@@ -4069,7 +4075,6 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
     esi->accu_match_values_matrix = NULL;
   }
   esi->max_combine_mode = extp->max_combine_mode;
-  esi->kenv_generator = kenv_generator;
   return esi;
 }
 
@@ -4121,7 +4126,12 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                              apos,
                              bpos,
                              matchlength,
-                             esi->debug)))
+#ifdef SKDEBUG
+                             esi->debug
+#else
+                             false
+#endif
+                             )))
   {
     bool instances_ordered;
     int mode;
@@ -4865,22 +4875,6 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
   }
 }
 
-#define GT_DIAGBANDSEED_CHECKSCORES\
-        if (seedpairlist->score_bits > 0 && diagband_struct == NULL)\
-        {\
-          if (currsegm_aseqnum == 133 && currsegm_bseqnum == 61798)\
-          {\
-            gt_assert(esi != NULL);\
-            int this_score \
-              = gt_kenv_total_score_in_seqpair(esi->kenv_generator,\
-                        esi->plainsequence_info.a_byte_sequence,\
-                        esi->plainsequence_info.aseqorencseq.seqlength,\
-                        esi->plainsequence_info.b_byte_sequence,\
-                        esi->plainsequence_info.bseqorencseq.seqlength);\
-            printf("this_score=%d\n",this_score); \
-          }\
-        }
-
 #define GT_DIAGBANDSEED_PROCESS_SEGMENT\
         for (process_run = 0; process_run < max_process_runs; process_run++) \
         {\
@@ -5165,7 +5159,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                             *querymatch_segment_buffer,
                                           GtRadixsortinfo
                                             *snd_pass_radix_sort_info,
-                                          const GtKenvGenerator *kenv_generator,
+                                          const GtScoreMatrix *score_matrix,
                                           GtSegmentRejectFunc
                                             segment_reject_func,
                                           GtSegmentRejectInfo
@@ -5252,7 +5246,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                          dbs_state,
                                          querymatch_segment_buffer,
                                          snd_pass_radix_sort_info,
-                                         kenv_generator,
                                          segment_reject_func,
                                          segment_reject_info);
       if (verbose)
@@ -5275,6 +5268,12 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       gt_diagband_statistics_total_score_show_min_set(diagband_statistics,
                                   total_score_show_min_mult
                                   * seedpairlist->score_threshold);
+      if (extp->verify_total_score_seqpair && seedpairlist->score_threshold > 0)
+      {
+        gt_diagband_statistics_score_matrix_set(diagband_statistics,
+                                                score_matrix,
+                                                seedpairlist->score_threshold);
+      }
       segment_proc_func = gt_diagband_statistics_add;
       segment_proc_info = diagband_statistics;
     }
@@ -6338,7 +6337,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   dbs_state,
                                   querymatch_segment_buffer,
                                   snd_pass_radix_sort_info,
-                                  arg->kenv_generator,
+                                  arg->kenv_generator != NULL
+                                    ? gt_kenv_score_matrix(arg->kenv_generator)
+                                    : NULL,
                                   segment_reject_func,
                                   segment_reject_info);
     gt_seedpairlist_reset(seedpairlist);
@@ -6465,7 +6466,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   dbs_state,
                                   querymatch_segment_buffer,
                                   snd_pass_radix_sort_info,
-                                  arg->kenv_generator,
+                                  arg->kenv_generator != NULL
+                                    ? gt_kenv_score_matrix(arg->kenv_generator)
+                                    : NULL,
                                   segment_reject_func,
                                   segment_reject_info);
   }

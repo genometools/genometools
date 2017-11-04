@@ -121,6 +121,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool benchmark,
                                 bool always_polished_ends,
                                 bool verify_alignment,
+                                bool verify_total_score_seqpair,
                                 bool only_selected_seqpairs,
                                 int max_combine_mode,
                                 GtAccumulateMatchValues *accu_match_values);
