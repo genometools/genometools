@@ -386,6 +386,7 @@ static void gt_diagband_statistics_bcov_add(
   }
 }
 
+#ifndef NDEBUG
 static int gt_diagband_statistics_eval_score(const GtScoreMatrix *score_matrix,
                                              const GtUchar *a_encoded,
                                              const GtUchar *b_encoded,
@@ -440,6 +441,7 @@ static int gt_diagband_statistics_total_score_in_seqpair(
   }
   return total_score;
 }
+#endif
 
 void gt_diagband_statistics_add(void *v_diagband_statistics,
                                 GT_UNUSED bool bpos_sorted,
@@ -450,7 +452,7 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
                                 GtUword bseqnum,
                                 const GtDiagbandStruct *diagband_struct,
                                 const GtDiagbandseedMaximalmatch *memstore,
-                                unsigned int seedlength,
+                                GT_UNUSED unsigned int seedlength,
                                 const GtSeedpairPositions *seedstore,
                                 const uint8_t *segment_scores,
                                 GtUword segment_length)
