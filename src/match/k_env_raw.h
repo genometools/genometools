@@ -39,7 +39,7 @@ typedef struct GtKenvGenerator GtKenvGenerator;
 /* Returns a new empty <GtKenvGenerator> object giving the frame to
    build a k environment. */
 GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
-                                       unsigned int q_val, unsigned int th_val,
+                                       unsigned int q_val, int th_val,
                                        bool allow_x_val, bool preprocess,
                                        GtError *err);
 
@@ -67,7 +67,7 @@ unsigned int gt_kenv_generator_get_q(const GtKenvGenerator *kenv_gen);
 
 /* Returns the value for <th> stored inside <kenv_gen>. <th> is the defined
    score threshold of the kmeres inside the environment. */
-unsigned int gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen);
+int gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen);
 
 /* Returns the number of bits required for storing a score value in the
    range from score_threshold to max_score_qgram */
@@ -92,4 +92,14 @@ int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
                        const GtUchar *a_encoded,
                        const GtUchar *b_encoded,
                        GtUword length);
+
+/* for two sequences referenced by <a_encoded> and <b_encoded> of length <alen>
+   and <blen>, respectively, determine the total score of all pairs of
+   q-mers achieving a score of at least <score_threshold> */
+
+int gt_kenv_total_score_in_seqpair(const GtKenvGenerator *kenv_gen,
+                                   const GtUchar *a_encoded,
+                                   GtUword alen,
+                                   const GtUchar *b_encoded,
+                                   GtUword blen);
 #endif

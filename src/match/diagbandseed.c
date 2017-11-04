@@ -2682,9 +2682,9 @@ static void gt_diagbandseed_encode_seedpair(uint8_t *bytestring,
 #ifdef SKDEBUG
   {
     GtDiagbandseedSeedPair thisseedpair;
-    uint8_t thisbpos_score_diff;
-    gt_diagbandseed_decode_seedpair_gen(&thisseedpair,&thisbpos_score_diff,
-                                        seedpairlist,bytestring);
+    uint8_t thisbpos_score_diff
+      = gt_diagbandseed_decode_seedpair_gen(&thisseedpair,seedpairlist,
+                                            bytestring);
     gt_assert(thisseedpair.aseqnum == aseqnum);
     gt_assert(thisseedpair.bseqnum == bseqnum);
     gt_assert(thisseedpair.apos == apos);
@@ -2700,7 +2700,7 @@ static void gt_diagbandseed_encode_seedpair_verify(const GtSeedpairlist
 {
   int idx;
   GtUword max_values[5];
-  int bytestring_length = 9;
+  int bytestring_length = 10;
   uint8_t bytestring[bytestring_length],
           bytestring_bf[bytestring_length];
   size_t trials;
@@ -3911,6 +3911,7 @@ typedef struct
                        *accu_match_values_entry;
   GtDiagbandseedState *dbs_state;
   int max_combine_mode;
+  const GtKenvGenerator *kenv_generator;
 } GtDiagbandseedExtendSegmentInfo;
 
 static void gt_diagbandseed_info_qm_set(
@@ -4000,6 +4001,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                            *querymatch_segment_buffer,
                                          GtRadixsortinfo
                                            *snd_pass_radix_sort_info,
+                                         const GtKenvGenerator *kenv_generator,
                                          GtSegmentRejectFunc
                                            segment_reject_func,
                                          GtSegmentRejectInfo
@@ -4067,6 +4069,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
     esi->accu_match_values_matrix = NULL;
   }
   esi->max_combine_mode = extp->max_combine_mode;
+  esi->kenv_generator = kenv_generator;
   return esi;
 }
 
@@ -4862,6 +4865,22 @@ static void gt_transform_segment_positions(GtDiagbandseedPosition a_seqlength,
   }
 }
 
+#define GT_DIAGBANDSEED_CHECKSCORES\
+        if (seedpairlist->score_bits > 0 && diagband_struct == NULL)\
+        {\
+          if (currsegm_aseqnum == 133 && currsegm_bseqnum == 61798)\
+          {\
+            gt_assert(esi != NULL);\
+            int this_score \
+              = gt_kenv_total_score_in_seqpair(esi->kenv_generator,\
+                        esi->plainsequence_info.a_byte_sequence,\
+                        esi->plainsequence_info.aseqorencseq.seqlength,\
+                        esi->plainsequence_info.b_byte_sequence,\
+                        esi->plainsequence_info.bseqorencseq.seqlength);\
+            printf("this_score=%d\n",this_score); \
+          }\
+        }
+
 #define GT_DIAGBANDSEED_PROCESS_SEGMENT\
         for (process_run = 0; process_run < max_process_runs; process_run++) \
         {\
@@ -5146,6 +5165,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                             *querymatch_segment_buffer,
                                           GtRadixsortinfo
                                             *snd_pass_radix_sort_info,
+                                          const GtKenvGenerator *kenv_generator,
                                           GtSegmentRejectFunc
                                             segment_reject_func,
                                           GtSegmentRejectInfo
@@ -5232,6 +5252,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                          dbs_state,
                                          querymatch_segment_buffer,
                                          snd_pass_radix_sort_info,
+                                         kenv_generator,
                                          segment_reject_func,
                                          segment_reject_info);
       if (verbose)
@@ -5324,7 +5345,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
     }
   } else
   {
-    int bpos_score;
     if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_ULONG)
     {
       const GtUword *mlist = gt_seedpairlist_mlist_ulong(seedpairlist),
@@ -5378,7 +5398,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 
           if (seedpairlist->score_bits > 0 && diagband_statistics != NULL)
           {
-            bpos_score = (int) (seedpairlist->score_threshold +
+            int bpos_score = (int) (seedpairlist->score_threshold +
                                  ((*nextsegm) & seedpairlist->mask_score_bits));
             GT_STOREINARRAY(&segment_scores,uint8_t,
                             256 + segment_scores.allocateduint8_t * 0.2,
@@ -5414,6 +5434,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
     } else
     {
+      int bpos_score;
       GtDiagbandseedSeedPair nextsegment;
       const GtUword minsegmentlen_offset = (minsegmentlen - 1) *
                                            seedpairlist->bytes_seedpair,
@@ -5471,6 +5492,12 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         {
           spp_ptr->apos = GT_DIAGBANDSEED_GETPOS_A(&nextsegment);
           spp_ptr->bpos = GT_DIAGBANDSEED_GETPOS_B(&nextsegment);
+          if (seedpairlist->score_bits > 0 && diagband_statistics != NULL)
+          {
+            GT_STOREINARRAY(&segment_scores,uint8_t,
+                            256 + segment_scores.allocateduint8_t * 0.2,
+                            bpos_score);
+          }
           spp_ptr++;
           nextsegment_offset += seedpairlist->bytes_seedpair;
           if (nextsegment_offset >= mlistlen_offset)
@@ -5480,12 +5507,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
           bpos_score = gt_diagbandseed_decode_seedpair(&nextsegment,
                                                        seedpairlist,
                                                        nextsegment_offset);
-          if (seedpairlist->score_bits > 0 && diagband_statistics != NULL)
-          {
-            GT_STOREINARRAY(&segment_scores,uint8_t,
-                            256 + segment_scores.allocateduint8_t * 0.2,
-                            bpos_score);
-          }
         } while (currsegm_aseqnum == nextsegment.aseqnum &&
                  currsegm_bseqnum == nextsegment.bseqnum);
 
@@ -6188,6 +6209,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->debug_seedpair,
                                   arg->verbose,
                                   stream);
+    /* Now the list of seed is sorted */
     mlistlen = gt_seedpairlist_length(seedpairlist);
     if (arg->verify && mlistlen > 0)
     {
@@ -6200,13 +6222,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        arg->verbose,
                                        stream,
                                        err);
-      if (had_err)
-      {
-        gt_seedpairlist_delete(seedpairlist);
-        seedpairlist = NULL;
-      }
     }
-  } else
+  }
+  if (had_err)
   {
     gt_seedpairlist_delete(seedpairlist);
     seedpairlist = NULL;
@@ -6320,6 +6338,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   dbs_state,
                                   querymatch_segment_buffer,
                                   snd_pass_radix_sort_info,
+                                  arg->kenv_generator,
                                   segment_reject_func,
                                   segment_reject_info);
     gt_seedpairlist_reset(seedpairlist);
@@ -6446,6 +6465,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   dbs_state,
                                   querymatch_segment_buffer,
                                   snd_pass_radix_sort_info,
+                                  arg->kenv_generator,
                                   segment_reject_func,
                                   segment_reject_info);
   }

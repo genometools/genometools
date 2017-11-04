@@ -104,7 +104,7 @@ static void gt_kenv_score_structure_delete(GtKenvScoreStructure *score_struct)
 /***** GtKenvGenerator *****/
 struct GtKenvGenerator{
   unsigned int q_value;
-  unsigned int score_threshold;
+  int score_threshold;
   unsigned int next_seqnum;
   unsigned int alph_size;
   GtCodetype *alph_powers;
@@ -181,7 +181,7 @@ void gt_kenv_generator_delete(GtKenvGenerator *kenv_gen)
 
 GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
                                        unsigned int q_value,
-                                       unsigned int score_threshold,
+                                       int score_threshold,
                                        bool allow_x_val, bool preprocess,
                                        GtError *err)
 {
@@ -222,7 +222,8 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
     gt_kenv_generator_delete(kenv_gen);
     return NULL;
   }
-  kenv_gen->score_bits = gt_required_bits(max_score_qgram - score_threshold);
+  kenv_gen->score_bits = gt_required_bits((GtUword) (max_score_qgram -
+                                                     score_threshold));
   gt_assert(kenv_gen->score_bits <= CHAR_BIT);
   kenv_gen->buffer_Char = gt_malloc(sizeof (*kenv_gen->buffer_Char) *
                                     (kenv_gen->q_value + 1));
@@ -303,7 +304,7 @@ unsigned int gt_kenv_generator_get_q(const GtKenvGenerator *kenv_gen)
   return kenv_gen->q_value;
 }
 
-unsigned int gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen)
+int gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen)
 {
   gt_assert(kenv_gen);
   return kenv_gen->score_threshold;
@@ -479,4 +480,42 @@ int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
                                            a_encoded[idx],b_encoded[idx]);
   }
   return score_sum;
+}
+
+int gt_kenv_total_score_in_seqpair(const GtKenvGenerator *kenv_gen,
+                                   const GtUchar *a_encoded,
+                                   GtUword alen,
+                                   const GtUchar *b_encoded,
+                                   GtUword blen)
+{
+  const GtUchar *aptr, *bptr;
+  int total_score = 0;
+
+  printf("q_value=%u,score_threshold=%d,alen=" GT_WU ",blen=" GT_WU "\n",
+          kenv_gen->q_value,kenv_gen->score_threshold,alen,blen);
+  if (alen >= kenv_gen->q_value && blen >= kenv_gen->q_value)
+  {
+    for (aptr = a_encoded; aptr <= a_encoded + alen - kenv_gen->q_value; aptr++)
+    {
+      for (bptr = b_encoded; bptr <= b_encoded + blen - kenv_gen->q_value;
+           bptr++)
+      {
+        const int this_score = gt_kenv_eval_score(kenv_gen,
+                                                  aptr,
+                                                  bptr,
+                                                  kenv_gen->q_value);
+        if (this_score >= 0)
+        {
+          printf(GT_WU " " GT_WU " with score %d\n",
+                 (GtUword) (aptr - a_encoded),
+                 (GtUword) (bptr - b_encoded),this_score);
+        }
+        if (this_score >= kenv_gen->score_threshold)
+        {
+          total_score += this_score;
+        }
+      }
+    }
+  }
+  return total_score;
 }
