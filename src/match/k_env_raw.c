@@ -192,6 +192,7 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
   GtUword offset_size;
   int max_score_qgram;
 
+  kenv_gen->alph_powers = NULL;
   kenv_gen->q_value = q_value;
   kenv_gen->score_threshold = score_threshold,
   kenv_gen->next_seqnum = 0;
@@ -201,6 +202,8 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
   kenv_gen->buffer_Char = NULL;
   kenv_gen->buffer_GtUchar = NULL;
   kenv_gen->buffer_Int = NULL;
+  kenv_gen->spaceGtKenvRawElement = NULL;
+  kenv_gen->kmer_offsets = NULL;
   kenv_gen->score_matrix
     = gt_score_matrix_new_read(use_dna ? dna_file
                                        : blosum_file,
@@ -232,12 +235,10 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
   kenv_gen->buffer_Int = gt_calloc((kenv_gen->q_value + 1),
                                   sizeof (*kenv_gen->buffer_Int));
 
-  kenv_gen->spaceGtKenvRawElement = NULL;
   kenv_gen->allocatedGtKenvRawElement = 0;
   kenv_gen->nextfreeGtKenvRawElement = 0;
   kenv_gen->alph_powers = gt_initbasepower(kenv_gen->alph_size, q_value);
   offset_size = kenv_gen->alph_powers[q_value];
-  kenv_gen->kmer_offsets = NULL;
   kenv_gen->preprocess_env = preprocess;
   kenv_gen->max_code_length = 0;
 

@@ -5573,8 +5573,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
 #endif
                                      GtBitcount_type score_bits,
                                      unsigned int numofchars,
-                                     GtDiagbandseedKmerIterator
-                                       *kenv_source_iter,
+                                     GtDiagbandseedKmerIterator *kenv_src_iter,
                                      const GtKmerPosListEncodeInfo *encode_info,
                                      bool verbose)
 {
@@ -5582,7 +5581,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
           kmer_count = 0,
           *kmer_environ_ptr,
           score_dist[100] = {0};
-  const GtKmerPosList *alist = gt_diagbandseed_kmer_iter_next(kenv_source_iter);
+  const GtKmerPosList *alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   GtKmerPosList *kmerpos_list = gt_malloc(sizeof *kmerpos_list);
   const int score_threshold = gt_kenv_generator_get_th(kenv_generator);
 #ifdef SKDEBUG
@@ -5615,7 +5614,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
       }
     }
     kmer_count += alist->nextfree;
-    alist = gt_diagbandseed_kmer_iter_next(kenv_source_iter);
+    alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   }
   if (verbose)
   {
@@ -5633,8 +5632,8 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
            GT_MEGABYTES(kmer_env_size * sizeof (GtUword)),
            (double) kmer_env_size/kmer_count);
   }
-  gt_diagbandseed_kmer_iter_reset(kenv_source_iter);
-  alist = gt_diagbandseed_kmer_iter_next(kenv_source_iter);
+  gt_diagbandseed_kmer_iter_reset(kenv_src_iter);
+  alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   kmerpos_list->allocated = kmerpos_list->nextfree = kmer_env_size;
   kmerpos_list->spaceGtUword
     = gt_malloc(sizeof (*kmerpos_list->spaceGtUword) * kmer_env_size);
@@ -5688,7 +5687,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
         }
       }
     }
-    alist = gt_diagbandseed_kmer_iter_next(kenv_source_iter);
+    alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   }
   gt_assert(kmer_environ_ptr == kmerpos_list->spaceGtUword + kmer_env_size);
   if (kmer_env_size > 0)
@@ -5703,7 +5702,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
     kmerpos_list->longest_code_run = 0;
   }
   kmerpos_list->numofchars = numofchars;
-  gt_diagbandseed_kmer_iter_reset(kenv_source_iter);
+  gt_diagbandseed_kmer_iter_reset(kenv_src_iter);
   return kmerpos_list;
 }
 
@@ -5813,7 +5812,6 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
                   GtDiagbandseedKmerIterator *aiter,
                   const GtSequencePartsInfo *aseqranges,
                   GtUword aidx,
-                  const GtKmerPosListEncodeInfo *aencode_info,
                   const GtSequencePartsInfo *bseqranges,
                   GtUword bidx,
                   const GtKmerPosListEncodeInfo *bencode_info,
@@ -5842,22 +5840,22 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
                                                   arg->file_buffer_size);
   if (biter == NULL)
   {
-    if (aencode_info->bits_kmerpos + score_bits > gt_uword_bits)
+    if (bencode_info->bits_kmerpos + score_bits > gt_uword_bits)
     {
       gt_error_set(err,"seedlength or sequence set is too large so that "
                        "bits_kmerpos + score_bits = %hu + %hu > %d; "
                        "either use smaller seedlength or option -parts",
-                   aencode_info->bits_kmerpos,score_bits,
+                   bencode_info->bits_kmerpos,score_bits,
                    gt_uword_bits);
       had_err = -1;
     } else
     {
       char *path;
-      GtDiagbandseedKmerIterator *kenv_source_iter = NULL;
+      GtDiagbandseedKmerIterator *kenv_src_iter = NULL;
 
       if (aiter == NULL || aseqranges != bseqranges || aidx != bidx)
       {
-        kenv_source_iter = gt_diagbandseed_kmer_iter_new_from_file(NULL,
+        kenv_src_iter = gt_diagbandseed_kmer_iter_new_from_file(NULL,
                                                   arg->bencseq,
                                                   arg->spacedseedweight,
                                                   arg->seedlength,
@@ -5868,15 +5866,15 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
                                                   0,
                                                   0,
                                                   arg->file_buffer_size);
-        gt_assert(kenv_source_iter != NULL);
+        gt_assert(kenv_src_iter != NULL);
       } else
       {
-        kenv_source_iter = aiter;
+        kenv_src_iter = aiter;
       }
       *kenv_list_ptr = gt_diagbandseed_kenv_generate(arg->kenv_generator,
                                                      score_bits,
                                                      b_numofchars,
-                                                     kenv_source_iter,
+                                                     kenv_src_iter,
                                                      bencode_info,
                                                      arg->verbose);
       path = gt_diagbandseed_kmer_filename(arg->bencseq,
@@ -5917,9 +5915,9 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
         blist_len = (*kenv_list_ptr)->nextfree;
         biter = gt_diagbandseed_kmer_iter_new_list(*kenv_list_ptr,score_bits);
       }
-      if (kenv_source_iter != aiter)
+      if (kenv_src_iter != aiter)
       {
-        gt_diagbandseed_kmer_iter_delete(kenv_source_iter);
+        gt_diagbandseed_kmer_iter_delete(kenv_src_iter);
       }
       gt_free(path);
     }
@@ -6033,7 +6031,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                           aiter,
                                           aseqranges,
                                           aidx,
-                                          aencode_info,
                                           bseqranges,
                                           bidx,
                                           bencode_info,
@@ -6839,7 +6836,6 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                         NULL,
                                         aseqranges,
                                         aidx,
-                                        aencode_info,
                                         aseqranges,
                                         aidx,
                                         aencode_info,
