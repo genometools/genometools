@@ -27,10 +27,14 @@
 /* Struct describing an element of the k-environment of a specific kmer.
    <kmer_neighbor> is the encoded Kmer, which has a score of <score> with
    the reference kmer. */
+
+typedef int GtKenvScore;
+#define GT_KENV_SCORE_FORMAT_CHAR "%d"
+
 typedef struct
 {
   GtCodetype kmer_neighbor;
-  int score;
+  GtKenvScore score;
 } GtKenvRawElement;
 
 /* Struct introducing the GtKenvGenerator class, used to build k_environments
@@ -40,8 +44,10 @@ typedef struct GtKenvGenerator GtKenvGenerator;
 /* Returns a new empty <GtKenvGenerator> object giving the frame to
    build a k environment. */
 GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
-                                       unsigned int q_val, int th_val,
-                                       bool allow_x_val, bool preprocess,
+                                       unsigned int q_value,
+                                       GtKenvScore score_threshold,
+                                       bool allow_x_val,
+                                       bool preprocess,
                                        GtError *err);
 
 /* Deletes the given <GtKenvGenerator>. */
@@ -68,7 +74,7 @@ unsigned int gt_kenv_generator_get_q(const GtKenvGenerator *kenv_gen);
 
 /* Returns the value for <th> stored inside <kenv_gen>. <th> is the defined
    score threshold of the kmeres inside the environment. */
-int gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen);
+GtKenvScore gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen);
 
 /* Returns the number of bits required for storing a score value in the
    range from score_threshold to max_score_qgram */
@@ -80,16 +86,13 @@ bool gt_kenv_generator_get_allow_x(const GtKenvGenerator *kenv_gen);
 
 /* Returns the array containing the maximum score for each character of the
    Alphabet within <kenv_gen>. */
-const int *gt_kenv_generator_get_max_score_each_char(
+const GtKenvScore *gt_kenv_generator_get_max_score_each_char(
                                               const GtKenvGenerator *kenv_gen);
-
-/* Returns the highest score possible for a given q-gram. */
-int gt_kenv_generator_get_max_score_qgram(const GtKenvGenerator *kenv_gen);
 
 /* return score for two encoded sequences of the given length with respect
    to the kenvironment */
 
-int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
+GtKenvScore gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
                        const GtUchar *a_encoded,
                        const GtUchar *b_encoded,
                        GtUword length);

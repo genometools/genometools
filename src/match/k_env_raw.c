@@ -21,6 +21,10 @@
 #include "core/array2dim_api.h"
 #include "core/ma_api.h"
 #include "core/score_matrix.h"
+#include "core/fileutils_api.h"
+#include "core/str_api.h"
+#include "core/cstr_api.h"
+#include "core/gtdatapath.h"
 #include "match/turnwheels.h"
 #include "match/initbasepower.h"
 #include "k_env_raw.h"
@@ -34,7 +38,7 @@
 /***** GtKenvScoreHandling *****/
 typedef struct
 {
-  int score;
+  GtKenvScore score;
   unsigned int charCode;
 } GtKenvScoreCharCodePair;
 
@@ -53,7 +57,7 @@ static int kenv_compare_charcodepairs(const void *p1, const void *p2)
 typedef struct
 {
   GtKenvScoreCharCodePair **score_pairs;
-  int *max_scores, max_overall_score;
+  GtKenvScore *max_scores, max_overall_score;
 } GtKenvScoreStructure;
 
 static GtKenvScoreStructure *gt_kenv_score_structure_new(
@@ -68,11 +72,13 @@ static GtKenvScoreStructure *gt_kenv_score_structure_new(
     = gt_calloc(alph_size, sizeof (*score_struct->max_scores));
   score_struct->max_overall_score = INT_MIN;
 
+  gt_assert(sizeof (GtKenvScore) >= sizeof (int));
   for (row = 0; row < alph_size; row++)
   {
     for (col = 0; col < alph_size; col++)
     {
-      const int this_score = gt_score_matrix_get_score(score_matrix, row, col);
+      const GtKenvScore this_score
+        = (GtKenvScore) gt_score_matrix_get_score(score_matrix, row, col);
       score_struct->score_pairs[row][col].score = this_score;
       score_struct->score_pairs[row][col].charCode = col;
       if (score_struct->max_overall_score < this_score)
@@ -104,15 +110,14 @@ static void gt_kenv_score_structure_delete(GtKenvScoreStructure *score_struct)
 /***** GtKenvGenerator *****/
 struct GtKenvGenerator{
   unsigned int q_value;
-  int score_threshold;
-  unsigned int next_seqnum;
+  GtKenvScore score_threshold;
   unsigned int alph_size;
   GtCodetype *alph_powers;
   const GtUchar* alph_symbolmap;
   GtKenvScoreStructure *score_struct;
   char *buffer_Char;
   GtUchar *buffer_GtUchar;
-  int *buffer_Int;
+  GtKenvScore *buffer_Int;
   bool allow_x;
   GtKenvRawElement *spaceGtKenvRawElement;
   GtUword allocatedGtKenvRawElement;
@@ -150,7 +155,8 @@ static void gt_kenv_gen_finalize_offsets(GtKenvGenerator *kenv_gen,
   }
 }
 
-int gt_kenv_generator_get_max_score_qgram(const GtKenvGenerator *kenv_gen)
+static GtKenvScore gt_kenv_generator_get_max_score_qgram(
+                          const GtKenvGenerator *kenv_gen)
 {
   gt_assert(kenv_gen != NULL && kenv_gen->score_struct != NULL);
   return kenv_gen->score_struct->max_overall_score * kenv_gen->q_value;
@@ -181,8 +187,9 @@ void gt_kenv_generator_delete(GtKenvGenerator *kenv_gen)
 
 GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
                                        unsigned int q_value,
-                                       int score_threshold,
-                                       bool allow_x_val, bool preprocess,
+                                       GtKenvScore score_threshold,
+                                       bool allow_x_val,
+                                       bool preprocess,
                                        GtError *err)
 {
   const char* blosum_file = "testdata/BLOSUM62";
@@ -190,12 +197,27 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
   GtKenvGenerator *kenv_gen = gt_malloc(sizeof (*kenv_gen));
   bool use_dna = gt_kenv_alphabet_is_dna(kenv_alphabet);
   GtUword offset_size;
-  int max_score_qgram;
+  GtKenvScore max_score_qgram;
+  GtStr *score_matrix_path = NULL;
 
+  if (!gt_file_exists(blosum_file))
+  {
+    const char *progname = gt_error_get_progname(err);
+    GtStr *prog = NULL;
+
+    gt_assert(progname != NULL);
+    prog = gt_str_new();
+    gt_str_append_cstr_nt(prog, progname,
+                          gt_cstr_length_up_to_char(progname, ' '));
+    score_matrix_path = gt_get_gtdata_path(gt_str_get(prog), err);
+    gt_str_delete(prog);
+    gt_str_append_cstr(score_matrix_path, "/../");
+    gt_str_append_cstr(score_matrix_path, blosum_file);
+    blosum_file = gt_str_get(score_matrix_path);
+  }
   kenv_gen->alph_powers = NULL;
   kenv_gen->q_value = q_value;
   kenv_gen->score_threshold = score_threshold,
-  kenv_gen->next_seqnum = 0;
   kenv_gen->allow_x = allow_x_val;
   kenv_gen->alph_size = gt_kenv_alphabet_get_alph_size(kenv_alphabet);
   kenv_gen->alph_symbolmap = gt_kenv_alphabet_get_characters(kenv_alphabet);
@@ -209,6 +231,7 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
                                        : blosum_file,
                                gt_kenv_alphabet_get_alphabet(kenv_alphabet),
                                err);
+  gt_str_delete(score_matrix_path);
   if (kenv_gen->score_matrix == NULL)
   {
     gt_free(kenv_gen);
@@ -257,13 +280,13 @@ GtKenvGenerator *gt_kenv_generator_new(const GtKenvAlphabet *kenv_alphabet,
 GtCodetype gt_kenv_get_kmer_code(const GtKenvGenerator *kenv_gen,
                                  const GtUchar *word)
 {
-  unsigned int idx, weight, q_value;
+  unsigned int idx, q_value;
   GtCodetype kmer_code = 0;
 
   q_value = gt_kenv_generator_get_q(kenv_gen);
   for (idx = 0; idx < q_value; idx++)
   {
-    weight = q_value - 1 - idx;
+    const unsigned int weight = q_value - 1 - idx;
     kmer_code += kenv_gen->alph_powers[weight] * word[idx];
   }
 
@@ -305,7 +328,7 @@ unsigned int gt_kenv_generator_get_q(const GtKenvGenerator *kenv_gen)
   return kenv_gen->q_value;
 }
 
-int gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen)
+GtKenvScore gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen)
 {
   gt_assert(kenv_gen);
   return kenv_gen->score_threshold;
@@ -324,7 +347,7 @@ bool gt_kenv_generator_get_allow_x(const GtKenvGenerator *kenv_gen)
   return kenv_gen->allow_x;
 }
 
-const int *gt_kenv_generator_get_max_score_each_char(
+const GtKenvScore *gt_kenv_generator_get_max_score_each_char(
                                                 const GtKenvGenerator *kenv_gen)
 {
   gt_assert(kenv_gen && kenv_gen->score_struct->max_scores);
@@ -334,8 +357,10 @@ const int *gt_kenv_generator_get_max_score_each_char(
 
 /* Fills the array inside the kenv_generator with the GtKenvRawElements */
 static void gt_kenv_raw_element_build(GtKenvGenerator *kenv_gen,
-                                      GtCodetype kmer, unsigned int curr_len,
-                                      int kmer_score, GtCodetype refcode)
+                                      GtCodetype kmer,
+                                      unsigned int curr_len,
+                                      GtKenvScore kmer_score,
+                                      GtCodetype refcode)
 {
   /* Check for full word, then we found a valid element for the environment */
   if (curr_len == kenv_gen->q_value)
@@ -370,7 +395,7 @@ static void gt_kenv_raw_element_build(GtKenvGenerator *kenv_gen,
     curr_col_ptr = kenv_gen->score_struct->score_pairs[curr_code];
     for (idx = 0; idx < kenv_gen->alph_size; idx++)
     {
-      int new_score = curr_col_ptr[idx].score;
+      GtKenvScore new_score = curr_col_ptr[idx].score;
       if (kmer_score + new_score >= kenv_gen->buffer_Int[curr_len])
       {
         GtCodetype new_kmer_code = kmer + curr_col_ptr[idx].charCode *
@@ -389,15 +414,17 @@ static void gt_kenv_raw_element_build(GtKenvGenerator *kenv_gen,
   }
 }
 
-static void gt_kenv_raw_kmer_from_code(GtKenvGenerator *kenv_gen, GtUword code)
+static void gt_kenv_raw_kmer_from_code(GtKenvGenerator *kenv_gen,
+                                       GtCodetype code)
 {
   unsigned int idx;
 
   gt_assert(kenv_gen->buffer_Char);
   for (idx = 0; idx < kenv_gen->q_value; idx++)
   {
-    unsigned int temp = kenv_gen->alph_powers[kenv_gen->q_value - 1 - idx],
-                 curr_code = code / temp;
+    GtCodetype temp = kenv_gen->alph_powers[kenv_gen->q_value - 1 - idx],
+               curr_code = code / temp;
+
     code = code - curr_code * temp;
     gt_assert(curr_code < kenv_gen->alph_size);
     kenv_gen->buffer_Char[idx] = kenv_gen->alph_symbolmap[curr_code];
@@ -467,12 +494,12 @@ const GtKenvRawElement *gt_kenv_raw_element_list(GtUword *length,
   }
 }
 
-int gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
-                       const GtUchar *a_encoded,
-                       const GtUchar *b_encoded,
-                       GtUword length)
+GtKenvScore gt_kenv_eval_score(const GtKenvGenerator *kenv_gen,
+                               const GtUchar *a_encoded,
+                               const GtUchar *b_encoded,
+                               GtUword length)
 {
-  int score_sum = 0;
+  GtKenvScore score_sum = 0;
   GtUword idx;
 
   gt_assert(kenv_gen != NULL && kenv_gen->score_matrix != NULL);

@@ -56,7 +56,6 @@
 #include "match/diagband-struct.h"
 #include "match/dbs_spaced_seeds.h"
 #include "match/weighted_lis_filter.h"
-#include "match/k_env_raw.h"
 #include "match/diagbandseed.h"
 
 #ifdef GT_THREADS_ENABLED
@@ -1874,7 +1873,7 @@ static char *gt_diagbandseed_kmer_filename(const GtEncseq *encseq,
                                            bool forward,
                                            unsigned int numparts,
                                            unsigned int partindex,
-                                           int score_threshold,
+                                           GtKenvScore score_threshold,
                                            const GtKmerPosListEncodeInfo
                                              *encode_info)
 {
@@ -1923,7 +1922,7 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new_from_file(
                                                const GtKmerPosListEncodeInfo
                                                  *encode_info,
                                                GtBitcount_type score_bits,
-                                               int score_threshold,
+                                               GtKenvScore score_threshold,
                                                size_t file_buffer_size)
 {
   GtDiagbandseedKmerIterator *kmeriterator = NULL;
@@ -2296,7 +2295,7 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedBaseListType splt,
                         GtUword maxmat,
                         bool inseqseeds,
                         GtBitcount_type score_bits,
-                        int score_threshold,
+                        GtKenvScore score_threshold,
                         GtUword amaxlen)
 {
   GtSeedpairlist *seedpairlist = gt_malloc(sizeof *seedpairlist);
@@ -2952,7 +2951,8 @@ static uint8_t gt_diagbandseed_decode_seedpair_gen(
   return bpos_score_diff;
 }
 
-static int gt_diagbandseed_decode_seedpair(GtDiagbandseedSeedPair *seedpair,
+static GtKenvScore gt_diagbandseed_decode_seedpair(
+                                            GtDiagbandseedSeedPair *seedpair,
                                             const GtSeedpairlist *seedpairlist,
                                             GtUword offset)
 {
@@ -2964,9 +2964,9 @@ static int gt_diagbandseed_decode_seedpair(GtDiagbandseedSeedPair *seedpair,
   return seedpairlist->score_threshold + bpos_score_diff;
 }
 
-static int gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
-                              const GtSeedpairlist *seedpairlist,
-                              GtUword spidx)
+static GtKenvScore gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
+                                      const GtSeedpairlist *seedpairlist,
+                                      GtUword spidx)
 {
 
   if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_STRUCT)
@@ -2975,7 +2975,7 @@ static int gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
     return 0;
   } else
   {
-    int bpos_score;
+    GtKenvScore bpos_score;
     if (seedpairlist->splt == GT_DIAGBANDSEED_BASE_LIST_ULONG)
     {
       GtDiagbandseedPosition apos, bpos;
@@ -2988,7 +2988,8 @@ static int gt_seedpairlist_at(GtDiagbandseedSeedPair *seedpair,
           seedpairlist->bseqrange_start;
       apos = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_apos),
       bpos = gt_seedpairlist_extract_ulong_at(seedpairlist,spidx,idx_bpos);
-      bpos_score = (int) (seedpairlist->score_threshold +
+      bpos_score = (GtKenvScore)
+                   (seedpairlist->score_threshold +
                           (seedpairlist->mlist_ulong->spaceGtUword[spidx] &
                            seedpairlist->mask_score_bits));
       GT_DIAGBANDSEED_SETPOS(seedpair,apos,bpos); /* set for ulong */
@@ -3010,7 +3011,7 @@ static void gt_diagbandseed_show_seed(FILE *stream,
 {
   GtDiagbandseedSeedPair seedpair;
   GtDiagbandseedPosition apos;
-  int bpos_score = gt_seedpairlist_at(&seedpair,seedpairlist,spidx);
+  GtKenvScore bpos_score = gt_seedpairlist_at(&seedpair,seedpairlist,spidx);
 
   apos = GT_DIAGBANDSEED_GETPOS_A(&seedpair);
   fprintf(stream, "(%" PRIu32 ",%" PRIu32 ",%" PRIu32 ",%" GT_WUS,
@@ -3021,7 +3022,7 @@ static void gt_diagbandseed_show_seed(FILE *stream,
                                          GT_DIAGBANDSEED_GETPOS_B(&seedpair)));
   if (seedpairlist->score_bits > 0)
   {
-    printf(",%d)",bpos_score);
+    printf("," GT_KENV_SCORE_FORMAT_CHAR ")",bpos_score);
   } else
   {
     printf(")");
@@ -3034,7 +3035,7 @@ static int gt_diagbandseed_seeds_compare(const GtSeedpairlist *seedpairlist,
 {
   GtDiagbandseedSeedPair p_seedpair, c_seedpair;
   GtDiagbandseedPosition p_apos, c_apos, p_bpos, c_bpos;
-  GT_UNUSED int p_bpos_score, c_bpos_score;
+  GT_UNUSED GtKenvScore p_bpos_score, c_bpos_score;
 
   gt_assert(current > 0);
   p_bpos_score = gt_seedpairlist_at(&p_seedpair,seedpairlist,current - 1);
@@ -3225,7 +3226,7 @@ static int gt_diagbandseed_verify(const GtSeedpairlist *seedpairlist,
   {
     GtDiagbandseedSeedPair seedpair;
     GtDiagbandseedPosition abs_apos, abs_bpos;
-    int bpos_score;
+    GtKenvScore bpos_score;
 
     bpos_score = gt_seedpairlist_at(&seedpair,seedpairlist,idx);
     /* extract decoded k-mers at seed positions */
@@ -3256,7 +3257,7 @@ static int gt_diagbandseed_verify(const GtSeedpairlist *seedpairlist,
       }
       if (kenv_generator != NULL)
       {
-        const int real_bpos_score
+        const GtKenvScore real_bpos_score
           = gt_kenv_eval_score(kenv_generator,a_encoded,b_encoded,seedlength);
         if (real_bpos_score != bpos_score)
         {
@@ -5397,8 +5398,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 
           if (seedpairlist->score_bits > 0 && diagband_statistics != NULL)
           {
-            int bpos_score = (int) (seedpairlist->score_threshold +
-                                 ((*nextsegm) & seedpairlist->mask_score_bits));
+            GtKenvScore bpos_score
+              = (GtKenvScore) (seedpairlist->score_threshold +
+                               ((*nextsegm) & seedpairlist->mask_score_bits));
             GT_STOREINARRAY(&segment_scores,uint8_t,
                             256 + segment_scores.allocateduint8_t * 0.2,
                             bpos_score);
@@ -5433,7 +5435,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
     } else
     {
-      int bpos_score;
+      GtKenvScore bpos_score;
       GtDiagbandseedSeedPair nextsegment;
       const GtUword minsegmentlen_offset = (minsegmentlen - 1) *
                                            seedpairlist->bytes_seedpair,
@@ -5583,7 +5585,7 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
           score_dist[100] = {0};
   const GtKmerPosList *alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   GtKmerPosList *kmerpos_list = gt_malloc(sizeof *kmerpos_list);
-  const int score_threshold = gt_kenv_generator_get_th(kenv_generator);
+  const GtKenvScore score_threshold = gt_kenv_generator_get_th(kenv_generator);
 #ifdef SKDEBUG
   const GtUword mask_score_bits = (((GtUword) 1) << score_bits) - 1;
 #endif
@@ -5821,7 +5823,8 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
           bnumseqranges = gt_sequence_parts_info_number(bseqranges);
   GtDiagbandseedKmerIterator *biter;
   int had_err = 0;
-  const int score_threshold = gt_kenv_generator_get_th(arg->kenv_generator);
+  const GtKenvScore score_threshold
+    = gt_kenv_generator_get_th(arg->kenv_generator);
   const GtBitcount_type score_bits
     = gt_kenv_generator_get_score_bits(arg->kenv_generator);
   const unsigned int b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
@@ -6675,8 +6678,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   if (arg->use_kmerfile)
   {
     unsigned int count,
-                 b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
-    unsigned int max_count = (arg->kenv_generator == NULL) ? 2 : 1;
+                 b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq),
+                 max_count = (arg->kenv_generator == NULL) ? 2 : 1;
     for (count = 0; count < max_count; count++)
     {
       const bool fwd = count == 0 ? true : false;

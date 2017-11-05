@@ -33,6 +33,42 @@ $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "seed.s","seed.q","seed_in_algn","s.seqlen",
                 "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
+def kenv_call(indexname,seedlength,kenv_th,kmerfile,onlykmers)
+  call = "#{$bin}/gt seed_extend -ii #{indexname} -l 100 -verify -debug-seedpair"
+  if not kmerfile
+    call += " -kmerfile no"
+  end
+  if onlykmers
+    call += " -onlykmers"
+  end
+  call += " -seedlength #{seedlength} -kenv #{kenv_th}"
+  return call
+end
+
+Name "gt seed_extend: k-environment"
+Keywords "gt_seed_extend kenv"
+Test do
+  seedlength2score_threshold = Hash.new()
+  seedlength2score_threshold[5] = 17
+  seedlength2score_threshold[6] = 23
+  [1,2].each do |filenum|
+    indexname = "sw#{filenum}"
+    run_test build_encseq(indexname, "#{$testdata}sw100K#{filenum}.fsa")
+    run_test kenv_call(indexname,10,50,true,false), :retval => 1
+    run_test kenv_call(indexname,5,56,true,false), :retval => 1
+    run_test kenv_call(indexname,6,67,true,false), :retval => 1
+    [false,true].each do |onlykmers|
+      run_test kenv_call(indexname,5,55,true,onlykmers)
+      run_test kenv_call(indexname,6,66,true,onlykmers)
+      run_test kenv_call(indexname,5,52,true,onlykmers)
+    end
+    [5,6].each do |seedlength|
+      score_threshold = seedlength2score_threshold[seedlength]
+      run_test "#{$bin}/gt seed_extend -ii sw#{filenum} -kenv #{score_threshold} -seedlength #{seedlength} -v -diagband-stat total_score_seqpair -verify-total-score-seqpair -verify"
+    end
+  end
+end
+
 Name "gt seed_extend: coords with/without alignment"
 Keywords "gt_seed_extend Al_coords"
 Test do

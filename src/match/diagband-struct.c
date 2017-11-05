@@ -278,6 +278,8 @@ void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
   diagband_struct->used_diagbands = 0;
 }
 
+typedef int GtDiagbandScore;
+
 struct GtDiagbandStatistics
 {
   bool forward,
@@ -290,7 +292,7 @@ struct GtDiagbandStatistics
   const GtScoreMatrix *score_matrix;
   GtUchar *a_buffer, *b_buffer;
   GtUword a_len, b_len;
-  int score_threshold;
+  GtDiagbandScore score_threshold;
 };
 
 GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
@@ -341,7 +343,7 @@ void gt_diagband_statistics_total_score_show_min_set(
 void gt_diagband_statistics_score_matrix_set(
                 GtDiagbandStatistics *diagband_statistics,
                 const GtScoreMatrix *score_matrix,
-                int score_threshold)
+                GtDiagbandScore score_threshold)
 {
   gt_assert(diagband_statistics != NULL);
   diagband_statistics->score_matrix = score_matrix;
@@ -387,12 +389,13 @@ static void gt_diagband_statistics_bcov_add(
 }
 
 #ifndef NDEBUG
-static int gt_diagband_statistics_eval_score(const GtScoreMatrix *score_matrix,
+static GtDiagbandScore gt_diagband_statistics_eval_score(
+                                             const GtScoreMatrix *score_matrix,
                                              const GtUchar *a_encoded,
                                              const GtUchar *b_encoded,
                                              GtUword length)
 {
-  int score_sum = 0;
+  GtDiagbandScore score_sum = 0;
   GtUword idx;
 
   for (idx = 0; idx < length; idx++)
@@ -403,32 +406,41 @@ static int gt_diagband_statistics_eval_score(const GtScoreMatrix *score_matrix,
   return score_sum;
 }
 
-static int gt_diagband_statistics_total_score_in_seqpair(
+static GtDiagbandScore gt_diagband_statistics_total_score_in_seqpair(
                                    const GtScoreMatrix *score_matrix,
+                                   bool same_seq,
                                    unsigned int q_value,
-                                   int score_threshold,
+                                   GtDiagbandScore score_threshold,
                                    const GtUchar *a_encoded,
                                    GtUword alen,
                                    const GtUchar *b_encoded,
                                    GtUword blen)
 {
   const GtUchar *aptr, *bptr;
-  int total_score = 0;
+  GtDiagbandScore total_score = 0;
 
   if (alen >= q_value && blen >= q_value)
   {
     for (aptr = a_encoded; aptr <= a_encoded + alen - q_value; aptr++)
     {
-      for (bptr = b_encoded; bptr <= b_encoded + blen - q_value;
+      if (same_seq)
+      {
+        bptr = b_encoded + (aptr - a_encoded) + q_value;
+      } else
+      {
+        bptr = b_encoded;
+      }
+      for (/* Nothing */; bptr <= b_encoded + blen - q_value;
            bptr++)
       {
 
         gt_assert(aptr + q_value - 1 <= a_encoded + alen - 1);
         gt_assert(bptr + q_value - 1 <= b_encoded + blen - 1);
-        const int this_score = gt_diagband_statistics_eval_score(score_matrix,
-                                                                 aptr,
-                                                                 bptr,
-                                                                 q_value);
+        const GtDiagbandScore this_score
+          = gt_diagband_statistics_eval_score(score_matrix,
+                                              aptr,
+                                              bptr,
+                                              q_value);
         if (this_score >= score_threshold)
         {
           /*printf(GT_WU " " GT_WU " with score %d\n",
@@ -522,10 +534,13 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
         diagband_statistics->compute_total_score_seqpair &&
         diagband_statistics->score_matrix != NULL)
     {
-      int bf_total_score_seqpair;
+      GtDiagbandScore bf_total_score_seqpair;
 
       bf_total_score_seqpair = gt_diagband_statistics_total_score_in_seqpair(
                                    diagband_statistics->score_matrix,
+                                   (aencseq == bencseq && aseqnum == bseqnum)
+                                      ? true
+                                      : false,
                                    seedlength,
                                    diagband_statistics->score_threshold,
                                    diagband_statistics->a_buffer,
