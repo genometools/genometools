@@ -225,10 +225,10 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionlinearcosts);
 
   optionaffinecosts = gt_option_new_string_array("a", "affinegapcosts, "
-                                           "use match, mismatch, gap_extension "
-                                           "and gap_opening, alternatively "
-                                           "substituationmatrix, gap_extension "
-                                           "and gap_opening",
+                                           "use match, mismatch, gap_open "
+                                           "and gap_extension, alternatively "
+                                           "substituationmatrix, gap_open "
+                                           "and gap_extension",
                                            arguments->affinecosts);
   gt_option_parser_add_option(op, optionaffinecosts);
 
@@ -396,7 +396,9 @@ static void gt_linspace_print_sequence(const GtUchar *characters,
 }
 
 /*show sequences, alignment and score*/
-static void alignment_show_with_sequences(const GtUchar *useq, GtUword ulen,
+static void alignment_show_with_sequences(GtUword useq_num,
+                                          const GtUchar *useq, GtUword ulen,
+                                          GtUword vseq_num,
                                           const GtUchar *vseq, GtUword vlen,
                                           const GtAlignment *align,
                                           const GtUchar *characters,
@@ -404,18 +406,25 @@ static void alignment_show_with_sequences(const GtUchar *useq, GtUword ulen,
                                           bool showscore,
                                           bool showalign,
                                           bool showsequences,
-                                          bool global,
+                                          GT_UNUSED bool global,
                                           const GtScoreHandler *scorehandler,
                                           FILE *fp)
 {
   if (fp != NULL)
   {
+    if (!showalign || showscore)
+    {
+      fprintf(fp,GT_WU " " GT_WU " ",useq_num,vseq_num);
+    }
     if (showsequences)
     {
       gt_linspace_print_sequence(characters,wildcardshow,useq, ulen, fp);
       gt_linspace_print_sequence(characters,wildcardshow,vseq, vlen, fp);
     }
-    fprintf(fp, "######\n");
+    if (showalign)
+    {
+      fprintf(fp, "######\n");
+    }
     if (showalign && gt_alignment_get_length(align) > 0)
     {
       gt_alignment_show_with_mapped_chars(align, characters,
@@ -427,13 +436,12 @@ static void alignment_show_with_sequences(const GtUchar *useq, GtUword ulen,
         fprintf(fp, "empty alignment\n");
       }
     }
-
     if (!showalign || showscore)
     {
       GtWord score = gt_scorehandler_eval_alignmentscore(scorehandler,
                                                          align, characters);
 
-      fprintf(fp, "%s: "GT_WD"\n", global? "distance" : "score", score);
+      fprintf(fp, GT_WD "\n", score);
     }
   }
 }
@@ -517,6 +525,11 @@ static int gt_all_against_all_alignment_check(bool affine,
   {
     gt_timer_start(linspacetimer);
   }
+  if (arguments->scoreonly &&
+      strcmp(gt_str_get(arguments->outputfile),"stdout") == 0)
+  {
+    printf("# Fields: s. seqnum, q. seqnum, score\n");
+  }
   for (i = 0; !had_err && i < sequence_table1->size; i++)
   {
     ulen = gt_str_length(sequence_table1->seqarray[i]);
@@ -574,7 +587,7 @@ static int gt_all_against_all_alignment_check(bool affine,
         gt_assert(align != NULL);
         if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
         {
-          alignment_show_with_sequences(useq, ulen, vseq, vlen, align,
+          alignment_show_with_sequences(i,useq, ulen, j,vseq, vlen, align,
                                         characters,
                                         wildcardshow, arguments->showscore,
                                         !arguments->scoreonly,
@@ -590,7 +603,7 @@ static int gt_all_against_all_alignment_check(bool affine,
             had_err = -1;
           } else
           {
-            alignment_show_with_sequences(useq, ulen, vseq, vlen, align,
+            alignment_show_with_sequences(i,useq, ulen, j,vseq, vlen, align,
                                           characters, wildcardshow,
                                           arguments->showscore,
                                           !arguments->scoreonly,
