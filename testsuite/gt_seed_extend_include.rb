@@ -34,15 +34,28 @@ $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
 def kenv_call(indexname,seedlength,kenv_th,kmerfile,onlykmers)
-  call = "#{$bin}/gt seed_extend -ii #{indexname} -l 100 -verify -debug-seedpair"
+  call = "#{$bin}/gt seed_extend -ii #{indexname} -l 100"
   if not kmerfile
     call += " -kmerfile no"
   end
   if onlykmers
     call += " -onlykmers"
+  else
+    call += " -verify -debug-seedpair"
   end
   call += " -seedlength #{seedlength} -kenv #{kenv_th}"
   return call
+end
+
+def determine_num_kmers(inputfile)
+  this_numkmers = 0
+  File.new(inputfile).each_line do |line|
+    m = line.match(/^# environment has (\d+) elements"/)
+    if m
+      this_numkmers += m[1].to_i
+    end
+  end
+  return this_numkmers
 end
 
 Name "gt seed_extend: k-environment"
@@ -65,6 +78,18 @@ Test do
     [5,6].each do |seedlength|
       score_threshold = seedlength2score_threshold[seedlength]
       run_test "#{$bin}/gt seed_extend -ii sw#{filenum} -kenv #{score_threshold} -seedlength #{seedlength} -v -diagband-stat total_score_seqpair -verify-total-score-seqpair -verify"
+    end
+    previous_numkmers = nil
+    1.upto(4).each do |parts|
+      run_test "#{$bin}/gt seed_extend -ii sw#{filenum} -kenv 40 -seedlength 8 -v -onlykmers -parts #{parts}"
+      this_numkmers = determine_num_kmers(last_stdout)
+      if not previous_numkmers.nil?
+        if previous_numkmers != this_numkmers
+          STDERR.puts "numkmers for part #{parts-1} = #{previous_numkmers}"
+          STDERR.puts "but this_numkmers for part #{parts} = #{this_numkmers}"
+          exit(1)
+        end
+      end
     end
   end
 end
