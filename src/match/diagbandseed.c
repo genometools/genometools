@@ -1001,6 +1001,7 @@ static void gt_kmerpos_list_add(GtKmerPosList *kmerpos_list,
                             kmerpos_list->encode_info->bytes_kmerpos;
 
       kmerpos_list->nextfree++;
+      /* XXX consider the case that kmerpos + score is too large for GtUword */
       gt_kmerpos_bytestring_encode(bytestring,
                                    encode_info,
                                    kmerpos_entry->code,
@@ -1988,7 +1989,7 @@ static void gt_diagbandseed_kmer_iter_delete(GtDiagbandseedKmerIterator *kmi)
   }
 }
 
-#define GT_DIAGBANDSEED_SET_SCORE(WORD)\
+#define GT_DIAGBANDSEED_SET_KENV_SCORE_ULONG(WORD)\
         if (kmi->kenv_score_tab != NULL)\
         {\
           GtUword idx = (GtUword) (kmi->listptr_struct -\
@@ -2019,7 +2020,7 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
                                      *kmi->listptr_uword);
         do
         {
-          GT_DIAGBANDSEED_SET_SCORE(*kmi->listptr_uword);
+          GT_DIAGBANDSEED_SET_KENV_SCORE_ULONG(*kmi->listptr_uword);
           gt_kmerpos_ulong_decode(kmi->listptr_struct++,
                                   kmi->section.encode_info,*kmi->listptr_uword);
           kmi->listptr_uword++;
@@ -2081,7 +2082,7 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
         do
         {
           gt_assert(kmi->listptr_struct < kmi->listend_struct);
-          GT_DIAGBANDSEED_SET_SCORE(kmi->buffer_uword);
+          GT_DIAGBANDSEED_SET_KENV_SCORE_ULONG(kmi->buffer_uword);
           gt_kmerpos_ulong_decode(kmi->listptr_struct++,
                                   kmi->section.encode_info,kmi->buffer_uword);
           rval = gt_readnextfromstream_GtUword(&kmi->buffer_uword,
@@ -5568,27 +5569,15 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 
 /* * * * * ALGORITHM STEPS * * * * */
 
-static GtKmerPosList *gt_diagbandseed_kenv_generate(
-                                     GtKenvGenerator *kenv_generator,
-#ifndef SKDEBUG
-                                     GT_UNUSED
-#endif
-                                     GtBitcount_type score_bits,
-                                     unsigned int numofchars,
-                                     GtDiagbandseedKmerIterator *kenv_src_iter,
-                                     const GtKmerPosListEncodeInfo *encode_info,
-                                     bool verbose)
+static GtUword gt_diagbandseed_kenv_length(GtKenvGenerator *kenv_generator,
+                                           GtDiagbandseedKmerIterator
+                                             *kenv_src_iter,
+                                           bool verbose)
 {
   GtUword kmer_env_size = 0,
           kmer_count = 0,
-          *kmer_environ_ptr,
           score_dist[100] = {0};
   const GtKmerPosList *alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
-  GtKmerPosList *kmerpos_list = gt_malloc(sizeof *kmerpos_list);
-  const GtKenvScore score_threshold = gt_kenv_generator_get_th(kenv_generator);
-#ifdef SKDEBUG
-  const GtUword mask_score_bits = (((GtUword) 1) << score_bits) - 1;
-#endif
 
   while (alist != NULL)
   {
@@ -5635,6 +5624,28 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
            (double) kmer_env_size/kmer_count);
   }
   gt_diagbandseed_kmer_iter_reset(kenv_src_iter);
+  return kmer_env_size;
+}
+
+static GtKmerPosList *gt_diagbandseed_kenv_generate_ulong(
+                                     GtKenvGenerator *kenv_generator,
+                                     GT_UNUSED GtBitcount_type score_bits,
+                                     unsigned int numofchars,
+                                     GtDiagbandseedKmerIterator *kenv_src_iter,
+                                     const GtKmerPosListEncodeInfo *encode_info,
+                                     bool verbose)
+{
+  GtUword kmer_env_size,
+          *kmer_environ_ptr;
+  const GtKmerPosList *alist;
+  GtKmerPosList *kmerpos_list = gt_malloc(sizeof *kmerpos_list);
+  const GtKenvScore score_threshold = gt_kenv_generator_get_th(kenv_generator);
+#ifdef SKDEBUG
+  const GtUword mask_score_bits = (((GtUword) 1) << score_bits) - 1;
+#endif
+
+  kmer_env_size = gt_diagbandseed_kenv_length(kenv_generator,kenv_src_iter,
+                                              verbose);
   alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   kmerpos_list->allocated = kmerpos_list->nextfree = kmer_env_size;
   kmerpos_list->spaceGtUword
@@ -5874,12 +5885,12 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
       {
         kenv_src_iter = aiter;
       }
-      *kenv_list_ptr = gt_diagbandseed_kenv_generate(arg->kenv_generator,
-                                                     score_bits,
-                                                     b_numofchars,
-                                                     kenv_src_iter,
-                                                     bencode_info,
-                                                     arg->verbose);
+      *kenv_list_ptr = gt_diagbandseed_kenv_generate_ulong(arg->kenv_generator,
+                                                           score_bits,
+                                                           b_numofchars,
+                                                           kenv_src_iter,
+                                                           bencode_info,
+                                                           arg->verbose);
       path = gt_diagbandseed_kmer_filename(arg->bencseq,
                                            arg->spacedseedweight,
                                            arg->seedlength,
