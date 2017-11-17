@@ -67,7 +67,7 @@ Test do
   [1,2].each do |filenum|
     indexname = "sw#{filenum}"
     run_test build_encseq(indexname, "#{$testdata}sw100K#{filenum}.fsa")
-    run_test kenv_call(indexname,10,50,true,false), :retval => 1
+    run_test kenv_call(indexname,10,50,true,false)
     run_test kenv_call(indexname,5,56,true,false), :retval => 1
     run_test kenv_call(indexname,6,67,true,false), :retval => 1
     [false,true].each do |onlykmers|

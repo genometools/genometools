@@ -2018,19 +2018,20 @@ static void gt_diagbandseed_kmer_iter_delete(GtDiagbandseedKmerIterator *kmi)
   }
 }
 
-#define GT_DIAGBANDSEED_SET_KENV_SCORE_ULONG(WORD)\
+#define GT_DIAGBANDSEED_SET_KENV_SCORE(BPOS_SCORE_DIFF)\
         if (kmi->kenv_score_tab != NULL)\
         {\
           GtUword idx = (GtUword) (kmi->listptr_struct -\
                                    kmi->listptr_struct_ref);\
           gt_assert(idx < kmi->kenv_score_tab_length);\
-          kmi->kenv_score_tab[idx] = (WORD) & kmi->mask_score_bits;\
+          kmi->kenv_score_tab[idx] = BPOS_SCORE_DIFF;\
         }
 
 static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
                                               GtDiagbandseedKmerIterator *kmi)
 {
   GtCodetype code;
+  uint8_t bpos_score_diff;
 
   if (kmi->at_list_end)
   {
@@ -2049,7 +2050,8 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
                                      kmi->section.encode_info->code_shift);
         do
         {
-          GT_DIAGBANDSEED_SET_KENV_SCORE_ULONG(*kmi->listptr_uword);
+          GT_DIAGBANDSEED_SET_KENV_SCORE((*kmi->listptr_uword) &
+                                         kmi->mask_score_bits);
           gt_kmerpos_ulong_decode(kmi->listptr_struct++,
                                   *kmi->listptr_uword++,
                                   kmi->section.encode_info);
@@ -2068,10 +2070,12 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
         do
         {
           gt_assert(kmi->listptr_struct < kmi->listend_struct);
-          /* XXX: also extract score from kenv here, but only later */
-          (void) gt_kmerpos_bytestring_decode(kmi->listptr_struct++,
-                                              kmi->listptr_uint8_t,
-                                              kmi->section.encode_info);
+          bpos_score_diff
+            = gt_kmerpos_bytestring_decode(kmi->listptr_struct,
+                                           kmi->listptr_uint8_t,
+                                           kmi->section.encode_info);
+          GT_DIAGBANDSEED_SET_KENV_SCORE(bpos_score_diff);
+          kmi->listptr_struct++;
           kmi->listptr_uint8_t += kmi->section.encode_info->bytes_kmerpos;
         } while (kmi->listptr_uint8_t < kmi->listend_uint8_t &&
                  code == gt_kmerpos_bytestring_code(kmi->listptr_uint8_t,
@@ -2113,7 +2117,8 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
         do
         {
           gt_assert(kmi->listptr_struct < kmi->listend_struct);
-          GT_DIAGBANDSEED_SET_KENV_SCORE_ULONG(kmi->buffer_uword);
+          GT_DIAGBANDSEED_SET_KENV_SCORE(kmi->buffer_uword &
+                                         kmi->mask_score_bits);
           gt_kmerpos_ulong_decode(kmi->listptr_struct++,
                                   kmi->buffer_uword,
                                   kmi->section.encode_info);
@@ -2132,9 +2137,12 @@ static const GtKmerPosList *gt_diagbandseed_kmer_iter_next(
         do
         {
           gt_assert(kmi->listptr_struct < kmi->listend_struct);
-          (void) gt_kmerpos_bytestring_decode(kmi->listptr_struct++,
-                                              &kmi->buffer_uint8_t[0],
-                                              kmi->section.encode_info);
+          bpos_score_diff
+            = gt_kmerpos_bytestring_decode(kmi->listptr_struct,
+                                           &kmi->buffer_uint8_t[0],
+                                           kmi->section.encode_info);
+          GT_DIAGBANDSEED_SET_KENV_SCORE(bpos_score_diff);
+          kmi->listptr_struct++;
           kmi->buffer_uint8_t
             = gt_readnextfromstream_uint8_t(&kmi->kmerstream_uint8_t);
           rval = kmi->buffer_uint8_t != NULL ? 1 : 0;
