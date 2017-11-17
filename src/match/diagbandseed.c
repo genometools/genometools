@@ -996,7 +996,7 @@ static void gt_kmerpos_list_add(GtKmerPosList *kmerpos_list,
                                     encode_info);
     } else
     {
-#define SKDEBUG
+#undef SKDEBUG
 #ifdef SKDEBUG
       GtDiagbandseedKmerPos kmerpos_entry2;
 #endif
@@ -5824,8 +5824,8 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate_bytestring(
             uint8_t bpos_score_diff
               = gt_kmerpos_bytestring_decode(&dec,encode_info,kmer_environ_ptr);
             gt_assert(dec.code == raw_ptr->kmer_neighbor);
-            gt_assert(dec.seqnum == seqnum);
-            gt_assert(dec.endpos == endpos);
+            gt_assert(dec.seqnum == aptr->seqnum);
+            gt_assert(dec.endpos == aptr->endpos);
             gt_assert(bpos_score_diff == (raw_ptr->score - score_threshold));
           }
 #endif
