@@ -80,6 +80,8 @@ GtKenvScore gt_kenv_generator_get_th(const GtKenvGenerator *kenv_gen);
    range from score_threshold to max_score_qgram */
 size_t gt_kenv_generator_get_score_bits(const GtKenvGenerator *kenv_gen);
 
+GtKenvScore gt_kenv_generator_get_max_score_qgram(const GtKenvGenerator *);
+
 /* Returns the value for <allow_w> stored inside <kenv_gen>. This is the chosen
    handling for wildcard amino acid X. */
 bool gt_kenv_generator_get_allow_x(const GtKenvGenerator *kenv_gen);

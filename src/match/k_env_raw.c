@@ -155,7 +155,7 @@ static void gt_kenv_gen_finalize_offsets(GtKenvGenerator *kenv_gen,
   }
 }
 
-static GtKenvScore gt_kenv_generator_get_max_score_qgram(
+GtKenvScore gt_kenv_generator_get_max_score_qgram(
                           const GtKenvGenerator *kenv_gen)
 {
   gt_assert(kenv_gen != NULL && kenv_gen->score_struct != NULL);
