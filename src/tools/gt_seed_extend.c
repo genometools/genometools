@@ -96,7 +96,7 @@ typedef struct {
   GtStr *estimation_mode;
   bool snd_pass;
   bool delta_filter;
-  bool noinseqseeds, no_combine_left_right, onlykmers;
+  bool noinseqseeds, fullseedpairsort, no_combine_left_right, onlykmers;
   unsigned int kenv_score_threshold;
   GtUword maxmat;
   GtUword file_buffer_size_kb; /* size in kilobytes, default 256 */
@@ -595,6 +595,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               "ignore seeds that are in same sequence"
                               "(triggered by option -estim)",
                               &arguments->noinseqseeds,false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -fullseedpairsort */
+  option = gt_option_new_bool("fullseedpairsort",
+                              "sort the seedpair completely on all four "
+                              "components (default: sort only on aseqnum, "
+                              "bseqnum, bpos)",
+                              &arguments->fullseedpairsort,false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -1403,6 +1412,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->snd_pass,
                                     arguments->delta_filter,
                                     !arguments->noinseqseeds,
+                                    arguments->fullseedpairsort,
                                     kenv_generator,
                                     extp);
 

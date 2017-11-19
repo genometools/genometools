@@ -68,7 +68,7 @@ typedef struct GtRadixsortinfo GtRadixsortinfo;
    returns a pointer to it. The object can be used to sort arrays of
    <GtUword>-integers. <maxlen> is the
    maximum size of the array to be sorted. */
-GtRadixsortinfo* gt_radixsort_new_ulong(GtUword maxlen);
+GtRadixsortinfo* gt_radixsort_new_ulong(GtUword maxlen,size_t sort_bytes);
 
 /* The following function is like the previous, except that the
    created object can be used to sort arrays of <GtUwordPair> values. */
@@ -135,7 +135,8 @@ void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
 /* XXX: to be documented */
 GtUword gt_radixsort_max_num_of_entries_flba(size_t memlimit,size_t unitsize);
 
-void gt_radixsort_inplace_flba(uint8_t *source,GtUword len,size_t unitsize);
+void gt_radixsort_inplace_flba(uint8_t *source,GtUword len,size_t unitsize,
+                               size_t flba_sort_bytes);
 
 size_t gt_radixsort_flba_unitsize(GtUword maxvalue);
 

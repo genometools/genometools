@@ -889,7 +889,8 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
     gt_timer_show_progress(timer, "to accumulate counts",stdout);
   }
   gt_assert(fci->buf.allocated > 0);
-  fci->radixsort_code = gt_radixsort_new_ulong(fci->buf.allocated);
+  fci->radixsort_code = gt_radixsort_new_ulong(fci->buf.allocated,
+                                               sizeof (GtUword));
   fci->buf.spaceGtUword = gt_radixsort_space_ulong(fci->radixsort_code);
   GT_FCI_ADDWORKSPACE(fci->fcsl,"radixsort_code",
                       gt_radixsort_size(fci->radixsort_code));

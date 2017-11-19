@@ -12,20 +12,30 @@ def inputmatchset(filename)
   matchset = Set.new()
   miter = SEmatch.new(filename)
   miter.each do |m|
-    thismatch = [m[:len],m[:s_start],m[:q_start]]
+    s_start = m[:s_start]
+    s_len = m[:s_len]
+    q_start = m[:q_start]
+    q_len = m[:q_len]
+    thismatch = [s_start,s_start+s_len-1,q_start,q_start+q_len-1]
     matchset.add(thismatch)
   end
   return matchset
 end
 
-matchset1 = inputmatchset(ARGV[0])
-matchset2 = inputmatchset(ARGV[1])
+matchsets = Array.new
+[0,1].each do |idx|
+  matchsets.push(inputmatchset(ARGV[idx]))
+end
 
-if matchset1 == matchset2
-  puts "identical sets of size #{matchset1.size}"
+if matchsets[0] == matchsets[1]
+  puts "identical sets of size #{matchsets[0].size}"
 else
-  puts "matchset1 - matchset2"
-  puts matchset1.difference(matchset2) 
-  puts "matchset2 - matchset1"
-  puts matchset2.difference(matchset1) 
+  [0,1].each do |i|
+    j = if i == 0 then 1 else 0 end
+    diff = matchsets[i].difference(matchsets[j])
+    puts "|#{ARGV[i]} - #{ARGV[j]}| = #{diff.length}"
+    diff.each do |elem|
+      puts "#{elem}"
+    end
+  end
 end

@@ -74,6 +74,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool snd_pass,
                                              bool delta_filter,
                                              bool inseqseeds,
+                                             bool fullseedpairsort,
                                              GtKenvGenerator *kenv_generator,
                                              const GtDiagbandseedExtendParams
                                                *extp);

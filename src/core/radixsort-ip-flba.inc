@@ -4,7 +4,7 @@ static uint8_t *gt_radixsort_flba_bin_get(
 {
   return rbuf->values.flbaptr +
                  ((binnum << rbuf->log_bufsize) +
-                  (GtUword) rbuf->nextidx[binnum]) * rbuf->unitsize;
+                  (GtUword) rbuf->nextidx[binnum]) * rbuf->flba_unitsize;
 }
 static inline void gt_radixsort_flba_bin_update(
                                     uint8_t *source,
@@ -15,8 +15,8 @@ static inline void gt_radixsort_flba_bin_update(
   GtUword binoffset = binnum << rbuf->log_bufsize;
 
   memcpy(rbuf->values.flbaptr
- + (binoffset + (GtUword) rbuf->nextidx[binnum]) * rbuf->unitsize,
-value,rbuf->unitsize);
+ + (binoffset + (GtUword) rbuf->nextidx[binnum]) * rbuf->flba_unitsize,
+value,rbuf->flba_unitsize);
   if ((GtUword) rbuf->nextidx[binnum] < rbuf->buf_size - 1)
   {
     rbuf->nextidx[binnum]++;
@@ -27,21 +27,21 @@ value,rbuf->unitsize);
 
     wsourceptr = source +
                  (rbuf->endofbin[binnum] - (rbuf->buf_size - 1))
- * rbuf->unitsize;
-    rsourceptr = wsourceptr + rbuf->buf_size * rbuf->unitsize;
-    rend = source + rbuf->startofbin[binnum+1] * rbuf->unitsize;
+ * rbuf->flba_unitsize;
+    rsourceptr = wsourceptr + rbuf->buf_size * rbuf->flba_unitsize;
+    rend = source + rbuf->startofbin[binnum+1] * rbuf->flba_unitsize;
     valptr = rbuf->values.flbaptr +
-             binoffset * rbuf->unitsize;
+             binoffset * rbuf->flba_unitsize;
     for (j=0; j<rbuf->buf_size; j++)
     {
-      memcpy(wsourceptr,valptr,rbuf->unitsize);
-      wsourceptr += rbuf->unitsize;
+      memcpy(wsourceptr,valptr,rbuf->flba_unitsize);
+      wsourceptr += rbuf->flba_unitsize;
       if (rsourceptr < rend)
       {
-        memcpy(valptr,rsourceptr,rbuf->unitsize);
-        rsourceptr += rbuf->unitsize;
+        memcpy(valptr,rsourceptr,rbuf->flba_unitsize);
+        rsourceptr += rbuf->flba_unitsize;
       }
-      valptr += rbuf->unitsize;
+      valptr += rbuf->flba_unitsize;
     }
     rbuf->nextidx[binnum] = 0;
   }
@@ -57,7 +57,7 @@ static void gt_radixsort_flba_cached_shuffle(GtRadixbuffer *rbuf,
                 nextbin, firstnonemptybin = UINT8_MAX+1;
   GtCountbasetype *count, previouscount, currentidx;
   uint8_t *sourceptr,
-                           *sourceend = source + len * rbuf->unitsize;
+                           *sourceend = source + len * rbuf->flba_unitsize;
 
   rbuf->countcached++;
   count = rbuf->startofbin; /* use same memory for count and startofbin */
@@ -66,7 +66,8 @@ static void gt_radixsort_flba_cached_shuffle(GtRadixbuffer *rbuf,
     count[binnum] = 0;
     rbuf->nextidx[binnum] = 0;
   }
-  for (sourceptr = source; sourceptr < sourceend; sourceptr += rbuf->unitsize)
+  for (sourceptr = source; sourceptr < sourceend;
+       sourceptr += rbuf->flba_unitsize)
   {
     count[sourceptr[rightshift]]++;
   }
@@ -82,9 +83,9 @@ static void gt_radixsort_flba_cached_shuffle(GtRadixbuffer *rbuf,
         firstnonemptybin = binnum;
       }
       memcpy(rbuf->values.
-             flbaptr + bufoffset * rbuf->unitsize,
-             source + binoffset * rbuf->unitsize,
-             (sizeof *source * elems2copy) * rbuf->unitsize);
+             flbaptr + bufoffset * rbuf->flba_unitsize,
+             source + binoffset * rbuf->flba_unitsize,
+             (sizeof *source * elems2copy) * rbuf->flba_unitsize);
     }
   }
   previouscount = count[0];
@@ -103,7 +104,7 @@ static void gt_radixsort_flba_cached_shuffle(GtRadixbuffer *rbuf,
   {
     /* no decl. */
     memcpy(rbuf->tmpvalue_ptr,gt_radixsort_flba_bin_get(rbuf,binnum),
-rbuf->unitsize);
+rbuf->flba_unitsize);
     while (true)
     {
       binnum = rbuf->tmpvalue_ptr[rightshift];
@@ -111,9 +112,9 @@ rbuf->unitsize);
       {
         /* no decl. */
         memcpy(rbuf->tmpswap_ptr,rbuf->tmpvalue_ptr,
-rbuf->unitsize);
+rbuf->flba_unitsize);
         memcpy(rbuf->tmpvalue_ptr,gt_radixsort_flba_bin_get(rbuf,binnum),
-rbuf->unitsize);
+rbuf->flba_unitsize);
         gt_radixsort_flba_bin_update
                              (source,rbuf,binnum,
                               rbuf->tmpswap_ptr);
@@ -150,10 +151,11 @@ rbuf->unitsize);
       uint8_t *sourceptr, *valptr;
 
       valptr = rbuf->values.flbaptr +
-               (binnum << rbuf->log_bufsize) * rbuf->unitsize;
+               (binnum << rbuf->log_bufsize) * rbuf->flba_unitsize;
       sourceptr = source +
-                  (rbuf->startofbin[binnum+1] - bufleft) * rbuf->unitsize;
-      memcpy(sourceptr,valptr,(sizeof *sourceptr * bufleft) * rbuf->unitsize);
+                  (rbuf->startofbin[binnum+1] - bufleft) * rbuf->flba_unitsize;
+      memcpy(sourceptr,valptr,
+             (sizeof *sourceptr * bufleft) * rbuf->flba_unitsize);
     }
   }
 }
@@ -167,7 +169,7 @@ static void gt_radixsort_flba_uncached_shuffle(
   GtUword binnum, nextbin;
   GtCountbasetype currentidx, previouscount, *count;
   uint8_t *sourceptr,
-                           *sourceend = source + len * rbuf->unitsize;
+                           *sourceend = source + len * rbuf->flba_unitsize;
 
   rbuf->countuncached++;
   count = rbuf->startofbin; /* use same memory for count and startofbin */
@@ -176,7 +178,8 @@ static void gt_radixsort_flba_uncached_shuffle(
     count[binnum] = 0;
     rbuf->nextidx[binnum] = 0;
   }
-  for (sourceptr = source; sourceptr < sourceend; sourceptr += rbuf->unitsize)
+  for (sourceptr = source; sourceptr < sourceend;
+       sourceptr += rbuf->flba_unitsize)
   {
     count[sourceptr[rightshift]]++;
   }
@@ -195,8 +198,8 @@ static void gt_radixsort_flba_uncached_shuffle(
   {
     GtCountbasetype *binptr;
     /* no decl. */
-    memcpy(rbuf->tmpvalue_ptr,source + (currentidx) * rbuf->unitsize,
-rbuf->unitsize);
+    memcpy(rbuf->tmpvalue_ptr,source + (currentidx) * rbuf->flba_unitsize,
+rbuf->flba_unitsize);
 
     while (true)
     {
@@ -207,19 +210,19 @@ rbuf->unitsize);
       {
         /* no decl. */
         memcpy(rbuf->tmpswap_ptr,rbuf->tmpvalue_ptr,
-rbuf->unitsize);
-        memcpy(rbuf->tmpvalue_ptr,source + (binnum) * rbuf->unitsize,
-rbuf->unitsize);
-        memcpy(source + (binnum) * rbuf->unitsize,
-rbuf->tmpswap_ptr,rbuf->unitsize);
+rbuf->flba_unitsize);
+        memcpy(rbuf->tmpvalue_ptr,source + (binnum) * rbuf->flba_unitsize,
+rbuf->flba_unitsize);
+        memcpy(source + (binnum) * rbuf->flba_unitsize,
+rbuf->tmpswap_ptr,rbuf->flba_unitsize);
         (*binptr)++;
       } else
       {
         break;
       }
     }
-    memcpy(source + (binnum) * rbuf->unitsize,
-rbuf->tmpvalue_ptr,rbuf->unitsize);
+    memcpy(source + (binnum) * rbuf->flba_unitsize,
+rbuf->tmpvalue_ptr,rbuf->flba_unitsize);
     currentidx++;
     (*binptr)++;
     /* skip over empty bins */
@@ -263,32 +266,32 @@ gt_radixsort_flba_inplace_insertionsort(
                                   GtCountbasetype a_size)
 {
   uint8_t *optr,
-                           *end = arr + a_size * rbuf->unitsize;
+                           *end = arr + a_size * rbuf->flba_unitsize;
 
-  for (optr = arr + 1 * rbuf->unitsize; optr < end;
-       optr += rbuf->unitsize)
+  for (optr = arr + 1 * rbuf->flba_unitsize; optr < end;
+       optr += rbuf->flba_unitsize)
   {
-    uint8_t *oprevious = optr - 1 * rbuf->unitsize;
+    uint8_t *oprevious = optr - 1 * rbuf->flba_unitsize;
 
-    if (memcmp(optr,oprevious,rbuf->unitsize) < 0)
+    if (memcmp(optr,oprevious,rbuf->flba_unitsize) < 0)
     {
       uint8_t *iptr;
       /* no decl. */
       memcpy(rbuf->tmpvalue_ptr,optr,
-rbuf->unitsize);
+rbuf->flba_unitsize);
 
-      memcpy(optr,oprevious,rbuf->unitsize);
-      for (iptr = oprevious; iptr > arr; iptr -= 1 * rbuf->unitsize)
+      memcpy(optr,oprevious,rbuf->flba_unitsize);
+      for (iptr = oprevious; iptr > arr; iptr -= 1 * rbuf->flba_unitsize)
       {
-        uint8_t *iprevious = iptr - 1 * rbuf->unitsize;
-        if (!(memcmp(rbuf->tmpvalue_ptr,iprevious,rbuf->unitsize) < 0))
+        uint8_t *iprevious = iptr - 1 * rbuf->flba_unitsize;
+        if (!(memcmp(rbuf->tmpvalue_ptr,iprevious,rbuf->flba_unitsize) < 0))
         {
           break;
         }
-        memcpy(iptr,iprevious,rbuf->unitsize);
+        memcpy(iptr,iprevious,rbuf->flba_unitsize);
       }
       memcpy(iptr,rbuf->tmpvalue_ptr,
-rbuf->unitsize);
+rbuf->flba_unitsize);
     }
   }
 }
@@ -308,19 +311,19 @@ static void gt_radixsort_flba_process_bin(
     if (width >= (GtCountbasetype) 2)
     {
       uint8_t *ptr
-       = source + rbuf->startofbin[binnum] * rbuf->unitsize;
+       = source + rbuf->startofbin[binnum] * rbuf->flba_unitsize;
 
       if (width == (GtCountbasetype) 2)
       {
-        uint8_t *nextptr = ptr + 1 * rbuf->unitsize;
-        if (memcmp(nextptr,ptr,rbuf->unitsize) < 0)
+        uint8_t *nextptr = ptr + 1 * rbuf->flba_unitsize;
+        if (memcmp(nextptr,ptr,rbuf->flba_unitsize) < 0)
         {
           /* no decl. */
           memcpy(rbuf->tmpswap_ptr,ptr,
-rbuf->unitsize);
-          memcpy(ptr,nextptr,rbuf->unitsize);
+rbuf->flba_unitsize);
+          memcpy(ptr,nextptr,rbuf->flba_unitsize);
           memcpy(nextptr,rbuf->tmpswap_ptr,
-rbuf->unitsize);
+rbuf->flba_unitsize);
         }
       } else
       {
@@ -354,7 +357,7 @@ static void gt_radixsort_flba_sub_inplace(GtRadixbuffer *rbuf,
                          currentstackelem.left.flbaptr,
                          currentstackelem.len,
                          currentstackelem.shift);
-    if (currentstackelem.shift < rbuf->unitsize-1)
+    if (currentstackelem.shift < rbuf->sort_bytes-1)
     {
       (void) gt_radixsort_flba_process_bin(stack,rbuf,
                                    currentstackelem.left.flbaptr,

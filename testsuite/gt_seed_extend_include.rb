@@ -466,11 +466,12 @@ if $gttestdata
   Test do
     indexname="manyshort-somelong"
     run("#{$scriptsdir}manyshort-somelong.rb #{$gttestdata}DNA-mix/Grumbach.fna 10000")
+    call = "#{$bin}gt seed_extend -no-reverse -l 50 -ii #{indexname}"
     run_test build_encseq(indexname, last_stdout)
-    run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt bytestring -ii #{indexname}"
+    run_test "#{call} -splt bytestring -fullseedpairsort"
     run "grep -v '^#' #{last_stdout}"
     run "mv #{last_stdout} splt-bytestring.matches"
-    run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt struct -ii #{indexname}"
+    run_test "#{call} -splt struct"
     run "diff -I '^#' #{last_stdout} splt-bytestring.matches"
   end
 end

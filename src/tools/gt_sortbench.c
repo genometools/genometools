@@ -720,7 +720,8 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     if (flba != NULL)
     {
       gt_assert(flba_unitsize > 0);
-      gt_radixsort_inplace_flba(flba,arguments->num_values,flba_unitsize);
+      gt_radixsort_inplace_flba(flba,arguments->num_values,flba_unitsize,
+                                flba_unitsize);
     } else
     {
       for (method = 0; method < GT_NUM_OF_SORT_IMPLEMENTATIONS; method++)

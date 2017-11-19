@@ -66,7 +66,8 @@ static void gt_radixsort_ulong_cached_shuffle(GtRadixbuffer *rbuf,
     count[binnum] = 0;
     rbuf->nextidx[binnum] = 0;
   }
-  for (sourceptr = source; sourceptr < sourceend; sourceptr++)
+  for (sourceptr = source; sourceptr < sourceend;
+       sourceptr++)
   {
     count[GT_RADIX_KEY(UINT8_MAX,rightshift,*sourceptr)]++;
   }
@@ -150,7 +151,8 @@ static void gt_radixsort_ulong_cached_shuffle(GtRadixbuffer *rbuf,
                (binnum << rbuf->log_bufsize);
       sourceptr = source +
                   (rbuf->startofbin[binnum+1] - bufleft);
-      memcpy(sourceptr,valptr,(sizeof *sourceptr * bufleft));
+      memcpy(sourceptr,valptr,
+             (sizeof *sourceptr * bufleft));
     }
   }
 }
@@ -173,7 +175,8 @@ static void gt_radixsort_ulong_uncached_shuffle(
     count[binnum] = 0;
     rbuf->nextidx[binnum] = 0;
   }
-  for (sourceptr = source; sourceptr < sourceend; sourceptr++)
+  for (sourceptr = source; sourceptr < sourceend;
+       sourceptr++)
   {
     count[GT_RADIX_KEY(UINT8_MAX,rightshift,*sourceptr)]++;
   }
@@ -342,7 +345,7 @@ static void gt_radixsort_ulong_sub_inplace(GtRadixbuffer *rbuf,
                          currentstackelem.left.ulongptr,
                          currentstackelem.len,
                          currentstackelem.shift);
-    if (currentstackelem.shift > 0)
+    if (currentstackelem.shift > rbuf->stop_recursion)
     {
       (void) gt_radixsort_ulong_process_bin(stack,rbuf,
                                    currentstackelem.left.ulongptr,

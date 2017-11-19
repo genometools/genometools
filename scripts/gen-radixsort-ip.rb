@@ -104,7 +104,7 @@ end
 
 def increment(options,var)
   if options.typename == :flba
-    return "#{var} += rbuf->unitsize"
+    return "#{var} += rbuf->flba_unitsize"
   else
     return "#{var}++"
   end
@@ -120,7 +120,7 @@ end
 
 def offset(options,expr)
   if options.typename == :flba
-    return "#{expr} * rbuf->unitsize"
+    return "#{expr} * rbuf->flba_unitsize"
   else
     return expr
   end
@@ -128,7 +128,7 @@ end
 
 def copy_ptr_ptr(options,destptr,sourceptr)
   if options.typename == :flba
-    return "memcpy(#{destptr},#{sourceptr},rbuf->unitsize)"
+    return "memcpy(#{destptr},#{sourceptr},rbuf->flba_unitsize)"
   else
     return "*#{destptr} = *#{sourceptr}"
   end
@@ -139,7 +139,7 @@ def copy_index_expr(options,arr,idx,expr)
     if expr.match(/^_/)
       expr = "rbuf->#{expr.del_us}_ptr"
     end
-    return "memcpy(#{arr} + (#{idx}) * rbuf->unitsize,\n#{expr},rbuf->unitsize)"
+    return "memcpy(#{arr} + (#{idx}) * rbuf->flba_unitsize,\n#{expr},rbuf->flba_unitsize)"
   else
     expr.del_us
     if "#{arr}[#{idx}]".length > 60
@@ -155,7 +155,7 @@ def copy_var_index(options,var,arr,idx)
     if var.match(/^_/)
       var = "rbuf->#{var.del_us}_ptr"
     end
-    return "memcpy(#{var},#{arr} + (#{idx}) * rbuf->unitsize,\nrbuf->unitsize)"
+    return "memcpy(#{var},#{arr} + (#{idx}) * rbuf->flba_unitsize,\nrbuf->flba_unitsize)"
   else
     var.del_us
     return "#{var} = #{arr}[#{idx}]"
@@ -170,7 +170,7 @@ def copy_var_expr(options,var,expr)
     if expr.match(/^_/)
       expr = "rbuf->#{expr.del_us}_ptr"
     end
-    return "memcpy(#{var},#{expr},\nrbuf->unitsize)"
+    return "memcpy(#{var},#{expr},\nrbuf->flba_unitsize)"
   else
     var.del_us
     expr.del_us
@@ -206,9 +206,9 @@ end
 
 def recursion_continue(options)
   if options.typename == :flba
-    return "currentstackelem.shift < rbuf->unitsize-1"
+    return "currentstackelem.shift < rbuf->sort_bytes-1"
   else
-    return "currentstackelem.shift > 0"
+    return "currentstackelem.shift > rbuf->stop_recursion"
   end
 end
 
@@ -269,7 +269,7 @@ def compare_smaller(options,ptr1,ptr2)
     if m = ptr1.match(/^&_(\w+)/)
       ptr1 = "rbuf->#{m[1]}_ptr"
     end
-    return "memcmp(#{ptr1},#{ptr2},rbuf->unitsize) < 0"
+    return "memcmp(#{ptr1},#{ptr2},rbuf->flba_unitsize) < 0"
   end
 end
 
@@ -283,7 +283,7 @@ static #{makebasetype(options)} *gt_radixsort_#{makekeyname(options)}_bin_get(
 {
   return rbuf->values.#{makekeyptr(options)} +
                  ((binnum << rbuf->log_bufsize) +
-                  (GtUword) rbuf->nextidx[binnum]) * rbuf->unitsize;
+                  (GtUword) rbuf->nextidx[binnum]) * rbuf->flba_unitsize;
 }
 END_OF_FILE
 else
@@ -360,7 +360,8 @@ static void gt_radixsort_#{makekeyname(options)}_cached_shuffle(GtRadixbuffer *r
     count[binnum] = 0;
     rbuf->nextidx[binnum] = 0;
   }
-  for (sourceptr = source; sourceptr < sourceend; #{increment(options,"sourceptr")})
+  for (sourceptr = source; sourceptr < sourceend;
+       #{increment(options,"sourceptr")})
   {
     count[#{radixkey(options,"sourceptr")}]++;
   }
@@ -444,7 +445,8 @@ static void gt_radixsort_#{makekeyname(options)}_cached_shuffle(GtRadixbuffer *r
                #{offset(options,"(binnum << rbuf->log_bufsize)")};
       sourceptr = source +
                   #{offset(options,"(rbuf->startofbin[binnum+1] - bufleft)")};
-      memcpy(sourceptr,valptr,#{offset(options,"(sizeof *sourceptr * bufleft)")});
+      memcpy(sourceptr,valptr,
+             #{offset(options,"(sizeof *sourceptr * bufleft)")});
     }
   }
 }
@@ -467,7 +469,8 @@ static void gt_radixsort_#{makekeyname(options)}_uncached_shuffle(
     count[binnum] = 0;
     rbuf->nextidx[binnum] = 0;
   }
-  for (sourceptr = source; sourceptr < sourceend; #{increment(options,"sourceptr")})
+  for (sourceptr = source; sourceptr < sourceend;
+       #{increment(options,"sourceptr")})
   {
     count[#{radixkey(options,"sourceptr")}]++;
   }
