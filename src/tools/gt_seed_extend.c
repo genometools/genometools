@@ -89,6 +89,7 @@ typedef struct {
   bool nofwd;
   bool benchmark;
   bool verbose;
+  bool with_code_run_dist;
   bool histogram;
   bool use_kmerfile;
   bool trimstat_on;
@@ -734,6 +735,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               "Calculate histogram to determine size of mlist",
                               &arguments->histogram,
                               true);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -code_run_dist */
+  option = gt_option_new_bool("code_run_dist",
+                              "Output distribution of length of runs of "
+                              "identical codes in sorted kmerpos lists",
+                              &arguments->with_code_run_dist,
+                              false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -1400,6 +1410,7 @@ static int gt_seed_extend_runner(int argc,
                                     kmplt,
                                     arguments->dbs_verify,
                                     arguments->verbose,
+                                    arguments->with_code_run_dist,
                                     arguments->dbs_debug_kmer,
                                     arguments->dbs_debug_seedpair,
                                     arguments->use_kmerfile,
