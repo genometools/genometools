@@ -22,6 +22,7 @@
 #include "core/str_api.h"
 #include "core/minmax.h"
 #include "core/intbits.h"
+#include "core/chardef.h"
 #include "core/score_matrix.h"
 #include "match/diagband-struct.h"
 
@@ -284,11 +285,12 @@ struct GtDiagbandStatistics
 {
   bool forward,
        compute_total_bcov,
-       compute_total_score_seqpair;
+       compute_total_score_seqpair,
+       compute_has_two_seeds_on_same_diagonal;
   GtUword total_bcov,
-          total_score_seqpair,
           total_score_show_min;
   GtBitsequence *diagband_track;
+  GtDiagbandseedPosition *previouspos;
   const GtScoreMatrix *score_matrix;
   GtUchar *a_buffer, *b_buffer;
   GtUword a_len, b_len;
@@ -306,6 +308,7 @@ GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
   diagband_statistics->forward = forward;
   diagband_statistics->compute_total_bcov = false;
   diagband_statistics->compute_total_score_seqpair = false;
+  diagband_statistics->compute_has_two_seeds_on_same_diagonal = false;
   diagband_statistics->total_score_show_min = 0;
   if (strcmp(arg,"total_bcov") == 0)
   {
@@ -317,12 +320,18 @@ GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
       diagband_statistics->compute_total_score_seqpair = true;
     } else
     {
-      gt_assert(false);
+      if (strcmp(arg,"two_seeds") == 0)
+      {
+        diagband_statistics->compute_has_two_seeds_on_same_diagonal = true;
+      } else
+      {
+        gt_assert(false);
+      }
     }
   }
   diagband_statistics->total_bcov = 0;
-  diagband_statistics->total_score_seqpair = 0;
   diagband_statistics->diagband_track = NULL;
+  diagband_statistics->previouspos = NULL;
   diagband_statistics->score_matrix = NULL;
   diagband_statistics->a_buffer = NULL;
   diagband_statistics->b_buffer = NULL;
@@ -357,6 +366,7 @@ void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics)
     gt_free(diagband_statistics->a_buffer);
     gt_free(diagband_statistics->b_buffer);
     gt_free(diagband_statistics->diagband_track);
+    gt_free(diagband_statistics->previouspos);
     gt_free(diagband_statistics);
   }
 }
@@ -372,7 +382,8 @@ void gt_diagband_statistics_display(const GtDiagbandStatistics
             diagband_statistics->total_bcov);
   } else
   {
-    gt_assert(diagband_statistics->compute_total_score_seqpair);
+    gt_assert(diagband_statistics->compute_total_score_seqpair ||
+              diagband_statistics->compute_has_two_seeds_on_same_diagonal);
   }
 }
 
@@ -400,6 +411,10 @@ static GtDiagbandScore gt_diagband_statistics_eval_score(
 
   for (idx = 0; idx < length; idx++)
   {
+    if (ISSPECIAL(a_encoded[idx]) || ISSPECIAL(b_encoded[idx]))
+    {
+      return 0;
+    }
     score_sum += gt_score_matrix_get_score(score_matrix,a_encoded[idx],
                                            b_encoded[idx]);
   }
@@ -433,7 +448,6 @@ static GtDiagbandScore gt_diagband_statistics_total_score_in_seqpair(
       for (/* Nothing */; bptr <= b_encoded + blen - q_value;
            bptr++)
       {
-
         gt_assert(aptr + q_value - 1 <= a_encoded + alen - 1);
         gt_assert(bptr + q_value - 1 <= b_encoded + blen - 1);
         const GtDiagbandScore this_score
@@ -464,7 +478,7 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
                                 GtUword bseqnum,
                                 const GtDiagbandStruct *diagband_struct,
                                 const GtDiagbandseedMaximalmatch *memstore,
-                                GT_UNUSED unsigned int seedlength,
+                                unsigned int seedlength,
                                 const GtSeedpairPositions *seedstore,
                                 const uint8_t *segment_scores,
                                 GtUword segment_length)
@@ -473,14 +487,32 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
   GtDiagbandStatistics *diagband_statistics
     = (GtDiagbandStatistics *) v_diagband_statistics;
 
-  if (diagband_statistics->diagband_track == NULL)
+  if (diagband_statistics->compute_has_two_seeds_on_same_diagonal ||
+      diagband_statistics->compute_total_bcov)
   {
-    GT_INITBITTAB(diagband_statistics->diagband_track,
-                  diagband_struct->num_diagbands);
-  } else
+    if (diagband_statistics->diagband_track == NULL)
+    {
+      GT_INITBITTAB(diagband_statistics->diagband_track,
+                    diagband_struct->num_diagbands);
+    } else
+    {
+      GT_CLEARBITTAB(diagband_statistics->diagband_track,
+                     diagband_struct->num_diagbands);
+    }
+  }
+  if (diagband_statistics->compute_has_two_seeds_on_same_diagonal)
   {
-    GT_CLEARBITTAB(diagband_statistics->diagband_track,
-                   diagband_struct->num_diagbands);
+    if (diagband_statistics->previouspos == NULL)
+    {
+      diagband_statistics->previouspos
+        = gt_calloc(diagband_struct->num_diagbands,
+                    sizeof *diagband_statistics->previouspos);
+    } else
+    {
+      memset(diagband_statistics->previouspos,0,
+             sizeof *diagband_statistics->previouspos *
+             diagband_struct->num_diagbands);
+    }
   }
   if (diagband_statistics->score_matrix != NULL)
   {
@@ -509,6 +541,8 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
   }
   if (seedstore != NULL)
   {
+    GtUword total_score_seqpair = 0, count_two_seeds_on_same_diagonal = 0;
+
     for (idx = 0; idx < segment_length; idx++)
     {
       const GtUword diagband_idx
@@ -521,11 +555,48 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
                                         diagband_idx);
       } else
       {
-        if (segment_scores != NULL &&
-            diagband_statistics->compute_total_score_seqpair)
+        if (diagband_statistics->compute_total_score_seqpair)
         {
-          diagband_statistics->total_score_seqpair
-            += (GtUword) segment_scores[idx];
+          if (segment_scores != NULL)
+          {
+            total_score_seqpair += (GtUword) segment_scores[idx];
+          }
+        } else
+        {
+          const GtDiagbandseedPosition bpos = seedstore[idx].bpos;
+
+          gt_assert(diagband_statistics->
+                      compute_has_two_seeds_on_same_diagonal &&
+                    diagband_idx < diagband_struct->num_diagbands &&
+                    diagband_statistics->previouspos[diagband_idx] <= bpos);
+          /* there was a previous match and current match with end position
+             bpos begins strictly after previous match */
+
+#ifdef OUTDIAGONALHITS
+          if (diagband_statistics->previouspos[diagband_idx] == 0)
+          {
+            printf("aseq=" GT_WU ",bseq=" GT_WU ",diag= " GT_WU
+                   "apos=%u,bpos=%u is first\n",
+                   aseqnum,bseqnum,diagband_idx,seedstore[idx].apos,bpos);
+          }
+#endif
+          if (diagband_statistics->previouspos[diagband_idx] > 0 &&
+              diagband_statistics->previouspos[diagband_idx] + seedlength
+              <= bpos)
+          {
+            if (!GT_ISIBITSET(diagband_statistics->diagband_track,diagband_idx))
+            {
+              /* Event has not been found on this diagonal */
+              count_two_seeds_on_same_diagonal++;
+              GT_SETIBIT(diagband_statistics->diagband_track,diagband_idx);
+            }
+#ifdef OUTDIAGONALHITS
+            printf("aseq=" GT_WU ",bseq=" GT_WU ",diag= " GT_WU
+                   "apos=%u,bpos=%u\n",
+                   aseqnum,bseqnum,diagband_idx,seedstore[idx].apos,bpos);
+#endif
+          }
+          diagband_statistics->previouspos[diagband_idx] = bpos;
         }
       }
     }
@@ -547,21 +618,24 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
                                    diagband_statistics->a_len,
                                    diagband_statistics->b_buffer,
                                    diagband_statistics->b_len);
-      gt_assert(bf_total_score_seqpair ==
-                diagband_statistics->total_score_seqpair);
+      gt_assert(bf_total_score_seqpair == total_score_seqpair);
     }
 #endif
-    if (diagband_statistics->total_score_seqpair >=
-        diagband_statistics->total_score_show_min)
+    if (total_score_seqpair >= diagband_statistics->total_score_show_min)
     {
       printf(GT_WU " " GT_WU " " GT_WU "\n",aseqnum,bseqnum,
-             diagband_statistics->total_score_seqpair);
+                                            total_score_seqpair);
     }
-    diagband_statistics->total_score_seqpair = 0;
+    if (count_two_seeds_on_same_diagonal > 0)
+    {
+      printf(GT_WU " " GT_WU " " GT_WU "\n",aseqnum,bseqnum,
+             count_two_seeds_on_same_diagonal);
+    }
   } else
   {
     gt_assert(memstore != NULL &&
-              !diagband_statistics->compute_total_score_seqpair);
+              !diagband_statistics->compute_total_score_seqpair &&
+              !diagband_statistics->compute_has_two_seeds_on_same_diagonal);
     for (idx = 0; idx < segment_length; idx++)
     {
       const GtUword diagband_idx

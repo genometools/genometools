@@ -178,6 +178,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
      the help message accordingly. */
   static const char *diagband_statistics_choices[] = {"total_bcov",
                                                       "total_score_seqpair",
+                                                      "two_seeds",
                                                       NULL};
   static const char *estimation_choices[] = {"JKD","ANI",NULL};
   gt_assert(arguments != NULL);
@@ -236,14 +237,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    "for protein sequences only",
                                    &arguments->kenv_score_threshold,
                                    UINT_MAX, 1UL);
-  gt_option_exclude(op_kenv, op_qii);
   gt_option_exclude(op_kenv, op_spacedseed);
   gt_option_parser_add_option(op, op_kenv);
 
   /* -diagbandwidth */
   op_diagbandwidth = gt_option_new_string("diagbandwidth",
                                "Logarithm of diagonal band width in the "
-                               "range\nfrom 0 to 10 (for filter), default: 6",
+                               "range\nfrom 0 to 10 (for filter)",
                                arguments->opt_diagbandwidth,
                                "6");
   arguments->se_ref_op_diagbandwidth = gt_option_ref(op_diagbandwidth);

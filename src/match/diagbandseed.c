@@ -6094,8 +6094,6 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
   const unsigned int b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
   GtTimer *timer = NULL;
 
-  /* this constraint should be removed later */
-  gt_assert(arg->aencseq == arg->bencseq);
   biter = gt_diagbandseed_kmer_iter_new_from_file(&blist_len,
                                                   arg->bencseq,
                                                   arg->spacedseedweight,
