@@ -469,6 +469,15 @@ static GtDiagbandScore gt_diagband_statistics_total_score_in_seqpair(
 }
 #endif
 
+void gt_diagband_statistics_header(const GtDiagbandStatistics
+                                     *diagband_statistics)
+{
+  if (diagband_statistics->compute_has_two_seeds_on_same_diagonal)
+  {
+    printf("# Fields: dbnum, querynum\n");
+  }
+}
+
 void gt_diagband_statistics_add(void *v_diagband_statistics,
                                 GT_UNUSED bool bpos_sorted,
                                 /* remove GT_UNUSED once arguments are used */
@@ -628,8 +637,7 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
     }
     if (count_two_seeds_on_same_diagonal > 0)
     {
-      printf(GT_WU " " GT_WU " " GT_WU "\n",aseqnum,bseqnum,
-             count_two_seeds_on_same_diagonal);
+      printf(GT_WU "\t" GT_WU "\n",aseqnum,bseqnum);
     }
   } else
   {

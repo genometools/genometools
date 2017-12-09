@@ -214,4 +214,7 @@ void gt_diagband_statistics_score_matrix_set(
                 const GtScoreMatrix *score_matrix,
                 int score_threshold);
 
+void gt_diagband_statistics_header(const GtDiagbandStatistics
+                                     *diagband_statistics);
+
 #endif

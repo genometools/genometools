@@ -5443,6 +5443,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
       segment_proc_func = gt_diagband_statistics_add;
       segment_proc_info = diagband_statistics;
+      gt_diagband_statistics_header(diagband_statistics);
     }
   }
   GT_INITARRAY(&segment_scores,uint8_t);
