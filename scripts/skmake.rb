@@ -96,6 +96,10 @@ def makecompilerflags(fp,options)
   else
     fp.print " cairo=no"
   end
+  if not ENV.has_key?("CC")
+    STDERR.puts "#{$0}: environment variable CC must be set, e.g.\ export CC=gcc should work, if gcc is installed in one of the directories listed in PATH"
+    exit(1)
+  end
   fp.print " #{extracpp} popcnt=yes CC='ccache " + ENV["CC"] + "'"
   if not options.fileargs.nil?
     filenames=options.fileargs.join(" ")

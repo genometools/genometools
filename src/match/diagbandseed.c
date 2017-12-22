@@ -6938,6 +6938,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   GtFtTrimstat *trimstat = NULL;
   GtKarlinAltschulStat *karlin_altschul_stat = NULL;
   GtDiagbandseedState *dbs_state = NULL;
+  unsigned int a_numofchars = gt_encseq_alphabetnumofchars(arg->aencseq);
 #ifdef GT_THREADS_ENABLED
   GtDiagbandseedThreadInfo *thread_info = NULL;
   FILE **stream_tab = NULL;
@@ -6956,7 +6957,6 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     }
   }
 #endif
-  unsigned int a_numofchars = gt_encseq_alphabetnumofchars(arg->aencseq);
   gt_assert(sizeof (GtDiagbandseedPosition) == sizeof (GtDiagbandseedPosition));
   if (arg->verbose || gt_querymatch_gfa2_display(arg->extp->out_display_flag))
   {
