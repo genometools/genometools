@@ -71,7 +71,6 @@
           if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
           {\
             GtUword add_cells = (ADD);\
-            gt_assert((L) <= add_cells);\
             (A)->allocated##TYPE += add_cells;\
             (A)->space##TYPE = (TYPE *) gt_realloc_mem((A)->space##TYPE,\
                                               sizeof (TYPE) *\
