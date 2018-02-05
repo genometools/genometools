@@ -5736,6 +5736,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 /* * * * * ALGORITHM STEPS * * * * */
 
 static GtKmerPosList *gt_diagbandseed_kenv_generate(
+                                     GtUword bidx,
                                      GtKenvGenerator *kenv_generator,
                                      unsigned int numofchars,
                                      GtDiagbandseedKmerIterator *kenv_src_iter,
@@ -5748,7 +5749,13 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
   GtKmerPosList *kmerpos_list = gt_kmerpos_list_new(0,numofchars,encode_info);
   GtKenvScore score_dist_size = 0;
   GtUword *score_dist = NULL, kmer_count = 0;
+  GtTimer *timer = NULL;
 
+  if (verbose)
+  {
+    timer = gt_timer_new();
+    gt_timer_start(timer);
+  }
   alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   if (verbose)
   {
@@ -5901,6 +5908,12 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
     }
     alist = gt_diagbandseed_kmer_iter_next(kenv_src_iter);
   }
+  if (verbose)
+  {
+    fprintf(stream,"# ... generated environment for part " GT_WU " ",bidx+1);
+    gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
+    gt_timer_start(timer);
+  }
   if (kmerpos_list->nextfree > 0)
   {
     gt_kmerpos_list_reduce_size(kmerpos_list);
@@ -5948,6 +5961,12 @@ static GtKmerPosList *gt_diagbandseed_kenv_generate(
   }
   gt_free(score_dist);
   gt_diagbandseed_kmer_iter_reset(kenv_src_iter);
+  if (verbose)
+  {
+    fprintf(stream,"# ... sorted environment for part " GT_WU " ",bidx+1);
+    gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
+    gt_timer_delete(timer);
+  }
   return kmerpos_list;
 }
 
@@ -6093,7 +6112,6 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
   GtDiagbandseedKmerIterator *biter;
   int had_err = 0;
   const unsigned int b_numofchars = gt_encseq_alphabetnumofchars(arg->bencseq);
-  GtTimer *timer = NULL;
 
   biter = gt_diagbandseed_kmer_iter_new_from_file(&blist_len,
                                                   arg->bencseq,
@@ -6125,25 +6143,14 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
     {
       kenv_src_iter = aiter;
     }
-    if (arg->verbose)
-    {
-      timer = gt_timer_new();
-      gt_timer_start(timer);
-    }
-    *kenv_list_ptr = gt_diagbandseed_kenv_generate(arg->kenv_generator,
+    *kenv_list_ptr = gt_diagbandseed_kenv_generate(bidx,
+                                                   arg->kenv_generator,
                                                    b_numofchars,
                                                    kenv_src_iter,
                                                    kenv_bencode_info,
                                                    stream,
                                                    arg->verbose,
                                                    arg->with_code_run_dist);
-    if (arg->verbose)
-    {
-      fprintf(stream,"# generated and sorted environment for part " GT_WU " ",
-                      bidx+1);
-      gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
-      gt_timer_start(timer);
-    }
     kenv_path = gt_diagbandseed_kmer_filename(arg->bencseq,
                                               arg->spacedseedweight,
                                               arg->seedlength,
@@ -6185,10 +6192,6 @@ static GtDiagbandseedKmerIterator *gt_diagbandseed_kenv_iterator(
     }
     gt_free(kenv_path);
     gt_assert(had_err || biter != NULL);
-  }
-  if (arg->verbose)
-  {
-    gt_timer_delete(timer);
   }
   if (had_err)
   {
