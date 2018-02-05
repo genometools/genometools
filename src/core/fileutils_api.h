@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include "core/error_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 

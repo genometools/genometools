@@ -16,6 +16,7 @@
 */
 
 #include "core/types_api.h"
+#include "core/assert_api.h"
 #include "extended/regular_seqid.h"
 
 void gt_regular_seqid_save(GtStr *seqid, GtStr *description)

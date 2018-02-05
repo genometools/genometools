@@ -19,7 +19,6 @@
 #define STR_API_H
 
 #include <stdio.h>
-#include "core/error_api.h"
 #include "core/types_api.h"
 
 /* Objects of the <GtStr> class are strings which grow on demand. */

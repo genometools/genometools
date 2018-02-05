@@ -15,6 +15,7 @@
 */
 
 #include "core/ma_api.h"
+#include "core/assert_api.h"
 #include "core/str_cache.h"
 
 struct GtStrCache {
