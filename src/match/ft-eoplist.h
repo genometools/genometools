@@ -54,15 +54,24 @@ GtUword gt_eoplist_insertions_count(const GtEoplist *eoplist);
 
 typedef struct GtEoplistReader GtEoplistReader;
 
+GtUword gt_eoplist_dband_width(const GtEoplist *eoplist);
+
 /* verify that the given eoplist represents an alignment of the sequences
-   stored by the eoplist->useq and and eoplist->vseq of length
+   stored by the eoplist->useq and eoplist->vseq of length
    eoplist->ulen and eoplist->vlen. If eoplist->useq and eoplist->vseq
-   have not been set, then checs involing the sequence are not
-   perforemed. */
+   are set than it is determined if the eoplist represents an alignment
+   whose unit costs are edist. */
 
 void gt_eoplist_verify(const GtEoplist *eoplist,
                        GtEoplistReader *eoplist_reader,
                        GtUword edist);
+
+void gt_eoplist_verify_affine_score(const GtEoplist *eoplist,
+                                    int8_t gap_open_penalty,
+                                    int8_t gap_extension_penalty,
+                                    GtUword alphasize,
+                                    const int8_t * const *scorematrix2D,
+                                    GtWord expected_score);
 
 /* The constructor for the reader, initially set to be empty. */
 GtEoplistReader *gt_eoplist_reader_new(void);

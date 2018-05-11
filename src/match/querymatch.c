@@ -1296,8 +1296,8 @@ static void gt_querymatch_seed_alignment(GtQuerymatch *querymatch,
 }
 
 static void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
-                                         GtSeqorEncseq *db_seqorencseq,
-                                         GtSeqorEncseq *query_seqorencseq)
+                                         const GtSeqorEncseq *db_seqorencseq,
+                                         const GtSeqorEncseq *query_seqorencseq)
 {
   if (querymatch->ref_querymatchoutoptions != NULL)
   {

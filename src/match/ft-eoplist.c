@@ -333,7 +333,6 @@ GtEoplistReader *gt_eoplist_reader_new(void)
 
   eoplist_reader = gt_malloc(sizeof *eoplist_reader);
   gt_assert(eoplist_reader != NULL);
-  eoplist_reader->width = 0;
   eoplist_reader->outbuffer = NULL;
   eoplist_reader->width = 70;
   eoplist_reader->outbuffer
@@ -568,7 +567,8 @@ void gt_eoplist_read_trace(GtEoplist *eoplist,
 
     if (sscanf(trace,"%d",&value) != 1)
     {
-      fprintf(stderr,"cannot read number from trace %s\n",trace);
+      fprintf(stderr,"file %s, line %d: cannot read number from trace %s\n",
+              __FILE__,__LINE__,trace);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (eoplist != NULL)
@@ -1240,6 +1240,40 @@ void gt_eoplist_format_exact(FILE *fp,
   }
 }
 
+GtUword gt_eoplist_dband_width(const GtEoplist *eoplist)
+{
+  GtEoplistReader *eoplist_reader = gt_eoplist_reader_new();
+  GtCigarOp co;
+  GtWord mindiag = 0, maxdiag = 0, currentdiag = 0;
+  const bool distinguish_mismatch_match = true;
+
+  gt_eoplist_reader_reset(eoplist_reader,eoplist,true);
+  while (gt_eoplist_reader_next_cigar(&co,eoplist_reader,
+                                      distinguish_mismatch_match))
+  {
+    if (co.eoptype == GtDeletionOp)
+    {
+      currentdiag -= (GtWord) co.iteration;
+      if (currentdiag < mindiag)
+      {
+        mindiag = currentdiag;
+      }
+    } else
+    {
+      if (co.eoptype == GtInsertionOp)
+      {
+        currentdiag += (GtWord) co.iteration;
+        if (currentdiag > maxdiag)
+        {
+          maxdiag = currentdiag;
+        }
+      }
+    }
+  }
+  gt_eoplist_reader_delete(eoplist_reader);
+  return (GtUword) (maxdiag - mindiag + 1);
+}
+
 void gt_eoplist_verify(const GtEoplist *eoplist,
                        GtEoplistReader *eoplist_reader,
                        GtUword edist)
@@ -1305,22 +1339,125 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
   }
   if (eoplist->ulen != sumulen)
   {
-    fprintf(stderr,"ulen = " GT_WU " != " GT_WU " = sumulen\n",
-            eoplist->ulen,sumulen);
+    fprintf(stderr,"file %s, line %d: ulen = " GT_WU " != " GT_WU
+                   " = sumulen\n",__FILE__,__LINE__,eoplist->ulen,sumulen);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (eoplist->vlen != sumvlen)
   {
-    fprintf(stderr,"vlen = " GT_WU " != " GT_WU " = sumvlen\n",
-            eoplist->vlen,sumvlen);
+    fprintf(stderr,"file %s, line %d: vlen = " GT_WU " != " GT_WU
+                   " = sumvlen\n",
+            __FILE__,__LINE__, eoplist->vlen,sumvlen);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (edist != sumdist)
   {
-    fprintf(stderr,"edist = " GT_WU " != " GT_WU " = sumdist\n",
-            edist,sumdist);
+    fprintf(stderr,"file %s, line %d: edist = " GT_WU " != " GT_WU
+                   " = sumdist\n",__FILE__,__LINE__,edist,sumdist);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+}
+
+void gt_eoplist_verify_affine_score(const GtEoplist *eoplist,
+                                    int8_t gap_open_penalty,
+                                    int8_t gap_extension_penalty,
+#ifndef NDEBUG
+#else
+                                    __attribute__ ((unused))
+#endif
+                                    GtUword alphasize,
+                                    const int8_t * const *scorematrix2D,
+                                    GtWord expected_score)
+{
+  GtCigarOp co;
+  GtUword sumulen = 0, sumvlen = 0;
+  GtWord score = 0;
+  bool last_was_deletion = false;
+  bool last_was_insertion = false;
+  const bool distinguish_mismatch_match = true;
+  const int8_t gap_start = gap_open_penalty + gap_extension_penalty;
+  GtEoplistReader *eoplist_reader = gt_eoplist_reader_new();
+
+  gt_assert(eoplist != NULL);
+  gt_eoplist_reader_reset(eoplist_reader,eoplist,true);
+  gt_assert (eoplist->useq != NULL && eoplist->vseq != NULL);
+  while (gt_eoplist_reader_next_cigar(&co,eoplist_reader,
+                                      distinguish_mismatch_match))
+  {
+    if (co.eoptype == GtDeletionOp)
+    {
+      if (last_was_deletion)
+      {
+        score -= (gap_extension_penalty * co.iteration);
+      } else
+      {
+        score -= (gap_start + gap_extension_penalty * (co.iteration-1));
+        last_was_deletion = true;
+      }
+      sumulen += co.iteration;
+    } else
+    {
+      if (co.eoptype == GtInsertionOp)
+      {
+        if (last_was_insertion)
+        {
+          score -= (gap_extension_penalty * co.iteration);
+        } else
+        {
+          score -= (gap_start + gap_extension_penalty * (co.iteration-1));
+          last_was_insertion = true;
+        }
+        sumvlen += co.iteration;
+      } else
+      {
+        if (co.eoptype == GtMismatchOp || co.eoptype == GtMatchOp)
+        {
+          GtUword idx;
+
+          for (idx = 0; idx < co.iteration; idx++)
+          {
+            GtUchar a, b;
+
+            gt_assert(sumulen + idx < eoplist->ulen);
+            gt_assert(sumvlen + idx < eoplist->vlen);
+            a = eoplist->useq[sumulen+idx];
+            b = eoplist->vseq[sumvlen+idx];
+            gt_assert(a < alphasize);
+            gt_assert(b < alphasize);
+            score += scorematrix2D[(int) a][(int) b];
+          }
+          last_was_deletion = false;
+          last_was_insertion = false;
+          sumulen += co.iteration;
+          sumvlen += co.iteration;
+        } else
+        {
+          gt_assert(false);
+        }
+      }
+    }
+  }
+  if (eoplist->ulen != sumulen)
+  {
+    fprintf(stderr,"file %s, line %d: ulen = " GT_WU " != " GT_WU
+                   " = sumulen\n",__FILE__,__LINE__,eoplist->ulen,sumulen);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if (eoplist->vlen != sumvlen)
+  {
+    fprintf(stderr,"file %s, line %d: vlen = " GT_WU " != " GT_WU
+                   " = sumvlen\n",
+            __FILE__,__LINE__,eoplist->vlen,sumvlen);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if (score != expected_score)
+  {
+    fprintf(stderr,"file %s, line %d: score = " GT_WD " != " GT_WD
+                   " = expected_score\n",
+            __FILE__,__LINE__,score,expected_score);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  gt_eoplist_reader_delete(eoplist_reader);
 }
 
 void gt_eoplist_display_seed_in_alignment_set(GtEoplist *eoplist)
