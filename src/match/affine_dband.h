@@ -15,7 +15,6 @@ void gt_affine_diagonalband_delete(GtAffineDPreservoir *adpr);
 
 GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
                                        GtAffineDPreservoir *adpr,
-                                       bool opt_memory,
                                        int8_t gap_opening, /* > 0 */
                                        int8_t gap_extension, /* > 0 */
                                        const int8_t * const *scorematrix2D,

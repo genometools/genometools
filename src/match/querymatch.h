@@ -27,6 +27,7 @@
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
 #include "querymatch-display.h"
+#include "affine_dband.h"
 #include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
@@ -194,7 +195,8 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        bool dtrace,
                                        GtUword trace_delta,
                                        bool match_has_seed,
-                                       bool affine_alignment,
+                                       GtSequencepairbuffer *seqpairbuf,
+                                       GtAffineDPreservoir *adpr,
                                        const GtEncseq *db_encseq,
                                        const GtEncseq *query_encseq,
                                        const GtKarlinAltschulStat

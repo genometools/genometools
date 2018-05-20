@@ -28,11 +28,9 @@
 #include "core/encseq.h"
 #include "core/showtime.h"
 #include "core/timer_api.h"
-#include "match/ft-polish.h"
 #include "match/seed-extend.h"
 #include "match/seq_or_encseq.h"
 #include "match/seed-extend-iter.h"
-#include "extended/linearalign.h"
 #include "tools/gt_show_seedext.h"
 
 typedef struct
@@ -40,7 +38,7 @@ typedef struct
   bool relax_polish,
        sortmatches,
        verify_alignment,
-       optimal_alignment;
+       affine_alignment;
   GtStr *matchfilename;
   GtStrArray *display_args;
 } GtShowSeedextArguments;
@@ -68,7 +66,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option_filename, *op_relax_polish, *op_sortmatches, *op_display,
-           *op_verify_alignment, *op_optimal_alignment;
+           *op_verify_alignment, *op_affine_alignment;
 
   gt_assert(arguments);
   /* init */
@@ -104,13 +102,14 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_verify_alignment);
   gt_option_is_development_option(op_verify_alignment);
 
-  /* -optimal-alignment */
-  op_optimal_alignment = gt_option_new_bool("optimal",
-                                           "compute optimal alignment for "
-                                           "substrings in given coordinates",
-                                           &arguments->optimal_alignment,false);
-  gt_option_parser_add_option(op, op_optimal_alignment);
-  gt_option_is_development_option(op_optimal_alignment);
+  /* -affine */
+  op_affine_alignment = gt_option_new_bool("affine",
+                                           "compute optimal affine alignment"
+                                           "for substrings in given "
+                                           "coordinates",
+                                           &arguments->affine_alignment,false);
+  gt_option_parser_add_option(op, op_affine_alignment);
+  gt_option_is_development_option(op_affine_alignment);
 
   /* -f */
   option_filename = gt_option_new_filename("f",
@@ -140,53 +139,6 @@ static int gt_show_seedext_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-void gt_querymatch_optimal_alignment(const GtQuerymatch *querymatchptr,
-                                     const GtSequencepairbuffer *seqpairbuf,
-                                     GtLinspaceManagement
-                                       *linspace_spacemanager,
-                                     GtScoreHandler *linspace_scorehandler,
-                                     GtAlignment *alignment,
-                                     GtUchar *alignment_show_buffer,
-                                     const GtSeedExtendDisplayFlag
-                                       *out_display_flag,
-                                     const GtUchar *characters,
-                                     GtUchar wildcardshow)
-{
-  GtUword edist;
-  const GtUword distance = gt_querymatch_distance(querymatchptr),
-                alignmentwidth = gt_querymatch_display_alignmentwidth(
-                                        out_display_flag);
-
-  edist = gt_linearalign_compute_generic(linspace_spacemanager,
-                                         linspace_scorehandler,
-                                         alignment,
-                                         seqpairbuf->a_sequence,
-                                         0,
-                                         seqpairbuf->a_len,
-                                         seqpairbuf->b_sequence,
-                                         0,
-                                         seqpairbuf->b_len);
-  if (edist < distance)
-  {
-    printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",
-           edist,distance - edist);
-  }
-  gt_assert(edist <= distance);
-  if (alignmentwidth > 0)
-  {
-    const bool downcase = false;
-
-    gt_alignment_show_generic(alignment_show_buffer,
-                              downcase,
-                              alignment,
-                              stdout,
-                              alignmentwidth,
-                              characters,
-                              wildcardshow);
-    gt_alignment_reset(alignment);
-  }
-}
-
 static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   GT_UNUSED const char **argv,
                                   GT_UNUSED int parsed_args,
@@ -198,17 +150,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtSeedextendMatchIterator *semi = NULL;
   const GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtSeedExtendDisplayFlag *out_display_flag = NULL;
-  GtFtPolishing_info *pol_info = NULL;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   const GtExtendCharAccess a_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
   const GtExtendCharAccess b_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
-  GtUchar *alignment_show_buffer = NULL;
-  GtAlignment *alignment = NULL;
-  GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
-  GtLinspaceManagement *linspace_spacemanager = NULL;
-  GtScoreHandler *linspace_scorehandler = NULL;
-  GT_UNUSED const GtUchar *characters = NULL;
-  GT_UNUSED GtUchar wildcardshow = (GtUchar) 'N';
   GtTimer *timer = NULL;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
@@ -229,18 +173,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   }
   if (!had_err)
   {
-    if (arguments->optimal_alignment)
-    {
-      if (gt_querymatch_alignment_display(out_display_flag))
-      {
-        GtUword alignmentwidth
-          = gt_querymatch_display_alignmentwidth(out_display_flag);
-        alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
-      }
-      alignment = gt_alignment_new();
-      linspace_spacemanager = gt_linspace_management_new();
-      linspace_scorehandler = gt_scorehandler_new(0,1,0,1);
-    }
     semi = gt_seedextend_match_iterator_new(arguments->matchfilename,err);
     if (semi == NULL)
     {
@@ -254,11 +186,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     aencseq = gt_seedextend_match_iterator_aencseq(semi);
     bencseq = gt_seedextend_match_iterator_bencseq(semi);
     /* the following are used if seed_extend is set */
-    if (arguments->optimal_alignment)
-    {
-      characters = gt_encseq_alphabetcharacters(aencseq);
-      wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
-    }
     gt_querymatch_Fields_output(stdout,out_display_flag);
     if (!arguments->relax_polish)
     {
@@ -267,10 +194,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       {
         matchscore_bias = gt_greedy_dna_sequence_bias_get(aencseq);
       }
-      pol_info = polishing_info_new_with_bias(
-                          gt_seedextend_match_iterator_errorpercentage(semi),
-                          matchscore_bias,
-                          gt_seedextend_match_iterator_history_size(semi));
     }
     if (arguments->verify_alignment)
     {
@@ -302,6 +225,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                match_has_seed = gt_seedextend_match_iterator_has_seed(semi),
                dtrace = gt_seedextend_match_iterator_dtrace(semi);
     const GtUword trace_delta = gt_seedextend_match_iterator_trace_delta(semi);
+    GtSequencepairbuffer *seqpairbuf = NULL;
+    GtAffineDPreservoir *adpr = NULL;
 
     if (gt_querymatch_evalue_display(out_display_flag) ||
         gt_querymatch_bitscore_display(out_display_flag))
@@ -314,6 +239,12 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     if (arguments->sortmatches)
     {
       (void) gt_seedextend_match_iterator_all_sorted(semi,true);
+    }
+    if (arguments->affine_alignment)
+    {
+      const bool opt_memory = false, keepcolumns = true;
+      seqpairbuf = gt_calloc(1,sizeof *seqpairbuf);
+      adpr = gt_affine_diagonalband_new(opt_memory, keepcolumns, 0, 0);
     }
     while (true)
     {
@@ -331,40 +262,24 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                         dtrace,
                                         trace_delta,
                                         match_has_seed,
-                                        arguments->optimal_alignment,
+                                        seqpairbuf,
+                                        adpr,
                                         aencseq,
                                         bencseq,
                                         karlin_altschul_stat,
                                         evalue,
                                         bitscore);
-      /*if (arguments->optimal_alignment)
-      {
-        gt_querymatch_extract_sequence_pair(&seqpairbuf,
-                                            aencseq,
-                                            bencseq,
-                                            querymatchptr);
-        gt_querymatch_optimal_alignment(querymatchptr,
-                                        &seqpairbuf,
-                                        linspace_spacemanager,
-                                        linspace_scorehandler,
-                                        alignment,
-                                        alignment_show_buffer,
-                                        out_display_flag,
-                                        characters,
-                                        wildcardshow);
-      }
-      */
     }
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
-    gt_free(seqpairbuf.a_sequence);
-    gt_free(seqpairbuf.b_sequence);
+    if (seqpairbuf != NULL)
+    {
+      gt_free(seqpairbuf->a_sequence);
+      gt_free(seqpairbuf->b_sequence);
+      gt_free(seqpairbuf);
+      gt_affine_diagonalband_delete(adpr);
+    }
     gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   }
-  gt_free(alignment_show_buffer);
-  polishing_info_delete(pol_info);
-  gt_alignment_delete(alignment);
-  gt_scorehandler_delete(linspace_scorehandler);
-  gt_linspace_management_delete(linspace_spacemanager);
   gt_seedextend_match_iterator_delete(semi);
   if (!had_err && gt_showtime_enabled())
   {

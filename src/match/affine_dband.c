@@ -525,7 +525,7 @@ static void gt_affine_alignment_traceback_scores(
 
 struct GtAffineDPreservoir
 {
-  GtUword band_width, max_vlen, max_ulen;
+  GtUword band_width, matrix_cells, max_vlen, max_ulen;
   size_t base_type_size;
   GtAffineScoreTriple *columnspace;
   void *matrix_col_ptr, *matrix_space;
@@ -537,64 +537,84 @@ GtAffineDPreservoir *gt_affine_diagonalband_new(bool opt_memory,
                                                 GtUword max_vlen)
 {
   GtAffineDPreservoir *adpr = gt_malloc(sizeof *adpr);
-  adpr->band_width = 50;
+
+  adpr->band_width = 0;
   adpr->base_type_size = opt_memory ? sizeof (GtAffineAlignTracebits)
                                     : sizeof (GtAffineScoreTriple);
   adpr->max_vlen = max_vlen;
   adpr->max_ulen = max_ulen;
-  adpr->columnspace = gt_malloc((max_ulen+1) * sizeof *adpr->columnspace);
-  if (keepcolumns)
+  if (max_ulen > 0)
+  {
+    adpr->columnspace = gt_malloc((max_ulen+1) * sizeof *adpr->columnspace);
+  } else
+  {
+    adpr->columnspace = NULL;
+  }
+  if (keepcolumns && max_vlen > 0)
   {
     adpr->matrix_col_ptr = gt_malloc((max_vlen+1) * sizeof (void *));
-    adpr->matrix_space = gt_malloc((max_vlen+1) * adpr->band_width *
-                                   adpr->base_type_size);
   } else
   {
     adpr->matrix_col_ptr = NULL;
-    adpr->matrix_space = NULL;
   }
+  adpr->matrix_cells = 0;
+  adpr->matrix_space = NULL;
   return adpr;
 }
 
+static bool gt_affine_opt_memory(const GtAffineDPreservoir *adpr)
+{
+  gt_assert(adpr != NULL);
+  return adpr->base_type_size == sizeof (GtAffineAlignTracebits) ? true
+                                                                 : false;
+}
+
 static void *gt_affine_diagonalband_col_ptr(GtAffineDPreservoir *adpr,
-#ifndef NDEBUG
-#else
-                                            __attribute__ ((unused))
-#endif
                                             GtUword vlen)
 {
-  gt_assert(adpr != NULL && vlen <= adpr->max_vlen
-                         && adpr->matrix_col_ptr != NULL);
+  gt_assert(adpr != NULL);
+
+  if (vlen > adpr->max_vlen)
+  {
+    adpr->max_vlen = MAX(vlen,adpr->max_vlen * 1.2 + 128);
+    adpr->matrix_col_ptr = gt_realloc(adpr->matrix_col_ptr,
+                                      (adpr->max_vlen+1) * sizeof (void *));
+  } else
+  {
+    gt_assert(adpr->matrix_col_ptr != NULL);
+  }
   return adpr->matrix_col_ptr;
 }
 
 static void *gt_affine_diagonalband_column_space(GtAffineDPreservoir *adpr,
-#ifndef NDEBUG
-#else
-                                                 __attribute__ ((unused))
-#endif
                                                  GtUword ulen)
 {
-  gt_assert(adpr != NULL && ulen <= adpr->max_ulen &&
-            adpr->columnspace != NULL);
+  gt_assert(adpr != NULL);
+
+  if (ulen > adpr->max_ulen)
+  {
+    adpr->max_ulen = MAX(ulen,adpr->max_ulen * 1.2 + 128);
+    adpr->columnspace = gt_realloc(adpr->columnspace,
+                                   (adpr->max_ulen+1) *
+                                   sizeof *adpr->columnspace);
+  } else
+  {
+    gt_assert(adpr->columnspace != NULL);
+  }
   return (void *) adpr->columnspace;
 }
 
 static void *gt_affine_diagonalband_matrix_space(GtAffineDPreservoir *adpr,
                                                  GtUword band_width,
-#ifndef NDEBUG
-#else
-                                                 __attribute__ ((unused))
-#endif
                                                  GtUword vlen)
 {
-  gt_assert(adpr != NULL && vlen <= adpr->max_vlen);
-  if (band_width > adpr->band_width)
+  gt_assert(adpr != NULL);
+  if (band_width * (vlen+1) >= adpr->matrix_cells)
   {
-    adpr->band_width = MAX(adpr->band_width * 1.2,band_width);
+    adpr->matrix_cells = MAX(band_width * (vlen+1),
+                             adpr->matrix_cells * 1.2 + 1024);
     adpr->matrix_space = gt_realloc(adpr->matrix_space,
-                                    (adpr->max_vlen+1) * adpr->band_width *
-                                    adpr->base_type_size);
+                                    adpr->matrix_cells * adpr->base_type_size);
   }
   gt_assert(adpr->matrix_space != NULL);
   return (void *) adpr->matrix_space;
@@ -617,7 +637,6 @@ void gt_affine_diagonalband_delete(GtAffineDPreservoir *adpr)
 static GtAffineScore gt_affine_diagonalband_align(
                                           bool keep_columns,
                                           GtAffineDPreservoir *adpr,
-                                          bool opt_memory,
                                           int8_t gap_opening, /* > 0 */
                                           int8_t gap_extension, /* > 0 */
                                           const int8_t * const *scorematrix2D,
@@ -637,7 +656,7 @@ static GtAffineScore gt_affine_diagonalband_align(
 
   if (keep_columns)
   {
-    if (opt_memory)
+    if (gt_affine_opt_memory(adpr))
     {
       GtAffineAlignTracebits **bitmatrix
         = (GtAffineAlignTracebits **) gt_affine_diagonalband_col_ptr(adpr,vlen);
@@ -701,8 +720,7 @@ static GtAffineScore gt_affine_diagonalband_align(
   return lastcolumnRvalue;
 }
 
-static void gt_affine_diagonalband_traceback(bool opt_memory,
-                                             GtAffineDPreservoir *adpr,
+static void gt_affine_diagonalband_traceback(GtAffineDPreservoir *adpr,
                                              GtEoplist *eoplist,
                                              const GtUchar *useq,
                                              const GtUword ulen,
@@ -710,13 +728,11 @@ static void gt_affine_diagonalband_traceback(bool opt_memory,
                                              const GtUword vlen,
                                              int8_t gap_opening, /* > 0 */
                                              int8_t gap_extension, /* > 0 */
-                                             __attribute__ ((unused))
-                                               GtWord left_dist,
-                                             __attribute__ ((unused))
-                                               GtWord right_dist)
+                                             GtWord left_dist,
+                                             GtWord right_dist)
 {
   gt_eoplist_reset(eoplist);
-  if (opt_memory)
+  if (gt_affine_opt_memory(adpr))
   {
     const GtAffineAlignTracebits *const *bitmatrix
       = (const GtAffineAlignTracebits * const*)
@@ -743,7 +759,6 @@ static void gt_affine_diagonalband_traceback(bool opt_memory,
 
 GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
                                        GtAffineDPreservoir *adpr,
-                                       bool opt_memory,
                                        int8_t gap_opening, /* > 0 */
                                        int8_t gap_extension, /* > 0 */
                                        const int8_t * const *scorematrix2D,
@@ -786,7 +801,6 @@ GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
     }
     dpscore = gt_affine_diagonalband_align(eoplist,
                                            adpr,
-                                           opt_memory,
                                            gap_opening,
                                            gap_extension,
                                            scorematrix2D,
@@ -803,8 +817,7 @@ GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
     {
       if (eoplist != NULL)
       {
-        gt_affine_diagonalband_traceback(opt_memory,
-                                         adpr,
+        gt_affine_diagonalband_traceback(adpr,
                                          eoplist,
                                          useq,
                                          ulen,
