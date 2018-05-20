@@ -1379,7 +1379,8 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
       GtWord affine_score;
       const int8_t gap_opening = 4, gap_extension = 2;
       const GtUword alphasize = 4;
-      GtUword expected_min_score;
+      GtUword expected_min_score,
+              abs_querystart_fwdstrand;
       const int8_t smallest_score = -5,
 		   *unitscoreDNA[5],
 		   unitscoreDNAtable[] = { 2,-1,-1,-1,-5,
@@ -1421,6 +1422,15 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
 	  + gt_eoplist_deletions_count(querymatch->ref_eoplist)
 	  + gt_eoplist_insertions_count(querymatch->ref_eoplist);
       querymatch->score = affine_score;
+      abs_querystart_fwdstrand = querymatch->query_seqstart +
+                                 querymatch->querystart_fwdstrand;
+      gt_eoplist_set_sequences(querymatch->ref_eoplist,
+                               seqpairbuf->a_sequence,
+                               querymatch->dbstart_relative,
+                               seqpairbuf->a_len,
+                               seqpairbuf->b_sequence,
+                               abs_querystart_fwdstrand,
+                               seqpairbuf->b_len);
     } else
     {
       if (match_has_seed)

@@ -393,7 +393,7 @@ Test do
     run_test "#{$bin}gt dev show_seedext -f seed_extend.out " + outfmt_seed
     run "mv #{last_stdout} show_seed_ext.out"
     run "diff -I '^#' seed_extend.out show_seed_ext.out"
-    run_test "#{$bin}gt dev show_seedext -f seed_extend.out -optimal -outfmt alignment"
+    run_test "#{$bin}gt dev show_seedext -f seed_extend.out -affine -outfmt alignment"
     $OUTFMT_ARGS.each do |arg|
       if arg != "subjectid" and arg != "queryid" and not arg.match(/^seed/)
         run_test "#{$bin}gt dev show_seedext -f seed_extend.out #{outfmt_seed} #{arg}"
@@ -404,7 +404,7 @@ Test do
     end
     run_test "#{$bin}gt seed_extend -v -ii at1MB#{qidx}"
     run "mv #{last_stdout} tmp.matches"
-    run_test "#{$bin}gt dev show_seedext -f tmp.matches -optimal -outfmt alignment"
+    run_test "#{$bin}gt dev show_seedext -f tmp.matches -affine -outfmt alignment"
   end
   ["",outfmt_seed].each do |seed|
     run_test "#{$bin}gt seed_extend -v -ii at1MB -l 783 " + seed
