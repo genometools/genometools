@@ -41,7 +41,8 @@ char gt_eoplist_pretty_print(GtEopType eoptype,bool distinguish_mismatch_match)
 
 struct GtEoplist
 {
-  GtUword nextfreeuint8_t, allocateduint8_t, countdeletions, countinsertions;
+  GtUword nextfreeuint8_t, allocateduint8_t, countmatches, countmismatches,
+          countdeletions, countinsertions;
   uint8_t *spaceuint8_t;
   const GtUchar *useq, *vseq;
   GtUword ustart, ulen, vstart, vlen;
@@ -57,6 +58,8 @@ void gt_eoplist_reset(GtEoplist *eoplist)
   if (eoplist != NULL)
   {
     eoplist->nextfreeuint8_t = 0;
+    eoplist->countmatches = 0;
+    eoplist->countmismatches = 0;
     eoplist->countdeletions = 0;
     eoplist->countinsertions = 0;
     eoplist->useq = eoplist->vseq = NULL;
@@ -206,9 +209,11 @@ void gt_eoplist_match_add(GtEoplist *eoplist,GtUword length)
     {
       gt_assert(length > 0);
       GT_EOPLIST_PUSH(eoplist,(uint8_t) (length - 1)); /* R length */
+      eoplist->countmatches += length;
       break;
     }
     GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_MAXMATCHES - 1); /* R max */
+    eoplist->countmatches += FT_EOPCODE_MAXMATCHES;
     length -= FT_EOPCODE_MAXMATCHES;
   }
 }
@@ -216,6 +221,7 @@ void gt_eoplist_match_add(GtEoplist *eoplist,GtUword length)
 void gt_eoplist_mismatch_add(GtEoplist *eoplist)
 {
   GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_MISMATCH); /* R 1 */
+  eoplist->countmismatches++;
 }
 
 void gt_eoplist_deletion_add(GtEoplist *eoplist)
@@ -257,6 +263,18 @@ void gt_eoplist_reverse_end(GtEoplist *eoplist,GtUword firstindex)
     *fwd = *bck;
     *bck = tmp;
   }
+}
+
+GtUword gt_eoplist_matches_count(const GtEoplist *eoplist)
+{
+  gt_assert(eoplist != NULL);
+  return eoplist->countmatches;
+}
+
+GtUword gt_eoplist_mismatches_count(const GtEoplist *eoplist)
+{
+  gt_assert(eoplist != NULL);
+  return eoplist->countmismatches;
 }
 
 GtUword gt_eoplist_deletions_count(const GtEoplist *eoplist)

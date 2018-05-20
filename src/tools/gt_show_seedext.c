@@ -207,8 +207,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
   GtLinspaceManagement *linspace_spacemanager = NULL;
   GtScoreHandler *linspace_scorehandler = NULL;
-  const GtUchar *characters = NULL;
-  GtUchar wildcardshow = (GtUchar) 'N';
+  GT_UNUSED const GtUchar *characters = NULL;
+  GT_UNUSED GtUchar wildcardshow = (GtUchar) 'N';
   GtTimer *timer = NULL;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
@@ -331,12 +331,13 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                         dtrace,
                                         trace_delta,
                                         match_has_seed,
+                                        arguments->optimal_alignment,
                                         aencseq,
                                         bencseq,
                                         karlin_altschul_stat,
                                         evalue,
                                         bitscore);
-      if (arguments->optimal_alignment)
+      /*if (arguments->optimal_alignment)
       {
         gt_querymatch_extract_sequence_pair(&seqpairbuf,
                                             aencseq,
@@ -352,6 +353,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                         characters,
                                         wildcardshow);
       }
+      */
     }
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
     gt_free(seqpairbuf.a_sequence);

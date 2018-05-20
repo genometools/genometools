@@ -20,11 +20,11 @@ GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
                                        int8_t gap_extension, /* > 0 */
                                        const int8_t * const *scorematrix2D,
                                        int8_t smallest_score,
-                                       GtUword alphasize,
                                        const GtUchar *useq,
                                        GtUword ulen,
                                        const GtUchar *vseq,
                                        GtUword vlen,
+                                       bool no_score_run,
                                        GtUword expected_score);
 
 #endif

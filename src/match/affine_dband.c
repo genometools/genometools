@@ -80,6 +80,15 @@ static GtUword show_dband_value(GtUword current_idx,GtUword j,
 }
 )/*GT_SHOW_AFFINE_DP_COLUMNS*/
 
+#define GT_AFFINE_SCORE_ROW_GET(CC) (ISSPECIAL(CC) ? NULL\
+                                                   : scorematrix2D[(int) (CC)])
+#define GT_AFFINE_SCORE_ROW_ACCESS(CC)\
+        ((score_row == NULL || ISSPECIAL(CC)) \
+           ? smallest_score\
+           : (GtAffineScore) score_row[(int) (CC)])
+#define GT_AFFINE_EQUAL_SYMBOLS(CA,CB)\
+        (!ISSPECIAL(CA) && (CA) == (CB))
+
 static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
                                           GtAffineAlignTracebits **bitmatrix,
                                           GtAffineScoreTriple *currentcol,
@@ -90,8 +99,8 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
 #else
                                           __attribute__ ((unused))
 #endif
-                                          GtUword alphasize,
                                           GtAffineScore min_align_score,
+                                          GtAffineScore smallest_score,
                                           const GtUchar *useq,
                                           GtUword ulen,
                                           const GtUchar *vseq,
@@ -123,7 +132,6 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
   colptr = bitmatrix[0];
   for (i = 1; i <= high_row; i++)
   {
-    gt_assert(useq[i-1] < alphasize);
     GT_AFFINE_EDGE_SET(i,0,Affine_D,Affine_D);
     currentcol[i].Rvalue = min_align_score;
     currentcol[i].Dvalue = GT_AFFINE_SCORE_SUM(currentcol[i-1].Dvalue,
@@ -139,14 +147,16 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
   {
     const GtAffineScoreTriple *cptr;
     GtAffineScoreTriple nw;
-    const int8_t *score_row = scorematrix2D[(int) vseq[j-1]];
+    const GtUchar cb = vseq[j-1];
+    const int8_t *score_row = GT_AFFINE_SCORE_ROW_GET(cb);
+
     GtAffineScore first_ivalue = min_align_score, score_R, score_D, score_I;
     const GtUword prev_high_row = high_row;
 
     GT_SHOW_AFFINE_DP_COLUMNS(
     current_idx = show_dband_value(current_idx,j-1,currentcol,low_row,high_row);
     )/*GT_SHOW_AFFINE_DP_COLUMNS*/
-    gt_assert(vseq[j-1] < alphasize && low_row <= high_row &&
+    gt_assert(low_row <= high_row &&
               (GtUword) (high_row - low_row + 1) <= band_width);
     colptr += (high_row - low_row + 1);
     bitmatrix[j] = colptr - low_row;
@@ -172,6 +182,7 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
     for (i = low_row+1; i <= high_row; i++)
     {
       GtAffineScoreTriple currententry;
+      const GtUchar ca = useq[i-1];
       GtAffineAlignEditOp rmaxedge = Affine_R, dmaxedge, imaxedge = Affine_X;
 
       currententry.Ivalue = min_align_score;
@@ -187,7 +198,7 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
         currententry.Rvalue = nw.Ivalue;
         rmaxedge = Affine_I;
       }
-      currententry.Rvalue += (GtAffineScore) score_row[useq[i-1]];
+      currententry.Rvalue += GT_AFFINE_SCORE_ROW_ACCESS(ca);
 
       /* compute A_affine(i,j,D) from value in the north */
       cptr = currentcol + i - 1;
@@ -232,8 +243,8 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_scores(
 #else
                                            __attribute__ ((unused))
 #endif
-                                           GtUword alphasize,
                                            GtAffineScore min_align_score,
+                                           GtAffineScore smallest_score,
                                            const GtUchar *useq,
                                            GtUword ulen,
                                            const GtUchar *vseq,
@@ -265,7 +276,6 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_scores(
   /* first column */
   for (i = 1; i <= high_row; i++)
   {
-    gt_assert(useq[i-1] < alphasize);
     currentcol[i].Rvalue = min_align_score;
     currentcol[i].Dvalue = GT_AFFINE_SCORE_SUM(currentcol[i-1].Dvalue,
                                                -gap_extension);
@@ -286,11 +296,12 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_scores(
   for (j = 1; j <= vlen; j++)
   {
     GtAffineScoreTriple nw;
-    const int8_t *score_row = scorematrix2D[(int) vseq[j-1]];
+    const GtUchar cb = vseq[j-1];
+    const int8_t *score_row = GT_AFFINE_SCORE_ROW_GET(cb);
     GtAffineScore first_ivalue = min_align_score, score_R, score_D, score_I;
     const GtUword prev_high_row = high_row;
 
-    gt_assert(vseq[j-1] < alphasize && low_row <= high_row &&
+    gt_assert(low_row <= high_row &&
               (GtUword) (high_row - low_row + 1) <= band_width);
     GT_SHOW_AFFINE_DP_COLUMNS(
     current_idx = show_dband_value(current_idx,j-1,currentcol,low_row,high_row);
@@ -311,6 +322,7 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_scores(
     {
       GtAffineScoreTriple currententry,
                      *cptr = currentcol + i - 1;
+      const GtUchar ca = useq[i-1];
 
       score_R = GT_AFFINE_SCORE_SUM(cptr->Rvalue,start_penalty);
       score_D = GT_AFFINE_SCORE_SUM(cptr->Dvalue,-gap_extension);
@@ -322,7 +334,7 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_scores(
       currententry.Ivalue = MAX(score_R,score_I);
 
       currententry.Rvalue = MAX3(nw.Rvalue,nw.Dvalue,nw.Ivalue) +
-                            (GtAffineScore) score_row[useq[i-1]];
+                            GT_AFFINE_SCORE_ROW_ACCESS(ca);
       nw = currentcol[i];
       currentcol[i] = currententry;
     }
@@ -330,6 +342,7 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_scores(
     {
       GtAffineScoreTriple currententry,
                      *cptr = currentcol + prev_high_row;
+      const GtUchar ca = useq[high_row];
 
       high_row++;
       score_R = GT_AFFINE_SCORE_SUM(cptr->Rvalue,start_penalty);
@@ -337,7 +350,7 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_scores(
       currententry.Dvalue = MAX(score_R,score_D);
       currententry.Ivalue = min_align_score;
       currententry.Rvalue = MAX3(nw.Rvalue,nw.Dvalue,nw.Ivalue) +
-                            (GtAffineScore) score_row[useq[high_row-1]];
+                            GT_AFFINE_SCORE_ROW_ACCESS(ca);
       currentcol[high_row] = currententry;
     }
     evaluated_cells += (high_row - low_row);
@@ -384,7 +397,7 @@ static void gt_affine_alignment_traceback_bits(GtEoplist *eoplist,
     {
       case Affine_R:
         gt_assert(i > 0 && j > 0);
-        if (useq[i-1] == vseq[j-1])
+        if (GT_AFFINE_EQUAL_SYMBOLS(useq[i-1],vseq[j-1]))
         {
           gt_eoplist_match_add(eoplist,1);
         } else
@@ -452,7 +465,7 @@ static void gt_affine_alignment_traceback_scores(
     {
       case Affine_R:
         gt_assert(i > 0 && j > 0);
-        if (useq[i-1] == vseq[j-1])
+        if (GT_AFFINE_EQUAL_SYMBOLS(useq[i-1],vseq[j-1]))
         {
           gt_eoplist_match_add(eoplist,1);
         } else
@@ -601,14 +614,15 @@ void gt_affine_diagonalband_delete(GtAffineDPreservoir *adpr)
 /* calculate alignment within diagonalband specified by left_dist and
    right_dist.  space and running time is O(bandwidth * vlen) */
 
-static GtAffineScore gt_affine_diagonalband_align(GtEoplist *eoplist,
+static GtAffineScore gt_affine_diagonalband_align(
+                                          bool keep_columns,
                                           GtAffineDPreservoir *adpr,
                                           bool opt_memory,
                                           int8_t gap_opening, /* > 0 */
                                           int8_t gap_extension, /* > 0 */
                                           const int8_t * const *scorematrix2D,
-                                          GtUword alphasize,
                                           GtAffineScore min_align_score,
+                                          GtAffineScore smallest_score,
                                           const GtUchar *useq,
                                           GtUword ulen,
                                           const GtUchar *vseq,
@@ -621,7 +635,7 @@ static GtAffineScore gt_affine_diagonalband_align(GtEoplist *eoplist,
   GtAffineScoreTriple *columnspace
     = (GtAffineScoreTriple *) gt_affine_diagonalband_column_space(adpr,ulen);
 
-  if (eoplist != NULL)
+  if (keep_columns)
   {
     if (opt_memory)
     {
@@ -637,18 +651,14 @@ static GtAffineScore gt_affine_diagonalband_align(GtEoplist *eoplist,
                                                 gap_opening,
                                                 gap_extension,
                                                 scorematrix2D,
-                                                alphasize,
                                                 min_align_score,
+                                                smallest_score,
                                                 useq,
                                                 ulen,
                                                 vseq,
                                                 vlen,
                                                 left_dist,
                                                 right_dist);
-      gt_eoplist_reset(eoplist);
-      gt_affine_alignment_traceback_bits(eoplist,
-                                         (const GtAffineAlignTracebits *const *)
-                                         bitmatrix,useq,ulen,vseq,vlen);
     } else
     {
       GtAffineScoreTriple **dpmatrix
@@ -662,28 +672,15 @@ static GtAffineScore gt_affine_diagonalband_align(GtEoplist *eoplist,
                                                   gap_opening,
                                                   gap_extension,
                                                   scorematrix2D,
-                                                  alphasize,
                                                   min_align_score,
+                                                  smallest_score,
                                                   useq,
                                                   ulen,
                                                   vseq,
                                                   vlen,
                                                   left_dist,
                                                   right_dist);
-      gt_eoplist_reset(eoplist);
-      gt_affine_alignment_traceback_scores(eoplist,
-                                           (const GtAffineScoreTriple *
-                                            const *) dpmatrix,
-                                           useq,
-                                           ulen,
-                                           vseq,
-                                           vlen,
-                                           gap_opening,
-                                           gap_extension,
-                                           left_dist,
-                                           right_dist);
     }
-    gt_eoplist_reverse_end(eoplist,0);
   } else
   {
     lastcolumnRvalue
@@ -692,8 +689,8 @@ static GtAffineScore gt_affine_diagonalband_align(GtEoplist *eoplist,
                                                 gap_opening,
                                                 gap_extension,
                                                 scorematrix2D,
-                                                alphasize,
                                                 min_align_score,
+                                                smallest_score,
                                                 useq,
                                                 ulen,
                                                 vseq,
@@ -702,6 +699,46 @@ static GtAffineScore gt_affine_diagonalband_align(GtEoplist *eoplist,
                                                 right_dist);
   }
   return lastcolumnRvalue;
+}
+
+static void gt_affine_diagonalband_traceback(bool opt_memory,
+                                             GtAffineDPreservoir *adpr,
+                                             GtEoplist *eoplist,
+                                             const GtUchar *useq,
+                                             const GtUword ulen,
+                                             const GtUchar *vseq,
+                                             const GtUword vlen,
+                                             int8_t gap_opening, /* > 0 */
+                                             int8_t gap_extension, /* > 0 */
+                                             __attribute__ ((unused))
+                                               GtWord left_dist,
+                                             __attribute__ ((unused))
+                                               GtWord right_dist)
+{
+  gt_eoplist_reset(eoplist);
+  if (opt_memory)
+  {
+    const GtAffineAlignTracebits *const *bitmatrix
+      = (const GtAffineAlignTracebits * const*)
+        gt_affine_diagonalband_col_ptr(adpr,vlen);
+    gt_affine_alignment_traceback_bits(eoplist,bitmatrix,useq,ulen,vseq,vlen);
+  } else
+  {
+    const GtAffineScoreTriple *const * dpmatrix
+      = (const GtAffineScoreTriple * const*)
+        gt_affine_diagonalband_col_ptr(adpr,vlen);
+    gt_affine_alignment_traceback_scores(eoplist,
+                                         dpmatrix,
+                                         useq,
+                                         ulen,
+                                         vseq,
+                                         vlen,
+                                         gap_opening,
+                                         gap_extension,
+                                         left_dist,
+                                         right_dist);
+  }
+  gt_eoplist_reverse_end(eoplist,0);
 }
 
 GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
@@ -715,11 +752,11 @@ GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
 #else
                                        __attribute__ ((unused))
 #endif
-                                       GtUword alphasize,
                                        const GtUchar *useq,
                                        GtUword ulen,
                                        const GtUchar *vseq,
                                        GtUword vlen,
+                                       bool no_score_run,
                                        GtUword expected_score)
 {
   GtUword iteration;
@@ -727,7 +764,8 @@ GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
   const GtWord lendiff = (GtWord) vlen - (GtWord) ulen;
 #endif
   GtUword band_width = 1 + (GtUword) ((vlen > ulen) ? vlen - ulen
-                                                    : ulen - vlen);
+                                                    : ulen - vlen),
+          previous_dpscore = GT_UWORD_MAX;
   const GtWord min_align_score = (ulen + vlen) * (GtAffineScore) smallest_score;
 
   gt_assert(smallest_score < 0 && min_align_score > INT_MIN/2);
@@ -752,23 +790,34 @@ GtUword gt_affine_iter_diagonalband_align(GtEoplist *eoplist,
                                            gap_opening,
                                            gap_extension,
                                            scorematrix2D,
-                                           alphasize,
                                            (GtAffineScore) min_align_score,
+                                           smallest_score,
                                            useq,
                                            ulen,
                                            vseq,
                                            vlen,
                                            left_dist,
                                            right_dist);
-    if (expected_score == 0)
+    if (expected_score == 0 || dpscore >= (GtAffineScore) expected_score ||
+        (no_score_run && previous_dpscore == dpscore))
     {
-      gt_assert(dpscore > 0);
+      if (eoplist != NULL)
+      {
+        gt_affine_diagonalband_traceback(opt_memory,
+                                         adpr,
+                                         eoplist,
+                                         useq,
+                                         ulen,
+                                         vseq,
+                                         vlen,
+                                         gap_opening, /* > 0 */
+                                         gap_extension, /* > 0 */
+                                         left_dist,
+                                         right_dist);
+      }
       return (GtUword) dpscore;
     }
-    if (dpscore == (GtAffineScore) expected_score)
-    {
-      return 0;
-    }
+    previous_dpscore = dpscore;
     if (band_width < 4)
     {
       band_width *= 2;

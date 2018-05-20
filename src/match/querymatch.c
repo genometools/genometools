@@ -26,6 +26,7 @@
 #include "karlin_altschul_stat.h"
 #include "ft-eoplist.h"
 #include "revcompl.h"
+#include "affine_dband.h"
 
 struct GtQuerymatch
 {
@@ -1336,6 +1337,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        bool dtrace,
                                        GtUword trace_delta,
                                        bool match_has_seed,
+                                       bool affine_alignment,
                                        const GtEncseq *db_encseq,
                                        const GtEncseq *query_encseq,
                                        const GtKarlinAltschulStat
@@ -1377,8 +1379,70 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                    &query_seqorencseq);
     } else
     {
-      gt_querymatch_full_alignment(querymatch,&db_seqorencseq,
-                                   &query_seqorencseq);
+      if (affine_alignment)
+      {
+        GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
+        GtAffineDPreservoir *adpr;
+        GtWord affine_score;
+        const bool opt_memory = false;
+        const int8_t gap_opening = 4, gap_extension = 2;
+        const GtUword alphasize = 4;
+        GtUword expected_min_score;
+        const int8_t smallest_score = -5,
+                     unitscoreDNAtable[] = { 2,-1,-1,-1,-5,
+                                            -1, 2,-1,-1,-5,
+                                            -1,-1, 2,-1,-5,
+                                            -1,-1,-1, 2,-5,
+                                            -5,-5,-5,-5,-5
+                                         };
+        const int8_t *unitscoreDNA[5];
+
+        unitscoreDNA[0] = unitscoreDNAtable;
+        unitscoreDNA[1] = unitscoreDNA[0] + alphasize + 1;
+        unitscoreDNA[2] = unitscoreDNA[1] + alphasize + 1;
+        unitscoreDNA[3] = unitscoreDNA[2] + alphasize + 1;
+        unitscoreDNA[4] = unitscoreDNA[3] + alphasize + 1;
+        gt_querymatch_extract_sequence_pair(&seqpairbuf,
+                                            db_seqorencseq.encseq,
+                                            query_seqorencseq.encseq,
+                                            querymatch);
+        adpr = gt_affine_diagonalband_new(opt_memory,
+                                          true,
+                                          seqpairbuf.a_len,
+                                          seqpairbuf.b_len);
+        gt_assert(querymatch->ref_eoplist != NULL);
+        expected_min_score = (querymatch->score *
+                              gt_querymatch_similarity(querymatch))/100;
+        affine_score
+          = (GtWord) gt_affine_iter_diagonalband_align(querymatch->ref_eoplist,
+                                                       adpr,
+                                                       opt_memory,
+                                                       gap_opening,
+                                                       gap_extension,
+                                                       (const int8_t *const *)
+                                                          unitscoreDNA,
+                                                       smallest_score,
+                                                       seqpairbuf.a_sequence,
+                                                       seqpairbuf.a_len,
+                                                       seqpairbuf.b_sequence,
+                                                       seqpairbuf.b_len,
+                                                       true,
+                                                       expected_min_score);
+        querymatch->mismatches
+          = gt_eoplist_mismatches_count(querymatch->ref_eoplist);
+        querymatch->distance
+          = querymatch->mismatches
+            + gt_eoplist_deletions_count(querymatch->ref_eoplist)
+            + gt_eoplist_insertions_count(querymatch->ref_eoplist);
+        querymatch->score = affine_score;
+        gt_free(seqpairbuf.a_sequence);
+        gt_free(seqpairbuf.b_sequence);
+        gt_affine_diagonalband_delete(adpr);
+      } else
+      {
+        gt_querymatch_full_alignment(querymatch,&db_seqorencseq,
+                                     &query_seqorencseq);
+      }
     }
   }
   if ((evalue == DBL_MAX || bitscore == DBL_MAX) &&
