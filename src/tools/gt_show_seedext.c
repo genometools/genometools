@@ -104,7 +104,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
 
   /* -affine */
   op_affine_alignment = gt_option_new_bool("affine",
-                                           "compute optimal affine alignment"
+                                           "compute optimal affine alignment "
                                            "for substrings in given "
                                            "coordinates",
                                            &arguments->affine_alignment,false);
@@ -164,7 +164,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   }
   gt_error_check(err);
   gt_assert(arguments != NULL);
-  /* Parse option string in first line of file specified by filename. */
   out_display_flag
     = gt_querymatch_display_flag_new(arguments->display_args,setmode,err);
   if (out_display_flag == NULL)
@@ -179,7 +178,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       had_err = -1;
     }
   }
-  /* Parse seed extensions. */
   if (!had_err)
   {
     printf("%s\n",gt_seedextend_match_iterator_Options_line(semi));
@@ -187,14 +185,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     bencseq = gt_seedextend_match_iterator_bencseq(semi);
     /* the following are used if seed_extend is set */
     gt_querymatch_Fields_output(stdout,out_display_flag);
-    if (!arguments->relax_polish)
-    {
-      double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
-      if (gt_seedextend_match_iterator_bias_parameters(semi))
-      {
-        matchscore_bias = gt_greedy_dna_sequence_bias_get(aencseq);
-      }
-    }
     if (arguments->verify_alignment)
     {
       gt_seedextend_match_iterator_verify_alignment_set(semi);
@@ -214,6 +204,15 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                             out_display_flag,
                             err) != 0)
       {
+        had_err = -1;
+      }
+    } else
+    {
+      if (arguments->affine_alignment)
+      {
+        gt_error_set(err,"Option -affine requires option -outfmt with one of "
+                         "the following arguments: alignment, trace, dtrace, "
+                         "cigar, or cigarX");
         had_err = -1;
       }
     }
@@ -243,6 +242,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     if (arguments->affine_alignment)
     {
       const bool opt_memory = false, keepcolumns = true;
+
       seqpairbuf = gt_calloc(1,sizeof *seqpairbuf);
       adpr = gt_affine_diagonalband_new(opt_memory, keepcolumns, 0, 0);
     }

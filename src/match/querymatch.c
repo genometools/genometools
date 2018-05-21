@@ -1374,7 +1374,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
     }
   } else
   {
-    if (seqpairbuf != NULL && querymatch->ref_eoplist != NULL)
+    if (seqpairbuf != NULL)
     {
       GtWord affine_score;
       const int8_t gap_opening = 4, gap_extension = 2;
@@ -1390,6 +1390,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
 					  -5,-5,-5,-5,-5
 					 };
 
+      gt_assert (querymatch->ref_eoplist != NULL);
       unitscoreDNA[0] = unitscoreDNAtable;
       unitscoreDNA[1] = unitscoreDNA[0] + alphasize + 1;
       unitscoreDNA[2] = unitscoreDNA[1] + alphasize + 1;
