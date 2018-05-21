@@ -1377,7 +1377,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
     if (seqpairbuf != NULL)
     {
       GtWord affine_score;
-      const int8_t gap_opening = 4, gap_extension = 2;
+      const int8_t gap_opening = 4, gap_extension = 1;
       const GtUword alphasize = 4;
       GtUword expected_min_score,
               abs_querystart_fwdstrand;

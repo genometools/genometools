@@ -154,7 +154,7 @@ void gt_querymatchoutoptions_extend(
     if (always_polished_ends)
     {
       gt_eoplist_polished_ends(querymatchoutoptions->eoplist,
-                               querymatchoutoptions->pol_info,true,
+                               querymatchoutoptions->pol_info,false,
                                gt_querymatch_polinfo_display(out_display_flag));
     }
     if (gt_querymatch_seed_in_algn_display(out_display_flag))
