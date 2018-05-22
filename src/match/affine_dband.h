@@ -1,7 +1,7 @@
 #ifndef AFFINE_DBAND_H
 #define AFFINE_DBAND_H
 #include <stdbool.h>
-#include <inttypes.h>
+#include <stdint.h>
 #include "ft-eoplist.h"
 
 typedef struct GtAffineDPreservoir GtAffineDPreservoir;

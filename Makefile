@@ -396,6 +396,14 @@ ifeq ($(popcnt),yes)
   endif
 endif
 
+ifeq ($(sse),yes)
+  GT_CFLAGS += -msse4.2
+endif
+
+ifeq ($(avx2),yes)
+  GT_CFLAGS += -mavx2
+endif
+
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/gtlua \

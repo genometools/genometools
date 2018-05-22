@@ -27,6 +27,9 @@
 #include "ft-eoplist.h"
 #include "revcompl.h"
 #include "affine_dband.h"
+#ifdef AFFINE_ALIGN_SSW
+#include "ssw.h"
+#endif
 
 struct GtQuerymatch
 {
@@ -1330,6 +1333,121 @@ static void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
   }
 }
 
+#ifdef AFFINE_ALIGN_SSW
+static void gt_querymatch_translate(GtUchar *seq,GtUword len,GtUchar cc,
+                                    GtUchar sub)
+{
+  GtUword idx;
+
+  for (idx = 0; idx < len; idx++)
+  {
+    if (seq[idx] == cc)
+    {
+      seq[idx] = sub;
+    }
+  }
+}
+#endif
+
+static void gt_querymatch_affine_alignment(GtQuerymatch *querymatch,
+                                           GtSequencepairbuffer *seqpairbuf,
+                                           GtAffineDPreservoir *adpr,
+                                           const GtEncseq *aencseq,
+                                           const GtEncseq *bencseq)
+{
+  GtWord affine_score;
+  const int8_t gap_opening = 4, gap_extension = 1;
+  const GtUword alphasize = 5;
+  GtUword expected_min_score,
+	  abs_querystart_fwdstrand;
+  const double correctness = 99;
+  const int8_t smallest_score = -5,
+	       *unitscoreDNA[5],
+	       unitscoreDNAtable[] = { 2,-1,-1,-1,-5,
+				      -1, 2,-1,-1,-5,
+				      -1,-1, 2,-1,-5,
+				      -1,-1,-1, 2,-5,
+				      -5,-5,-5,-5,-5
+				     };
+
+  gt_assert (querymatch->ref_eoplist != NULL);
+  unitscoreDNA[0] = unitscoreDNAtable;
+  unitscoreDNA[1] = unitscoreDNA[0] + alphasize;
+  unitscoreDNA[2] = unitscoreDNA[1] + alphasize;
+  unitscoreDNA[3] = unitscoreDNA[2] + alphasize;
+  unitscoreDNA[4] = unitscoreDNA[3] + alphasize;
+  gt_querymatch_extract_sequence_pair(seqpairbuf,aencseq,bencseq,querymatch);
+#ifdef AFFINE_ALIGN_SSW
+  GtUword opt_affine_score, opt_ustart, opt_vstart, opt_usubstringlength,
+	  opt_vsubstringlength;;
+  GtSSWprofile *vprofile;
+  const bool compute_only_end = false;
+  gt_querymatch_translate(seqpairbuf->a_sequence,seqpairbuf->a_len,
+			  (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
+  gt_querymatch_translate(seqpairbuf->b_sequence,seqpairbuf->b_len,
+			  (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
+  vprofile = gt_ssw_profile_new (seqpairbuf->a_sequence,
+				 seqpairbuf->a_len,
+				 unitscoreDNAtable,
+				 smallest_score,
+				 alphasize,
+				 compute_only_end);
+  opt_affine_score
+     = gt_ssw_align (&opt_ustart,
+		     &opt_usubstringlength,
+		     &opt_vstart,
+		     &opt_vsubstringlength,
+		     vprofile,
+		     NULL,
+		     seqpairbuf->b_sequence,
+		     seqpairbuf->b_len,
+		     gap_opening,
+		     gap_extension,
+		     compute_only_end);
+
+  gt_ssw_profile_delete (vprofile);
+  querymatch_translate(seqpairbuf->a_sequence,seqpairbuf->a_len,
+		       (GtUchar) (alphasize-1),(GtUchar) WILDCARD);
+  querymatch_translate(seqpairbuf->b_sequence,seqpairbuf->b_len,
+		       (GtUchar) (alphasize-1),(GtUchar) WILDCARD);
+  printf("%lu %lu %lu %lu %lu ",
+	    opt_affine_score,
+	    opt_ustart,opt_usubstringlength,
+	    opt_vstart,opt_vsubstringlength);
+#endif
+  expected_min_score = (querymatch->score * correctness)/100;
+  affine_score
+    = (GtWord) gt_affine_iter_diagonalband_align(querymatch->ref_eoplist,
+						 adpr,
+						 gap_opening,
+						 gap_extension,
+						 (const int8_t *const *)
+						    unitscoreDNA,
+						 smallest_score,
+						 seqpairbuf->a_sequence,
+						 seqpairbuf->a_len,
+						 seqpairbuf->b_sequence,
+						 seqpairbuf->b_len,
+						 true,
+						 expected_min_score);
+  querymatch->mismatches
+    = gt_eoplist_mismatches_count(querymatch->ref_eoplist);
+  querymatch->distance
+    = querymatch->mismatches
+      + gt_eoplist_deletions_count(querymatch->ref_eoplist)
+      + gt_eoplist_insertions_count(querymatch->ref_eoplist);
+  querymatch->score = affine_score;
+  abs_querystart_fwdstrand = querymatch->query_seqstart +
+			     querymatch->querystart_fwdstrand;
+  gt_eoplist_set_sequences(querymatch->ref_eoplist,
+			   seqpairbuf->a_sequence,
+			   querymatch->dbstart_relative,
+                           seqpairbuf->a_len,
+                           seqpairbuf->b_sequence,
+                           abs_querystart_fwdstrand,
+                           seqpairbuf->b_len);
+}
+
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
@@ -1376,62 +1494,11 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
   {
     if (seqpairbuf != NULL)
     {
-      GtWord affine_score;
-      const int8_t gap_opening = 4, gap_extension = 1;
-      const GtUword alphasize = 4;
-      GtUword expected_min_score,
-              abs_querystart_fwdstrand;
-      const int8_t smallest_score = -5,
-		   *unitscoreDNA[5],
-		   unitscoreDNAtable[] = { 2,-1,-1,-1,-5,
-					  -1, 2,-1,-1,-5,
-					  -1,-1, 2,-1,-5,
-					  -1,-1,-1, 2,-5,
-					  -5,-5,-5,-5,-5
-					 };
-
-      gt_assert (querymatch->ref_eoplist != NULL);
-      unitscoreDNA[0] = unitscoreDNAtable;
-      unitscoreDNA[1] = unitscoreDNA[0] + alphasize + 1;
-      unitscoreDNA[2] = unitscoreDNA[1] + alphasize + 1;
-      unitscoreDNA[3] = unitscoreDNA[2] + alphasize + 1;
-      unitscoreDNA[4] = unitscoreDNA[3] + alphasize + 1;
-      gt_querymatch_extract_sequence_pair(seqpairbuf,
-					  db_seqorencseq.encseq,
-					  query_seqorencseq.encseq,
-					  querymatch);
-      expected_min_score = (querymatch->score *
-			    gt_querymatch_similarity(querymatch))/100;
-      affine_score
-	= (GtWord) gt_affine_iter_diagonalband_align(querymatch->ref_eoplist,
-						     adpr,
-						     gap_opening,
-						     gap_extension,
-						     (const int8_t *const *)
-							unitscoreDNA,
-						     smallest_score,
-						     seqpairbuf->a_sequence,
-						     seqpairbuf->a_len,
-						     seqpairbuf->b_sequence,
-						     seqpairbuf->b_len,
-						     true,
-						     expected_min_score);
-      querymatch->mismatches
-	= gt_eoplist_mismatches_count(querymatch->ref_eoplist);
-      querymatch->distance
-	= querymatch->mismatches
-	  + gt_eoplist_deletions_count(querymatch->ref_eoplist)
-	  + gt_eoplist_insertions_count(querymatch->ref_eoplist);
-      querymatch->score = affine_score;
-      abs_querystart_fwdstrand = querymatch->query_seqstart +
-                                 querymatch->querystart_fwdstrand;
-      gt_eoplist_set_sequences(querymatch->ref_eoplist,
-                               seqpairbuf->a_sequence,
-                               querymatch->dbstart_relative,
-                               seqpairbuf->a_len,
-                               seqpairbuf->b_sequence,
-                               abs_querystart_fwdstrand,
-                               seqpairbuf->b_len);
+      gt_querymatch_affine_alignment(querymatch,
+                                     seqpairbuf,
+                                     adpr,
+                                     db_seqorencseq.encseq,
+                                     query_seqorencseq.encseq);
     } else
     {
       if (match_has_seed)

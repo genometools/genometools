@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <inttypes.h>
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "affine_dband.h"

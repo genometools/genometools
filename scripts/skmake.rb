@@ -35,6 +35,8 @@ def parseargs(argv)
   options.fileargs = nil
   options.threads = true
   options.sketch = false
+  options.sse = false
+  options.avx2 = false
   opts = OptionParser.new
   opts.on("--sketch","compile with annotation sketch") do |x|
     options.sketch = true
@@ -51,6 +53,12 @@ def parseargs(argv)
   opts.on("--prof","compile for profiling") do |x|
     options.prof = true
   end
+  opts.on("--sse","compile with -msse4.2") do |x|
+    options.sse = true
+  end
+  opts.on("--avx2","compile with -mavx2") do |x|
+    options.avx2 = true
+  end
   opts.on("--noopt","no optimization") do |x|
     options.optimize = false
   end
@@ -63,6 +71,10 @@ def parseargs(argv)
   rest = opts.parse(argv)
   if not rest.empty?
     options.fileargs = rest
+  end
+  if options.sse and options.avx2
+    STDERR.puts "#{$0}: options --sse and --avx2 exclude each other"
+    exit 1
   end
   return options
 end
@@ -95,6 +107,12 @@ def makecompilerflags(fp,options)
     fp.print " cairo=yes"
   else
     fp.print " cairo=no"
+  end
+  if options.sse
+    fp.print " sse=yes"
+  end
+  if options.avx2
+    fp.print " avx2=yes"
   end
   if not ENV.has_key?("CC")
     STDERR.puts "#{$0}: environment variable CC must be set, e.g.\ export CC=gcc should work, if gcc is installed in one of the directories listed in PATH"
