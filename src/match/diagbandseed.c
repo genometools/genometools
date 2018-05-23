@@ -6588,12 +6588,12 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
         processinfo = (void *) xdropinfo;
       }
     }
-    if (extp->extendxdrop || extp->verify_alignment ||
-        gt_querymatch_alignment_display(extp->out_display_flag) ||
-        gt_querymatch_trace_display(extp->out_display_flag) ||
-        gt_querymatch_dtrace_display(extp->out_display_flag) ||
-        gt_querymatch_cigar_display(extp->out_display_flag) ||
-        gt_querymatch_cigarX_display(extp->out_display_flag))
+    /* need to produce alignment if seeds were extended with xdrop of
+       if alignment needs to be verified or
+       if -outfmt contains a corresponding flag */
+    if (extp->extendxdrop ||
+        extp->verify_alignment ||
+        gt_querymatch_run_aligner(extp->out_display_flag))
     {
       querymoutopt = gt_querymatchoutoptions_new(extp->out_display_flag,
                                                  NULL,

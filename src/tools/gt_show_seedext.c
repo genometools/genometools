@@ -180,6 +180,24 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   }
   if (!had_err)
   {
+    if (gt_querymatch_subjectid_display(out_display_flag) &&
+        !gt_seedextend_match_iterator_has_subjectid(semi))
+    {
+      gt_error_set(err,"output of subject id requires subject id in input");
+      had_err = -1;
+    }
+  }
+  if (!had_err)
+  {
+    if (gt_querymatch_queryid_display(out_display_flag) &&
+        !gt_seedextend_match_iterator_has_queryid(semi))
+    {
+      gt_error_set(err,"output of query id requires query id in input");
+      had_err = -1;
+    }
+  }
+  if (!had_err)
+  {
     printf("%s\n",gt_seedextend_match_iterator_Options_line(semi));
     aencseq = gt_seedextend_match_iterator_aencseq(semi);
     bencseq = gt_seedextend_match_iterator_bencseq(semi);
@@ -189,12 +207,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       gt_seedextend_match_iterator_verify_alignment_set(semi);
     }
-    if (gt_querymatch_alignment_display(out_display_flag) ||
-        gt_querymatch_trace_display(out_display_flag) ||
-        gt_querymatch_dtrace_display(out_display_flag) ||
-        gt_querymatch_cigar_display(out_display_flag) ||
-        gt_querymatch_cigarX_display(out_display_flag) ||
-        arguments->verify_alignment)
+    if (arguments->verify_alignment ||
+        gt_querymatch_run_aligner(out_display_flag))
     {
       if (gt_seedextend_match_iterator_querymatchoutoptions_set(
                             semi,
@@ -210,12 +224,17 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       if (arguments->affine_alignment)
       {
-        gt_error_set(err,"Option -affine requires option -outfmt with one of "
-                         "the following arguments: alignment, trace, dtrace, "
-                         "cigar, or cigarX");
+        gt_error_set(err,"Option -affine requires option -outfmt without any "
+                         " of the following arguments: alignment, trace, "
+                         "dtrace, cigar, or cigarX");
         had_err = -1;
       }
     }
+  }
+  if (!gt_seedextend_match_iterator_has_seqnums(semi))
+  {
+    gt_error_set(err,"match file without sequence numbers cannot be processed");
+    had_err = -1;
   }
   if (!had_err)
   {

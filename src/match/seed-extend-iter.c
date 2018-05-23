@@ -419,12 +419,34 @@ bool gt_seedextend_match_iterator_has_seed(
   return gt_querymatch_has_seed(semi->in_display_flag);
 }
 
+bool gt_seedextend_match_iterator_has_seqnums(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return gt_querymatch_s_seqnum_display(semi->in_display_flag) &&
+         gt_querymatch_q_seqnum_display(semi->in_display_flag) ? true : false;
+}
+
 bool gt_seedextend_match_iterator_has_cigar(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
   return gt_querymatch_cigar_display(semi->in_display_flag) ||
          gt_querymatch_cigarX_display(semi->in_display_flag);
+}
+
+bool gt_seedextend_match_iterator_has_subjectid(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return gt_querymatch_subjectid_display(semi->in_display_flag);
+}
+
+bool gt_seedextend_match_iterator_has_queryid(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return gt_querymatch_queryid_display(semi->in_display_flag);
 }
 
 GtUword gt_seedextend_match_iterator_trace_delta(

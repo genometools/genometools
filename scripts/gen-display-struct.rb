@@ -60,8 +60,10 @@ display_options = [
                   "satisfy the filter conditions"],
   ["fstperquery", "output only the first found match per query"],
   ["tabsep",      "separate columns by tabulator, instead of space as default"],
+  ["strandplmi",  "strand is shown as + and - sign"],
   ["blast",       "output matches in blast format 7 (tabular with comment " +
                   "lines; instead of gap opens, indels are displayed)"],
+  ["paf",         "output matches in PAF format, used by minimap (Li 2017)"],
   ["gfa2",        "output matches in gfa2 format"],
   ["custom",      "output matches in custom format, i.e. no columns are " +
                   "pre-defined; all columns have to be specified by the user"],
@@ -90,6 +92,8 @@ display_options = [
   ["q.end",       "display end position of match on query sequence"],
   ["alignment length",    "display length of alignment"],
   ["mismatches",  "display number of mismatches in alignment"],
+  ["matches",     "display number of matches in alignment"],
+  ["mapping qual","display mapping quality (255 for missing)"],
   ["indels",      "display number of indels in alignment"],
   ["gap opens",   "display number of indels in alignment"],
   ["score",       "display score of match"],

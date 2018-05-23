@@ -29,7 +29,8 @@ seeds = [170039800390891361279027638963673934519,
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $KMPLT_LIST = ["struct","ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
-$OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
+$OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo",
+                "fstperquery","seed.len",
                 "seed.s","seed.q","seed_in_algn","s.seqlen",
                 "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
@@ -300,6 +301,7 @@ Test do
   run "#{$scriptsdir}gfa2lint.rb #{last_stdout}"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt gfa2 cigar"
   run "#{$scriptsdir}gfa2lint.rb #{last_stdout}"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 100 -outfmt paf cigar"
 end
 
 # Invalid arguments

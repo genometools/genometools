@@ -613,6 +613,13 @@ void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
                         distinguish_mismatch_match,fp);
 }
 
+void gt_querymatchoutoptions_exact_cigar_show(bool distinguish_mismatch_match,
+                                              GtUword matchlength,
+                                              FILE *fp)
+{
+  gt_eoplist_show_exact_cigar(distinguish_mismatch_match,matchlength,fp);
+}
+
 void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                         bool dtrace,

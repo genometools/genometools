@@ -224,6 +224,10 @@ void gt_eoplist_show_plain(const GtEoplist *eoplist,FILE *fp);
 void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,
                            bool distinguish_mismatch_match,FILE *fp);
 
+void gt_eoplist_show_exact_cigar(bool distinguish_mismatch_match,
+                                GtUword matchlength,
+                                FILE *fp);
+
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
                               const GtFtPolishing_info *pol_info,
                               bool withpolcheck,

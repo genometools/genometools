@@ -19,7 +19,10 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"gfa2", Gt_Gfa2_display, false},
   {"identity", Gt_Identity_display, true},
   {"indels", Gt_Indels_display, true},
+  {"mapping qual", Gt_Mappingqual_display, true},
+  {"matches", Gt_Matches_display, true},
   {"mismatches", Gt_Mismatches_display, true},
+  {"paf", Gt_Paf_display, false},
   {"polinfo", Gt_Polinfo_display, false},
   {"q.end", Gt_Q_end_display, true},
   {"q.len", Gt_Q_len_display, true},
@@ -39,6 +42,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"seed.s", Gt_Seed_s_display, true},
   {"seed_in_algn", Gt_Seed_in_algn_display, false},
   {"strand", Gt_Strand_display, true},
+  {"strandplmi", Gt_Strandplmi_display, false},
   {"subject id", Gt_Subjectid_display, true},
   {"tabsep", Gt_Tabsep_display, false},
   {"trace", Gt_Trace_display, true}
@@ -46,42 +50,46 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   34,
-   17,
-   30,
+   37,
+   20,
+   33,
    10,
    11,
-   37,
+   41,
+   39,
    3,
+   19,
    13,
    6,
    4,
    5,
-   38,
+   42,
    7,
-   25,
-   27,
-   36,
    28,
-   24,
-   35,
-   19,
-   21,
-   23,
+   30,
+   40,
+   31,
+   27,
+   38,
    22,
-   18,
+   24,
+   26,
+   25,
+   21,
    1,
+   18,
+   17,
    16,
    15,
    12,
-   29,
+   32,
    8,
    14,
-   31,
-   33,
-   32,
-   26,
-   20,
+   34,
+   36,
+   35,
+   29,
+   23,
    9,
    2
 };
@@ -101,9 +109,12 @@ const char *gt_querymatch_display_help(void)
          "fstperquery:      output only the first found match per query\n"
          "tabsep:           separate columns by tabulator, instead of\n"
          "                  space as default\n"
+         "strandplmi:       strand is shown as + and - sign\n"
          "blast:            output matches in blast format 7 (tabular with\n"
          "                  comment lines; instead of gap opens, indels are\n"
          "                  displayed)\n"
+         "paf:              output matches in PAF format, used by minimap\n"
+         "                  (Li 2017)\n"
          "gfa2:             output matches in gfa2 format\n"
          "custom:           output matches in custom format, i.e. no\n"
          "                  columns are pre-defined; all columns have to be\n"
@@ -141,6 +152,8 @@ const char *gt_querymatch_display_help(void)
          "                  sequence\n"
          "alignment length: display length of alignment\n"
          "mismatches:       display number of mismatches in alignment\n"
+         "matches:          display number of matches in alignment\n"
+         "mapping qual:     display mapping quality (255 for missing)\n"
          "indels:           display number of indels in alignment\n"
          "gap opens:        display number of indels in alignment\n"
          "score:            display score of match\n"
@@ -164,7 +177,9 @@ const char *gt_querymatch_display_help(void)
         ", failed_seed"\
         ", fstperquery"\
         ", tabsep"\
+        ", strandplmi"\
         ", blast"\
+        ", paf"\
         ", gfa2"\
         ", custom"\
         ", cigar"\
@@ -184,6 +199,8 @@ const char *gt_querymatch_display_help(void)
         ", q.end"\
         ", alignment length"\
         ", mismatches"\
+        ", matches"\
+        ", mapping qual"\
         ", indels"\
         ", gap opens"\
         ", score"\
@@ -233,10 +250,22 @@ bool gt_querymatch_tabsep_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Tabsep_display);
 }
 
+bool gt_querymatch_strandplmi_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Strandplmi_display);
+}
+
 bool gt_querymatch_blast_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Blast_display);
+}
+
+bool gt_querymatch_paf_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Paf_display);
 }
 
 bool gt_querymatch_gfa2_display(const GtSeedExtendDisplayFlag
@@ -351,6 +380,18 @@ bool gt_querymatch_mismatches_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Mismatches_display);
+}
+
+bool gt_querymatch_matches_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Matches_display);
+}
+
+bool gt_querymatch_mappingqual_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Mappingqual_display);
 }
 
 bool gt_querymatch_indels_display(const GtSeedExtendDisplayFlag

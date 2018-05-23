@@ -81,6 +81,10 @@ void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
                                         bool distinguish_mismatch_match,
                                         FILE *fp);
 
+void gt_querymatchoutoptions_exact_cigar_show(bool distinguish_mismatch_match,
+                                              GtUword matchlength,
+                                              FILE *fp);
+
 void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                         bool dtrace,

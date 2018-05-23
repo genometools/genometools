@@ -854,8 +854,8 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
   if (!haserr)
   {
     if (gt_option_is_set(arguments->refextendgreedyoption) ||
-        gt_querymatch_alignment_display(out_display_flag) ||
-        gt_option_is_set(arguments->refextendxdropoption))
+        gt_option_is_set(arguments->refextendxdropoption) ||
+        gt_querymatch_run_aligner(out_display_flag))
     {
       if (gt_greedy_extend_char_access(&cam_a,
                                        &cam_b,
@@ -904,13 +904,9 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
       = Gt_Initializer_GtProcessinfo_and_querymatchspaceptr;
     info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
     info_querymatch.out_display_flag = out_display_flag;
-    if (gt_querymatch_alignment_display(out_display_flag) ||
-        gt_querymatch_trace_display(out_display_flag) ||
-        gt_querymatch_dtrace_display(out_display_flag) ||
-        gt_querymatch_cigar_display(out_display_flag) ||
-        gt_querymatch_cigarX_display(out_display_flag) ||
-        (gt_option_is_set(arguments->refextendxdropoption) &&
-         !arguments->noxpolish))
+    if ((gt_option_is_set(arguments->refextendxdropoption) &&
+         !arguments->noxpolish) ||
+        gt_querymatch_run_aligner(out_display_flag))
     {
       querymatchoutoptions
         = gt_querymatchoutoptions_new(out_display_flag,

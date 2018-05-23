@@ -686,6 +686,15 @@ void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,
   }
 }
 
+void gt_eoplist_show_exact_cigar(bool distinguish_mismatch_match,
+                                GtUword matchlength,
+                                FILE *fp)
+{
+  gt_assert(matchlength > 0);
+  fprintf(fp,GT_WU "%c",matchlength,
+          gt_eoplist_pretty_print(GtMatchOp,distinguish_mismatch_match));
+}
+
 static void gt_eoplist_single_line(const char *tag,
                                    int numwidth,
                                    unsigned int width,

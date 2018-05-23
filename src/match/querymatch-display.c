@@ -178,6 +178,15 @@ bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
           display_flag->alignmentwidth > 0) ? true : false;
 }
 
+bool gt_querymatch_run_aligner(const GtSeedExtendDisplayFlag *display_flag)
+{
+  return (gt_querymatch_alignment_display(display_flag) ||
+          gt_querymatch_trace_display(display_flag) ||
+          gt_querymatch_dtrace_display(display_flag) ||
+          gt_querymatch_cigar_display(display_flag) ||
+          gt_querymatch_cigarX_display(display_flag)) ? true : false;
+}
+
 #define GT_SE_ASSERT_DISPLAY_ID(PTR,ID)\
         if ((PTR) == NULL)\
         {\
@@ -207,7 +216,13 @@ static int gt_querymatch_display_flag_set(char *copyspace,
                                 "gfa2","alignment",
                                 "gfa2","custom",
                                 "gfa2","failed_seed",
-                                "gfa2","seed_in_algn"};
+                                "gfa2","seed_in_algn",
+                                "paf","alignment",
+                                "paf","blast",
+                                "paf","trace",
+                                "paf","dtrace",
+                                "paf","gfa2"
+                               };
   size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
   const GtSEdisplayStruct *dstruct;
   const char *ptr;
@@ -296,7 +311,7 @@ static bool gt_querymatch_display_args_contain(const GtStrArray *display_args,
   return false;
 }
 
-static int gt_querymatch_options_order_check(
+static int gt_querymatch_options_gfa2_order_check(
                  const GtSeedExtendDisplayFlag *display_flag,
                  size_t num_gfa2_default_flags,
                  GtError *err)
@@ -325,9 +340,9 @@ static int gt_querymatch_options_order_check(
       {
         const unsigned int display_arg_num = gt_display_flag2index[order[idx]];
 
-        gt_error_set(err,"for gfa2 output in the list of argument to option "
-                         "-outfmt the keyword \"%s\" must come after trace "
-                         "or cigar",
+        gt_error_set(err,"if gfa2 appears in the list of arguments to option "
+                         "-outfmt, then the keyword \"%s\" must come after "
+                         "trace, dtrace or cigar",
                          gt_display_arguments_table[display_arg_num].name);
         return -1;
       }
@@ -381,6 +396,30 @@ static size_t gt_display_flag_setmode2display_flag(
                                            sizeof gfa2_flags[0]);
       return sizeof gfa2_flags/sizeof gfa2_flags[0];
     }
+    if (gt_querymatch_display_args_contain(display_args,"paf"))
+    {
+      GtSeedExtendDisplay_enum paf_flags[] =
+      {
+        Gt_Queryid_display,
+        Gt_Q_seqlen_display,
+        Gt_Q_start_display,
+        Gt_Q_end_display,
+        Gt_Strand_display,
+        Gt_Subjectid_display,
+        Gt_S_seqlen_display,
+        Gt_S_start_display,
+        Gt_S_end_display,
+        Gt_Strandplmi_display,
+        Gt_Matches_display,
+        Gt_Alignmentlength_display,
+        Gt_Mappingqual_display
+      };
+      gt_querymatch_display_multi_flag_add(display_flag,paf_flags,
+                                           sizeof paf_flags/
+                                           sizeof paf_flags[0]);
+      return sizeof paf_flags/sizeof paf_flags[0];
+    }
+
     if (!gt_querymatch_display_args_contain(display_args,"custom"))
     {
       if (setmode == GT_SEED_EXTEND_DISPLAY_SET_STANDARD)
@@ -403,8 +442,8 @@ static size_t gt_display_flag_setmode2display_flag(
                                              sizeof standard_flags[0]);
         return 0;
       }
+      gt_assert (setmode == GT_SEED_EXTEND_DISPLAY_SET_EXACT);
       {
-        gt_assert(setmode == GT_SEED_EXTEND_DISPLAY_SET_EXACT);
         GtSeedExtendDisplay_enum exact_flags[] =
         {
           Gt_S_len_display,
@@ -464,7 +503,8 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
     }
     if (ret == 1)
     {
-      /* the only flag with a parameter is Gt_Alignment_display */
+      /* the only flags with a parameter are Gt_Alignment_display,
+         Gt_Trace_display or Gt_Dtrace_display */
       if (parameter < 0)
       {
         const char *key;
@@ -509,9 +549,9 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
       display_flag->trace_delta = GT_SEED_EXTEND_DEFAULT_TRACE_DELTA;
     }
   }
-  if (!haserr && num_flags > 0 /* must be for gfa2 */)
+  if (!haserr && num_flags > 0 && gt_querymatch_gfa2_display(display_flag))
   {
-    if (gt_querymatch_options_order_check(display_flag,num_flags,err) != 0)
+    if (gt_querymatch_options_gfa2_order_check(display_flag,num_flags,err) != 0)
     {
       haserr = true;
     }

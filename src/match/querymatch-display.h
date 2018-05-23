@@ -52,6 +52,8 @@ const char *gt_querymatch_display_help(void);
 
 bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag *);
 
+bool gt_querymatch_run_aligner(const GtSeedExtendDisplayFlag *display_flag);
+
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag *);
 
 GtUword gt_querymatch_trace_delta_display(const GtSeedExtendDisplayFlag *);

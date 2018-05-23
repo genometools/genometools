@@ -384,14 +384,17 @@ static int gt_non_white_space_prefix_length(const char *s)
   const char *sptr;
 
   gt_assert(s != NULL);
-  for (sptr = s; !isspace(*sptr); sptr++)
+  for (sptr = s; !isspace(*sptr) && *sptr != '\0'; sptr++)
   {
     /* Nothing */ ;
   }
   return (int) (sptr - s);
 }
 
-static const char *gt_seed_extend_outflag = "FRCP";
+static const char *gt_seed_extend_outsymbol(bool plusminus)
+{
+  return plusminus ?  "+RC-" : "FRCP";
+}
 
 static void gt_querymatch_description_out(FILE *fp,const char *description)
 {
@@ -434,6 +437,14 @@ void gt_querymatch_gfa2_edge(const GtQuerymatch *querymatch,GtUword edgenum)
   fprintf(querymatch->fp,"E\t" GT_WU "\t",edgenum);
 }
 
+static bool gt_separator_is_tab(const GtSeedExtendDisplayFlag *display_flag)
+{
+  return gt_querymatch_blast_display(display_flag) ||
+         gt_querymatch_tabsep_display(display_flag) ||
+         gt_querymatch_paf_display(display_flag) ||
+         gt_querymatch_gfa2_display(display_flag) ? true : false;
+}
+
 void gt_querymatch_prettyprint(double evalue,double bit_score,
                                const GtSeedExtendDisplayFlag *out_display_flag,
                                const GtQuerymatch *querymatch)
@@ -441,17 +452,20 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   const unsigned int *column_order;
   GtUword numcolumns, idx, one_off;
   char separator;
-  bool gfa2_display;
+  bool gfa2_display, paf_display;
 
+  const bool strandplusminus
+    = gt_querymatch_strandplmi_display(out_display_flag);
+  const char *strand_symbol_table
+    = gt_seed_extend_outsymbol(strandplusminus);
   gt_assert(querymatch != NULL && querymatch->fp != NULL &&
             out_display_flag != NULL);
   gfa2_display = gt_querymatch_gfa2_display(out_display_flag);
+  paf_display = gt_querymatch_paf_display(out_display_flag);
   column_order = gt_querymatch_display_order(&numcolumns,out_display_flag);
   gt_assert(numcolumns > 0);
   one_off = gt_querymatch_blast_display(out_display_flag) ? 1 : 0;
-  separator = (gt_querymatch_blast_display(out_display_flag) ||
-               gt_querymatch_tabsep_display(out_display_flag) ||
-               gfa2_display) ? '\t' : ' ';
+  separator = gt_separator_is_tab(out_display_flag) ? '\t' : ' ';
   for (idx = 0; idx < numcolumns; idx++)
   {
     const unsigned int co = column_order[idx];
@@ -468,6 +482,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
     {
       case Gt_Cigar_display:
       case Gt_Cigarx_display:
+        if (paf_display)
+        {
+          fputs("cg:Z:",querymatch->fp);
+        }
         if (querymatch->distance > 0)
         {
           gt_querymatchoutoptions_cigar_show(
@@ -476,8 +494,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                                      querymatch->fp);
         } else
         {
-          fprintf(querymatch->fp,GT_WU "%c",gt_querymatch_dblen(querymatch),
-                                            co == Gt_Cigar_display ? 'M' : '=');
+          gt_querymatchoutoptions_exact_cigar_show(
+                                     co == Gt_Cigar_display ? false : true,
+                                     gt_querymatch_dblen(querymatch),
+                                     querymatch->fp);
         }
         break;
       case Gt_Trace_display:
@@ -513,6 +533,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Subjectid_display:
+        gt_assert (querymatch->db_desc != NULL);
         gt_querymatch_description_out(querymatch->fp,querymatch->db_desc);
         break;
       case Gt_S_start_display:
@@ -542,8 +563,9 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Strand_display:
+        gt_assert((int) querymatch->query_readmode < 4);
         fprintf(querymatch->fp,"%c",
-                gt_seed_extend_outflag[querymatch->query_readmode]);
+                strand_symbol_table[querymatch->query_readmode]);
         break;
       case Gt_Q_len_display:
         fprintf(querymatch->fp,GT_WU,gt_querymatch_querylen(querymatch));
@@ -561,6 +583,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Queryid_display:
+        gt_assert (querymatch->query_desc != NULL);
         gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
         break;
       case Gt_Q_start_display:
@@ -569,6 +592,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         break;
       case Gt_Q_end_display:
         if (!gt_querymatch_gfa2_display(out_display_flag) &&
+            !gt_querymatch_paf_display(out_display_flag) &&
             (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
              !gt_querymatch_blast_display(out_display_flag)))
         {
@@ -591,6 +615,12 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
           fprintf(querymatch->fp,"MM:i:");
         }
         fprintf(querymatch->fp,GT_WU,querymatch->mismatches);
+        break;
+      case Gt_Matches_display:
+        fprintf(querymatch->fp,GT_WU,gt_querymatch_matches(querymatch));
+        break;
+      case Gt_Mappingqual_display:
+        fputs("255",querymatch->fp);
         break;
       case Gt_Indels_display:
       case Gt_Gapopens_display:
@@ -702,9 +732,13 @@ void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
 {
   if (gt_querymatch_failed_seed_display(out_display_flag))
   {
-    const char separator
-      = (gt_querymatch_blast_display(out_display_flag) ||
-         gt_querymatch_tabsep_display(out_display_flag)) ? '\t' : ' ';
+    const char separator = gt_separator_is_tab(out_display_flag) ? '\t' : ' ';
+    const bool strandplusminus
+      = gt_querymatch_strandplmi_display(out_display_flag);
+    const char *strand_symbol_table
+      = gt_seed_extend_outsymbol(strandplusminus);
+
+    gt_assert((int) querymatch->query_readmode < 4);
     fprintf(querymatch->fp, "# failed_seed:%c" GT_WU "%c" GT_WU "%c"  GT_WU
                                    "%c%c%c" GT_WU "%c" GT_WU "\n",
             separator,
@@ -714,7 +748,7 @@ void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
             separator,
             querymatch->db_seedpos_rel,
             separator,
-            gt_seed_extend_outflag[querymatch->query_readmode],
+            strand_symbol_table[querymatch->query_readmode],
             separator,
             querymatch->queryseqnum,
             separator,
@@ -925,11 +959,11 @@ static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
 
 static GtReadmode gt_readmode_character_code_parse(char direction)
 {
-  if (direction == 'F')
+  if (direction == 'F' || direction == '+')
   {
     return GT_READMODE_FORWARD;
   }
-  if (direction == 'P')
+  if (direction == 'P' || direction == '-')
   {
     return GT_READMODE_REVCOMPL;
   }
@@ -953,15 +987,15 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
   const unsigned int *column_order
     = gt_querymatch_display_order(&numcolumns,in_display_flag);
 
+  gt_assert(line_ptr != NULL);
   querymatch->db_seedpos_rel = GT_UWORD_MAX;
   querymatch->query_seedpos_rel = GT_UWORD_MAX;
-  separator = gt_querymatch_blast_display(in_display_flag) ||
-              gt_querymatch_tabsep_display(in_display_flag) ? '\t' : ' ';
+  separator = strchr(line_ptr,'\t') != NULL ? '\t' : ' ';
   for (column = 0; column < numcolumns; column++)
   {
     int ret = 1;
 
-    gt_assert(*ptr != '\0');
+    gt_assert(ptr != NULL && *ptr != '\0');
     while (isspace(*ptr))
     {
       ptr++;
@@ -1024,6 +1058,8 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         break;
       case Gt_Queryid_display:
         querymatch->query_desc = ptr;
+        printf("parse Queryid\n");
+        gt_assert(ptr != NULL);
         break;
       case Gt_Q_start_display:
         ret = sscanf(ptr,GT_WU,&querymatch->querystart_fwdstrand);
@@ -1065,6 +1101,8 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_Identity_display:
       case Gt_Indels_display:
       case Gt_Gapopens_display:
+      case Gt_Matches_display:
+      case Gt_Mappingqual_display:
         break;
       default: gt_assert(false);
     }
@@ -1077,6 +1115,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     ptr = strchr(ptr,separator);
+    gt_assert(column == numcolumns - 1 || ptr != NULL);
   }
   gt_assert(gt_querymatch_s_seqnum_display(in_display_flag) &&
             gt_querymatch_q_seqnum_display(in_display_flag));
@@ -1359,16 +1398,16 @@ static void gt_querymatch_affine_alignment(GtQuerymatch *querymatch,
   const int8_t gap_opening = 4, gap_extension = 1;
   const GtUword alphasize = 5;
   GtUword expected_min_score,
-	  abs_querystart_fwdstrand;
+          abs_querystart_fwdstrand;
   const double correctness = 99;
   const int8_t smallest_score = -5,
-	       *unitscoreDNA[5],
-	       unitscoreDNAtable[] = { 2,-1,-1,-1,-5,
-				      -1, 2,-1,-1,-5,
-				      -1,-1, 2,-1,-5,
-				      -1,-1,-1, 2,-5,
-				      -5,-5,-5,-5,-5
-				     };
+               *unitscoreDNA[5],
+               unitscoreDNAtable[] = { 2,-1,-1,-1,-5,
+                                      -1, 2,-1,-1,-5,
+                                      -1,-1, 2,-1,-5,
+                                      -1,-1,-1, 2,-5,
+                                      -5,-5,-5,-5,-5
+                                     };
 
   gt_assert (querymatch->ref_eoplist != NULL);
   unitscoreDNA[0] = unitscoreDNAtable;
@@ -1379,73 +1418,67 @@ static void gt_querymatch_affine_alignment(GtQuerymatch *querymatch,
   gt_querymatch_extract_sequence_pair(seqpairbuf,aencseq,bencseq,querymatch);
 #ifdef AFFINE_ALIGN_SSW
   GtUword opt_affine_score, opt_ustart, opt_vstart, opt_usubstringlength,
-	  opt_vsubstringlength;;
+          opt_vsubstringlength;;
   GtSSWprofile *vprofile;
   const bool compute_only_end = false;
   gt_querymatch_translate(seqpairbuf->a_sequence,seqpairbuf->a_len,
-			  (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
+                          (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
   gt_querymatch_translate(seqpairbuf->b_sequence,seqpairbuf->b_len,
-			  (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
+                          (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
   vprofile = gt_ssw_profile_new (seqpairbuf->a_sequence,
-				 seqpairbuf->a_len,
-				 unitscoreDNAtable,
-				 smallest_score,
-				 alphasize,
-				 compute_only_end);
+                                 seqpairbuf->a_len,
+                                 unitscoreDNAtable,
+                                 smallest_score,
+                                 alphasize,
+                                 compute_only_end);
   opt_affine_score
      = gt_ssw_align (&opt_ustart,
-		     &opt_usubstringlength,
-		     &opt_vstart,
-		     &opt_vsubstringlength,
-		     vprofile,
-		     NULL,
-		     seqpairbuf->b_sequence,
-		     seqpairbuf->b_len,
-		     gap_opening,
-		     gap_extension,
-		     compute_only_end);
+                     &opt_usubstringlength,
+                     &opt_vstart,
+                     &opt_vsubstringlength,
+                     vprofile,
+                     NULL,
+                     seqpairbuf->b_sequence,
+                     seqpairbuf->b_len,
+                     gap_opening,
+                     gap_extension,
+                     compute_only_end);
 
   gt_ssw_profile_delete (vprofile);
   querymatch_translate(seqpairbuf->a_sequence,seqpairbuf->a_len,
-		       (GtUchar) (alphasize-1),(GtUchar) WILDCARD);
+                       (GtUchar) (alphasize-1),(GtUchar) WILDCARD);
   querymatch_translate(seqpairbuf->b_sequence,seqpairbuf->b_len,
-		       (GtUchar) (alphasize-1),(GtUchar) WILDCARD);
-  printf("%lu %lu %lu %lu %lu ",
-	    opt_affine_score,
-	    opt_ustart,opt_usubstringlength,
-	    opt_vstart,opt_vsubstringlength);
+                       (GtUchar) (alphasize-1),(GtUchar) WILDCARD);
+  printf(GT_WU " " GT_WU " " GT_WU " " GT_WU " " GT_WU " ",
+         opt_affine_score,
+         opt_ustart,opt_usubstringlength,
+         opt_vstart,opt_vsubstringlength);
 #endif
   expected_min_score = (querymatch->score * correctness)/100;
   affine_score
     = (GtWord) gt_affine_iter_diagonalband_align(querymatch->ref_eoplist,
-						 adpr,
-						 gap_opening,
-						 gap_extension,
-						 (const int8_t *const *)
-						    unitscoreDNA,
-						 smallest_score,
-						 seqpairbuf->a_sequence,
-						 seqpairbuf->a_len,
-						 seqpairbuf->b_sequence,
-						 seqpairbuf->b_len,
-						 true,
-						 expected_min_score);
-  querymatch->mismatches
-    = gt_eoplist_mismatches_count(querymatch->ref_eoplist);
-  querymatch->distance
-    = querymatch->mismatches
-      + gt_eoplist_deletions_count(querymatch->ref_eoplist)
-      + gt_eoplist_insertions_count(querymatch->ref_eoplist);
-  querymatch->score = affine_score;
+                                                 adpr,
+                                                 gap_opening,
+                                                 gap_extension,
+                                                 (const int8_t *const *)
+                                                    unitscoreDNA,
+                                                 smallest_score,
+                                                 seqpairbuf->a_sequence,
+                                                 seqpairbuf->a_len,
+                                                 seqpairbuf->b_sequence,
+                                                 seqpairbuf->b_len,
+                                                 true,
+                                                 expected_min_score);
   abs_querystart_fwdstrand = querymatch->query_seqstart +
-			     querymatch->querystart_fwdstrand;
+                             querymatch->querystart_fwdstrand;
   gt_eoplist_set_sequences(querymatch->ref_eoplist,
-			   seqpairbuf->a_sequence,
-			   querymatch->dbstart_relative,
+                           seqpairbuf->a_sequence,
+                           querymatch->dbstart_relative,
                            seqpairbuf->a_len,
                            seqpairbuf->b_sequence,
                            abs_querystart_fwdstrand,
                            seqpairbuf->b_len);
+  querymatch->score = affine_score;
 }
 
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
@@ -1492,6 +1525,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
     }
   } else
   {
+    const bool exact_match = querymatch->distance == 0 ? true : false;
     if (seqpairbuf != NULL)
     {
       gt_querymatch_affine_alignment(querymatch,
@@ -1510,6 +1544,15 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
         gt_querymatch_full_alignment(querymatch,&db_seqorencseq,
                                      &query_seqorencseq);
       }
+    }
+    if (!exact_match && querymatch->ref_eoplist != NULL)
+    {
+      querymatch->mismatches
+        = gt_eoplist_mismatches_count(querymatch->ref_eoplist);
+      querymatch->distance
+        = querymatch->mismatches
+          + gt_eoplist_deletions_count(querymatch->ref_eoplist)
+          + gt_eoplist_insertions_count(querymatch->ref_eoplist);
     }
   }
   if ((evalue == DBL_MAX || bitscore == DBL_MAX) &&

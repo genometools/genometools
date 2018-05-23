@@ -21,6 +21,16 @@ if sematchlist[0].length != sematchlist[1].length
   exit 1
 end
 
+def relation_expected(key,v1,v2)
+  if key == :editdist
+    return v1 <= v2
+  end
+  if key == :identity
+    return v1 >= v2
+  end
+  return v1 == v2
+end
+
 0.upto(sematchlist[0].length-1).each do |idx|
   m0 = sematchlist[0][idx]
   m1 = sematchlist[1][idx]
@@ -32,8 +42,9 @@ end
       STDERR.puts "#{$0}: match #{idx}: missing key #{k} in #{ARGV[0]}"
       exit 1
     end
-    if m0[k] != v
-      STDERR.puts "#{$0}: match #{idx}: key #{k}: has values #{m0[k]} != #{v}"
+    if not relation_expected(k,m0[k],v)
+      STDERR.puts "#{$0}: match #{idx}: key #{k}: unexpected relation of #{m0[k]} #{v}"
+      STDERR.puts "#{m0}\n#{m1}"
       exit 1
     end
   end

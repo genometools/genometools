@@ -99,6 +99,15 @@ bool gt_seedextend_match_iterator_has_seed(
 bool gt_seedextend_match_iterator_has_cigar(
                         const GtSeedextendMatchIterator *semi);
 
+bool gt_seedextend_match_iterator_has_subjectid(
+                        const GtSeedextendMatchIterator *semi);
+
+bool gt_seedextend_match_iterator_has_queryid(
+                        const GtSeedextendMatchIterator *semi);
+
+bool gt_seedextend_match_iterator_has_seqnums(
+                        const GtSeedextendMatchIterator *semi);
+
 GtUword gt_seedextend_match_iterator_trace_delta(
                         const GtSeedextendMatchIterator *semi);
 
