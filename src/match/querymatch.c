@@ -1289,7 +1289,8 @@ GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
   return querymatch_table->spaceGtQuerymatch + idx;
 }
 
-void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
+static void gt_querymatch_extract_sequence_pair(
+                                         GtSequencepairbuffer *seqpairbuf,
                                          const GtEncseq *db_encseq,
                                          const GtEncseq *query_encseq,
                                          const GtQuerymatch *querymatch)

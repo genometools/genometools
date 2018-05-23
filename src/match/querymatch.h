@@ -183,11 +183,6 @@ typedef struct
   GtUword a_allocated, b_allocated, a_len, b_len;
 } GtSequencepairbuffer;
 
-void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
-                                         const GtEncseq *db_encseq,
-                                         const GtEncseq *query_encseq,
-                                         const GtQuerymatch *querymatch);
-
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,

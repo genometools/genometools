@@ -10,10 +10,10 @@ typedef int GtAffineScore;
 
 typedef enum
 {
-  Affine_X = 0, /* unknown, keep it, as it is the default value 0 */
-  Affine_R, /* 1 = 01, shift 0 */
-  Affine_D, /* 2 = 10, shift 2 */
-  Affine_I  /* 3 = 11, shift 4 */
+  GT_AFFINE_DBAND_UNDEF = 0, /* unknown, keep it, as it' the default value 0 */
+  GT_AFFINE_DBAND_REPLACEMENT, /* 1 = 01, shift 0 */
+  GT_AFFINE_DBAND_DELETION,    /* 2 = 10, shift 2 */
+  GT_AFFINE_DBAND_INSERTION    /* 3 = 11, shift 4 */
 } GtAffineAlignEditOp;
 
 typedef struct
@@ -50,9 +50,10 @@ typedef struct
         bitmatrix[J][I].trace = ((VALUE) << (2 * ((EDGETYPE)-1)))
 
 #define GT_AFFINE_EDGE_SET_ALL(I,J,RVALUE,DVALUE,IVALUE)\
-        bitmatrix[J][I].trace = (((RVALUE) << (2 * (Affine_R-1))) |\
-                                 ((DVALUE) << (2 * (Affine_D-1))) |\
-                                 ((IVALUE) << (2 * (Affine_I-1))))
+        bitmatrix[J][I].trace \
+          = (((RVALUE) << (2 * (GT_AFFINE_DBAND_REPLACEMENT-1))) |\
+            ((DVALUE) << (2 * (GT_AFFINE_DBAND_DELETION-1))) |\
+            ((IVALUE) << (2 * (GT_AFFINE_DBAND_INSERTION-1))))
 
 #define GT_AFFINE_EDGE_GET(I,J,EDGETYPE)\
         ((bitmatrix[J][I].trace >> (2 * ((EDGETYPE)-1))) & 3)
@@ -131,7 +132,7 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
   colptr = bitmatrix[0];
   for (i = 1; i <= high_row; i++)
   {
-    GT_AFFINE_EDGE_SET(i,0,Affine_D,Affine_D);
+    GT_AFFINE_EDGE_SET(i,0,GT_AFFINE_DBAND_DELETION,GT_AFFINE_DBAND_DELETION);
     currentcol[i].Rvalue = min_align_score;
     currentcol[i].Dvalue = GT_AFFINE_SCORE_SUM(currentcol[i-1].Dvalue,
                                                -gap_extension);
@@ -165,7 +166,8 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
       gt_assert(low_row <= prev_high_row);
       cptr = currentcol + low_row;
       first_ivalue = GT_AFFINE_SCORE_SUM(cptr->Ivalue,-gap_extension);
-      GT_AFFINE_EDGE_SET(low_row,j,Affine_I,Affine_I);
+      GT_AFFINE_EDGE_SET(low_row,j,GT_AFFINE_DBAND_INSERTION,
+                         GT_AFFINE_DBAND_INSERTION);
     }
     nw = currentcol[low_row];
     currentcol[low_row].Rvalue = min_align_score;
@@ -182,7 +184,9 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
     {
       GtAffineScoreTriple currententry;
       const GtUchar ca = useq[i-1];
-      GtAffineAlignEditOp rmaxedge = Affine_R, dmaxedge, imaxedge = Affine_X;
+      GtAffineAlignEditOp rmaxedge = GT_AFFINE_DBAND_REPLACEMENT,
+                          dmaxedge,
+                          imaxedge = GT_AFFINE_DBAND_UNDEF;
 
       currententry.Ivalue = min_align_score;
       /* compute A_affine(i,j,R) from value in the north west */
@@ -190,12 +194,12 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
       if (currententry.Rvalue < nw.Dvalue)
       {
         currententry.Rvalue = nw.Dvalue;
-        rmaxedge = Affine_D;
+        rmaxedge = GT_AFFINE_DBAND_DELETION;
       }
       if (currententry.Rvalue < nw.Ivalue)
       {
         currententry.Rvalue = nw.Ivalue;
-        rmaxedge = Affine_I;
+        rmaxedge = GT_AFFINE_DBAND_INSERTION;
       }
       currententry.Rvalue += GT_AFFINE_SCORE_ROW_ACCESS(ca);
 
@@ -203,16 +207,18 @@ static GtAffineScore gt_affine_diagonalband_fillDPtab_bits(
       cptr = currentcol + i - 1;
       score_R = GT_AFFINE_SCORE_SUM(cptr->Rvalue,start_penalty);
       score_D = GT_AFFINE_SCORE_SUM(cptr->Dvalue,-gap_extension);
-      GT_AFFINE_SET_MAX2(currententry.Dvalue,dmaxedge,score_R,Affine_R,
-                                                      score_D,Affine_D);
+      GT_AFFINE_SET_MAX2(currententry.Dvalue,dmaxedge,score_R,
+                         GT_AFFINE_DBAND_REPLACEMENT,
+                         score_D,GT_AFFINE_DBAND_DELETION);
       /* compute A_affine(i,j,I) from value in the west, if available*/
       if (i <= prev_high_row)
       {
         cptr++;
         score_R = GT_AFFINE_SCORE_SUM(cptr->Rvalue,start_penalty);
         score_I = GT_AFFINE_SCORE_SUM(cptr->Ivalue,-gap_extension);
-        GT_AFFINE_SET_MAX2(currententry.Ivalue,imaxedge,score_R,Affine_R,
-                                                        score_I,Affine_I);
+        GT_AFFINE_SET_MAX2(currententry.Ivalue,imaxedge,score_R,
+                           GT_AFFINE_DBAND_REPLACEMENT,
+                           score_I,GT_AFFINE_DBAND_INSERTION);
       }
 
       nw = currentcol[i];
@@ -388,13 +394,13 @@ static void gt_affine_alignment_traceback_bits(GtEoplist *eoplist,
   GtAffineAlignEditOp edge;
 
   gt_assert(eoplist != NULL && bitmatrix != NULL);
-  edge = Affine_R;
+  edge = GT_AFFINE_DBAND_REPLACEMENT;
   /* backtracing */
   while (i > 0 || j > 0)
   {
     switch (edge)
     {
-      case Affine_R:
+      case GT_AFFINE_DBAND_REPLACEMENT:
         gt_assert(i > 0 && j > 0);
         if (GT_AFFINE_EQUAL_SYMBOLS(useq[i-1],vseq[j-1]))
         {
@@ -403,19 +409,19 @@ static void gt_affine_alignment_traceback_bits(GtEoplist *eoplist,
         {
           gt_eoplist_mismatch_add(eoplist);
         }
-        edge = GT_AFFINE_EDGE_GET(i,j,Affine_R);
+        edge = GT_AFFINE_EDGE_GET(i,j,GT_AFFINE_DBAND_REPLACEMENT);
         i--;
         j--;
         break;
-      case Affine_D:
+      case GT_AFFINE_DBAND_DELETION:
         gt_eoplist_deletion_add(eoplist);
-        edge = GT_AFFINE_EDGE_GET(i,j,Affine_D);
+        edge = GT_AFFINE_EDGE_GET(i,j,GT_AFFINE_DBAND_DELETION);
         gt_assert(i > 0);
         i--;
         break;
-      case Affine_I:
+      case GT_AFFINE_DBAND_INSERTION:
         gt_eoplist_insertion_add(eoplist);
-        edge = GT_AFFINE_EDGE_GET(i,j,Affine_I);
+        edge = GT_AFFINE_EDGE_GET(i,j,GT_AFFINE_DBAND_INSERTION);
         gt_assert(j > 0);
         j--;
         break;
@@ -451,7 +457,7 @@ static void gt_affine_alignment_traceback_scores(
                                     __attribute__ ((unused)) GtWord right_dist)
 {
   GtUword i = ulen, j = vlen;
-  GtAffineAlignEditOp edge = Affine_R;
+  GtAffineAlignEditOp edge = GT_AFFINE_DBAND_REPLACEMENT;
   const GtAffineScoreTriple *previous;
   GtAffineScore maxvalue;
   const GtAffineScore start_penalty = -(gap_opening+gap_extension);
@@ -462,7 +468,7 @@ static void gt_affine_alignment_traceback_scores(
   {
     switch (edge)
     {
-      case Affine_R:
+      case GT_AFFINE_DBAND_REPLACEMENT:
         gt_assert(i > 0 && j > 0);
         if (GT_AFFINE_EQUAL_SYMBOLS(useq[i-1],vseq[j-1]))
         {
@@ -481,17 +487,17 @@ static void gt_affine_alignment_traceback_scores(
         {
           if (maxvalue == previous->Dvalue)
           {
-            edge = Affine_D;
+            edge = GT_AFFINE_DBAND_DELETION;
           } else
           {
             if (maxvalue == previous->Ivalue)
             {
-              edge = Affine_I;
+              edge = GT_AFFINE_DBAND_INSERTION;
             }
           }
         }
         break;
-      case Affine_D:
+      case GT_AFFINE_DBAND_DELETION:
         gt_eoplist_deletion_add(eoplist);
         i--;
         gt_assert(i >= low_row_on_the_fly(j,right_dist) &&
@@ -500,10 +506,10 @@ static void gt_affine_alignment_traceback_scores(
         if (previous->Rvalue + start_penalty >=
             previous->Dvalue - gap_extension)
         {
-          edge = Affine_R;
+          edge = GT_AFFINE_DBAND_REPLACEMENT;
         }
         break;
-      case Affine_I:
+      case GT_AFFINE_DBAND_INSERTION:
         gt_assert(j > 0);
         gt_eoplist_insertion_add(eoplist);
         j--;
@@ -513,7 +519,7 @@ static void gt_affine_alignment_traceback_scores(
         if (previous->Rvalue + start_penalty >=
             previous->Ivalue - gap_extension)
         {
-          edge = Affine_R;
+          edge = GT_AFFINE_DBAND_REPLACEMENT;
         }
         break;
       default:
