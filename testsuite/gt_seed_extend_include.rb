@@ -260,6 +260,8 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-failed_seed.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
   run "diff #{last_stdout} #{$testdata}see-ext-at1MB-u8-failed_seed-evalue.matches"
+  run_test "#{$bin}/gt seed_extend -ii at1MB -l 700 -affine -outfmt cigar"
+  run "diff #{last_stdout} #{$testdata}see-ext-at1MB-700-affine-cigar.matches"
   evalue_filter = 10e-30
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
   run "mv #{last_stdout} strong.matches"

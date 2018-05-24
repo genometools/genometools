@@ -221,7 +221,12 @@ static int gt_querymatch_display_flag_set(char *copyspace,
                                 "paf","blast",
                                 "paf","trace",
                                 "paf","dtrace",
-                                "paf","gfa2"
+                                "paf","gfa2",
+                                "seed_in_algn","paf",
+                                "seed_in_algn","cigar",
+                                "seed_in_algn","cigarX",
+                                "seed_in_algn","trace",
+                                "seed_in_algn","dtrace"
                                };
   size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
   const GtSEdisplayStruct *dstruct;

@@ -90,6 +90,7 @@ typedef struct
                *querymatchspaceptr_only_right;
   const GtKarlinAltschulStat *karlin_altschul_stat;
   const GtSeedExtendDisplayFlag *out_display_flag;
+  GtAffineDPreservoir *adpr;
   GtUword userdefinedleastlength,
           errorpercentage;
   double evalue_threshold;
@@ -99,9 +100,9 @@ typedef struct
 } GtProcessinfo_and_querymatchspaceptr;
 
 #define Gt_Initializer_GtProcessinfo_and_querymatchspaceptr\
-        {NULL,NULL,NULL,NULL,NULL,NULL,0,0,0.0,{0,0,0,0,0,0},\
-                                               {0,0,0,0,0,0},\
-                                               {0,0,0,0,0,0}}
+        {NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0.0,{0,0,0,0,0,0},\
+                                                    {0,0,0,0,0,0},\
+                                                    {0,0,0,0,0,0}}
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,

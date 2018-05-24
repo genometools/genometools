@@ -90,6 +90,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             GtUword db_seedpos_rel,
                             GtUword query_seedpos,
                             GtUword seedlen,
+                            GtAffineDPreservoir *adpr,
                             bool greedyextension);
 
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,

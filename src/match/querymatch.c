@@ -1158,6 +1158,40 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
   }
 }
 
+static GtUword gt_querymatch_affine_alignment(const GtQuerymatch *querymatch,
+                                              const GtSeqorEncseq
+                                                *db_seqorencseq,
+                                              const GtSeqorEncseq
+                                                *query_seqorencseq,
+                                              GtAffineDPreservoir *adpr)
+{
+  GtUword affine_score;
+
+  gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
+                                      db_seqorencseq,
+                                      gt_querymatch_dbstart(querymatch),
+                                      gt_querymatch_dblen(querymatch),
+                                      querymatch->query_readmode,
+                                      query_seqorencseq,
+                                      querymatch->query_seqstart +
+                                        querymatch->querystart_fwdstrand,
+                                      gt_querymatch_querylen(querymatch));
+   affine_score
+     = gt_querymatchoutoptions_affine_alignment(
+                                querymatch->ref_querymatchoutoptions,
+                                gt_querymatch_dblen(querymatch),
+                                gt_querymatch_querylen(querymatch),
+                                querymatch->score,
+                                adpr);
+   gt_querymatchoutoptions_set_sequences(querymatch->ref_querymatchoutoptions,
+                                         querymatch->dbstart_relative,
+                                         gt_querymatch_dblen(querymatch),
+                                         querymatch->querystart_fwdstrand,
+                                         gt_querymatch_querylen(querymatch),
+                                         false);
+  return affine_score;
+}
+
 bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             const GtSeedExtendDisplayFlag *out_display_flag,
                             GtUword dblen,
@@ -1179,10 +1213,12 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             GtUword db_seedpos_rel,
                             GtUword query_seedpos_rel,
                             GtUword seedlen,
+                            GtAffineDPreservoir *adpr,
                             bool greedyextension)
 {
   const char *query_desc = NULL, *db_desc = NULL;
   GtUword desclen;
+  bool exact_match;
 
   gt_assert(querymatch != NULL);
   if (gt_querymatch_subjectid_display(out_display_flag))
@@ -1228,9 +1264,24 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   querymatch->db_seedpos_rel = db_seedpos_rel;
   querymatch->query_seedpos_rel = query_seedpos_rel;
   querymatch->seedlen = seedlen;
+  exact_match = (querymatch->distance == 0) ? true : false;
   if (gt_querymatch_ordered(querymatch))
   {
-    gt_querymatch_alignment_prepare(querymatch,dbes,queryes,greedyextension);
+    if (!exact_match && adpr != NULL)
+    {
+      gt_assert (querymatch->ref_eoplist != NULL);
+      querymatch->score = gt_querymatch_affine_alignment(querymatch,dbes,
+                                                         queryes,adpr);
+      querymatch->mismatches
+        = gt_eoplist_mismatches_count(querymatch->ref_eoplist);
+      querymatch->distance
+        = querymatch->mismatches
+          + gt_eoplist_deletions_count(querymatch->ref_eoplist)
+          + gt_eoplist_insertions_count(querymatch->ref_eoplist);
+    } else
+    {
+      gt_querymatch_alignment_prepare(querymatch,dbes,queryes,greedyextension);
+    }
     return true;
   }
   return false;
@@ -1403,29 +1454,10 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
     const bool exact_match = querymatch->distance == 0 ? true : false;
     if (adpr != NULL)
     {
-      gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
-                                          &db_seqorencseq,
-                                          gt_querymatch_dbstart(querymatch),
-                                          gt_querymatch_dblen(querymatch),
-                                          querymatch->query_readmode,
-                                          &query_seqorencseq,
-                                          querymatch->query_seqstart +
-                                            querymatch->querystart_fwdstrand,
-                                          gt_querymatch_querylen(querymatch));
-      querymatch->score
-        = gt_querymatchoutoptions_affine_alignment(
-                                  querymatch->ref_querymatchoutoptions,
-                                  gt_querymatch_dblen(querymatch),
-                                  gt_querymatch_querylen(querymatch),
-                                  querymatch->score,
-                                  adpr);
-      gt_querymatchoutoptions_set_sequences(
-                                         querymatch->ref_querymatchoutoptions,
-                                         querymatch->dbstart_relative,
-                                         gt_querymatch_dblen(querymatch),
-                                         querymatch->querystart_fwdstrand,
-                                         gt_querymatch_querylen(querymatch),
-                                         false);
+      querymatch->score = gt_querymatch_affine_alignment(querymatch,
+                                                         &db_seqorencseq,
+                                                         &query_seqorencseq,
+                                                         adpr);
     } else
     {
       if (match_has_seed)

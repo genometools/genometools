@@ -219,6 +219,7 @@ typedef enum
 
 static GtUword gt_combine_extensions(
          bool forxdrop,
+         GtAffineDPreservoir *adpr,
          GtExtensionCombination mode,
          GtQuerymatch *querymatchspaceptr,
          GtPreviousMatchStruct *previous_match,
@@ -304,6 +305,7 @@ static GtUword gt_combine_extensions(
                              gt_sesp_db_seedpos(sesp),
                              gt_sesp_query_seedpos(sesp),
                              sesp->seedlength,
+                             adpr,
                              false)) /* greedyextension */
                              /*forxdrop ? false : true*/
   {
@@ -1253,6 +1255,7 @@ static bool gt_extend_sesp(bool forxdrop,
     total_alignedlen[mode]
       = gt_combine_extensions(
                        forxdrop,
+                       info_querymatch->adpr,
                        mode,
                        querymatchspaceptr,
                        previous_match,

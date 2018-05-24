@@ -128,6 +128,7 @@ static int gt_exact_selfmatch_with_output(void *info,
                              pos1 - db_seqstart,
                              pos2 - query_seqstart,
                              len,
+                             false,
                              false))
   {
     /* for exact matches we do not output evalues and bitscores */
@@ -734,6 +735,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    dbstart - db_seqstart,
                                    querystart - query_seqstart,
                                    matchlength,
+                                   false,
                                    false))
         {
           /* for exact matches we do not output evalues and bitscores */

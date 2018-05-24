@@ -225,13 +225,13 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       if (arguments->affine_alignment)
       {
         gt_error_set(err,"Option -affine requires option -outfmt with one "
-                         " of the following arguments: alignment, trace, "
+                         "of the following arguments: alignment, trace, "
                          "dtrace, cigar, or cigarX");
         had_err = -1;
       }
     }
   }
-  if (!gt_seedextend_match_iterator_has_seqnums(semi))
+  if (!had_err && !gt_seedextend_match_iterator_has_seqnums(semi))
   {
     gt_error_set(err,"match file without sequence numbers cannot be processed");
     had_err = -1;

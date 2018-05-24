@@ -147,6 +147,7 @@ struct GtDiagbandseedInfo
   bool norev,
        nofwd,
        verify,
+       affine_alignment,
        verbose,
        with_code_run_dist,
        debug_kmer,
@@ -423,6 +424,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              GtDiagbandseedBaseListType splt,
                                              GtDiagbandseedBaseListType kmplt,
                                              bool verify,
+                                             bool affine_alignment,
                                              bool verbose,
                                              bool with_code_run_dist,
                                              bool debug_kmer,
@@ -467,6 +469,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->splt = splt;
   info->kmplt = kmplt;
   info->verify = verify;
+  info->affine_alignment = affine_alignment;
   info->verbose = verbose;
   info->with_code_run_dist = with_code_run_dist;
   info->debug_kmer = debug_kmer;
@@ -4064,6 +4067,7 @@ typedef struct
           use_apos,
           mincoverage;
   bool only_selected_seqpairs;
+  GtAffineDPreservoir *adpr;
   double evalue_threshold;
   GtDiagbandSeedPlainSequence plainsequence_info;
   GtReadmode query_readmode;
@@ -4094,9 +4098,11 @@ static void gt_diagbandseed_info_qm_set(
                          GtReadmode query_readmode,
                          FILE *stream,
                          const GtKarlinAltschulStat *karlin_altschul_stat,
+                         GtAffineDPreservoir *adpr,
                          void *processinfo)
 {
   info_querymatch->processinfo = processinfo;
+  info_querymatch->adpr = adpr;
   if (extp->accu_match_values != NULL && !store_matches)
   {
     info_querymatch->querymatchspaceptr = NULL;
@@ -4166,6 +4172,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                          const GtKarlinAltschulStat
                                            *karlin_altschul_stat,
                                          GtReadmode query_readmode,
+                                         GtAffineDPreservoir *adpr,
                                          FILE *stream,
                                          GtDiagbandseedState
                                            *dbs_state,
@@ -4207,6 +4214,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                               query_readmode,
                               stream,
                               karlin_altschul_stat,
+                              adpr,
                               processinfo);
   esi->dbs_state = dbs_state;
   /* the following are constant and depends only on the given parameters */
@@ -5317,6 +5325,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                           unsigned int spacedseedweight,
                                           unsigned int seedlength,
                                           GtReadmode query_readmode,
+                                          GtAffineDPreservoir *adpr,
                                           bool verbose,
                                           FILE *stream,
                                           const GtStr *diagband_statistics_arg,
@@ -5409,6 +5418,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                          bidx,
                                          karlin_altschul_stat,
                                          query_readmode,
+                                         adpr,
                                          stream,
                                          dbs_state,
                                          querymatch_segment_buffer,
@@ -6230,6 +6240,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   int had_err = 0;
   GtKmerPosListEncodeInfo *aencode_info, *bencode_info,
                           *kenv_aencode_info = NULL, *kenv_bencode_info = NULL;
+  GtAffineDPreservoir *adpr = NULL;
 
   /* from here vars used in context of seedpairlist */
   GtSeedpairlist *seedpairlist = NULL;
@@ -6251,6 +6262,11 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtKenvScore score_threshold = 0;
 
   gt_assert(arg != NULL);
+  if (arg->affine_alignment)
+  {
+    const bool opt_memory = false, keepcolumns = true;
+    adpr = gt_affine_diagonalband_new(opt_memory,keepcolumns,0,0);
+  }
   aencode_info
     = gt_kmerpos_encode_info_new(arg->kmplt,
                                  gt_encseq_alphabetnumofchars(arg->aencseq),
@@ -6634,6 +6650,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->seedlength,
                                   arg->nofwd ? GT_READMODE_REVCOMPL
                                              : GT_READMODE_FORWARD,
+                                  adpr,
                                   arg->verbose,
                                   stream,
                                   arg->diagband_statistics_arg,
@@ -6763,6 +6780,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->spacedseedweight,
                                   arg->seedlength,
                                   GT_READMODE_REVCOMPL,
+                                  adpr,
                                   arg->verbose,
                                   stream,
                                   arg->diagband_statistics_arg,
@@ -6804,6 +6822,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
   gt_querymatch_segment_buffer_delete(querymatch_segment_buffer);
   gt_radixsort_delete(snd_pass_radix_sort_info);
+  gt_affine_diagonalband_delete(adpr);
   return had_err;
 }
 

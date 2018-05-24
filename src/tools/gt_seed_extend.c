@@ -88,6 +88,7 @@ typedef struct {
   bool norev;
   bool nofwd;
   bool benchmark;
+  bool affine_alignment;
   bool verbose;
   bool with_code_run_dist;
   bool histogram;
@@ -171,7 +172,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_kenv, *op_maxmat,
     *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics,
     *op_estim, *op_benchmark, *op_snd_pass, *op_delta_filter, *op_onlykmers,
-    *op_qii, *op_verify_total_score_seqpair;
+    *op_qii, *op_verify_total_score_seqpair,
+    *op_affine_alignment;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
@@ -546,6 +548,16 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_maxmat, op_verify_alignment);
   gt_option_is_development_option(op_verify_alignment);
 
+  /* -affine */
+  op_affine_alignment = gt_option_new_bool("affine",
+                                           "compute optimal affine alignment "
+                                           "for substrings in given "
+                                           "coordinates",
+                                           &arguments->affine_alignment,false);
+  gt_option_parser_add_option(op, op_affine_alignment);
+  gt_option_is_development_option(op_affine_alignment);
+
+  /* -verify-total-score-seqpair */
   op_verify_total_score_seqpair
     = gt_option_new_bool("verify-total-score-seqpair",
                          "verify the total score of a sequence pair "
@@ -772,12 +784,14 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_diagband_statistics, op_use_apos_track_all);
   gt_option_exclude(op_diagband_statistics, op_minlen);
   gt_option_exclude(op_diagband_statistics, op_estim);
+  gt_option_exclude(op_diagband_statistics, op_affine_alignment);
   gt_option_exclude(op_estim, op_outfmt);
   gt_option_exclude(op_estim, op_onlyseeds);
   gt_option_exclude(op_estim, op_verify_alignment);
   gt_option_exclude(op_estim, op_verify_total_score_seqpair);
   gt_option_exclude(op_estim, op_only_selected_seqpairs);
   gt_option_exclude(op_estim, op_benchmark);
+  gt_option_exclude(op_estim, op_affine_alignment);
   gt_option_exclude(op_cam, op_xbe);
   gt_option_exclude(op_cam, op_xdr);
   gt_option_exclude(op_cam_generic, op_xbe);
@@ -955,6 +969,18 @@ static int gt_seed_extend_runner(int argc,
       {
         fputc('\n',stdout);
       }
+    }
+  }
+
+  if (!had_err && arguments->affine_alignment)
+  {
+    gt_assert (out_display_flag != NULL);
+    if (!gt_querymatch_run_aligner(out_display_flag))
+    {
+      gt_error_set(err,"Option -affine requires option -outfmt with one "
+                       "of the following arguments: alignment, trace, "
+                       "dtrace, cigar, or cigarX");
+      had_err = -1;
     }
   }
   /* Set character access method */
@@ -1409,6 +1435,7 @@ static int gt_seed_extend_runner(int argc,
                                     splt,
                                     kmplt,
                                     arguments->dbs_verify,
+                                    arguments->affine_alignment,
                                     arguments->verbose,
                                     arguments->with_code_run_dist,
                                     arguments->dbs_debug_kmer,
