@@ -593,7 +593,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* -noinseqseeds */
   option = gt_option_new_bool("noinseqseeds",
-                              "ignore seeds that are in same sequence"
+                              "ignore seeds that are in same sequence "
                               "(triggered by option -estim)",
                               &arguments->noinseqseeds,false);
   gt_option_is_development_option(option);

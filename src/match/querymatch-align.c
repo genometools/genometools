@@ -23,6 +23,9 @@
 #include "revcompl.h"
 #include "seed-extend.h"
 #include "ft-polish.h"
+#ifdef AFFINE_ALIGN_SSW
+#include "ssw.h"
+#endif
 #include "querymatch-align.h"
 
 struct GtQuerymatchoutoptions
@@ -454,7 +457,7 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   }
 }
 
-static void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
+void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
                                              *querymatchoutoptions,
                                            GtUword dbstart_relative,
                                            GtUword dblen,
@@ -492,15 +495,12 @@ static void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
                                            *querymatchoutoptions,
                                          const GtSeqorEncseq *dbes,
-                                         GtUword dbstart_relative,
                                          GtUword dbstart,
                                          GtUword dblen,
                                          GtReadmode query_readmode,
                                          const GtSeqorEncseq *queryes,
-                                         GtUword querystart,
                                          GtUword abs_querystart_fwdstrand,
-                                         GtUword querylen,
-                                         bool withcorrection)
+                                         GtUword querylen)
 {
   gt_assert(querymatchoutoptions != NULL);
   if (querymatchoutoptions->characters == NULL)
@@ -592,12 +592,98 @@ void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
       gt_assert(query_readmode == GT_READMODE_FORWARD);
     }
   }
-  gt_querymatchoutoptions_set_sequences(querymatchoutoptions,
-                                        dbstart_relative,
-                                        dblen,
-                                        querystart,
-                                        querylen,
-                                        withcorrection);
+}
+
+GtUword gt_querymatchoutoptions_affine_alignment(GtQuerymatchoutoptions
+                                                   *querymatchoutoptions,
+                                                 GtUword dblen,
+                                                 GtUword querylen,
+                                                 GtWord score,
+                                                 GtAffineDPreservoir *adpr)
+{
+  GtWord affine_score;
+  const int8_t gap_opening = 4, gap_extension = 1;
+  const GtUword alphasize = 5;
+  GtUword expected_min_score;
+  const double correctness = 99;
+  const int8_t smallest_score = -5,
+               *unitscoreDNA[5],
+               unitscoreDNAtable[] = { 2,-1,-1,-1,-5,
+                                      -1, 2,-1,-1,-5,
+                                      -1,-1, 2,-1,-5,
+                                      -1,-1,-1, 2,-5,
+                                      -5,-5,-5,-5,-5
+                                     };
+
+  gt_assert (querymatchoutoptions->eoplist != NULL);
+  unitscoreDNA[0] = unitscoreDNAtable;
+  unitscoreDNA[1] = unitscoreDNA[0] + alphasize;
+  unitscoreDNA[2] = unitscoreDNA[1] + alphasize;
+  unitscoreDNA[3] = unitscoreDNA[2] + alphasize;
+  unitscoreDNA[4] = unitscoreDNA[3] + alphasize;
+
+#ifdef AFFINE_ALIGN_SSW
+  GtUword opt_affine_score, opt_ustart, opt_vstart, opt_usubstringlength,
+          opt_vsubstringlength;;
+  GtSSWprofile *vprofile;
+  const bool compute_only_end = false;
+  gt_querymatchoutoptions_translate(querymatchoutoptions->useqbuffer,
+                                    dblen,
+                                    (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
+  gt_querymatchoutoptions_translate(querymatchoutoptions->vseqbuffer,
+                                    querylen,
+                                    (GtUchar) WILDCARD,(GtUchar) (alphasize-1));
+  vprofile = gt_ssw_profile_new (querymatchoutoptions->useqbuffer,
+                                 dblen,
+                                 unitscoreDNAtable,
+                                 smallest_score,
+                                 alphasize,
+                                 compute_only_end);
+  opt_affine_score
+     = gt_ssw_align (&opt_ustart,
+                     &opt_usubstringlength,
+                     &opt_vstart,
+                     &opt_vsubstringlength,
+                     vprofile,
+                     NULL,
+                     querymatchoutoptions->vseqbuffer,
+                     querylen,
+                     gap_opening,
+                     gap_extension,
+                     compute_only_end);
+
+  gt_ssw_profile_delete (vprofile);
+  gt_querymatchoutoptions_translate(querymatchoutoptions->useqbuffer,
+                                    dblen,
+                                    (GtUchar) (alphasize-1),
+                                    (GtUchar) WILDCARD);
+  gt_querymatchoutoptions_translate(querymatchoutoptions->vseqbuffer,
+                                    querylen,
+                                    (GtUchar) (alphasize-1),
+                                    (GtUchar) WILDCARD);
+  printf(GT_WU " " GT_WU " " GT_WU " " GT_WU " " GT_WU " ",
+         opt_affine_score,
+         opt_ustart,opt_usubstringlength,
+         opt_vstart,opt_vsubstringlength);
+#endif
+  expected_min_score = (score * correctness)/100;
+  affine_score
+    = (GtWord) gt_affine_iter_diagonalband_align(querymatchoutoptions->eoplist,
+                                                 adpr,
+                                                 gap_opening,
+                                                 gap_extension,
+                                                 (const int8_t *const *)
+                                                    unitscoreDNA,
+                                                 smallest_score,
+                                                 querymatchoutoptions->
+                                                   useqbuffer,
+                                                 dblen,
+                                                 querymatchoutoptions->
+                                                   vseqbuffer,
+                                                 querylen,
+                                                 true,
+                                                 expected_min_score);
+  return affine_score;
 }
 
 void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions

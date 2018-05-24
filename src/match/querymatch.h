@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2018 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2018 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,14 +20,12 @@
 
 #include <inttypes.h>
 #include <stdio.h>
-#include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
 #include "core/arraydef.h"
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
 #include "querymatch-display.h"
-#include "affine_dband.h"
 #include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
@@ -177,12 +175,6 @@ void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
 GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
                                         *querymatch_table,GtUword idx);
 
-typedef struct
-{
-  GtUchar *a_sequence, *b_sequence;
-  GtUword a_allocated, b_allocated, a_len, b_len;
-} GtSequencepairbuffer;
-
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
@@ -190,7 +182,6 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        bool dtrace,
                                        GtUword trace_delta,
                                        bool match_has_seed,
-                                       GtSequencepairbuffer *seqpairbuf,
                                        GtAffineDPreservoir *adpr,
                                        const GtEncseq *db_encseq,
                                        const GtEncseq *query_encseq,

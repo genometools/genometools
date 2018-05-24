@@ -224,7 +224,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       if (arguments->affine_alignment)
       {
-        gt_error_set(err,"Option -affine requires option -outfmt without any "
+        gt_error_set(err,"Option -affine requires option -outfmt with one "
                          " of the following arguments: alignment, trace, "
                          "dtrace, cigar, or cigarX");
         had_err = -1;
@@ -243,7 +243,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                match_has_seed = gt_seedextend_match_iterator_has_seed(semi),
                dtrace = gt_seedextend_match_iterator_dtrace(semi);
     const GtUword trace_delta = gt_seedextend_match_iterator_trace_delta(semi);
-    GtSequencepairbuffer *seqpairbuf = NULL;
     GtAffineDPreservoir *adpr = NULL;
 
     if (gt_querymatch_evalue_display(out_display_flag) ||
@@ -262,7 +261,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       const bool opt_memory = false, keepcolumns = true;
 
-      seqpairbuf = gt_calloc(1,sizeof *seqpairbuf);
       adpr = gt_affine_diagonalband_new(opt_memory, keepcolumns, 0, 0);
     }
     while (true)
@@ -281,7 +279,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                         dtrace,
                                         trace_delta,
                                         match_has_seed,
-                                        seqpairbuf,
                                         adpr,
                                         aencseq,
                                         bencseq,
@@ -290,13 +287,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                         bitscore);
     }
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
-    if (seqpairbuf != NULL)
-    {
-      gt_free(seqpairbuf->a_sequence);
-      gt_free(seqpairbuf->b_sequence);
-      gt_free(seqpairbuf);
-      gt_affine_diagonalband_delete(adpr);
-    }
+    gt_affine_diagonalband_delete(adpr);
     gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   }
   gt_seedextend_match_iterator_delete(semi);

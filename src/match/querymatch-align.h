@@ -23,6 +23,7 @@
 #include "match/ft-front-prune.h"
 #include "match/seq_or_encseq.h"
 #include "match/querymatch-display.h"
+#include "match/affine_dband.h"
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
@@ -117,15 +118,27 @@ void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
 void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
                                            *querymatchoutoptions,
                                          const GtSeqorEncseq *dbes,
-                                         GtUword dbstart_relative,
                                          GtUword dbstart,
                                          GtUword dblen,
                                          GtReadmode query_readmode,
                                          const GtSeqorEncseq *queryes,
-                                         GtUword querystart,
                                          GtUword abs_querystart_fwdstrand,
-                                         GtUword querylen,
-                                         bool withcorrection);
+                                         GtUword querylen);
+
+GtUword gt_querymatchoutoptions_affine_alignment(GtQuerymatchoutoptions
+                                                   *querymatchoutoptions,
+                                                 GtUword dblen,
+                                                 GtUword querylen,
+                                                 GtWord score,
+                                                 GtAffineDPreservoir *adpr);
+
+void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
+                                             *querymatchoutoptions,
+                                           GtUword dbstart_relative,
+                                           GtUword dblen,
+                                           GtUword querystart,
+                                           GtUword querylen,
+                                           bool withcorrection);
 
 void gt_querymatchoutoptions_seededmatch2eoplist(
                                 GtQuerymatchoutoptions *querymatchoutoptions,
