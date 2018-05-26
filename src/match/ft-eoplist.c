@@ -42,7 +42,8 @@ char gt_eoplist_pretty_print(GtEopType eoptype,bool distinguish_mismatch_match)
 struct GtEoplist
 {
   GtUword nextfreeuint8_t, allocateduint8_t, countmatches, countmismatches,
-          countdeletions, countinsertions;
+          countdeletions, countinsertions, countgapopens;
+  bool previous_was_gap;
   uint8_t *spaceuint8_t;
   const GtUchar *useq, *vseq;
   GtUword ustart, ulen, vstart, vlen;
@@ -62,6 +63,8 @@ void gt_eoplist_reset(GtEoplist *eoplist)
     eoplist->countmismatches = 0;
     eoplist->countdeletions = 0;
     eoplist->countinsertions = 0;
+    eoplist->countgapopens = 0;
+    eoplist->previous_was_gap = false;
     eoplist->useq = eoplist->vseq = NULL;
     eoplist->ulen = eoplist->vlen = 0;
   }
@@ -125,58 +128,6 @@ char *gt_eoplist2cigar_string(const GtEoplist *eoplist,
   return sbuf.space;
 }
 
-void gt_eoplist_from_cigar(GtEoplist *eoplist,
-                           const char *cigarstring,char sep)
-{
-  const char *cptr;
-  GtUword iteration = 0;
-
-  for (cptr = cigarstring; *cptr != '\0' && *cptr != sep && *cptr != '\n';
-       cptr++)
-  {
-    if (isdigit(*cptr))
-    {
-      iteration = iteration * 10 + (GtUword) (*cptr - '0');
-    } else
-    {
-      GtUword idx;
-
-      switch (*cptr)
-      {
-        case DELETION_CHAR:
-          for (idx = 0; idx < iteration; idx++)
-          {
-            gt_eoplist_deletion_add(eoplist);
-          }
-          break;
-        case INSERTION_CHAR:
-          for (idx = 0; idx < iteration; idx++)
-          {
-            gt_eoplist_insertion_add(eoplist);
-          }
-          break;
-        case MATCH_CHAR:
-          gt_eoplist_match_add(eoplist,iteration);
-          break;
-        case REPLACEMENT_CHAR:
-          gt_eoplist_match_add(eoplist,iteration);
-          break;
-        case MISMATCH_CHAR:
-          for (idx = 0; idx < iteration; idx++)
-          {
-            gt_eoplist_mismatch_add(eoplist);
-          }
-          break;
-        default:
-          fprintf(stderr,"file %s, line %d: illegal symbol '%c' "
-                         "in cigar string\n",__FILE__,__LINE__,*cptr);
-          exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-      iteration = 0;
-    }
-  }
-}
-
 void gt_eoplist_delete(GtEoplist *eoplist)
 {
   if (eoplist != NULL)
@@ -216,18 +167,25 @@ void gt_eoplist_match_add(GtEoplist *eoplist,GtUword length)
     eoplist->countmatches += FT_EOPCODE_MAXMATCHES;
     length -= FT_EOPCODE_MAXMATCHES;
   }
+  eoplist->previous_was_gap = false;
 }
 
 void gt_eoplist_mismatch_add(GtEoplist *eoplist)
 {
   GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_MISMATCH); /* R 1 */
   eoplist->countmismatches++;
+  eoplist->previous_was_gap = false;
 }
 
 void gt_eoplist_deletion_add(GtEoplist *eoplist)
 {
   GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_DELETION);
   eoplist->countdeletions++;
+  if (!eoplist->previous_was_gap)
+  {
+    eoplist->countgapopens++;
+    eoplist->previous_was_gap = true;
+  }
 }
 
 void gt_eoplist_insertion_add(GtEoplist *eoplist)
@@ -235,6 +193,11 @@ void gt_eoplist_insertion_add(GtEoplist *eoplist)
   gt_assert(eoplist != NULL);
   GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_INSERTION);
   eoplist->countinsertions++;
+  if (!eoplist->previous_was_gap)
+  {
+    eoplist->countgapopens++;
+    eoplist->previous_was_gap = true;
+  }
 }
 
 GtUword gt_eoplist_length(const GtEoplist *eoplist)
@@ -287,6 +250,64 @@ GtUword gt_eoplist_insertions_count(const GtEoplist *eoplist)
 {
   gt_assert(eoplist != NULL);
   return eoplist->countinsertions;
+}
+
+GtUword gt_eoplist_gapopens_count(const GtEoplist *eoplist)
+{
+  gt_assert(eoplist != NULL);
+  return eoplist->countgapopens;
+}
+
+void gt_eoplist_from_cigar(GtEoplist *eoplist,
+                           const char *cigarstring,char sep)
+{
+  const char *cptr;
+  GtUword iteration = 0;
+
+  for (cptr = cigarstring; *cptr != '\0' && *cptr != sep && *cptr != '\n';
+       cptr++)
+  {
+    if (isdigit(*cptr))
+    {
+      iteration = iteration * 10 + (GtUword) (*cptr - '0');
+    } else
+    {
+      GtUword idx;
+
+      switch (*cptr)
+      {
+        case DELETION_CHAR:
+          for (idx = 0; idx < iteration; idx++)
+          {
+            gt_eoplist_deletion_add(eoplist);
+          }
+          break;
+        case INSERTION_CHAR:
+          for (idx = 0; idx < iteration; idx++)
+          {
+            gt_eoplist_insertion_add(eoplist);
+          }
+          break;
+        case MATCH_CHAR:
+          gt_eoplist_match_add(eoplist,iteration);
+          break;
+        case REPLACEMENT_CHAR:
+          gt_eoplist_match_add(eoplist,iteration);
+          break;
+        case MISMATCH_CHAR:
+          for (idx = 0; idx < iteration; idx++)
+          {
+            gt_eoplist_mismatch_add(eoplist);
+          }
+          break;
+        default:
+          fprintf(stderr,"file %s, line %d: illegal symbol '%c' "
+                         "in cigar string\n",__FILE__,__LINE__,*cptr);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      iteration = 0;
+    }
+  }
 }
 
 struct GtEoplistReader

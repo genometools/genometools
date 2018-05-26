@@ -114,7 +114,6 @@ static int gt_exact_selfmatch_with_output(void *info,
                              pos1 - db_seqstart,
                              db_seqstart,
                              dbseqlen,
-                             0, /* score */
                              0, /* edist */
                              0, /* mismatches */
                              true,
@@ -696,7 +695,6 @@ static int gt_callenumquerymatches(bool selfmatch,
                            dbstart - db_seqstart,
                            db_seqstart,
                            dbseqlen,
-                           0, /* score */
                            0, /* edist */
                            0, /* mismatches */
                            selfmatch,
@@ -721,7 +719,6 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    dbstart - db_seqstart,
                                    db_seqstart,
                                    dbseqlen,
-                                   0, /* score */
                                    0, /* edist */
                                    0, /* mismatches */
                                    selfmatch,

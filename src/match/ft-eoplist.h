@@ -47,6 +47,9 @@ GtUword gt_eoplist_mismatches_count(const GtEoplist *eoplist);
 /* return number of deletions in eoplist */
 GtUword gt_eoplist_deletions_count(const GtEoplist *eoplist);
 
+/* return number of gapopens in eoplist */
+GtUword gt_eoplist_gapopens_count(const GtEoplist *eoplist);
+
 /* return number of insertions in eoplist */
 GtUword gt_eoplist_insertions_count(const GtEoplist *eoplist);
 

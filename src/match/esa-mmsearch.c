@@ -463,7 +463,6 @@ void gt_queryuniquematch(bool selfmatch,
                          dbstart - db_seqstart,
                          db_seqstart,
                          dbseqlen,
-                         0, /* score */
                          0, /* edist */
                          0, /* mismatches */
                          selfmatch,
@@ -554,7 +553,6 @@ static void gt_querysubstringmatch(bool selfmatch,
                            dbstart - db_seqstart,
                            db_seqstart,
                            dbseqlen,
-                           0, /* score */
                            0, /* edist */
                            0, /* mismatches */
                            selfmatch,

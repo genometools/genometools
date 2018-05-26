@@ -46,7 +46,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbstart_relative,
                         GtUword db_seqstart,
                         GtUword dbseqlen,
-                        GtWord score,
                         GtUword distance,
                         GtUword mismatches,
                         bool selfmatch,
@@ -76,7 +75,6 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             GtUword dbstart_relative,
                             GtUword db_seqstart,
                             GtUword dbseqlen,
-                            GtWord score,
                             GtUword distance,
                             GtUword mismatches,
                             bool selfmatch,
@@ -163,7 +161,7 @@ void gt_querymatch_verify_alignment_set(GtQuerymatch *querymatch);
 
 GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch);
 
-GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
+GtWord gt_querymatch_distance2unit_score(GtUword distance,GtUword alignedlen);
 
 GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
@@ -190,5 +188,13 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                          *karlin_altschul_stat,
                                        double evalue,
                                        double bitscore);
+
+static inline GtUword gt_querymatch_score2distance(GtWord score,
+                                                   GtUword alignedlen)
+{
+  gt_assert(score < 0 || alignedlen >= score);
+  return (score >= 0) ? (((GtWord) alignedlen - score)/3)
+                      : -(((GtWord) alignedlen + score)/3);
+}
 
 #endif

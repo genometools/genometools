@@ -25,6 +25,9 @@ def relation_expected(key,v1,v2)
   if key == :editdist
     return v1 <= v2
   end
+  if key == :score
+    return v1 >= v2
+  end
   if key == :identity
     return v1 >= v2
   end

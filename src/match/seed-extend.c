@@ -23,19 +23,6 @@
 #include "match/seq_or_encseq.h"
 #include "match/seed-extend.h"
 
-static GtUword gt_querymatch_score2distance(GtXdropscore score,
-                                            GtUword alignedlen)
-{
-  if (score >= 0)
-  {
-    gt_assert(alignedlen >= score);
-    return ((GtWord) alignedlen - score)/3;
-  } else
-  {
-    return -(((GtWord) alignedlen + score)/3);
-  }
-}
-
 struct GtXdropmatchinfo
 {
   GtXdropArbitraryscores arbitscores;
@@ -240,7 +227,6 @@ static GtUword gt_combine_extensions(
          GtUword right_mismatches)
 {
   GtUword dblen, querylen, total_alignedlen, total_distance, total_mismatches;
-  GtXdropscore total_score;
 
   if (mode == GT_EXTENSION_COMBINE_ONLY_LEFT)
   {
@@ -260,21 +246,21 @@ static GtUword gt_combine_extensions(
   total_alignedlen = dblen + querylen;
   if (forxdrop)
   {
-    total_score = seed_score + left_score + right_score;
+    GtXdropscore total_score = seed_score + left_score + right_score;
     total_distance = gt_querymatch_score2distance(total_score,total_alignedlen);
     total_mismatches = 0;
   } else
   {
     total_distance = left_distance + right_distance;
     total_mismatches = left_mismatches + right_mismatches;
-    total_score = gt_querymatch_distance2score(total_distance,total_alignedlen);
   }
   gt_assert(sesp->dbstart_relative >= u_left_ext &&
             sesp->querystart_relative >= v_left_ext);
 
 #ifdef SKDEBUG
   printf("total_distance=" GT_WU ", total_score=" GT_WD ",total_alignedlen="
-         GT_WU ", err=%.2f\n",total_distance,total_score,total_alignedlen,
+         GT_WU ", err=%.2f\n",total_distance,
+          gt_querymatch_distance2unit_score(total_distance,total_alignedlen),
           gt_querymatch_error_percentage(total_distance,total_alignedlen));
 #endif
   previous_match->a_start = sesp->dbstart_relative - u_left_ext;
@@ -291,7 +277,6 @@ static GtUword gt_combine_extensions(
                              previous_match->a_start,
                              sesp->db_seqstart,
                              sesp->dbseqlength,
-                             (GtWord) total_score,
                              total_distance,
                              total_mismatches,
                              sesp->same_encseq,
