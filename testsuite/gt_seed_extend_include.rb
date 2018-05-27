@@ -306,6 +306,14 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -l 100 -outfmt paf cigar"
 end
 
+Name "gt seed_extend: cigarX derived consistencies"
+Keywords "gt_seed_extend gt_seed_extend_consistency"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt cigarX mismatches indels matches 'gap opens'"
+  run "#{$scriptsdir}consistency_wrt_cigar.rb #{last_stdout}"
+end
+
 # Invalid arguments
 Name "gt seed_extend: failure"
 Keywords "gt_seed_extend gt_seed_extend_failure"

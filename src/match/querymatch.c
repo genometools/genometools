@@ -47,7 +47,8 @@ struct GtQuerymatch
     query_seedpos_rel, /* relative position of seed on query */
     seedlen,
     distance, /* 0 for exact match, upper bound on optimal distance */
-    mismatches;
+    mismatches,
+    gapopens;
   GtWord affine_score;
   GtReadmode query_readmode; /* readmode of query sequence */
   bool selfmatch, verify_alignment, force_order;
@@ -64,6 +65,7 @@ GtQuerymatch *gt_querymatch_new(void)
 
   gt_assert(querymatch != NULL);
   querymatch->ref_querymatchoutoptions = NULL;
+  querymatch->ref_eoplist = NULL;
   querymatch->verify_alignment = false;
   querymatch->query_readmode = GT_READMODE_FORWARD;
   querymatch->fp = stdout;
@@ -71,6 +73,10 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->db_desc = NULL;
   querymatch->query_desc = NULL;
   querymatch->force_order = true;
+  querymatch->affine_score = 0;
+  querymatch->gapopens = 0;
+  querymatch->distance = 0;
+  querymatch->mismatches = 0;
   return querymatch;
 }
 
@@ -621,15 +627,27 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fputs("255",querymatch->fp);
         break;
       case Gt_Indels_display:
-      case Gt_Gapopens_display:
         if (gfa2_display)
         {
           fprintf(querymatch->fp,"IN:i:");
         }
         fprintf(querymatch->fp,GT_WU,gt_querymatch_indels(querymatch));
         break;
+      case Gt_Gapopens_display:
+        if (querymatch->ref_eoplist != NULL)
+        {
+          fprintf(querymatch->fp,GT_WU,
+                  gt_eoplist_gapopens_count(querymatch->ref_eoplist));
+        } else
+        {
+          fputc('0',querymatch->fp);
+        }
+        break;
       case Gt_Score_display:
         fprintf(querymatch->fp,GT_WD,gt_querymatch_unit_score(querymatch));
+        break;
+      case Gt_Affinescore_display:
+        fprintf(querymatch->fp,GT_WD,querymatch->affine_score);
         break;
       case Gt_Editdist_display:
         if (gfa2_display)
@@ -892,12 +910,34 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
                      querymatch->query_desc);
 }
 
+static void gt_querymatch_update_from_cigar(GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL && querymatch->ref_eoplist != NULL);
+
+  querymatch->mismatches
+    = gt_eoplist_mismatches_count(querymatch->ref_eoplist);
+  querymatch->distance
+    = querymatch->mismatches
+      + gt_eoplist_deletions_count(querymatch->ref_eoplist)
+      + gt_eoplist_insertions_count(querymatch->ref_eoplist);
+  querymatch->gapopens = gt_eoplist_gapopens_count(querymatch->ref_eoplist);
+}
+
+static void gt_querymatch_reset_exact(GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+
+  querymatch->mismatches = 0;
+  querymatch->distance = 0;
+  querymatch->gapopens = 0;
+}
+
 static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
                                             const GtSeqorEncseq *dbes,
                                             const GtSeqorEncseq *queryes,
                                             bool greedyextension)
 {
-  bool seeded_alignment;
+  bool exact_match;
   GtUword abs_querystart_fwdstrand;
 
   gt_assert(querymatch != NULL);
@@ -925,10 +965,11 @@ static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
                         querymatch->seedlen,
                         querymatch->verify_alignment,
                         greedyextension);
-    seeded_alignment = true;
+    exact_match = false;
   } else
   {
-    seeded_alignment = false;
+    gt_eoplist_reset(querymatch->ref_eoplist);
+    exact_match = true;
   }
   abs_querystart_fwdstrand = querymatch->query_seqstart +
                              querymatch->querystart_fwdstrand;
@@ -945,10 +986,20 @@ static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
                                         gt_querymatch_dblen(querymatch),
                                         querymatch->querystart,
                                         querymatch->querylen,
-                                        seeded_alignment);
-  if (seeded_alignment && !greedyextension)
+                                        !exact_match);
+  if (exact_match)
   {
-    gt_querymatch_applycorrection(querymatch);
+    gt_querymatch_reset_exact(querymatch);
+  } else
+  {
+    if (!greedyextension)
+    {
+      gt_querymatch_applycorrection(querymatch);
+      if (querymatch->ref_eoplist != NULL)
+      {
+        gt_querymatch_update_from_cigar(querymatch);
+      }
+    }
   }
 }
 
@@ -978,8 +1029,8 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
   char separator;
   const char *ptr = line_ptr;
   GtUword column, numcolumns, dbend_relative = GT_UWORD_MAX,
-          queryend_relative = GT_UWORD_MAX;
-  GtWord unit_score = GT_WORD_MAX;
+          queryend_relative = GT_UWORD_MAX, read_indels = GT_UWORD_MAX;
+  GtWord read_unit_score = GT_WORD_MAX;
   const unsigned int *column_order
     = gt_querymatch_display_order(&numcolumns,in_display_flag);
 
@@ -1060,7 +1111,10 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         ret = sscanf(ptr,GT_WU,&querymatch->querystart_fwdstrand);
         break;
       case Gt_Score_display:
-        ret = sscanf(ptr,GT_WD,&unit_score);
+        ret = sscanf(ptr,GT_WD,&read_unit_score);
+        break;
+      case Gt_Affinescore_display:
+        fprintf(querymatch->fp,GT_WD,querymatch->affine_score);
         break;
       case Gt_Editdist_display:
         ret = sscanf(ptr,GT_WU,&querymatch->distance);
@@ -1092,9 +1146,11 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_S_end_display:
         ret = sscanf(ptr,GT_WU,&dbend_relative);
         break;
+      case Gt_Indels_display:
+        ret = sscanf(ptr,GT_WU,&read_indels);
+        break;
       case Gt_Alignmentlength_display:
       case Gt_Identity_display:
-      case Gt_Indels_display:
       case Gt_Gapopens_display:
       case Gt_Matches_display:
       case Gt_Mappingqual_display:
@@ -1112,15 +1168,28 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
     ptr = strchr(ptr,separator);
     gt_assert(column == numcolumns - 1 || ptr != NULL);
   }
-  if (gt_querymatch_score_display(in_display_flag) &&
-      gt_querymatch_s_len_display(in_display_flag) &&
-      gt_querymatch_q_len_display(in_display_flag) &&
-      !gt_querymatch_editdist_display(in_display_flag))
+  if (!gt_querymatch_editdist_display(in_display_flag))
   {
-    gt_assert(unit_score != GT_WORD_MAX);
-    querymatch->distance
-      = gt_querymatch_score2distance(unit_score,
-                                     gt_querymatch_aligned_len(querymatch));
+    if (gt_querymatch_s_len_display(in_display_flag) &&
+        gt_querymatch_q_len_display(in_display_flag) &&
+        gt_querymatch_score_display(in_display_flag))
+    {
+      gt_assert(read_unit_score != GT_WORD_MAX);
+      querymatch->distance
+         = gt_querymatch_score2distance(read_unit_score,
+                                        gt_querymatch_aligned_len(querymatch));
+    } else
+    {
+      if (gt_querymatch_mismatches_display(in_display_flag) &&
+          gt_querymatch_indels_display(in_display_flag))
+      {
+        gt_assert(read_indels != GT_UWORD_MAX);
+        querymatch->distance = read_indels + querymatch->mismatches;
+      } else
+      {
+        querymatch->distance = GT_UWORD_MAX;
+      }
+    }
   }
   gt_assert(gt_querymatch_s_seqnum_display(in_display_flag) &&
             gt_querymatch_q_seqnum_display(in_display_flag));
@@ -1475,14 +1544,15 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                      &query_seqorencseq);
       }
     }
-    if (!exact_match && querymatch->ref_eoplist != NULL)
+    if (exact_match)
     {
-      querymatch->mismatches
-        = gt_eoplist_mismatches_count(querymatch->ref_eoplist);
-      querymatch->distance
-        = querymatch->mismatches
-          + gt_eoplist_deletions_count(querymatch->ref_eoplist)
-          + gt_eoplist_insertions_count(querymatch->ref_eoplist);
+      gt_querymatch_reset_exact(querymatch);
+    } else
+    {
+      if (querymatch->ref_eoplist != NULL)
+      {
+        gt_querymatch_update_from_cigar(querymatch);
+      }
     }
   }
   if ((evalue == DBL_MAX || bitscore == DBL_MAX) &&

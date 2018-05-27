@@ -1,6 +1,6 @@
 # Options: -ii subject -qii query -evalue 0.01 -outfmt alignment blast -seedlength 12 -minidentity 75 -history 60
 # Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
-gi|4714011|dbj|C99887.1|C99887	gi|4714047|dbj|C99930.1|C99930	90.91	733	38	30	53	802	746	1	3e-284	961.3
+gi|4714011|dbj|C99887.1|C99887	gi|4714047|dbj|C99930.1|C99930	90.91	733	38	22	53	802	746	1	3e-284	961.3
 Query  53   aaacatgaaaaaaaaagtaaaacgaaaactcggagagcagaaacaacgataacatcacaa  112
             ||| |  | |  ||||  |||| | ||| | || |||| ||||||| | | || ||||| 
 Sbjct  746  aaa-a--acaggaaaa--aaaagg-aaatttggggagcggaaacaa-ggttacttcacag  694

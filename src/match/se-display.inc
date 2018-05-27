@@ -3,6 +3,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 {
 /* incolumn is true iff the helptext of the argument begins
    with the keyword "display" */
+  {"affine score", Gt_Affinescore_display, true},
   {"alignment", Gt_Alignment_display, false},
   {"alignment length", Gt_Alignmentlength_display, true},
   {"bit score", Gt_Bitscore_display, true},
@@ -49,49 +50,50 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 };
 
 static unsigned int gt_display_flag2index[] = {
-   0,
-   37,
-   20,
-   33,
-   10,
-   11,
-   41,
-   39,
-   3,
-   19,
-   13,
-   6,
-   4,
-   5,
-   42,
-   7,
-   28,
-   30,
-   40,
-   31,
-   27,
-   38,
-   22,
-   24,
-   26,
-   25,
-   21,
    1,
+   38,
+   21,
+   34,
+   11,
+   12,
+   42,
+   40,
+   4,
+   20,
+   14,
+   7,
+   5,
+   6,
+   43,
+   8,
+   29,
+   31,
+   41,
+   32,
+   28,
+   39,
+   23,
+   25,
+   27,
+   26,
+   22,
+   2,
+   19,
    18,
    17,
    16,
-   15,
-   12,
-   32,
-   8,
-   14,
-   34,
-   36,
-   35,
-   29,
-   23,
+   13,
+   33,
+   0,
    9,
-   2
+   15,
+   35,
+   37,
+   36,
+   30,
+   24,
+   10,
+   3
 };
 
 const char *gt_querymatch_display_help(void)
@@ -155,8 +157,9 @@ const char *gt_querymatch_display_help(void)
          "matches:          display number of matches in alignment\n"
          "mapping qual:     display mapping quality (255 for missing)\n"
          "indels:           display number of indels in alignment\n"
-         "gap opens:        display number of indels in alignment\n"
-         "score:            display score of match\n"
+         "gap opens:        display number of gap opens in alignment\n"
+         "score:            display unit score of match\n"
+         "affine score:     display affine score of match\n"
          "editdist:         display unit edit distance\n"
          "identity:         display percent identity of match\n"
          "seed.len:         display length seed of the match\n"
@@ -204,6 +207,7 @@ const char *gt_querymatch_display_help(void)
         ", indels"\
         ", gap opens"\
         ", score"\
+        ", affine score"\
         ", editdist"\
         ", identity"\
         ", seed.len"\
@@ -410,6 +414,12 @@ bool gt_querymatch_score_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Score_display);
+}
+
+bool gt_querymatch_affinescore_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Affinescore_display);
 }
 
 bool gt_querymatch_editdist_display(const GtSeedExtendDisplayFlag
