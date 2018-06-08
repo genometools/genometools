@@ -137,7 +137,7 @@ static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
     {
       if (seqit->sequencebuffer.nextfreeGtUchar == 0 && seqit->withsequence)
       {
-        gt_error_set(err,"sequence "GT_LLU" is empty", seqit->unitnum);
+        gt_error_set(err,"sequence " GT_LLU " is empty", seqit->unitnum);
         haserr = true;
         break;
       }
