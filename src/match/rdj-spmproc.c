@@ -105,6 +105,7 @@ static void outproc_a(GT_UNUSED GtUword suffix_seqnum,
         skipped = true;\
         d.out.e.proc = outproc;\
         d.out.e.data = &skipped;\
+        d.skipped_counter = 0;\
         gt_spmproc_skip((SN), (PN), 100UL, false, true, &d);\
         if (EXP) gt_ensure(skipped);\
         else gt_ensure(!skipped);\

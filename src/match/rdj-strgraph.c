@@ -739,6 +739,7 @@ int gt_strgraph_load_spm_from_file(GtStrgraph *strgraph,
     skipdata.out.e.proc = gt_spmproc_strgraph_add;
     skipdata.to_skip = contained;
     skipdata.out.e.data = strgraph;
+    skipdata.skipped_counter = 0;
   }
   strgraph->load_self_spm = load_self_spm;
   for (i = 0; i < nspmfiles; i++)

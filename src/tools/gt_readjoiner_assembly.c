@@ -271,6 +271,7 @@ static int gt_readjoiner_assembly_count_spm(const char *readset, bool eqlen,
     skipdata.out.e.proc = gt_spmproc_strgraph_count;
     skipdata.to_skip = contained;
     skipdata.out.e.data = strgraph;
+    skipdata.skipped_counter = 0;
   }
   for (i = 0; i < nspmfiles; i++)
   {
