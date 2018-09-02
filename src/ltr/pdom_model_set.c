@@ -115,7 +115,8 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
         if (len > 5 && strncmp(line, "ALPH", 4 * sizeof (char)) == 0) {
           if (len > 9 && (strncmp(line, "ALPH  Amino", 11 * sizeof (char)) == 0
                      || strncmp(line, "ALPH  amino", 11 * sizeof (char)) == 0
-                     || strncmp(line, "ALPH  AMINO", 11 * sizeof (char)) == 0)) {
+                     || strncmp(line, "ALPH  AMINO", 11 * sizeof (char)) == 0))
+          {
             break;
           } else {
             gt_error_set(err, "invalid (non-protein) alphabet definition "
