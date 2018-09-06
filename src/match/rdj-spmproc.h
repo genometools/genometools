@@ -56,7 +56,6 @@ Given a GtBitsequence (large as the number of reads), acts as a filter
 and calls the Spmproc outproc if the bit for both seqnums is not set.
 The void* data must be of type GtSpmprocSkipData.
 */
-
 typedef struct {
   GtBitsequence *to_skip;
   GtSpmprocXWithData out;

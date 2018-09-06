@@ -155,6 +155,7 @@ static int gt_readjoiner_gfa_use_spmfiles(GtSpmproc proc, void *procdata,
     skipdata.to_skip = contained;
     skipdata.out.e.proc = proc;
     skipdata.out.e.data = procdata;
+    skipdata.skipped_counter = 0;
   }
   for (i = 0; i < nspmfiles; i++)
   {
