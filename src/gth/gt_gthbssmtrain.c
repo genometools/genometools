@@ -321,10 +321,11 @@ static int gt_gthbssmtrain_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err && arguments->intermediate)
     had_err = gth_bssm_seq_processor_write_intermediate(bsp, err);
 
-  if (!had_err) {
-    gth_bssm_seq_processor_sample(bsp, arguments->verbose, logfp);
+  if (!had_err)
+    had_err = gth_bssm_seq_processor_sample(bsp, arguments->verbose, logfp, err);
+
+  if (!had_err)
     gth_bssm_seq_processor_write(bsp);
-  }
 
   gt_node_stream_delete(bssm_train_stream);
   gt_node_stream_delete((GtNodeStream*) buffer_stream);

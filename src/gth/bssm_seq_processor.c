@@ -1272,24 +1272,20 @@ int gth_bssm_seq_processor_write_intermediate(GthBSSMSeqProcessor *bsp,
   return 0;
 }
 
-#if 0
-  "T1",
-  "T2",
-  "T0",
-  "F1",
-  "F2",
-  "F0",
-  "Fi"
-#endif
-
-static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
-                              GtFile *logfp)
+static int show_and_check_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
+                                       GtFile *logfp, GtError *err)
 {
   GtUword len0, len1, len2;
+  bool site_found = false;
+
+  gt_error_check(err);
+  gt_assert(bsp && logfp);
 
   len0 = gt_array_size(bsp->i0_true_don_gt);
   len1 = gt_array_size(bsp->i1_true_don_gt);
   len2 = gt_array_size(bsp->i2_true_don_gt);
+  if (len0 || len1 || len2)
+    site_found = true;
 
   if (verbose) {
     printf("%s/T1: "GT_WU" seqs\n", GT_DIR, len0);
@@ -1323,6 +1319,8 @@ static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
     len0 = gt_array_size(bsp->i0_true_don_gc);
     len1 = gt_array_size(bsp->i1_true_don_gc);
     len2 = gt_array_size(bsp->i2_true_don_gc);
+    if (len0 || len1 || len2)
+      site_found = true;
 
     if (verbose) {
       printf("%s/T1: "GT_WU" seqs\n", GC_DIR, len0);
@@ -1356,6 +1354,8 @@ static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
   len0 = gt_array_size(bsp->i0_true_acc);
   len1 = gt_array_size(bsp->i1_true_acc);
   len2 = gt_array_size(bsp->i2_true_acc);
+  if (len0 || len1 || len2)
+    site_found = true;
 
   if (verbose) {
     printf("%s/T1: "GT_WU" seqs\n", AG_DIR, len0);
@@ -1385,15 +1385,21 @@ static void show_sample_sizes(GthBSSMSeqProcessor *bsp, bool verbose,
                   AG_DIR, MAX3(len0, len1, len2),
                   gt_array_size(bsp->i_false_acc));
 
+  if (!site_found) {
+    gt_error_set(err, "no donor or acceptor sites found, wrong -extracttype?");
+    return -1;
+  }
+  return 0;
 }
 
-void gth_bssm_seq_processor_sample(GthBSSMSeqProcessor *bsp, bool verbose,
-                                   GtFile *logfp)
+int gth_bssm_seq_processor_sample(GthBSSMSeqProcessor *bsp, bool verbose,
+                                  GtFile *logfp, GtError *err)
 {
   GtUword len0, len1, len2;
   gt_assert(bsp);
 
-  show_sample_sizes(bsp, verbose, logfp);
+  if (show_and_check_sample_sizes(bsp, verbose, logfp, err))
+    return -1;
 
   sample_bssm_seqs(bsp->e0_false_don_gt, gt_array_size(bsp->i0_true_don_gt));
   sample_bssm_seqs(bsp->e0_false_acc, gt_array_size(bsp->i0_true_acc));
@@ -1424,6 +1430,8 @@ void gth_bssm_seq_processor_sample(GthBSSMSeqProcessor *bsp, bool verbose,
   len1 = gt_array_size(bsp->i1_true_acc);
   len2 = gt_array_size(bsp->i2_true_acc);
   sample_bssm_seqs(bsp->i_false_acc, MAX3(len0, len1, len2));
+
+  return 0;
 }
 
 void gth_bssm_seq_processor_write(GthBSSMSeqProcessor *bsp)
