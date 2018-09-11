@@ -53,8 +53,9 @@ int                  gth_bssm_seq_processor_find_false_sites(
 int                  gth_bssm_seq_processor_write_intermediate(
                                                           GthBSSMSeqProcessor*,
                                                                GtError *err);
-void                 gth_bssm_seq_processor_sample(GthBSSMSeqProcessor*,
-                                                   bool verbose, GtFile *logfp);
+int                  gth_bssm_seq_processor_sample(GthBSSMSeqProcessor*,
+                                                   bool verbose, GtFile *logfp,
+                                                   GtError *err);
 void                 gth_bssm_seq_processor_write(GthBSSMSeqProcessor*);
 
 #endif
