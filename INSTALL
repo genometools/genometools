@@ -101,8 +101,31 @@ preferred option.
 Use the 'useshared=yes' make option to ignore the embedded code copies in the
 GenomeTools source distribution and to use the system-wide versions. The following
 libraries (and their development headers) are required to be present:
-zlib, bzlib2, liblua5.1, lua-filesystem, lua-lpeg, lua-md5, libexpat, libtre,
-libcairo + libpango (only unless 'cairo=no' is used), libsqlite3 and libbam.
+
+ - zlib (https://zlib.net/)
+   Debian/Ubuntu: zlib1g-dev
+ - bzlib2 (https://www.sourceware.org/bzip2/)
+   Debian/Ubuntu: libbz2-dev
+ - liblua5.1 (https://www.lua.org/)
+   Debian/Ubuntu: liblua5.1-0-dev
+ - lua-filesystem (https://keplerproject.github.io/luafilesystem/)
+   Debian/Ubuntu: lua-filesystem-dev
+ - lua-lpeg (http://www.inf.puc-rio.br/~roberto/lpeg/)
+   Debian/Ubuntu: lua-lpeg-dev
+ - lua-md5 (https://keplerproject.github.io/md5/)
+   Debian/Ubuntu: lua-md5-dev
+ - libexpat (https://github.com/libexpat/libexpat)
+   Debian/Ubuntu: libexpat1-dev
+ - libtre (https://github.com/laurikari/tre/)
+   Debian/Ubuntu: libtre-dev
+ - libcairo (only unless 'cairo=no' is used) (https://cairographics.org/)
+   Debian/Ubuntu: libcairo2-dev
+ - libpango (only unless 'cairo=no' is used) (https://www.pango.org/)
+   Debian/Ubuntu: libpango1.0-dev
+ - libsqlite3 (https://www.sqlite.org/)
+   Debian/Ubuntu: libsqlite3-dev
+ - libbam (http://www.htslib.org/)
+   Debian/Ubuntu: libbam-dev
 
 
 Testing GenomeTools (optional)
