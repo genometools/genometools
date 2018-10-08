@@ -59,8 +59,8 @@ static int extract_feature_seq(GtEncseqBuilder *b, const char *header,
   if (!had_err) {
     buffer = gt_calloc((size_t) gt_range_length(&range) + 1, sizeof (char));
     startpos = gt_encseq_seqstartpos(encseq, seqnum);
-    gt_encseq_extract_decoded(encseq, buffer, startpos + range.start,
-                              startpos + range.end);
+    gt_encseq_extract_decoded(encseq, buffer, startpos + range.start - 1,
+                              startpos + range.end - 1);
     gt_encseq_builder_add_cstr(b, buffer, gt_range_length(&range), header);
     gt_free(buffer);
   }
