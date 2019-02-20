@@ -60,7 +60,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtRange *seedpairdistance,
                                              GtDiagbandseedBaseListType splt,
                                              GtDiagbandseedBaseListType kmplt,
-                                             bool verify,
+                                             bool sample_kmers,
+                                             bool verify_seeds,
                                              bool affine_alignment,
                                              bool verbose,
                                              bool with_code_run_dist,
@@ -129,7 +130,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 int max_combine_mode,
                                 GtAccumulateMatchValues *accu_match_values);
 
-int gt_diagbandseed_derive_maxmat_show(GtUword maxmat);
+int gt_diagbandseed_derive_maxmat_format(GtUword maxmat);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);

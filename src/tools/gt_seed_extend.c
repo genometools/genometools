@@ -59,9 +59,10 @@ typedef struct {
         *diagband_statistics_arg,
         *chainarguments,
         *dbs_memlimit_str;
+  bool sample_kmers;
   bool dbs_debug_kmer;
   bool dbs_debug_seedpair;
-  bool dbs_verify;
+  bool dbs_verify_seeds;
   bool weakends;
   bool onlyseeds;
   bool overlappingseeds;
@@ -244,8 +245,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* -diagbandwidth */
   op_diagbandwidth = gt_option_new_string("diagbandwidth",
-                               "Logarithm of diagonal band width in the "
-                               "range\nfrom 0 to 10 (for filter)",
+                               "keyword \"no\" (for switching of diagonal band "
+                               "filter or logarithm of diagonal band width in "
+                               "the range from 0 to 10 (for filter)",
                                arguments->opt_diagbandwidth,
                                "6");
   arguments->se_ref_op_diagbandwidth = gt_option_ref(op_diagbandwidth);
@@ -301,6 +303,14 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                 "");
   gt_option_parser_add_option(op, op_mem);
 
+  /* -sample-kmers */
+  option = gt_option_new_bool("sample-kmers",
+                              "sample the kmer positions at even distances",
+                              &arguments->sample_kmers,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -debug-kmer */
   option = gt_option_new_bool("debug-kmer",
                               "Output KmerPos lists",
@@ -320,7 +330,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -verify */
   option = gt_option_new_bool("verify",
                               "Check that k-mer seeds occur in the sequences",
-                              &arguments->dbs_verify,
+                              &arguments->dbs_verify_seeds,
                               false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
@@ -464,11 +474,20 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_trimstat, op_onlyseeds);
 
   /* -maxmat */
-  op_maxmat = gt_option_new_ulong("maxmat",
-                                 "compute maximal matches of minimum length "
-                                 "specified by option -l",
+  op_maxmat = gt_option_new_ulong_min_max("maxmat",
+                                  "compute maximal matches (MEMs) of minimum "
+                                  "length specified by option -l, optional "
+                                  "argument specifies output or kind of "
+                                  "postprocessing of MEMs:\n"
+                                  "1: Vmatch-like output\n"
+                                  "2: MUMmer-like output\n"
+                                  "3: use mems as seeds and extend them, use "
+                                  "standard output format of seed_extend\n"
+                                  "4: use kmer as seeds for computing maximal "
+                                  "exact matches using character comparisons",
                                  &arguments->maxmat,
-                                 1);
+                                 1,
+                                 1,4);
   arguments->se_ref_op_maxmat = gt_option_ref(op_maxmat);
   /* will later be included again: gt_option_exclude(op_maxmat, op_bia); */
   /*gt_option_exclude(op_maxmat, op_diagbandwidth);
@@ -944,7 +963,7 @@ static int gt_seed_extend_runner(int argc,
     if (!gt_querymatch_gfa2_display(out_display_flag))
     {
       const bool idhistout
-        = (!gt_diagbandseed_derive_maxmat_show(arguments->maxmat) &&
+        = (!gt_diagbandseed_derive_maxmat_format(arguments->maxmat) &&
            gt_str_length(arguments->diagband_statistics_arg) == 0) ? true
                                                                    : false;
       gt_querymatch_Options_output(stdout,argc,argv,idhistout,
@@ -952,7 +971,7 @@ static int gt_seed_extend_runner(int argc,
                                    arguments->se_historysize);
       if (gt_str_length(arguments->estimation_mode) == 0 &&
           !arguments->onlyseeds &&
-          !gt_diagbandseed_derive_maxmat_show(arguments->maxmat) &&
+          !gt_diagbandseed_derive_maxmat_format(arguments->maxmat) &&
           !arguments->onlykmers &&
           gt_str_length(arguments->diagband_statistics_arg) == 0)
       {
@@ -1434,7 +1453,8 @@ static int gt_seed_extend_runner(int argc,
                                     &arguments->seedpairdistance,
                                     splt,
                                     kmplt,
-                                    arguments->dbs_verify,
+                                    arguments->sample_kmers,
+                                    arguments->dbs_verify_seeds,
                                     arguments->affine_alignment,
                                     arguments->verbose,
                                     arguments->with_code_run_dist,
