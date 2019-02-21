@@ -1030,15 +1030,11 @@ static void gt_sain_setundefined(bool fwd,GtUsainindextype *suftab,
 }
 
 static void gt_sain_movenames2front(GtUsainindextype *suftab,
-                                    GtUword numberofsuffixes,
-                                    GtUword totallength)
+                                    GtUword numberofsuffixes)
 {
-  GtUsainindextype *rptr, *wptr;
-  const GtUsainindextype *maxrptr;
+  GtUsainindextype *rptr, *wptr, *wend = suftab + GT_MULT2(numberofsuffixes);
 
-  gt_assert(totallength > 0);
-  maxrptr = suftab + numberofsuffixes + GT_DIV2(totallength-1);
-  for (rptr = wptr = suftab + numberofsuffixes; rptr <= maxrptr; rptr++)
+  for (rptr = wptr = suftab + numberofsuffixes; wptr < wend; rptr++)
   {
     if (*rptr > 0)
     {
@@ -1048,7 +1044,6 @@ static void gt_sain_movenames2front(GtUsainindextype *suftab,
                                   signified by 0 */
     }
   }
-  gt_assert(wptr == suftab + GT_MULT2(numberofsuffixes));
 }
 
 static void gt_sain_checkorder(const GtSainseq *sainseq,
@@ -1454,7 +1449,7 @@ static void gt_sain_rec_sortsuffixes(unsigned int level,
 
       GT_SAIN_SHOWTIMER("movenames2front");
       gt_sain_setundefined(true,suftab,0,countSstartype-1);
-      gt_sain_movenames2front(suftab,countSstartype,sainseq->totallength);
+      gt_sain_movenames2front(suftab,countSstartype);
       if (level == 0)
       {
         firstusable = (GtUsainindextype) GT_MULT2(countSstartype);

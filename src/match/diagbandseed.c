@@ -5090,7 +5090,7 @@ static void gt_diagbandseed_segment_exact_extension(
     GtDiagbandseedPosition apos = segment_positions[idx].apos,
                            bpos = segment_positions[idx].bpos;
 
-    printf(GT_WU "\t" GT_WU "\t" GT_WU "\n",apos,bpos,
+    printf("%u\t%u\t" GT_WU "\n",apos,bpos,
           GT_DIAGBANDSEED_DIAGONAL(amaxlen,apos,bpos));
   }
 }
