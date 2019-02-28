@@ -2,16 +2,16 @@ format-version: 1.2
 subsetdef: biosapiens "biosapiens protein feature ontology"
 subsetdef: DBVAR "database of genomic structural variation"
 subsetdef: SOFA "SO feature annotation"
-synonymtypedef: aa1 "amino acid 1 letter code" 
-synonymtypedef: aa3 "amino acid 3 letter code" 
-synonymtypedef: AAMOD "amino acid modification" 
-synonymtypedef: BS "biosapiens" 
-synonymtypedef: dbsnp "dbsnp variant terms" 
-synonymtypedef: dbvar "DBVAR" 
-synonymtypedef: ebi_variants "ensembl variant terms" 
+synonymtypedef: aa1 "amino acid 1 letter code"
+synonymtypedef: aa3 "amino acid 3 letter code"
+synonymtypedef: AAMOD "amino acid modification"
+synonymtypedef: BS "biosapiens"
+synonymtypedef: dbsnp "dbsnp variant terms"
+synonymtypedef: dbvar "DBVAR"
+synonymtypedef: ebi_variants "ensembl variant terms"
 synonymtypedef: RNAMOD "RNA modification" EXACT
-synonymtypedef: VAR "variant annotation term" 
-ontology: so-xp/subsets/SOFA
+synonymtypedef: VAR "variant annotation term"
+ontology: so/subsets/SOFA
 
 [Term]
 id: SO:0000000
@@ -28,7 +28,6 @@ def: "A sequence_feature with an extent greater than zero. A nucleotide region i
 subset: SOFA
 synonym: "sequence" EXACT []
 is_a: SO:0000110 ! sequence_feature
-disjoint_from: SO:0000699 ! junction
 
 [Term]
 id: SO:0000004
@@ -44,6 +43,8 @@ name: satellite_DNA
 namespace: sequence
 def: "The many tandem repeats (identical or related) of a short basic repeating unit; many have a base composition or other property different from the genome average that allows them to be separated from the bulk (main band) genomic DNA." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 subset: SOFA
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:satellite" EXACT []
 synonym: "satellite DNA" EXACT []
 xref: http://en.wikipedia.org/wiki/Satellite_DNA "wiki"
 is_a: SO:0000705 ! tandem_repeat
@@ -78,6 +79,8 @@ name: scRNA
 namespace: sequence
 def: "A small non coding RNA sequence, present in the cytoplasm." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:scRNA" EXACT []
 synonym: "small cytoplasmic RNA" EXACT []
 is_a: SO:0000655 ! ncRNA
 relationship: derives_from SO:0000483 ! nc_primary_transcript
@@ -185,6 +188,9 @@ name: sequence_feature
 namespace: sequence
 def: "Any extent of continuous biological sequence." [LAMHDI:mb, SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:misc_feature" EXACT []
+synonym: "INSDC_note:other" EXACT []
+synonym: "INSDC_note:sequence_feature" EXACT []
 synonym: "located sequence feature" RELATED []
 synonym: "located_sequence_feature" EXACT []
 synonym: "sequence feature" EXACT []
@@ -242,6 +248,8 @@ name: ribosome_entry_site
 namespace: sequence
 def: "Region in mRNA where ribosome assembles." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:ribosome_binding_site" EXACT []
 synonym: "ribosome entry site" EXACT []
 is_a: SO:0000836 ! mRNA_region
 relationship: part_of SO:0000204 ! five_prime_UTR
@@ -253,6 +261,8 @@ namespace: sequence
 def: "A sequence segment located within the five prime end of an mRNA that causes premature termination of translation." [SO:as]
 subset: SOFA
 synonym: "attenuator sequence" EXACT []
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:attenuator" EXACT []
 xref: http://en.wikipedia.org/wiki/Attenuator "wiki"
 is_a: SO:0005836 ! regulatory_region
 relationship: part_of SO:0000234 ! mRNA
@@ -263,6 +273,8 @@ name: terminator
 namespace: sequence
 def: "The sequence of DNA located either at the end of the transcript that causes RNA polymerase to terminate transcription." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:terminator" EXACT []
 synonym: "terminator sequence" EXACT []
 xref: http://en.wikipedia.org/wiki/Terminator_(genetics) "wiki"
 is_a: SO:0001679 ! transcription_regulatory_region
@@ -284,6 +296,7 @@ namespace: sequence
 def: "A region of the transcript sequence within a gene which is not removed from the primary RNA transcript by RNA splicing." [SO:ke]
 comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology.
 subset: SOFA
+synonym: "INSDC_feature:exon" EXACT []
 xref: http://en.wikipedia.org/wiki/Exon "wiki"
 is_a: SO:0000833 ! transcript_region
 
@@ -323,7 +336,7 @@ name: clone
 namespace: sequence
 def: "A piece of DNA that has been inserted in a vector so that it can be propagated in a host bacterium or some other organism." [SO:ke]
 subset: SOFA
-xref: http:http://en.wikipedia.org/wiki/Clone_(genetics) "wiki"
+xref: http:http\://en.wikipedia.org/wiki/Clone_(genetics) "wiki"
 is_a: SO:0000695 ! reagent
 
 [Term]
@@ -398,6 +411,8 @@ namespace: sequence
 def: "A cis-acting sequence that increases the utilization of (some) eukaryotic promoters, and can function in either orientation and in any location (upstream or downstream) relative to the promoter." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 comment: An enhancer may participate in an enhanceosome GO:0034206. A protein-DNA complex formed by the association of a distinct set of general and specific transcription factors with a region of enhancer DNA. The cooperative assembly of an enhanceosome confers specificity of transcriptional regulation. This comment is a place holder should we start to make cross products with GO.
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:enhancer" EXACT []
 xref: http://en.wikipedia.org/wiki/Enhancer_(genetics) "wiki"
 is_a: SO:0000727 ! CRM
 
@@ -408,6 +423,8 @@ namespace: sequence
 def: "A regulatory_region composed of the TSS(s) and binding sites for TF_complexes of the basal transcription machinery." [SO:regcreative]
 comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology. The region on a DNA molecule involved in RNA polymerase binding to initiate transcription.
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:promoter" EXACT []
 synonym: "promoter sequence" EXACT []
 xref: http://en.wikipedia.org/wiki/Promoter "wiki"
 is_a: SO:0001055 ! transcriptional_cis_regulatory_region
@@ -428,6 +445,7 @@ namespace: sequence
 def: "A group of contiguous genes transcribed as a single (polycistronic) mRNA from a single regulatory region." [SO:ma]
 comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology.
 subset: SOFA
+synonym: "INSDC_feature:operon" EXACT []
 xref: http://en.wikipedia.org/wiki/Operon "wiki"
 is_a: SO:0005855 ! gene_group
 
@@ -468,6 +486,8 @@ name: primary_transcript
 namespace: sequence
 def: "A transcript that in its initial state requires modification to be functional." [SO:ma]
 subset: SOFA
+synonym: "INSDC_feature:precursor_RNA" EXACT []
+synonym: "INSDC_feature:prim_transcript" EXACT []
 synonym: "precursor RNA" EXACT []
 synonym: "primary transcript" EXACT []
 xref: http://en.wikipedia.org/wiki/Primary_transcript "wiki"
@@ -488,6 +508,7 @@ namespace: sequence
 def: "A region of a primary transcript that is transcribed, but removed from within the transcript by splicing together the sequences (exons) on either side of it." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology.
 subset: SOFA
+synonym: "INSDC_feature:intron" EXACT []
 xref: http://en.wikipedia.org/wiki/Intron "wiki"
 is_a: SO:0000835 ! primary_transcript_region
 
@@ -569,6 +590,7 @@ subset: SOFA
 synonym: "5' UTR" EXACT []
 synonym: "five prime UTR" EXACT []
 synonym: "five_prime_untranslated_region" EXACT []
+synonym: "INSDC_feature:5'UTR" EXACT []
 xref: http://en.wikipedia.org/wiki/5'_UTR "wiki"
 is_a: SO:0000203 ! UTR
 
@@ -578,6 +600,7 @@ name: three_prime_UTR
 namespace: sequence
 def: "A region at the 3' end of a mature transcript (following the stop codon) that is not translated into a protein." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 subset: SOFA
+synonym: "INSDC_feature:3'UTR" EXACT []
 synonym: "three prime untranslated region" EXACT []
 synonym: "three prime UTR" EXACT []
 xref: http://en.wikipedia.org/wiki/Three_prime_untranslated_region "wiki"
@@ -612,8 +635,11 @@ namespace: sequence
 def: "Messenger RNA is the intermediate molecule between DNA and protein. It includes UTR and coding sequences. It does not contain introns." [SO:ma]
 comment: An mRNA does not contain introns as it is a processed_transcript. The equivalent kind of primary_transcript is protein_coding_primary_transcript (SO:0000120) which may contain introns. This term is mapped to MGED. Do not obsolete without consulting MGED ontology.
 subset: SOFA
+synonym: "INSDC_feature:mRNA" EXACT []
 synonym: "messenger RNA" EXACT []
+synonym: "protein_coding_transcript" EXACT []
 xref: http://en.wikipedia.org/wiki/MRNA "wiki"
+xref: http://www.gencodegenes.org/gencode_biotypes.html "GENCODE"
 is_a: SO:0000233 ! mature_transcript
 
 [Term]
@@ -652,6 +678,8 @@ name: rRNA
 namespace: sequence
 def: "RNA that comprises part of a ribosome, and that can provide both structural scaffolding and catalytic activity." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html, ISBN:0198506732]
 subset: SOFA
+synonym: "INSDC_feature:rRNA" EXACT []
+synonym: "INSDC_qualifier:unknown" BROAD []
 synonym: "ribosomal ribonucleic acid" EXACT []
 synonym: "ribosomal RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/RRNA "wiki"
@@ -665,6 +693,8 @@ namespace: sequence
 def: "Transfer RNA (tRNA) molecules are approximately 80 nucleotides in length. Their secondary structure includes four short double-helical elements and three loops (D, anti-codon, and T loops). Further hydrogen bonds mediate the characteristic L-shaped molecular structure. Transfer RNAs have two regions of fundamental functional importance: the anti-codon, which is responsible for specific mRNA codon recognition, and the 3' end, to which the tRNA's corresponding amino acid is attached (by aminoacyl-tRNA synthetases). Transfer RNAs cope with the degeneracy of the genetic code in two manners: having more than one tRNA (with a specific anti-codon) for a particular amino acid; and 'wobble' base-pairing, i.e. permitting non-standard base-pairing at the 3rd anti-codon position." [http://www.sanger.ac.uk/cgi-bin/Rfam/getacc?RF00005, ISBN:0198506732]
 comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology.
 subset: SOFA
+synonym: "INSDC_feature:tRNA" EXACT []
+synonym: "INSDC_qualifier:unknown" BROAD []
 synonym: "transfer ribonucleic acid" RELATED []
 synonym: "transfer RNA" RELATED []
 xref: http://en.wikipedia.org/wiki/TRNA "wiki"
@@ -678,6 +708,8 @@ namespace: sequence
 def: "A small nuclear RNA molecule involved in pre-mRNA splicing and processing." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html, PMID:11733745, WB:ems]
 comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology.
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:snRNA" EXACT []
 synonym: "small nuclear RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/SnRNA "wiki"
 is_a: SO:0000655 ! ncRNA
@@ -689,6 +721,8 @@ name: snoRNA
 namespace: sequence
 def: "A snoRNA (small nucleolar RNA) is any one of a class of small RNAs that are associated with the eukaryotic nucleus as components of small nucleolar ribonucleoproteins. They participate in the processing or modifications of many RNAs, mostly ribosomal RNAs (rRNAs) though snoRNAs are also known to target other classes of RNA, including spliceosomal RNAs, tRNAs, and mRNAs via a stretch of sequence that is complementary to a sequence in the targeted RNA." [GOC:kgc]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:snoRNA" EXACT []
 synonym: "small nucleolar RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/SnoRNA "wiki"
 is_a: SO:0000655 ! ncRNA
@@ -701,6 +735,8 @@ namespace: sequence
 alt_id: SO:0000649
 def: "Small, ~22-nt, RNA molecule that is the endogenous transcript of a miRNA gene (or the product of other non coding RNA genes. Micro RNAs are produced from precursor molecules (SO:0000647) that can form local hairpin structures, which ordinarily are processed (usually via the Dicer pathway) such that a single miRNA molecule accumulates from one arm of a hairpin precursor molecule. Micro RNAs may trigger the cleavage of their target molecules or act as translational repressors." [PMID:11081512, PMID:12592000]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:miRNA" EXACT []
 synonym: "micro RNA" EXACT []
 synonym: "microRNA" EXACT []
 synonym: "small temporal RNA" EXACT []
@@ -716,9 +752,12 @@ name: microsatellite
 namespace: sequence
 def: "A repeat_region containing repeat_units of 2 to 10 bp repeated in tandem." [http://www.informatics.jax.org/silver/glossary.shtml, NCBI:th]
 subset: SOFA
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:microsatellite" EXACT []
 synonym: "microsatellite locus" EXACT []
 synonym: "microsatellite marker" EXACT []
-synonym: "VNTR" EXACT []
+synonym: "short tandem repeat" EXACT []
+synonym: "STR" EXACT [http://www.ncbi.nlm.nih.gov/books/NBK21126/def-item/A9651/]
 xref: http://en.wikipedia.org/wiki/Microsatellite "wiki"
 is_a: SO:0000005 ! satellite_DNA
 
@@ -728,6 +767,8 @@ name: inverted_repeat
 namespace: sequence
 def: "The sequence is complementarily repeated on the opposite strand. It is a palindrome, and it may, or may not be hyphenated. Examples: GCTGATCAGC, or GCTGA-----TCAGC." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:inverted" EXACT []
 synonym: "inverted repeat" EXACT []
 synonym: "inverted repeat sequence" EXACT []
 xref: http://en.wikipedia.org/wiki/Inverted_repeat "wiki"
@@ -737,8 +778,9 @@ is_a: SO:0000657 ! repeat_region
 id: SO:0000296
 name: origin_of_replication
 namespace: sequence
-def: "The origin of replication; starting site for duplication of a nucleic acid molecule to give two identical copies." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
+def: "A region of nucleic acid from which replication initiates; includes sequences that are recognized by replication proteins, the site from which the first separation of complementary strands occurs, and specific replication start sites." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html, NCBI:cf]
 subset: SOFA
+synonym: "INSDC_feature:rep_origin" EXACT []
 synonym: "ori" EXACT []
 synonym: "origin of replication" EXACT []
 xref: http://en.wikipedia.org/wiki/Origin_of_replication "wiki"
@@ -760,6 +802,7 @@ namespace: sequence
 def: "A modified nucleotide, i.e. a nucleotide other than A, T, C. G." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 comment: Modified base:<modified_base>.
 subset: SOFA
+synonym: "INSDC_feature:modified_base" EXACT []
 synonym: "modified base site" EXACT []
 is_a: SO:0001236 ! base
 is_a: SO:0001720 ! epigenetically_modified_region
@@ -791,6 +834,8 @@ namespace: sequence
 def: "A repeat where the same sequence is repeated in the same direction. Example: GCTGA-followed by-GCTGA." [SO:ke]
 subset: SOFA
 synonym: "direct repeat" EXACT []
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:direct" EXACT []
 xref: http://en.wikipedia.org/wiki/Direct_repeat "wiki"
 is_a: SO:0000657 ! repeat_region
 
@@ -800,6 +845,8 @@ name: TSS
 namespace: sequence
 def: "The first base where RNA polymerase begins to synthesize the RNA transcript." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:misc_feature" BROAD []
+synonym: "INSDC_note:transcription_start_site" EXACT []
 synonym: "transcription start site" EXACT []
 synonym: "transcription_start_site" EXACT []
 is_a: SO:0000835 ! primary_transcript_region
@@ -812,6 +859,7 @@ def: "A contiguous sequence which begins with, and includes, a start codon and e
 subset: SOFA
 synonym: "coding sequence" EXACT []
 synonym: "coding_sequence" EXACT []
+synonym: "INSDC_feature:CDS" EXACT []
 is_a: SO:0000836 ! mRNA_region
 
 [Term]
@@ -869,6 +917,8 @@ namespace: sequence
 def: "Region of sequence similarity by descent from a common ancestor." [SO:ke]
 subset: SOFA
 synonym: "conserved region" EXACT []
+synonym: "INSDC_feature:misc_feature" BROAD []
+synonym: "INSDC_note:conserved_region" EXACT []
 xref: http://en.wikipedia.org/wiki/Conserved_region "wiki"
 is_a: SO:0001410 ! experimental_feature
 
@@ -878,6 +928,7 @@ name: STS
 namespace: sequence
 def: "Short (typically a few hundred base pairs) DNA sequence that has a single occurrence in a genome and whose location and base sequence are known." [http://www.biospace.com]
 subset: SOFA
+synonym: "INSDC_feature:STS" EXACT []
 synonym: "sequence tag site" EXACT []
 is_a: SO:0000324 ! tag
 
@@ -906,6 +957,8 @@ name: nc_conserved_region
 namespace: sequence
 def: "Non-coding region of sequence similarity by descent from a common ancestor." [SO:ke]
 subset: SOFA
+synonym: "conserved non-coding element" EXACT []
+synonym: "conserved non-coding sequence" EXACT []
 synonym: "nc conserved region" EXACT []
 synonym: "noncoding conserved region" EXACT []
 is_a: SO:0000330 ! conserved_region
@@ -916,6 +969,9 @@ name: pseudogene
 namespace: sequence
 def: "A sequence that closely resembles a known functional gene, at another locus within a genome, that is non-functional as a consequence of (usually several) mutations that prevent either its transcription or translation (or both). In general, pseudogenes result from either reverse transcription of a transcript of their \"normal\" paralog (SO:0000043) (in which case the pseudogene typically lacks introns and includes a poly(A) tail) or from recombination (SO:0000044) (in which case the pseudogene is typically a tandem duplication of its \"normal\" paralog)." [http://www.ucl.ac.uk/~ucbhjow/b241/glossary.html]
 subset: SOFA
+synonym: "INSDC_feature:gene" BROAD []
+synonym: "INSDC_qualifier:pseudo" EXACT []
+synonym: "INSDC_qualifier:unknown" EXACT []
 xref: http://en.wikipedia.org/wiki/Pseudogene "wiki"
 is_a: SO:0001411 ! biological_region
 relationship: non_functional_homolog_of SO:0000704 ! gene
@@ -1012,7 +1068,7 @@ is_a: SO:0001248 ! assembly
 id: SO:0000360
 name: codon
 namespace: sequence
-def: "A set of (usually) three nucleotide bases in a DNA or RNA sequence, which together code for a unique amino acid or the termination of translation and are contained within the CDS." [http://www.everythingbio.com/glos/definition.php?word=codon, SO:ke]
+def: "A set of (usually) three nucleotide bases in a DNA or RNA sequence, which together code for a unique amino acid or the termination of translation and are contained within the CDS." [SO:ke]
 subset: SOFA
 xref: http://en.wikipedia.org/wiki/Codon "wiki"
 is_a: SO:0000851 ! CDS_region
@@ -1039,7 +1095,7 @@ is_a: SO:0000366 ! insertion_site
 id: SO:0000370
 name: small_regulatory_ncRNA
 namespace: sequence
-def: "A non-coding RNA, usually with a specific secondary structure, that acts to regulate gene expression." [SO:ma]
+def: "A non-coding RNA less than 200 nucleotides long, usually with a specific secondary structure, that acts to regulate gene expression. These include short ncRNAs such as piRNA, miRNA and siRNAs (among others)." [PMID:28541282, PomBase:al, SO:ma]
 subset: SOFA
 synonym: "small regulatory ncRNA" EXACT []
 is_a: SO:0000655 ! ncRNA
@@ -1060,6 +1116,8 @@ name: ribozyme
 namespace: sequence
 def: "An RNA with catalytic activity." [SO:ma]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:ribozyme" EXACT []
 xref: http://en.wikipedia.org/wiki/Ribozyme "wiki"
 is_a: SO:0000372 ! enzymatic_RNA
 
@@ -1083,6 +1141,8 @@ namespace: sequence
 def: "A small catalytic RNA motif that catalyzes self-cleavage reaction. Its name comes from its secondary structure which resembles a carpenter's hammer. The hammerhead ribozyme is involved in the replication of some viroid and some satellite RNAs." [PMID:2436805]
 subset: SOFA
 synonym: "hammerhead ribozyme" EXACT []
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:hammerhead_ribozyme" EXACT []
 xref: http://en.wikipedia.org/wiki/Hammerhead_ribozyme "wiki"
 is_a: SO:0000715 ! RNA_motif
 
@@ -1092,6 +1152,8 @@ name: RNase_MRP_RNA
 namespace: sequence
 def: "The RNA molecule essential for the catalytic activity of RNase MRP, an enzymatically active ribonucleoprotein with two distinct roles in eukaryotes. In mitochondria it plays a direct role in the initiation of mitochondrial DNA replication. In the nucleus it is involved in precursor rRNA processing, where it cleaves the internal transcribed spacer 1 between 18S and 5.8S rRNAs." [http://www.sanger.ac.uk/cgi-bin/Rfam/getacc?RF00030]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:RNase_MRP_RNA" EXACT []
 synonym: "RNase MRP RNA" EXACT []
 is_a: SO:0000655 ! ncRNA
 
@@ -1101,6 +1163,8 @@ name: RNase_P_RNA
 namespace: sequence
 def: "The RNA component of Ribonuclease P (RNase P), a ubiquitous endoribonuclease, found in archaea, bacteria and eukarya as well as chloroplasts and mitochondria. Its best characterized activity is the generation of mature 5 prime ends of tRNAs by cleaving the 5 prime leader elements of precursor-tRNAs. Cellular RNase Ps are ribonucleoproteins. RNA from bacterial RNase Ps retains its catalytic activity in the absence of the protein subunit, i.e. it is a ribozyme. Isolated eukaryotic and archaeal RNase P RNA has not been shown to retain its catalytic function, but is still essential for the catalytic activity of the holoenzyme. Although the archaeal and eukaryotic holoenzymes have a much greater protein content than the bacterial ones, the RNA cores from all the three lineages are homologous. Helices corresponding to P1, P2, P3, P4, and P10/11 are common to all cellular RNase P RNAs. Yet, there is considerable sequence variation, particularly among the eukaryotic RNAs." [http://www.sanger.ac.uk/cgi-bin/Rfam/getacc?RF00010]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:RNase_P_RNA" EXACT []
 synonym: "RNase P RNA" EXACT []
 is_a: SO:0000655 ! ncRNA
 
@@ -1110,6 +1174,8 @@ name: telomerase_RNA
 namespace: sequence
 def: "The RNA component of telomerase, a reverse transcriptase that synthesizes telomeric DNA." [http://www.sanger.ac.uk/cgi-bin/Rfam/getacc?RF00025]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:telomerase_RNA" EXACT []
 synonym: "telomerase RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/Telomerase_RNA "wiki"
 is_a: SO:0000655 ! ncRNA
@@ -1248,6 +1314,8 @@ name: vault_RNA
 namespace: sequence
 def: "A family of RNAs are found as part of the enigmatic vault ribonucleoprotein complex. The complex consists of a major vault protein (MVP), two minor vault proteins (VPARP and TEP1), and several small untranslated RNA molecules. It has been suggested that the vault complex is involved in drug resistance." [http://www.sanger.ac.uk/cgi-bin/Rfam/getacc?RF00006]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:vault_RNA" EXACT []
 synonym: "vault RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/Vault_RNA "wiki"
 is_a: SO:0000655 ! ncRNA
@@ -1258,6 +1326,8 @@ name: Y_RNA
 namespace: sequence
 def: "Y RNAs are components of the Ro ribonucleoprotein particle (Ro RNP), in association with Ro60 and La proteins. The Y RNAs and Ro60 and La proteins are well conserved, but the function of the Ro RNP is not known. In humans the RNA component can be one of four small RNAs: hY1, hY3, hY4 and hY5. These small RNAs are predicted to fold into a conserved secondary structure containing three stem structures. The largest of the four, hY1, contains an additional hairpin." [http://www.sanger.ac.uk/cgi-bin/Rfam/getacc?RF00019]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:Y_RNA" EXACT []
 synonym: "Y RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/Y_RNA "wiki"
 is_a: SO:0000655 ! ncRNA
@@ -1283,7 +1353,9 @@ def: "A biological_region of sequence that, in the molecule, interacts selective
 comment: See GO:0005488 : binding.
 subset: biosapiens
 subset: SOFA
+synonym: "binding site" EXACT []
 synonym: "binding_or_interaction_site" EXACT []
+synonym: "INSDC_feature:misc_binding" EXACT []
 synonym: "site" RELATED []
 xref: http://en.wikipedia.org/wiki/Binding_site "wiki"
 is_a: SO:0001411 ! biological_region
@@ -1295,6 +1367,7 @@ namespace: sequence
 def: "A binding site that, in the molecule, interacts selectively and non-covalently with polypeptide molecules." [SO:ke]
 comment: See GO:0042277 : peptide binding.
 subset: SOFA
+synonym: "INSDC_feature:protein_bind" EXACT []
 synonym: "protein binding site" EXACT []
 is_a: SO:0000409 ! binding_site
 
@@ -1314,6 +1387,7 @@ name: sequence_difference
 namespace: sequence
 def: "A region where the sequence differs from that of a specified sequence." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:misc_difference" EXACT []
 synonym: "sequence difference" EXACT []
 is_a: SO:0000700 ! remark
 
@@ -1326,6 +1400,7 @@ def: "The signal_peptide is a short region of the peptide located at the N-termi
 comment: Old def before biosapiens:The sequence for an N-terminal domain of a secreted protein; this domain is involved in attaching nascent polypeptide to the membrane leader sequence.
 subset: biosapiens
 subset: SOFA
+synonym: "INSDC_feature:sig_peptide" EXACT []
 synonym: "signal" RELATED [uniprot:feature_type]
 synonym: "signal peptide" EXACT []
 synonym: "signal peptide coding sequence" EXACT []
@@ -1343,6 +1418,7 @@ comment: This term mature peptide, merged with the biosapiens term mature protei
 subset: biosapiens
 subset: SOFA
 synonym: "chain" RELATED [uniprot:feature_type]
+synonym: "INSDC_feature:mat_peptide" EXACT []
 synonym: "mature peptide" RELATED []
 synonym: "mature protein region" EXACT []
 is_a: SO:0000839 ! polypeptide_region
@@ -1389,6 +1465,8 @@ name: rasiRNA
 namespace: sequence
 def: "A 17-28-nt, small interfering RNA derived from transcripts of repetitive elements." [http://www.developmentalcell.com/content/article/abstract?uid=PIIS1534580703002284]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:rasiRNA" EXACT []
 synonym: "repeat associated small interfering RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/RasiRNA "wiki"
 is_a: SO:0000655 ! ncRNA
@@ -1407,6 +1485,7 @@ id: SO:0000464
 name: decayed_exon
 namespace: sequence
 def: "A non-functional descendant of an exon." [SO:ke]
+comment: Does not have to be part of a pseudogene.
 subset: SOFA
 synonym: "decayed exon" EXACT []
 is_a: SO:0000462 ! pseudogenic_region
@@ -1497,6 +1576,8 @@ name: polyA_signal_sequence
 namespace: sequence
 def: "The recognition sequence necessary for endonuclease cleavage of an RNA transcript that is followed by polyadenylation; consensus=AATAAA." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:polyA_signal_sequence" EXACT []
 synonym: "poly(A) signal" EXACT []
 synonym: "polyA signal sequence" EXACT []
 synonym: "polyadenylation termination signal" EXACT []
@@ -1509,6 +1590,7 @@ namespace: sequence
 alt_id: SO:0001430
 def: "The site on an RNA transcript to which will be added adenine residues by post-transcriptional polyadenylation. The boundary between the UTR and the polyA sequence." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 subset: SOFA
+synonym: "INSDC_feature:polyA_site" EXACT []
 synonym: "polyA cleavage site" EXACT []
 synonym: "polyA junction" EXACT []
 synonym: "polyA site" EXACT []
@@ -1524,6 +1606,7 @@ name: centromere
 namespace: sequence
 def: "A region of chromosome where the spindle fibers attach during mitosis and meiosis." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:centromere" EXACT []
 xref: http://en.wikipedia.org/wiki/Centromere "wiki"
 is_a: SO:0000628 ! chromosomal_structural_element
 
@@ -1554,6 +1637,8 @@ namespace: sequence
 def: "A self spliced intron." [SO:ke]
 subset: SOFA
 synonym: "autocatalytically spliced intron" EXACT []
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:autocatalytically_spliced_intron" EXACT []
 is_a: SO:0000188 ! intron
 
 [Term]
@@ -1563,6 +1648,8 @@ namespace: sequence
 def: "The signal recognition particle (SRP) is a universally conserved ribonucleoprotein. It is involved in the co-translational targeting of proteins to membranes. The eukaryotic SRP consists of a 300-nucleotide 7S RNA and six proteins: SRPs 72, 68, 54, 19, 14, and 9. Archaeal SRP consists of a 7S RNA and homologues of the eukaryotic SRP19 and SRP54 proteins. In most eubacteria, the SRP consists of a 4.5S RNA and the Ffh protein (a homologue of the eukaryotic SRP54 protein). Eukaryotic and archaeal 7S RNAs have very similar secondary structures, with eight helical elements. These fold into the Alu and S domains, separated by a long linker region. Eubacterial SRP is generally a simpler structure, with the M domain of Ffh bound to a region of the 4.5S RNA that corresponds to helix 8 of the eukaryotic and archaeal SRP S domain. Some Gram-positive bacteria (e.g. Bacillus subtilis), however, have a larger SRP RNA that also has an Alu domain. The Alu domain is thought to mediate the peptide chain elongation retardation function of the SRP. The universally conserved helix which interacts with the SRP54/Ffh M domain mediates signal sequence recognition. In eukaryotes and archaea, the SRP19-helix 6 complex is thought to be involved in SRP assembly and stabilizes helix 8 for SRP54 binding." [http://www.sanger.ac.uk/cgi-bin/Rfam/getacc?RF00017]
 subset: SOFA
 synonym: "7S RNA" RELATED []
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:SRP_RNA" EXACT []
 synonym: "signal recognition particle RNA" RELATED []
 synonym: "SRP RNA" EXACT []
 is_a: SO:0000655 ! ncRNA
@@ -1587,6 +1674,8 @@ def: "A short 3'-uridylated RNA that can form a duplex (except for its post-tran
 subset: SOFA
 synonym: "gRNA" EXACT []
 synonym: "guide RNA" EXACT []
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:guide_RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/Guide_RNA "wiki"
 is_a: SO:0000655 ! ncRNA
 
@@ -1658,6 +1747,7 @@ name: telomere
 namespace: sequence
 def: "A specific structure at the end of a linear chromosome, required for the integrity and maintenance of the end." [SO:ma]
 subset: SOFA
+synonym: "INSDC_feature:telomere" EXACT []
 synonym: "telomeric DNA" EXACT []
 synonym: "telomeric sequence" EXACT []
 xref: http://en.wikipedia.org/wiki/Telomere "wiki"
@@ -1669,6 +1759,8 @@ name: silencer
 namespace: sequence
 def: "A regulatory region which upon binding of transcription factors, suppress the transcription of the gene or genes they control." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:silencer" EXACT []
 xref: http://en.wikipedia.org/wiki/Silencer_(DNA) "wiki"
 is_a: SO:0000727 ! CRM
 
@@ -1676,8 +1768,10 @@ is_a: SO:0000727 ! CRM
 id: SO:0000627
 name: insulator
 namespace: sequence
-def: "A transcriptional cis regulatory region that when located between a CM and a gene's promoter prevents the CRM from modulating that genes expression." [SO:regcreative]
+def: "A regulatory region that 1) when located between a CM and a gene's promoter prevents the CRM from modulating that genes expression and 2) acts as a chromatin boundary element or barrier that can block the encroachment of condensed chromatin from an adjacent region." [NCBI:cf, PMID:12154228, SO:regcreative]
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:insulator" EXACT []
 synonym: "insulator element" EXACT []
 xref: http://en.wikipedia.org/wiki/Insulator_(genetics) "wiki"
 is_a: SO:0001055 ! transcriptional_cis_regulatory_region
@@ -1696,6 +1790,9 @@ name: minisatellite
 namespace: sequence
 def: "A repeat region containing tandemly repeated sequences having a unit length of 10 to 40 bp." [http://www.informatics.jax.org/silver/glossary.shtml]
 subset: SOFA
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:minisatellite" EXACT []
+synonym: "VNTR" EXACT [http://www.ncbi.nlm.nih.gov/books/NBK21126/def-item/A9655/]
 xref: http://en.wikipedia.org/wiki/Minisatellite "wiki"
 is_a: SO:0000005 ! satellite_DNA
 
@@ -1706,6 +1803,8 @@ namespace: sequence
 def: "Antisense RNA is RNA that is transcribed from the coding, rather than the template, strand of DNA. It is therefore complementary to mRNA." [SO:ke]
 subset: SOFA
 synonym: "antisense RNA" EXACT []
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:antisense_RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/Antisense_RNA "wiki"
 is_a: SO:0000655 ! ncRNA
 relationship: derives_from SO:0000645 ! antisense_primary_transcript
@@ -1725,9 +1824,11 @@ name: siRNA
 namespace: sequence
 def: "A small RNA molecule that is the product of a longer exogenous or endogenous dsRNA, which is either a bimolecular duplex or very long hairpin, processed (via the Dicer pathway) such that numerous siRNAs accumulate from both strands of the dsRNA. SRNAs trigger the cleavage of their target molecules." [PMID:12592000]
 subset: SOFA
+synonym: "INSDC_feature:ncRNA" BROAD []
+synonym: "INSDC_qualifier:siRNA" EXACT []
 synonym: "small interfering RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/SiRNA "wiki"
-is_a: SO:0000655 ! ncRNA
+is_a: SO:0000370 ! small_regulatory_ncRNA
 
 [Term]
 id: SO:0000650
@@ -1785,8 +1886,11 @@ namespace: sequence
 def: "An RNA transcript that does not encode for a protein rather the RNA molecule is the gene product." [SO:ke]
 comment: A ncRNA is a processed_transcript, so it may not contain parts such as transcribed_spacer_regions that are removed in the act of processing. For the corresponding primary_transcripts, please see term SO:0000483 nc_primary_transcript.
 subset: SOFA
+synonym: "INSDC_qualifier:other" BROAD []
+synonym: "known_ncrna" EXACT []
 synonym: "noncoding RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/NcRNA "wiki"
+xref: http://www.gencodegenes.org/gencode_biotypes.html "GENCODE"
 is_a: SO:0000233 ! mature_transcript
 
 [Term]
@@ -1795,6 +1899,8 @@ name: repeat_region
 namespace: sequence
 def: "A region of sequence containing one or more repeat units." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:other" EXACT []
 synonym: "repeat region" EXACT []
 is_a: SO:0001411 ! biological_region
 relationship: has_part SO:0001411 ! biological_region
@@ -1806,6 +1912,8 @@ namespace: sequence
 def: "A repeat that is located at dispersed sites in the genome." [SO:ke]
 subset: SOFA
 synonym: "dispersed repeat" EXACT []
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:dispersed" EXACT []
 synonym: "interspersed repeat" EXACT []
 xref: http://en.wikipedia.org/wiki/Interspersed_repeat "wiki"
 is_a: SO:0000657 ! repeat_region
@@ -1850,6 +1958,7 @@ name: transcript
 namespace: sequence
 def: "An RNA synthesized on a DNA or RNA template by an RNA polymerase." [SO:ma]
 subset: SOFA
+synonym: "INSDC_feature:misc_RNA" BROAD []
 xref: http://en.wikipedia.org/wiki/RNA "wiki"
 is_a: SO:0000831 ! gene_member_region
 
@@ -1970,6 +2079,7 @@ namespace: sequence
 def: "A region (or regions) that includes all of the sequence elements necessary to encode a functional transcript. A gene may include regulatory regions, transcribed regions and/or other functional sequence regions." [SO:immuno_workshop]
 comment: This term is mapped to MGED. Do not obsolete without consulting MGED ontology. A gene may be considered as a unit of inheritance.
 subset: SOFA
+synonym: "INSDC_feature:gene" EXACT []
 xref: http://en.wikipedia.org/wiki/Gene "wiki"
 is_a: SO:0001411 ! biological_region
 relationship: member_of SO:0005855 ! gene_group
@@ -1980,6 +2090,8 @@ name: tandem_repeat
 namespace: sequence
 def: "Two or more adjacent copies of a region (of length greater than 1)." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:repeat_region" BROAD []
+synonym: "INSDC_qualifier:tandem" EXACT []
 synonym: "tandem repeat" EXACT []
 xref: http://en.wikipedia.org/wiki/Tandem_repeat "wiki"
 xref: http://www.sci.sdsu.edu/~smaloy/Glossary/T.html
@@ -2002,6 +2114,8 @@ name: nucleotide_motif
 namespace: sequence
 def: "A region of nucleotide sequence corresponding to a known motif." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:misc_feature" BROAD []
+synonym: "INSDC_note:nucleotide_motif" EXACT []
 synonym: "nucleotide motif" EXACT []
 is_a: SO:0001683 ! sequence_motif
 
@@ -2031,6 +2145,7 @@ name: ultracontig
 namespace: sequence
 def: "An ordered and oriented set of scaffolds based on somewhat weaker sets of inferential evidence such as one set of mate pair reads together with supporting evidence from ESTs or location of markers from SNP or microsatellite maps, or cytogenetic localization of contained markers." [FB:WG]
 subset: SOFA
+synonym: "pseudochromosome" EXACT []
 synonym: "superscaffold" RELATED []
 is_a: SO:0000353 ! sequence_assembly
 
@@ -2040,6 +2155,7 @@ name: oriT
 namespace: sequence
 def: "A region of a DNA molecule where transfer is initiated during the process of conjugation or mobilization." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
 subset: SOFA
+synonym: "INSDC_feature:oriT" EXACT []
 synonym: "origin of transfer" EXACT []
 xref: http://en.wikipedia.org/wiki/Origin_of_transfer "wiki"
 is_a: SO:0000296 ! origin_of_replication
@@ -2053,6 +2169,7 @@ def: "The transit_peptide is a short region at the N-terminus of the peptide tha
 comment: Added to bring SO inline with the EMBL, DDBJ, GenBank feature table. Old definition before biosapiens: The coding sequence for an N-terminal domain of a nuclear-encoded organellar protein. This domain is involved in post translational import of the protein into the organelle.
 subset: biosapiens
 subset: SOFA
+synonym: "INSDC_feature:transit_peptide" EXACT []
 synonym: "signal" RELATED []
 synonym: "transit" RELATED [uniprot:feature_type]
 synonym: "transit peptide" EXACT []
@@ -2079,6 +2196,8 @@ name: gap
 namespace: sequence
 def: "A gap in the sequence of known length. The unknown bases are filled in with N's." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:assembly_gap" NARROW []
+synonym: "INSDC_feature:gap" EXACT []
 is_a: SO:0000143 ! assembly_component
 relationship: part_of SO:0000353 ! sequence_assembly
 
@@ -2108,8 +2227,12 @@ namespace: sequence
 def: "A non functional descendant of an rRNA." [SO:ke]
 comment: Added Jan 2006 to allow the annotation of the pseudogenic rRNA by flybase. Non-functional is defined as its transcription is prevented due to one or more mutatations.
 subset: SOFA
+synonym: "INSDC_feature:rRNA" BROAD []
+synonym: "INSDC_qualifier:pseudo" EXACT []
 synonym: "pseudogenic rRNA" EXACT []
 is_a: SO:0000462 ! pseudogenic_region
+relationship: non_functional_homolog_of SO:0000673 ! transcript
+relationship: part_of SO:0000336 ! pseudogene
 
 [Term]
 id: SO:0000778
@@ -2118,8 +2241,12 @@ namespace: sequence
 def: "A non functional descendent of a tRNA." [SO:ke]
 comment: Added Jan 2006 to allow the annotation of the pseudogenic tRNA by flybase. Non-functional is defined as its transcription is prevented due to one or more mutatations.
 subset: SOFA
+synonym: "INSDC_feature:tRNA" BROAD []
+synonym: "INSDC_qualifier:pseudo" EXACT []
 synonym: "pseudogenic tRNA" EXACT []
 is_a: SO:0000462 ! pseudogenic_region
+relationship: non_functional_homolog_of SO:0000673 ! transcript
+relationship: part_of SO:0000336 ! pseudogene
 
 [Term]
 id: SO:0000830
@@ -2310,6 +2437,7 @@ name: mobile_genetic_element
 namespace: sequence
 def: "A nucleotide region with either intra-genome or intracellular mobility, of varying length, which often carry the information necessary for transfer and recombination with the host genome." [PMID:14681355]
 subset: SOFA
+synonym: "INSDC_feature:mobile_element" EXACT []
 synonym: "MGE" EXACT []
 synonym: "mobile genetic element" EXACT []
 xref: http://en.wikipedia.org/wiki/Mobile_genetic_element "wiki"
@@ -2330,6 +2458,8 @@ name: transcriptional_cis_regulatory_region
 namespace: sequence
 def: "A regulatory_region that modulates the transcription of a gene or genes." [PMID:9679020, SO:regcreative]
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:transcriptional_cis_regulatory_region" EXACT []
 synonym: "transcription-control region" EXACT []
 synonym: "transcriptional cis regulatory region" EXACT []
 is_a: SO:0001679 ! transcription_regulatory_region
@@ -2352,6 +2482,9 @@ alt_id: SO:1000007
 def: "A sequence_alteration is a sequence_feature whose extent is the deviation from another sequence." [SO:ke]
 comment: Merged with partially characterized change in nucleotide sequence.
 subset: SOFA
+synonym: "INSDC_feature:misc_feature" BROAD []
+synonym: "INSDC_feature:variation" EXACT []
+synonym: "INSDC_note:sequence_alteration" EXACT []
 synonym: "partially characterised change in DNA sequence" NARROW []
 synonym: "partially_characterised_change_in_DNA_sequence" NARROW []
 synonym: "sequence alteration" EXACT []
@@ -2445,6 +2578,8 @@ namespace: sequence
 def: "A region defined by its disposition to be involved in a biological process." [SO:cb]
 subset: SOFA
 synonym: "biological region" EXACT []
+synonym: "INSDC_misc_feature" BROAD []
+synonym: "INSDC_note:biological_region" EXACT []
 is_a: SO:0000001 ! region
 
 [Term]
@@ -2573,6 +2708,8 @@ name: regulatory_region
 namespace: sequence
 def: "A region of sequence that is involved in the control of a biological process." [SO:ke]
 subset: SOFA
+synonym: "INSDC_feature:regulatory" BROAD []
+synonym: "INSDC_qualifier:other" EXACT []
 synonym: "regulatory region" EXACT []
 xref: http://en.wikipedia.org/wiki/Regulatory_region "wiki"
 is_a: SO:0000831 ! gene_member_region
