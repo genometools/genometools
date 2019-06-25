@@ -287,7 +287,7 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
                             seqLen, mapIntervalLog2));
     mapName = gt_str_new_cstr(projectName);
     {
-      char buf[1 + 4 + 3 + 2];
+      char buf[1 + 4 + 3 + 3];
       snprintf(buf, sizeof (buf), ".%ucxm", (unsigned)mapIntervalLog2);
       gt_str_append_cstr(mapName, buf);
       if (createMapFile)

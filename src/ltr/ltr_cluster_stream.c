@@ -321,7 +321,7 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
       continue;
     fni = gt_feature_node_iterator_new((GtFeatureNode*) gn);
     while ((curnode = gt_feature_node_iterator_next(fni)) != NULL) {
-      char header[BUFSIZ];
+      char header[2*BUFSIZ];
       fnt = gt_feature_node_get_type(curnode);
       if (strcmp(fnt, gt_ft_repeat_region) == 0) {
         const char *rid;
@@ -341,7 +341,7 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
         range = gt_genome_node_get_range((GtGenomeNode*) curnode);
         if ((range.end - range.start + 1) < 10UL)
           continue;
-        (void) snprintf(header, BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer,
+        (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer,
                         range.start, range.end);
         gt_hashmap_add(desc2node, (void*) gt_cstr_dup(header), (void*) curnode);
       } else if (strcmp(fnt, real_feature) == 0) {
@@ -349,7 +349,7 @@ static int cluster_annotate_nodes(GtClusteredSet *cs, GtEncseq *encseq,
         range = gt_genome_node_get_range((GtGenomeNode*) curnode);
         if ((range.end - range.start + 1) < 10UL)
           continue;
-        (void) snprintf(header, BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer,
+        (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer,
                         range.start, range.end);
         gt_hashmap_add(desc2node, (void*) gt_cstr_dup(header), (void*) curnode);
       }
