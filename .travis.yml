@@ -42,13 +42,13 @@ matrix:
       env: opt=no cairo=no
     - os: osx
       compiler: gcc
-      env: default=yes
+      env: default=yes PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
     - os: osx
       compiler: gcc
-      env: assert=no
+      env: assert=no PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
     - os: osx
       compiler: gcc
-      env: amalgamation=yes
+      env: amalgamation=yes PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
     - os: linux
       compiler: gcc
       env: opt=no cairo=no

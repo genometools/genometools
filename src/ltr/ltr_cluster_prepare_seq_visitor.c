@@ -101,12 +101,12 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
       GtRange range;
       const char *attr;
       GtEncseqBuilder *eb;
-      char header[BUFSIZ];
+      char header[2*BUFSIZ];
       attr = gt_feature_node_get_attribute(curnode, "name");
       if (!attr)
         continue;
       range = gt_genome_node_get_range((GtGenomeNode*) curnode);
-      (void) snprintf(header, BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer, range.start,
+      (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer, range.start,
                       range.end);
       if (!gt_hashmap_get(lcv->encseq_builders, attr)) {
         eb = gt_encseq_builder_new(gt_encseq_alphabet(lcv->src_encseq));
@@ -129,7 +129,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
       char *tmp;
       GtRange range;
       GtEncseqBuilder *eb;
-      char header[BUFSIZ];  /* XXX: use GtStr for safety */
+      char header[2*BUFSIZ];  /* XXX: use GtStr for safety */
       if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0) {
         if (first_ltr) {
           tmp = gt_cstr_dup("lLTR");
@@ -143,7 +143,7 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
         gt_free(tmp);
         continue;
       }
-      (void) snprintf(header, BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer, range.start,
+      (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer, range.start,
                       range.end);
       if (!gt_hashmap_get(lcv->encseq_builders, tmp)) {
         eb = gt_encseq_builder_new(gt_encseq_alphabet(lcv->src_encseq));
