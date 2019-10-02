@@ -64,7 +64,7 @@ typedef struct{
              diagonal, /* call diagonalband algorithm */
              dna,
              protein,
-             has_costmatrix, /* special case of substituation matrix*/
+             has_costmatrix, /* special case of substitution matrix*/
              showscore,
              showsequences,
              scoreonly, /* dev option generate alignment, but do not show it*/
@@ -179,7 +179,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
 
   /* special case, if given matrix includes cost values in place of scores */
   optioncostmatrix = gt_option_new_bool("costmatrix", "describes type of "
-                                        "given substituation matrix",
+                                        "given substitution matrix",
                                         &arguments->has_costmatrix, false);
   gt_option_parser_add_option(op, optioncostmatrix);
 
@@ -219,7 +219,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionlinearcosts = gt_option_new_string_array("l", "lineargapcosts, "
                                                  "use match, mismatch and "
                                                  "gapcost, alternatively "
-                                                 "substituationmatrix and "
+                                                 "substitution matrix and "
                                                  "gapcost",
                                                  arguments->linearcosts);
   gt_option_parser_add_option(op, optionlinearcosts);
@@ -227,7 +227,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionaffinecosts = gt_option_new_string_array("a", "affinegapcosts, "
                                            "use match, mismatch, gap_extension "
                                            "and gap_opening, alternatively "
-                                           "substituationmatrix, gap_extension "
+                                           "substitution matrix, gap_extension "
                                            "and gap_opening",
                                            arguments->affinecosts);
   gt_option_parser_add_option(op, optionaffinecosts);
