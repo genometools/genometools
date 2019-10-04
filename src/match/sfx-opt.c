@@ -26,6 +26,7 @@
 #include "core/readmode.h"
 #include "core/spacecalc.h"
 #include "core/str.h"
+#include "core/thread_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "match/sfx-opt.h"
@@ -114,6 +115,14 @@ static GtOPrval parse_options(int *parsed_args,
     basenameptr = gt_basename(gt_str_get(so->inputindex));
     gt_str_set(so->indexname, basenameptr);
     gt_free(basenameptr);
+  }
+
+  if (oprval == GT_OPTION_PARSER_OK &&
+      gt_jobs > 1 && gt_index_options_outlcptab_value(so->idxopts)) {
+    /* LCP table generation is not implemented in multithreaded
+       operation */
+    gt_error_set(err, "option -lcp cannot be used when using >1 threads");
+    oprval = GT_OPTION_PARSER_ERROR;
   }
 
   gt_option_parser_delete(op);
