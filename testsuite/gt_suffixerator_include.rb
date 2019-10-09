@@ -601,3 +601,11 @@ Test do
   run "#{$bin}/gt dev sfxmap -enumlcpitvtree -esa sfx > noBU.txt"
   run "diff withBU.txt noBU.txt"
 end
+
+Name "gt suffixerator multithreaded -lcp"
+Keywords "gt_suffixerator multithreaded"
+Test do
+  run "#{$bin}/gt -j 3 suffixerator -db #{$testdata}/at1MB -indexname foo " + \
+      "-lcp -suf", :retval => 1
+  grep(last_stderr, /cannot be used when/)
+end
