@@ -43,12 +43,18 @@ static int extract_feature_seq(GtEncseqBuilder *b, const char *header,
                                GT_UNUSED const char *fnt, GtError *err)
 {
   char *buffer;
-  int had_err = 0;
+  int had_err = 0,
+      rval;
   GtUword seqnum,
                 startpos;
 
-  (void) sscanf(gt_str_get(seqid), "seq"GT_WU"", &seqnum);
-  if (seqnum >= gt_encseq_num_of_sequences(encseq)) {
+  rval = sscanf(gt_str_get(seqid), "seq"GT_WU"", &seqnum);
+  if (rval != 1) {
+    gt_error_set(err, "expected sequence ID of format 'seqX' but "
+                      "encountered '%s'",gt_str_get(seqid));
+    had_err = -1;
+  }
+  if (!had_err && (seqnum >= gt_encseq_num_of_sequences(encseq))) {
     gt_error_set(err, "annotation encountered for sequence "GT_WU", but the "
                       "supplied encoded sequence only contains sequences "
                       "0-"GT_WU"", seqnum,
@@ -123,9 +129,9 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
       had_err = extract_feature_seq(eb, header, seqid, lcv->src_encseq, range,
                                     fnt, err);
       gt_file_delete(file);
-    } else if (strcmp(fnt, gt_ft_LTR_retrotransposon) == 0)
+    } else if (strcmp(fnt, gt_ft_LTR_retrotransposon) == 0) {
       continue;
-    else {
+    } else {
       char *tmp;
       GtRange range;
       GtEncseqBuilder *eb;

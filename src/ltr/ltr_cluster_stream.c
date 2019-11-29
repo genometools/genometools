@@ -497,7 +497,7 @@ static int gt_ltr_cluster_stream_next(GtNodeStream *ns,
       if (had_err) {
         gt_genome_node_delete(*gn);
         *gn = NULL;
-        break;
+        return had_err;
       }
     }
     lcs->feat_to_encseq =
