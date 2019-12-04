@@ -3,7 +3,7 @@ Keywords "gt_ruby"
 Test do
   run_ruby "#{$testdata}gtruby/gff3.rb #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
 Name "gtruby: genome_visitor bindings (output stream)"
@@ -11,7 +11,7 @@ Keywords "gt_ruby"
 Test do
   run_ruby "#{$testdata}gtruby/genome_visitor.rb #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
 Name "gtruby: feature_index and feature_stream bindings"
@@ -59,7 +59,7 @@ if not $arguments["nocairo"] then
     run_ruby "#{$testdata}gtruby/block_stuff.rb " +
              "#{$testdata}gff3_file_1_short.txt"
     run "env LC_ALL=C sort #{last_stdout}"
-    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.blocks"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.blocks"
   end
 
   Name "gtruby: AnnotationSketch bindings (style)"
@@ -83,7 +83,7 @@ if not $arguments["nocairo"] then
              "out.svg"
     # will fail e.g. if cairo toy font setup is different from test machine
     # disabled for now
-    # run "diff out.svg #{$testdata}graphics_test.out"
+    # run "diff --strip-trailing-cr out.svg #{$testdata}graphics_test.out"
   end
 
   Name "gtruby: AnnotationSketch bindings (FeatureNode(Iterator))"
@@ -97,7 +97,7 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/show_recmaps.rb " +
              "#{$testdata}standard_gene_as_tree.gff3"
-    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
 end
 
@@ -111,7 +111,7 @@ Name "gtruby: show_seqids"
 Keywords "gt_ruby"
 Test do
   run_ruby "#{$testdata}gtruby/show_seqids.rb #{$testdata}encode_known_genes_Mar07.gff3"
-  run "diff #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
 end
 
 Name "gtruby: used_types"
@@ -119,7 +119,7 @@ Keywords "gt_ruby"
 Test do
   run_ruby "#{$testdata}gtruby/used_types.rb " +
            "#{$testdata}standard_gene_as_tree.gff3"
-  run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.types"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.types"
 end
 
 Name "gtruby: {Comment,Sequence,Region,Meta,EOF}Node classes"
@@ -132,7 +132,7 @@ Name "gtruby: CustomStream/CustomVisitor basic tests"
 Keywords "gt_ruby"
 Test do
   run_ruby "#{$testdata}gtruby/custom_stuff.rb #{$testdata}eden.gff3"
-  run "diff #{last_stdout} #{$testdata}custom_streams_ref.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}custom_streams_ref.txt"
 end
 
 Name "gtruby: CustomStream/CustomVisitor all node types"

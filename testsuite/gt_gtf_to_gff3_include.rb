@@ -2,7 +2,7 @@ Name "gt gtf_to_gff3 test"
 Keywords "gt_gtf_to_gff3"
 Test do
   run_test "#{$bin}gt gtf_to_gff3 #{$testdata}gt_gtf_to_gff3_test.gtf"
-  run "diff #{last_stdout} #{$testdata}gt_gtf_to_gff3_test.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gtf_to_gff3_test.gff3"
 end
 
 Name "gt gtf_to_gff3 test (lone stop codon)"
@@ -33,12 +33,12 @@ Test do
   grep(last_stderr, /is contained in CDS in line 7/)
   run_test "#{$bin}gt gtf_to_gff3 -tidy #{$testdata}gt_gtf_to_gff3_test_stop_codon_in_cds.gtf"
   grep(last_stderr, /is contained in CDS in line 7/)
-  run("diff #{last_stdout} #{$testdata}gt_gtf_to_gff3_test_stop_codon_in_cds.gff3")
+  run("diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gtf_to_gff3_test_stop_codon_in_cds.gff3")
   run_test "#{$bin}gt gtf_to_gff3 #{$testdata}gt_gtf_to_gff3_test_stop_codon_in_cds2.gtf", :retval => 1
   grep(last_stderr, /is contained in CDS in line 21/)
   run_test "#{$bin}gt gtf_to_gff3 -tidy #{$testdata}gt_gtf_to_gff3_test_stop_codon_in_cds2.gtf"
   grep(last_stderr, /is contained in CDS in line 21/)
-  run("diff #{last_stdout} #{$testdata}gt_gtf_to_gff3_test_stop_codon_in_cds2.gff3")
+  run("diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_gtf_to_gff3_test_stop_codon_in_cds2.gff3")
 end
 
 if $gttestdata then
@@ -50,7 +50,7 @@ if $gttestdata then
     run_test("#{$bin}gt gtf_to_gff3 " +
              "#{$gttestdata}gtf/Drosophila_melanogaster.BDGP5.4.50.gtf " +
              "| #{$bin}gt gff3 -sort ", :maxtime => 3600)
-    run "diff #{last_stdout} " +
+    run "diff --strip-trailing-cr #{last_stdout} " +
         "ref_sorted.gff3"
   end
 
@@ -60,6 +60,6 @@ if $gttestdata then
     run_test "#{$bin}gt gtf_to_gff3 -tidy " +
              "#{$gttestdata}gtf/gencode.v11.annotation.gtf.gz " +
              "| #{$bin}gt gff3 -sort -tidy", :maxtime => 3600
-    run "diff #{last_stdout} #{$gttestdata}gff3/gencode.v11.annotation.gff3"
+    run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}gff3/gencode.v11.annotation.gff3"
   end
 end

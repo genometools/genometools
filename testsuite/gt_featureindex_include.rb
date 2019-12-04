@@ -13,7 +13,7 @@ if not $arguments["nordb"] then
   Test do
     run "#{$bin}gt mkfeatureindex -filename tmp.db #{$testdata}/gt_view_prob_2.gff3"
     run "#{$bin}gt featureindex -filename tmp.db"
-    run "diff #{last_stdout} #{$testdata}/gt_view_prob_2.gff3"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}/gt_view_prob_2.gff3"
   end
 
   Name "gt featureindex (parse error in GFF3)"
@@ -60,7 +60,7 @@ if not $arguments["nordb"] then
         seqid.chomp!
         run "#{$bin}gt featureindex -seqid #{seqid} -retain no -filename tmp.db > out.gff3"
         run "#{$bin}gt gff3 -retainids no #{file} | #{$bin}gt select -seqid #{seqid}"
-        run "diff out.gff3 #{last_stdout}"
+        run "diff --strip-trailing-cr out.gff3 #{last_stdout}"
       end
     end
   end

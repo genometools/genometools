@@ -6,7 +6,7 @@ Test do
   run_test "#{$bin}gt id_to_md5 " \
     "-seqfiles U89959_genomic.fas U89959_ests_unique.fas " \
     "-matchdesc #{$testdata}U89959_sas.gff3"
-  run "diff #{last_stdout} #{$testdata}U89959_sas.gff3md5"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_sas.gff3md5"
 end
 
 Name "gt id_to_md5 (U89959_csas.gff3)"
@@ -17,7 +17,7 @@ Test do
   run_test "#{$bin}gt id_to_md5 " \
     "-seqfiles U89959_genomic.fas U89959_ests_unique.fas " \
     "-matchdesc #{$testdata}U89959_csas.gff3"
-  run "diff #{last_stdout} #{$testdata}U89959_csas.gff3md5"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_csas.gff3md5"
 end
 
 Name "gt id_to_md5 (failure)"

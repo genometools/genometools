@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #ifdef _WIN32
 #include <windows.h>
+#include <stdio.h>
 #endif
 #include "core/compat.h"
 
@@ -39,7 +40,11 @@ int gt_mkstemp(char *templ)
   if (!_mktemp(templ))
     return -1;
 #endif
-  return open(templ, O_RDWR, O_EXCL);
+  #ifndef _WIN32
+    return open(templ, O_RDWR, O_EXCL);
+  #else
+    return open(templ, O_RDWR | O_CREAT, 0666);
+  #endif
 #endif
 }
 

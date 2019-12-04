@@ -15,7 +15,7 @@ Test do
     run_test "#$bin/gt compreads decompress -file test"
     `grep -v @ #$testdata/#{file} > original`
     `grep -v @ test.fastq > test_out`
-    run_test "diff test_out original"
+    run_test "diff --strip-trailing-cr test_out original"
   end
 end
 
@@ -27,7 +27,7 @@ Test do
   run_test "#$bin/gt compreads decompress -file test"
   `grep -h -v @ #{files.join(' ')} > original`
   `grep -v @ test.fastq > test_out`
-  run_test "diff test_out original"
+  run_test "diff --strip-trailing-cr test_out original"
 end
 
 Name "gt hcr reads and description"
@@ -39,9 +39,9 @@ Test do
     run_test "#$bin/gt compreads decompress -file test"
     `grep -v -e '^@' #$testdata/#{file} > original`
     `grep -v '^@'  test.fastq > test_out`
-    run_test "diff test_out original"
+    run_test "diff --strip-trailing-cr test_out original"
     run_test "#$bin/gt compreads decompress -descs -file test"
-    run_test "diff test.fastq #$testdata/#{file}"
+    run_test "diff --strip-trailing-cr test.fastq #$testdata/#{file}"
   end
 end
 
@@ -53,7 +53,7 @@ Test do
            " -files #{files.join(' ')} -name test"
   run_test "#$bin/gt compreads decompress -descs -file test"
   `cat #{files.join(' ')} > original`
-  run_test "diff test.fastq original"
+  run_test "diff --strip-trailing-cr test.fastq original"
 end
 
 Name "gt hcr decompress benchmark"
@@ -81,7 +81,7 @@ Test do
              "-name test_#{hcr_testfiles[0]}"
     run_test "#$bin/gt compreads decompress -descs" \
              " -file test_#{hcr_testfiles[0]}", :maxtime => 300
-    run_test "diff test_#{hcr_testfiles[0]}.fastq " \
+    run_test "diff --strip-trailing-cr test_#{hcr_testfiles[0]}.fastq " \
              "#$testdata/#{hcr_testfiles[0]}"
   end
 end

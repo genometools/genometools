@@ -307,7 +307,11 @@ void gt_fa_xbzclose(BZFILE *stream)
   xfclose_generic(stream, GT_FILE_MODE_BZIP2, fa);
 }
 
-static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";
+#ifndef _WIN32
+  static const char genometools_tmptemplate[] = "/genometools.XXXXXXXXXX";
+#else
+  static const char genometools_tmptemplate[] = "\\genometools.XXXXXXXXXX";
+#endif
 
 static inline const char* gt_fa_try_tmpdir(const char *dirname)
 {

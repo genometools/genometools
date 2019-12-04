@@ -51,8 +51,11 @@
 #include "annotationsketch/text_width_calculator_cairo.h"
 
 #define TEXT_SPACER         8  /* pt */
-#define TIME_DATE_FORMAT    "%a, %b %d %Y - %T"
-
+#ifdef _WIN32
+  #define TIME_DATE_FORMAT    "%a, %b %d %Y"
+#else
+  #define TIME_DATE_FORMAT    "%a, %b %d %Y - %T"
+#endif
 typedef struct {
   GtUword width;
   double pwidth, pheight, theight;

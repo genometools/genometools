@@ -39,7 +39,12 @@ char *gt_basename(const char *path)
   }
   strcpy(sbuf, path);
   for (c = sbuf + pathlen - 1; c >= sbuf; c--) {
-    if (*c == GT_PATH_SEPARATOR) {
+//if (*c == GT_PATH_SEPARATOR) {
+#ifndef _WIN32
+  if (*c == GT_PATH_SEPARATOR) {
+#else
+  if (*c == '\\' || *c == '/') {
+#endif
       if (foundother) {
         c++;
         for (i=0; c[i] != '\0'; i++)

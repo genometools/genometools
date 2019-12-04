@@ -25,7 +25,7 @@ Test do
         i=i+1
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
                  "-dna -global -l 0 1 1 -wildcard"
-        run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
+        run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
       end
     end
   end
@@ -48,7 +48,7 @@ Test do
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}nGASP/#{f1} #{$testdata}nGASP/#{f2} "\
                  "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore",\
                  :maxtime => 180
-        run "diff #{last_stdout} #{temp}"
+        run "diff --strip-trailing-cr #{last_stdout} #{temp}"
       end
     end
   end
@@ -62,7 +62,7 @@ end
              "#{$testdata}gt_linspace_align_test_#{i}.fas "\
              "#{$testdata}gt_linspace_align_test_#{i+1}.fas "\
              "-dna -local -l 2 \" -2\" \" -1\" -showsequences"
-    run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_test_#{i}.out"
+    run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_local_test_#{i}.out"
   end
 end
 
@@ -74,7 +74,7 @@ end
              "#{$testdata}gt_linspace_align_affine_test_#{i}.fas "\
              "#{$testdata}gt_linspace_align_affine_test_#{i+1}.fas "\
              "-dna -global -a 0 2 3 1"
-    run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_#{i}.out"
+    run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_#{i}.out"
   end
 end
 
@@ -85,7 +85,7 @@ Test do
            "#{$testdata}gt_linspace_align_affine_test_1.fas "\
            "#{$testdata}gt_linspace_align_affine_test_2.fas "\
            "-dna -local -a 6 \" -2\" \" -5\" \" -1\" -showsequences"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_test_1.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_test_1.out"
 end
 
 Name "gt linspace_align diagonalband filelist"
@@ -100,7 +100,7 @@ Test do
         i=i+1
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
                  "-dna -global -l 0 1 1 -d -wildcard"
-        run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
+        run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
       end
     end
   end
@@ -121,7 +121,7 @@ Test do
            "#{$testdata}gt_linspace_align_affine_test_1.fas "\
            "#{$testdata}gt_linspace_align_affine_test_2.fas "\
            " -dna -global -a 0 2 3 1 -d"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_1.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_1.out"
 end
 
 Name "gt linspace_align special cases"
@@ -131,32 +131,32 @@ Test do
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-dna -global -l 0 1 1"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-dna -local -l 2 \" -2\" \" -1\" -showsequences"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_linear_special_cases.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_local_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-dna -global -a 0 2 3 1"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-dna -local -a  6 \" -2\" \" -5\" \" -1\" -showsequences"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_special_cases.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-dna -global -l 0 1 1 -d"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-dna -global -a 0 2 3 1 -d"
-  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
 end
 
 Name "gt linspace_align all checkfun with gt_paircmp (dna)"
@@ -176,7 +176,7 @@ if $gttestdata then
     run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}DNA-mix/Grumbach.fna/humdystrop.fna "\
              "#{$gttestdata}DNA-mix/Grumbach.fna/humhdabcd.fna "\
              "-dna -global -l 0 1 1 -d -showonlyscore", :maxtime => 1500
-    run "diff #{last_stdout} #{temp}"
+    run "diff --strip-trailing-cr #{last_stdout} #{temp}"
   end
 
   Name "gt linspace_align global lin gap protein gttestdata filelist"
@@ -191,6 +191,6 @@ if $gttestdata then
              "#{$gttestdata}swissprot/swiss10K "\
              "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore",\
              :maxtime => 120
-    run "diff #{last_stdout} #{temp}"
+    run "diff --strip-trailing-cr #{last_stdout} #{temp}"
   end
 end

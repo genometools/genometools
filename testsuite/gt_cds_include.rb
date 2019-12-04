@@ -8,7 +8,7 @@ require 'fileutils'
     run_test "#{$bin}gt cds -minorflen 1 -startcodon yes " \
              "-seqfile gt_cds_test_#{i}.fas -matchdesc " \
              "#{$testdata}gt_cds_test_#{i}.in"
-    run "diff #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
 end
 
@@ -29,7 +29,7 @@ end
     run_test "#{$bin}gt cds -minorflen 1 -startcodon yes -usedesc " \
              "-seqfile gt_cds_test_#{i}.fas " \
              "#{$testdata}gt_cds_test_#{i}.in"
-    run "diff #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
 end
 
@@ -40,7 +40,7 @@ Test do
   run_test "#{$bin}gt cds -minorflen 1 -usedesc -seqfile " \
            "gt_cds_test_descrange.fas " \
            "#{$testdata}gt_cds_test_descrange.in"
-  run "diff #{last_stdout} #{$testdata}gt_cds_test_descrange.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_cds_test_descrange.out"
 end
 
 Name "gt cds test (multi description)"
@@ -50,7 +50,7 @@ Test do
   run_test "#{$bin}gt cds -minorflen 1 -usedesc -seqfile " \
            "gt_cds_descrange_multi.fas " \
            "#{$testdata}gt_cds_descrange_multi.in"
-  run "diff #{last_stdout} #{$testdata}gt_cds_descrange_multi.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_cds_descrange_multi.out"
 end
 
 Name "gt cds test (multi description fail 1)"
@@ -100,7 +100,7 @@ Test do
   run_test "#{$bin}gt cds -startcodon no -finalstopcodon no -seqfile " \
            "U89959_genomic.fas -matchdesc " \
            "#{$testdata}gt_cds_nostartcodon_nofinalstopcodon.in"
-  run "diff #{last_stdout} " \
+  run "diff --strip-trailing-cr #{last_stdout} " \
       "#{$testdata}gt_cds_nostartcodon_nofinalstopcodon.out"
 end
 
@@ -111,7 +111,7 @@ Test do
   run_test "#{$bin}gt cds -startcodon yes -finalstopcodon no -minorflen 64 " \
            "-seqfile III.fas -usedesc " \
            "#{$testdata}nGASP/resIII.gff3"
-  run "diff #{last_stdout} #{$testdata}nGASP/resIIIcds.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}nGASP/resIIIcds.gff3"
 end
 
 Name "gt cds test (U89959)"
@@ -120,7 +120,7 @@ Test do
   FileUtils.copy "#{$testdata}U89959_genomic.fas", "."
   run_test "#{$bin}gt cds -seqfile U89959_genomic.fas " \
            "-matchdesc #{$testdata}U89959_csas.gff3"
-  run      "diff #{last_stdout} #{$testdata}U89959_cds.gff3"
+  run      "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_cds.gff3"
 end
 
 Name "gt cds test (not sorted)"
@@ -140,6 +140,6 @@ if $gttestdata then
     run_test "#{$bin}gt cds -startcodon yes -minorflen 1 " \
              "-seqfile marker_region.fas " \
              "-matchdesc #{$gttestdata}cds/marker_bug.gff3"
-    run "diff #{last_stdout} #{$gttestdata}cds/marker_bug.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$gttestdata}cds/marker_bug.out"
   end
 end

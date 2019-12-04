@@ -30,7 +30,7 @@ Name "sequence buffer: EMBL multi-line description"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}embl_test5.embl"
-  run "diff #{last_stdout} #{$testdata}embl_test5.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}embl_test5.fas"
 end
 
 Name "sequence buffer: EMBL empty sequence"
@@ -72,7 +72,7 @@ allfiles.each do |file|
              "| grep -v '>'  > #{file}_out1"
     run_test "#{$bin}gt convertseq #{$testdata}#{file}.embl " + \
              "| grep -v '>' > #{file}_out2"
-    run "diff -i #{file}_out1 #{file}_out2"
+    run "diff --strip-trailing-cr -i #{file}_out1 #{file}_out2"
   end
 
   Name "sequence buffer: check EMBL effectivelength #{file}"
@@ -142,7 +142,7 @@ Name "sequence buffer: GenBank text before LOCUS"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test2.gbk"
-  run "diff #{last_stdout} #{$testdata}genbank_test2.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}genbank_test2.fas"
 end
 
 Name "sequence buffer: GenBank missing DEFINITION line"
@@ -191,7 +191,7 @@ gbfiles.each do |file|
              "| grep -v '>' > #{file}_out1"
     run_test "#{$bin}gt convertseq #{$testdata}#{file}.gbk " + \
              "| grep -v '>' > #{file}_out2"
-    run "diff -i #{file}_out1 #{file}_out2"
+    run "diff --strip-trailing-cr -i #{file}_out1 #{file}_out2"
   end
 
   Name "sequence buffer: check GenBank effectivelength #{file}"
@@ -221,7 +221,7 @@ Name "sequence buffer: FastQ success"
 Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}test1.fastq"
-  run "diff -i #{last_stdout} #{$testdata}test1.fasta"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}test1.fasta"
 end
 
 Name "sequence buffer: FastQ success, seq > buffersize"
@@ -229,7 +229,7 @@ Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt dev readreads -fasta #{$testdata}fastq_long.fastq > ref.fasta"
   run_test "#{$bin}gt convertseq #{$testdata}fastq_long.fastq"
-  run "diff -i #{last_stdout} ref.fasta"
+  run "diff --strip-trailing-cr -i #{last_stdout} ref.fasta"
 end
 
 Name "sequence buffer: FastQ non-FASTQ file"
@@ -286,7 +286,7 @@ Test do
            "#{$testdata}test5_tricky.fastq > ref.fas"
   run_test "#{$bin}gt convertseq " + \
            "#{$testdata}test5_tricky.fastq"
-  run "diff -i #{last_stdout} ref.fas"
+  run "diff --strip-trailing-cr -i #{last_stdout} ref.fas"
 end
 
 Name "sequence buffer: FastQ empty sequence"
@@ -301,14 +301,14 @@ Name "sequence buffer: FastQ huge reads"
 Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}fastq_problem.fastq.gz"
-  run "diff -i #{last_stdout} #{$testdata}fastq_problem.fasta"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}fastq_problem.fasta"
 end
 
 Name "sequence buffer: FastQ huge reads 2"
 Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}fastq_problem2.fastq.gz"
-  run "diff -i #{last_stdout} #{$testdata}fastq_problem2.fasta"
+  run "diff --strip-trailing-cr -i #{last_stdout} #{$testdata}fastq_problem2.fasta"
 end
 
 Name "sequence buffer: FastQ premature end"

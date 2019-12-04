@@ -7,7 +7,7 @@ Test do
   run_test "#{$bin}gt extractfeat -type gene " \
     "-seqfile gt_extractfeat_succ_1.fas " \
     "-matchdesc #{$testdata}gt_extractfeat_succ_1.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -seqfile test 1 (compressed)"
@@ -17,7 +17,7 @@ Test do
   run_test "#{$bin}gt extractfeat -type gene " \
     "-seqfile gt_extractfeat_succ_1.fas.gz " \
     "-matchdesc #{$testdata}gt_extractfeat_succ_1.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -seqfile test 1 (with -o)"
@@ -27,7 +27,7 @@ Test do
   run_test "#{$bin}gt extractfeat -o test.fas -type gene " \
     "-seqfile gt_extractfeat_succ_1.fas.gz " \
     "-matchdesc #{$testdata}gt_extractfeat_succ_1.gff3"
-  run "diff test.fas #{$testdata}gt_extractfeat_succ_1.out"
+  run "diff --strip-trailing-cr test.fas #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -seqfile test 2"
@@ -37,7 +37,7 @@ Test do
   run_test "#{$bin}gt extractfeat -type gene " \
     "-seqfile gt_extractfeat_succ_2.fas " \
     "-matchdesc #{$testdata}gt_extractfeat_succ_2.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out1"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out1"
 end
 
 Name "gt extractfeat -seqfile test 3"
@@ -47,7 +47,7 @@ Test do
   run_test "#{$bin}gt extractfeat -type exon " \
     "-seqfile gt_extractfeat_succ_2.fas " \
     "-matchdesc #{$testdata}gt_extractfeat_succ_2.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out2"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out2"
 end
 
 Name "gt extractfeat -seqfile test 4"
@@ -57,7 +57,7 @@ Test do
   run_test "#{$bin}gt extractfeat -type exon -join " \
     "-seqfile gt_extractfeat_succ_2.fas " \
     "-matchdesc #{$testdata}gt_extractfeat_succ_2.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out3"
 end
 
 Name "gt extractfeat -seqfile test 5"
@@ -67,7 +67,7 @@ Test do
   run_test "#{$bin}gt extractfeat -type exon -join " \
     "-seqfile gt_extractfeat_succ_3.fas " \
     "-matchdesc #{$testdata}gt_extractfeat_succ_3.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_3.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_succ_3.out"
 end
 
 Name "gt extractfeat -regionmapping fail 1 (no mapping file)"
@@ -132,7 +132,7 @@ Test do
   run "env GT_TESTDATA=./ #{$memcheck} #{$bin}gt extractfeat " \
     "-type gene -regionmapping #{$testdata}regionmapping_4.lua " \
     "#{$testdata}gt_extractfeat_succ_1.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -regionmapping test 1 (mapping function)"
@@ -162,7 +162,7 @@ Test do
   FileUtils.copy "#{$testdata}U89959_genomic.fas", "."
   run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-matchdesc -type CDS -join -translate #{$testdata}U89959_cds.gff3"
-  run "diff #{last_stdout} #{$testdata}U89959_cds.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_cds.fas"
 end
 
 Name "gt extractfeat -translate -gcode"
@@ -173,7 +173,7 @@ Test do
     run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-matchdesc -type CDS -join -translate -gcode #{code} " \
     "#{$testdata}U89959_cds.gff3"
-    run "diff #{last_stdout} #{$testdata}U89959_cds_#{code}.fas"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}U89959_cds_#{code}.fas"
   end
 end
 
@@ -195,11 +195,11 @@ Test do
   run "#{$bin}gt extractfeat -seqfile gt_extractfeat_phase.fas " \
     "-matchdesc -type CDS -join -translate " \
     "#{$testdata}gt_extractfeat_phase_fix.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_phase_fix.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_phase_fix.out"
   run "#{$bin}gt extractfeat -seqfile gt_extractfeat_phase.fas " \
     "-matchdesc -type CDS -join -translate " \
     "#{$testdata}gt_extractfeat_phase.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_phase.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_phase.out"
 end
 
 Name "gt extractfeat -translate (phases example 2)"
@@ -208,10 +208,10 @@ Test do
   FileUtils.copy "#{$testdata}Scaffold_102.fa", "."
   run "#{$bin}gt extractfeat -seqfile Scaffold_102.fa " \
     "-matchdesc -type CDS -translate #{$testdata}Scaffold_102.gff3"
-  run "diff #{last_stdout} #{$testdata}Scaffold_102.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}Scaffold_102.out"
   run "#{$bin}gt extractfeat -seqfile Scaffold_102.fa " \
     "-matchdesc -type CDS -join -translate #{$testdata}Scaffold_102.gff3"
-  run "diff #{last_stdout} #{$testdata}Scaffold_102.joined.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}Scaffold_102.joined.out"
 end
 
 Name "gt extractfeat -help"
@@ -228,7 +228,7 @@ Test do
   run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-type CDS -join -seqid " \
     "#{$testdata}gt_extractfeat_seqid_target.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_seqid.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_seqid.fas"
 end
 
 Name "gt extractfeat -target"
@@ -238,7 +238,7 @@ Test do
   run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-type mRNA -join -target " \
     "#{$testdata}gt_extractfeat_seqid_target.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_target.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_target.fas"
 end
 
 Name "gt extractfeat -seqid -target"
@@ -248,7 +248,7 @@ Test do
   run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-type CDS -join -seqid -target " \
     "#{$testdata}gt_extractfeat_seqid_target.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_seqid_target.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_seqid_target.fas"
 end
 
 Name "gt extractfeat -retainids"
@@ -258,11 +258,11 @@ Test do
   run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-type CDS -retainids -join -translate " \
     "#{$testdata}gt_extractfeat_retainids.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_retainids_join.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_retainids_join.fas"
   run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-type CDS -retainids -translate " \
     "#{$testdata}gt_extractfeat_retainids.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_retainids.fas"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_retainids.fas"
 end
 
 Name "gt extractfeat compare query method combinations"
@@ -282,23 +282,23 @@ Test do
       run "#{$bin}gt extractfeat #{method} " \
         "-seqfile gt_extractfeat_mappings.fas " \
         "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
-      run "diff #{last_stdout} " \
+      run "diff --strip-trailing-cr #{last_stdout} " \
         "#{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
       run "#{$bin}gt extractfeat #{method} -seqfiles " \
         "gt_extractfeat_mappings_sep1.fas " \
         "gt_extractfeat_mappings_sep2.fas " \
         "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
-      run "diff #{last_stdout} " \
+      run "diff --strip-trailing-cr #{last_stdout} " \
         "#{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
       run "#{$bin}gt extractfeat #{method} -encseq idx " \
         "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
-      run "diff #{last_stdout} " \
+      run "diff --strip-trailing-cr #{last_stdout} " \
         "#{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
     end
     run "env GT_TESTDATA=./ #{$memcheck} #{$bin}gt extractfeat " \
       "-regionmapping #{$testdata}gt_extractfeat_mappings_seprm.lua " \
       "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
-    run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
   end
 end
 
@@ -315,7 +315,7 @@ Test do
     run "#{$bin}gt extractfeat #{method} " \
       "gt_extractfeat_matchdescstart_1.fas -type gene " \
       "-matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3"
-    run "diff #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
     run "#{$bin}gt extractfeat #{method} " \
       "gt_extractfeat_matchdescstart_2.fas -type gene " \
       "-matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
@@ -330,7 +330,7 @@ Test do
   grep(last_stderr, "could match more than one sequence")
   run "#{$bin}gt extractfeat -encseq foo -type gene " \
     "-matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3"
-  run "diff #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
   run "#{$bin}gt encseq encode -lossless -indexname foo " \
     "gt_extractfeat_matchdescstart_2.fas"
   run "#{$bin}gt extractfeat -encseq foo -type gene " \

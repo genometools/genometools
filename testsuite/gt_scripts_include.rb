@@ -27,7 +27,7 @@ end
   Test do
     run_test "#{$bin}gt  #{$testdata}gtscripts/csa_stream.lua " +
              "#{$testdata}gt_csa_prob_#{i}.in"
-    run "diff #{last_stdout} #{$testdata}gt_csa_prob_#{i}.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_csa_prob_#{i}.out"
   end
 end
 
@@ -40,7 +40,7 @@ end
              "gt_cds_test_#{i}.fas " +
              "#{$testdata}gt_cds_test_#{i}.in"
     run "sed 's/gtscript/gt cds/' #{last_stdout}"
-    run "diff #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
 end
 
@@ -67,11 +67,11 @@ Keywords "gt_scripts"
 Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/gff3.lua #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
   run_test "#{$bin}gt #{$testdata}gtscripts/genome_stream_outfile.lua outfile < #{$testdata}eden.gff3"
   run_test "#{$bin}gt gff3 -sort -retainids -tidy outfile > 1"
   run_test "#{$bin}gt gff3 -sort -retainids -tidy #{$testdata}eden.gff3 > 2"
-  run "diff 1 2"
+  run "diff --strip-trailing-cr 1 2"
   run_test "#{$bin}gt #{$testdata}gtscripts/genome_stream_outfile.lua /nonexist < #{$testdata}eden.gff3", :retval => 1
 end
 
@@ -79,7 +79,7 @@ Name "genome_stream bindings (input stream stdin)"
 Keywords "gt_scripts"
 Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/genome_stream_stdin.lua #{$testdata}eden.gff3 < #{$testdata}eden.gff3"
-  run "diff #{last_stdout} #{$testdata}genome_stream_stdin.gff3"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}genome_stream_stdin.gff3"
 end
 
 Name "genome_visitor bindings"
@@ -87,7 +87,7 @@ Keywords "gt_scripts"
 Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/genome_visitor.lua #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
-  run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
 Name "range bindings"
@@ -106,7 +106,7 @@ Name "scorematrix2c"
 Keywords "gt_scripts scorematrix"
 Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/scorematrix2c.lua #{$testdata}BLOSUM62"
-  run "diff #{last_stdout} #{$testdata}blosum62.c"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}blosum62.c"
 end
 
 Name "scorematrix2stdout"
@@ -114,7 +114,7 @@ Keywords "gt_scripts scorematrix"
 Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/scorematrix2stdout.lua " +
            "#{$testdata}BLOSUM62.gth"
-  run "diff #{last_stdout} #{$testdata}BLOSUM62.out"
+  run "diff --strip-trailing-cr #{last_stdout} #{$testdata}BLOSUM62.out"
 end
 
 Name "require 'gtlua'"
@@ -181,7 +181,7 @@ if not $arguments["nocairo"] then
   Keywords "gt_scripts"
   Test do
     run_test "#{$bin}gt #{$testdata}gtscripts/recmap.lua #{$testdata}gff3_file_1_short.txt"
-    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
   end
 
   Name "AnnotationSketch (invalid ImageInfo object)"
@@ -194,7 +194,7 @@ if not $arguments["nocairo"] then
   Keywords "gt_scripts"
   Test do
     run_test("#{$bin}gt #{$testdata}gtscripts/show_seqids.lua #{$testdata}encode_known_genes_Mar07.gff3", :maxtime => 100)
-    run "diff #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
   end
 
   Name "evalviz.lua test 1"
@@ -202,7 +202,7 @@ if not $arguments["nocairo"] then
   Test do
     run_test "#{$bin}gt #{$testdata}../gtscripts/evalviz.lua png_files #{$testdata}gt_eval_test_1.in #{$testdata}gt_eval_test_1.in"
     run "grep -v seqid #{last_stdout}"
-    run "diff #{last_stdout} #{$testdata}gt_eval_test_1.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_eval_test_1.out"
   end
 
 =begin XXX: takes too long
@@ -210,7 +210,7 @@ if not $arguments["nocairo"] then
   Keywords "gt_scripts"
   Test do
     run_test "#{$bin}gt #{$testdata}../gtscripts/evalviz.lua png_files #{$testdata}gt_evalviz_test.reality #{$testdata}gt_evalviz_test.prediction"
-    run "diff #{last_stdout} #{$testdata}gt_evalviz_test.out"
+    run "diff --strip-trailing-cr #{last_stdout} #{$testdata}gt_evalviz_test.out"
   end
 =end
 end
