@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma.h"
 #include "core/xansi_api.h"
 

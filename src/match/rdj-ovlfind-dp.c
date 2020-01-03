@@ -22,7 +22,7 @@
 #include "match/rdj-ovlfind-dp.h"
 /* unit test: */
 #include <string.h>
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/array_api.h"
 
 typedef struct

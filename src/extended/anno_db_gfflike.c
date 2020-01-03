@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/fileutils_api.h"
 #include "core/hashtable.h"
 #include "core/hashmap.h"

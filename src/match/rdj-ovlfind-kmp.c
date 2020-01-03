@@ -22,7 +22,7 @@
 #include "match/rdj-ovlfind-kmp.h"
 /* for unit test: */
 #include "core/array_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 
 gt_kmp_t* gt_kmp_preproc(const char *seq, GtUword seqlen)
 {

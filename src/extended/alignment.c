@@ -26,7 +26,7 @@
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/chardef.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma.h"
 #include "core/xansi_api.h"
 #include "core/types_api.h"

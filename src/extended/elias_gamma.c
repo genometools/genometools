@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "extended/elias_gamma.h"

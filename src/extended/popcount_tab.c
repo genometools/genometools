@@ -21,7 +21,7 @@
 #include "core/byte_popcount_api.h"
 #include "core/combinatorics.h"
 #include "core/compact_ulong_store.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/error_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"

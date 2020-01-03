@@ -39,7 +39,7 @@
 #include "core/encseq_access_type.h"
 #include "core/encseq_metadata.h"
 #include "core/encseq_rep.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"

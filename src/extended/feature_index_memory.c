@@ -22,7 +22,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/cstr_table.h"
 #include "core/cstr_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/hashmap.h"
 #include "core/interval_tree.h"
 #include "core/ma.h"

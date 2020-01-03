@@ -26,7 +26,7 @@
 
 #include "core/assert_api.h"
 #include "core/divmodmul_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/intbits.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"

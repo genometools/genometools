@@ -25,7 +25,7 @@
 #include "annotationsketch/style.h"
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/thread_api.h"

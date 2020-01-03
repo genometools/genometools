@@ -30,7 +30,7 @@
 #include "core/compat_api.h"
 #include "core/cstr.h"
 #include "core/cstr_array.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"

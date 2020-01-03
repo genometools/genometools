@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/ma.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/tag_value_map.h"

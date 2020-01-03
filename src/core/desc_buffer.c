@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/desc_buffer.h"
 #include "core/dynalloc.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/log_api.h"
 #include "core/ma.h"
 #include "core/queue.h"

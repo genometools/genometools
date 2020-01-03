@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include <ctype.h>
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/undef_api.h"
 #include "extended/gff3_escaping.h"
 

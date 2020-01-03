@@ -22,7 +22,7 @@
 #include "match/rdj-ovlfind-bf.h"
 /* for unit test: */
 #include "core/array_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 
 static inline bool contfind_bf(const char *a, GtUword alen,
     const char *b, GtUword blen)

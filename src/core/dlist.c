@@ -17,7 +17,7 @@
 
 #include <limits.h>
 #include "core/dlist.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"

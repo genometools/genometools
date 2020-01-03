@@ -20,7 +20,7 @@
 #include "core/array_api.h"
 #include "core/arraydef.h"
 #include "core/disc_distri_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/fasta.h"
 #include "core/fileutils.h"
 #include "core/format64.h"

@@ -19,7 +19,7 @@
 #include "match/rdj-spmproc.h"
 /* for unit test: */
 #include "core/unused_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 
 void gt_spmproc_a_e(GtUword suffix_seqnum, GtUword prefix_seqnum,
   GtUword suffix_length, GT_UNUSED GtUword prefix_length,

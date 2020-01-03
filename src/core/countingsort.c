@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/countingsort.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 

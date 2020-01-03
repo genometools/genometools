@@ -18,7 +18,7 @@
 #include "core/byte_popcount_api.h"
 #include "core/byte_select_api.h"
 #include "core/combinatorics.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/log_api.h"

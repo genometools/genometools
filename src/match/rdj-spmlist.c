@@ -25,7 +25,7 @@
 #include "core/log_api.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/minmax.h"
 #include "core/ma.h"
 #include "core/unused_api.h"

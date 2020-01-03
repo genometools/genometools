@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/minmax.h"
 #include "core/msort.h"
 #include "core/range.h"

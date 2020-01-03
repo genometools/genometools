@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/dyn_bittab.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
 

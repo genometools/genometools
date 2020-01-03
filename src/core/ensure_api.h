@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENSURE_H
-#define ENSURE_H
+#ifndef ENSURE_API_H
+#define ENSURE_API_H
 
 #include <stdbool.h>
 #include "core/error.h"

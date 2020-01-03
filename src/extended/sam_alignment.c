@@ -18,7 +18,7 @@
 
 #include <samtools/sam.h>
 #include "core/alphabet_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"

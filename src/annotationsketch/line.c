@@ -19,7 +19,7 @@
 #include "annotationsketch/block.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/line.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/interval_tree.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"

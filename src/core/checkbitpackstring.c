@@ -23,7 +23,7 @@
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/error.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 
 int
 gt_bitPackString_unit_test(GtError *err)

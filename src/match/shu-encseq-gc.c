@@ -20,7 +20,7 @@
 #include "core/alphabet_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/safearith.h"

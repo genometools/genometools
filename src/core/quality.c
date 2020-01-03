@@ -18,7 +18,7 @@
 #include <math.h>
 #include <ctype.h>
 #include "core/assert_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/quality.h"
 #include "core/mathsupport.h"
 
