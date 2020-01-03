@@ -24,7 +24,7 @@
 #include "core/seq_iterator_fastq_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "tools/gt_readreads.h"
 
 #define SEQUENCE_CHAR_SEPARATOR '|'

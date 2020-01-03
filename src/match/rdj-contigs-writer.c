@@ -16,7 +16,7 @@
 */
 
 #include "core/arraydef.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/log_api.h"
 #include "core/ma.h"
 #include "core/str.h"

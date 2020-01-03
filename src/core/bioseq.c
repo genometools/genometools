@@ -24,7 +24,7 @@
 #include "core/dynalloc.h"
 #include "core/encseq.h"
 #include "core/fa_api.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/fasta_reader_fsm.h"
 #include "core/fasta_reader_rec.h"
 #include "core/fasta_reader_seqit.h"

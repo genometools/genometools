@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/codon_iterator_simple_api.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/symbol_api.h"
 #include "core/trans_table_api.h"
 #include "core/translator.h"

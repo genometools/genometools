@@ -24,7 +24,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/compat_api.h"
 #include "core/cstr_api.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/minmax.h"

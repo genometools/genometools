@@ -25,7 +25,7 @@
 #include "core/cstr.h"
 #include "core/cstr_array.h"
 #include "core/encseq.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/fileutils.h"
 #include "core/hashmap.h"
 #include "core/log.h"

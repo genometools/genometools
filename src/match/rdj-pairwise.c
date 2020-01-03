@@ -27,7 +27,7 @@
 #include "match/rdj-pairwise.h"
 /* unit test: */
 #include "match/rdj-ensure-output.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 
 struct Read {
   char* seq;

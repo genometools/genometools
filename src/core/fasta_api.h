@@ -57,4 +57,49 @@ void gt_fasta_show_entry_nt_str(const char *description,
                                 GtUword sequence_length,
                                 GtUword width,
                                 GtStr *outstr);
+
+/* Print a fasta entry with optional <description> and <suffix> plus mandatory
+   <sequence> to <outfp>. If <width> is != 0 the sequence is formatted
+   accordingly. */
+void gt_fasta_show_entry_with_suffix(const char *description,
+                                     const char *sequence,
+                                     GtUword sequence_length,
+                                     const char *suffix, GtUword width,
+                                     GtFile *outfp);
+
+/* Print a fasta entry with optional <description> and <suffix> plus mandatory
+   <sequence> to <outfp>. If <width> is != 0 the sequence is formatted
+   accordingly.
+   Will print at most <sequence_length> characters from <sequence> and at most
+   <description_length> characters from <description> if present. */
+void gt_fasta_show_entry_nt_with_suffix(const char *description,
+                                        GtUword description_length,
+                                        const char *sequence,
+                                        GtUword sequence_length,
+                                        const char *suffix,
+                                        GtUword width,
+                                        GtFile *outfp);
+
+/* Print a fasta entry with optional <description> and <suffix> plus mandatory
+   <sequence> to <outstr>. If <width> is != 0 the sequence is formatted
+   accordingly. */
+void gt_fasta_show_entry_with_suffix_str(const char *description,
+                                         const char *sequence,
+                                         GtUword sequence_length,
+                                         const char *suffix, GtUword width,
+                                         GtStr *outstr);
+
+/* Print a fasta entry with optional <description> and <suffix> plus mandatory
+   <sequence> to <outstr>. If <width> is != 0 the sequence is formatted
+   accordingly.
+   Will print at most <sequence_length> characters from <sequence> and at most
+   <description_length> characters from <description> if present. */
+void gt_fasta_show_entry_nt_with_suffix_str(const char *description,
+                                            GtUword description_length,
+                                            const char *sequence,
+                                            GtUword sequence_length,
+                                            const char *suffix,
+                                            GtUword width,
+                                            GtStr *outstr);
+
 #endif

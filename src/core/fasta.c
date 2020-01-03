@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/fasta_separator.h"
 #include "core/xansi_api.h"
 

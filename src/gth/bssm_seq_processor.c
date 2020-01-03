@@ -18,7 +18,7 @@
 #include "core/bittab_api.h"
 #include "core/compat_api.h"
 #include "core/cstr_api.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/file_api.h"
 #include "core/fileutils_api.h"
 #include "core/output_file.h"

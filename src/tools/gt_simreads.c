@@ -18,7 +18,7 @@
 #include "core/str.h"
 #include "core/disc_distri_api.h"
 #include "core/encseq.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/fa_api.h"
 #include "core/file_api.h"
 #include "core/fileutils.h"

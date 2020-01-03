@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/ma_api.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
