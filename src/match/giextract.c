@@ -21,13 +21,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/fa_api.h"
 #include "core/assert_api.h"
 #include "core/divmodmul_api.h"
 #include "core/error_api.h"
 #include "core/fasta_api.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/format64.h"
 #include "core/ma_api.h"
 #include "core/progressbar.h"

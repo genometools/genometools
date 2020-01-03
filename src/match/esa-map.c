@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "core/fa_api.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/array.h"
 #include "core/endianess_api.h"
 #include "core/error_api.h"

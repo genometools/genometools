@@ -24,7 +24,7 @@
 #include "core/compact_ulong_store.h"
 #include "core/encseq.h"
 #include "core/filelengthvalues.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/intbits.h"
 #include "core/log.h"
 #include "core/ma.h"

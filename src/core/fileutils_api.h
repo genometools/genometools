@@ -91,4 +91,11 @@ off_t       gt_file_size(const char *file);
   concatenation of <path> and <suffix>. <file> must exist. */
 off_t       gt_file_size_with_suffix(const char *path, const char *suffix);
 
+/* Returns true if the file with the given <path> exists and is a directory,
+   false otherwise. */
+bool        gt_file_exists_and_is_dir(const char *path);
+
+/* Compare two files bytewise, fails hard with exit(1) if files differ. */
+void        gt_xfile_cmp(const char *file1, const char *file2);
+
 #endif

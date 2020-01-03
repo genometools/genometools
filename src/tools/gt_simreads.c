@@ -21,7 +21,7 @@
 #include "core/fasta_api.h"
 #include "core/fa_api.h"
 #include "core/file_api.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/logger.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"

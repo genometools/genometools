@@ -23,7 +23,7 @@
 #include "core/basename_api.h"
 #include "core/encseq.h"
 #include "core/fa_api.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/log_api.h"

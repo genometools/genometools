@@ -22,7 +22,7 @@
 #include "core/disc_distri_api.h"
 #include "core/ensure_api.h"
 #include "core/fasta_api.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/format64.h"
 #include "core/hashmap-generic.h"
 #include "core/log.h"

@@ -40,7 +40,7 @@
 #include "core/spacecalc.h"
 #include "core/divmodmul_api.h"
 #include "core/format64.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread_api.h"
 #endif
