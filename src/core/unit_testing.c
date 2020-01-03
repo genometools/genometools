@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/unit_testing.h"
+#include "core/unit_testing_api.h"
 #include "core/xansi_api.h"
 
 int gt_unit_test_run(void *key, void *value, void *data, GtError *err)

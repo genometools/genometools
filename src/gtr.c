@@ -44,7 +44,7 @@
 #include "core/toolbox.h"
 #include "core/tool_iterator.h"
 #include "core/types_api.h"
-#include "core/unit_testing.h"
+#include "core/unit_testing_api.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"

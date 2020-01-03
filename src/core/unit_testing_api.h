@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef UNIT_TESTING_H
-#define UNIT_TESTING_H
+#ifndef UNIT_TESTING_API_H
+#define UNIT_TESTING_API_H
 
 #include "core/error_api.h"
 
