@@ -19,7 +19,7 @@
 #define CANVAS_MEMBERS_H
 
 #include "core/bittab.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/style.h"

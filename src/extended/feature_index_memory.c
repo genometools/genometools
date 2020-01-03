@@ -27,7 +27,7 @@
 #include "core/interval_tree.h"
 #include "core/ma_api.h"
 #include "core/minmax_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_index_memory.h"

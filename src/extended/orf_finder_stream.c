@@ -21,7 +21,7 @@
 #include "core/log.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "extended/node_stream_api.h"

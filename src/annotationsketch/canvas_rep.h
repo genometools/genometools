@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "core/bittab.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/custom_track.h"
 #include "annotationsketch/graphics.h"

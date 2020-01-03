@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "annotationsketch/custom_track.h"
 #include "core/error_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/str.h"
 
 typedef int           (*GtCustomTrackRenderFunc)(GtCustomTrack*, GtGraphics*,

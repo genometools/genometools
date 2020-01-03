@@ -19,7 +19,7 @@
 #define RANGE_LUA_H
 
 #include "lua.h"
-#include "core/range.h"
+#include "core/range_api.h"
 
 /* exports the Range class to Lua:
 

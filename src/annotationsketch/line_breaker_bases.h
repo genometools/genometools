@@ -18,7 +18,7 @@
 #ifndef LINE_BREAKER_BASES_H
 #define LINE_BREAKER_BASES_H
 
-#include "core/range.h"
+#include "core/range_api.h"
 #include "annotationsketch/line_breaker.h"
 
 /* Implements the GtLineBreaker interface; breaks GtLines if base ranges

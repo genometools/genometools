@@ -39,7 +39,7 @@
 #include "core/mathsupport.h"
 #include "core/output_file_api.h"
 #include "core/parseutils_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/showtime.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

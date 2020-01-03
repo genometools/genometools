@@ -18,7 +18,7 @@
 #ifndef LINE_BREAKER_CAPTIONS_H
 #define LINE_BREAKER_CAPTIONS_H
 
-#include "core/range.h"
+#include "core/range_api.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/layout.h"
 #include "annotationsketch/line_breaker.h"

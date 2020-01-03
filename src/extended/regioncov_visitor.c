@@ -21,7 +21,7 @@
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
 #include "core/minmax_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/regioncov_visitor.h"

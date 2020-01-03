@@ -23,7 +23,7 @@
 #include "core/interval_tree.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/undef_api.h"
 #include "extended/gff3_defines.h"
 

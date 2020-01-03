@@ -21,7 +21,7 @@
 #define ALIGNMENT_H
 
 #include <stdio.h>
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/types_api.h"
 #include "core/error_api.h"
 #include "core/score_matrix.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/ma_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "extended/transcript_used_exons.h"
 
 struct GtTranscriptUsedExons {

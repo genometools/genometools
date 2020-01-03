@@ -30,7 +30,7 @@
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/md5_tab.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/readmode.h"
 #include "core/str.h"
 #include "core/str_array.h"

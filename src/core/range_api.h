@@ -20,6 +20,9 @@
 
 #include <stdbool.h>
 #include "core/array_api.h"
+#include "core/error_api.h"
+#include "core/file_api.h"
+#include "core/range_api.h"
 
 /* The <GtRange> class is used to represent genomic ranges in __GenomeTools__.
    Thereby, the <start> must ___always___ be smaller or equal than the <end>. */
@@ -59,5 +62,48 @@ GtRange gt_range_join(const GtRange *range_a, const GtRange *range_b);
 GtRange gt_range_offset(const GtRange *range, GtWord offset);
 /* Returns the length of the given <range>. */
 GtUword gt_range_length(const GtRange *range);
+/* Reorder <range>. */
+GtRange gt_range_reorder(GtRange range);
+/* Sort an array <ranges> of ranges. */
+void    gt_ranges_sort(GtArray *ranges);
+/* Sort an array <ranges> of ranges by length. */
+void    gt_ranges_sort_by_length_stable(GtArray *ranges);
+/* RetuUE if the ranges in <ranges> are sorted. */
+bool    gt_ranges_are_sorted(const GtArray *ranges);
+/* Returns TRUE if the ranges in <ranges> do not overlap. */
+bool    gt_ranges_do_not_overlap(const GtArray *ranges);
+/* Retuns TRUE if the ranges in <ranges> are sorted and do not overlap. */
+bool    gt_ranges_are_sorted_and_do_not_overlap(const GtArray *ranges);
+/* Returns TRUE if the ranges in <ranges_a> and <ranges_b> are equal. */
+bool    gt_ranges_are_equal(const GtArray *ranges_a,
+                                  const GtArray *ranges_b);
+/* Takes a sorted array of ranges and runs the equivalent of uniq on it. */
+void    gt_ranges_uniq(GtArray*, const GtArray*);
+/* Similar to the previous function, just in place. */
+void    gt_ranges_uniq_in_place(GtArray*);
+/* Similar to gt_ranges_uniq(), additionally returns an array which contains the
+   counts of the occurrences of each elem in the original array. */
+GtArray* gt_ranges_uniq_count(GtArray*, const GtArray*);
+/* Similar to the previous function, just in place.S */
+GtArray* gt_ranges_uniq_in_place_count(GtArray*);
+/* Returns TRUE if the ranges in <ranges> are consecutive. */
+bool    gt_ranges_are_consecutive(const GtArray *ranges);
+/* Returns the sum of the length of the ranges in <ranges>. */
+GtUword gt_ranges_total_length(const GtArray *ranges);
+/* Returns the length of the boundaries of the ranges in <ranges>. */
+GtUword gt_ranges_spanned_length(const GtArray *ranges);
+/* Copies ranges <inranges> to the 'opposite' strand, the result being in
+   <outranges>. */
+void    gt_ranges_copy_to_opposite_strand(GtArray *outranges,
+                                          const GtArray *inranges,
+                                          GtUword gen_total_length,
+                                          GtUword gen_offset);
+/* Returns TRUE if all ranges in <ranges> are within the <region>. */
+bool    gt_ranges_borders_are_in_region(GtArray *ranges,
+                                        const GtRange *region);
+/* Prints a representation of the ranges <ranges> to <outfp>. */
+void    gt_ranges_show(GtArray *ranges, GtFile *outfp);
+
+int     gt_range_unit_test(GtError*);
 
 #endif

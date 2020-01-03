@@ -21,7 +21,7 @@
 #include "core/cstr_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/unused_api.h"
 #include "core/dlist.h"
 #include "core/fptr_api.h"

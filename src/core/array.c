@@ -24,7 +24,7 @@
 #include "core/msort.h"
 #include "core/mathsupport.h"
 #include "core/qsort_r_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/unused_api.h"
 
 #define ARRAY_NUM_OF_TESTS  100

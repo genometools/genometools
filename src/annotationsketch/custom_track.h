@@ -23,7 +23,7 @@
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/style.h"
 #include "core/error_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/str.h"
 
 typedef struct GtCustomTrackClass GtCustomTrackClass;

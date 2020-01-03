@@ -26,7 +26,7 @@
 #include "core/hashmap-generic.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/strand_api.h"
 #include "core/thread_api.h"
 #include "core/undef_api.h"

@@ -20,7 +20,7 @@
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/strand_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_type.h"
