@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FA_H
-#define FA_H
+#ifndef FA_API_H
+#define FA_API_H
 
 #ifndef S_SPLINT_S
 #include <bzlib.h>

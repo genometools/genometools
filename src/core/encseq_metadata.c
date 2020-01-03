@@ -20,7 +20,7 @@
 #include "core/encseq_metadata.h"
 #include "core/encseq.h"
 #include "core/encseq_rep.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/intbits.h"
 #include "core/ma.h"
 

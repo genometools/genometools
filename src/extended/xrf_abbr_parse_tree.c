@@ -17,7 +17,7 @@
 #include <string.h>
 #include "core/array.h"
 #include "core/cstr_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
 #include "core/io.h"

@@ -20,7 +20,7 @@
 
 #include <string.h>
 #include "core/ensure_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/xansi_api.h"
 
 /* defines macros to make easier to test output to a temporary file */

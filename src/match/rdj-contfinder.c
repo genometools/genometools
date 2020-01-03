@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/error_api.h"
 #include "core/compact_ulong_store.h"
 #include "core/encseq.h"

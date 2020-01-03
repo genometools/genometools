@@ -28,7 +28,7 @@
 #include "core/basename_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fasta_api.h"
 #include "core/fasta_reader.h"
 #include "core/fasta_reader_rec.h"

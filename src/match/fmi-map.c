@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/error_api.h"
 #include "core/fileutils.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/array.h"
 #include "core/str.h"
 #include "core/alphabet.h"

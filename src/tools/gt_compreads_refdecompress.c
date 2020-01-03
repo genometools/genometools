@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/alphabet_api.h"
 #include "core/basename_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"

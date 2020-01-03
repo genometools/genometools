@@ -27,7 +27,7 @@
 #include "core/combinatorics.h"
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/init_api.h"
 #include "core/log.h"
 #include "core/ma.h"

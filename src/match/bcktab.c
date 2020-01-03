@@ -24,7 +24,7 @@
 #include "core/chardef.h"
 #include "core/compat_api.h"
 #include "core/error_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/format64.h"
 #include "core/mapspec.h"
 #include "core/mathsupport.h"

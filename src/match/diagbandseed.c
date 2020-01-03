@@ -28,7 +28,7 @@
 #include "core/complement.h"
 #include "core/cstr_api.h"
 #include "core/encseq.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"

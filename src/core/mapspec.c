@@ -17,7 +17,7 @@
 */
 
 #include "core/error_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/filelengthvalues.h"
 #include "core/format64.h"
 #include "core/intbits.h"

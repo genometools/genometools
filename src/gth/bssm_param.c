@@ -19,7 +19,7 @@
 #include "lauxlib.h"
 #include "core/bioseq.h"
 #include "core/compat_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
 #include "core/xansi_api.h"

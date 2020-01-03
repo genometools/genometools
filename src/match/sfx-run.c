@@ -25,7 +25,7 @@
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/logger.h"
 #include "core/readmode.h"
 #include "core/showtime.h"

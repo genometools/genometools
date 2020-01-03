@@ -41,7 +41,7 @@
 #include "core/encseq_rep.h"
 #include "core/ensure_api.h"
 #include "core/error_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/filelengthvalues.h"
 #include "core/fileutils_api.h"
 #include "core/format64.h"

@@ -28,7 +28,7 @@
 #include "core/ebzlib.h"
 #include "core/ezlib.h"
 #include "core/hashmap.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/ma.h"
 #include "core/spacepeak.h"
 #include "core/thread_api.h"

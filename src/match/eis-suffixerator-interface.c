@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "match/dataalign.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/filelengthvalues.h"
 #include "core/logger.h"
 #include "core/minmax.h"

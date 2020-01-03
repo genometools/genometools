@@ -30,7 +30,7 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/compat_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"

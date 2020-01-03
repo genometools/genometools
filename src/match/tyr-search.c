@@ -16,7 +16,7 @@
 */
 
 #include "core/alphabet.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/unused_api.h"
 #include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/chardef.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/arraydef.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fasta_separator.h"
 #include "core/log_api.h"
 #include "core/xansi_api.h"

@@ -19,7 +19,7 @@
 #include "core/arraydef.h"
 #include "core/basename_api.h"
 #include "core/encseq_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/hashmap_api.h"
 #include "core/logger.h"
 #include "core/logger_api.h"

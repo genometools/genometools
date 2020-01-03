@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/ma.h"
 #include "match/rdj-twobitenc-editor.h"
 

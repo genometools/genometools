@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/ma.h"
 #include "core/xansi_api.h"
 #include "core/xbzlib.h"

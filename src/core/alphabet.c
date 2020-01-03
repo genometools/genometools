@@ -26,7 +26,7 @@
 #include "core/cstr_api.h"
 #include "core/ensure_api.h"
 #include "core/fileutils_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/gtdatapath.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"

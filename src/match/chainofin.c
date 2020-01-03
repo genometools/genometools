@@ -17,7 +17,7 @@
 
 #include <stdbool.h>
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/error_api.h"
 #include "core/types_api.h"
 #include "chain2dim.h"

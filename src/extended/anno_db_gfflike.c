@@ -31,7 +31,7 @@
 #include "core/thread_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"

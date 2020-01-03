@@ -16,7 +16,7 @@
 */
 
 #include "core/xansi_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/assert_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ma.h"

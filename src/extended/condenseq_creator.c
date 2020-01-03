@@ -21,7 +21,7 @@
 #include "core/arraydef.h"
 #include "core/disc_distri_api.h"
 #include "core/divmodmul_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma.h"

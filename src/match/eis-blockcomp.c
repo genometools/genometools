@@ -34,7 +34,7 @@
 #include "core/bitpackstring.h"
 #include "match/dataalign.h"
 #include "core/error_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/log.h"
 #include "core/minmax.h"
 #include "core/str.h"

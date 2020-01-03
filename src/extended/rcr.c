@@ -28,7 +28,7 @@
 #include "core/chardef.h"
 #include "core/compat_api.h"
 #include "core/disc_distri_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/log_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"

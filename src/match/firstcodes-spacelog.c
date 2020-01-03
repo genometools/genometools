@@ -17,7 +17,7 @@
 
 #include <string.h>
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/ma.h"
 #include "core/log_api.h"
 #include "core/spacecalc.h"

@@ -18,7 +18,7 @@
 #include "core/defined-types.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
 #include "sfx-apfxlen.h"

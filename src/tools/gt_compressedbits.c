@@ -18,7 +18,7 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
 #include "core/ma.h"

@@ -17,7 +17,7 @@
 
 #include "core/bittab.h"
 #include "core/ensure_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/undef_api.h"

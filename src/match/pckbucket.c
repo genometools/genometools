@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/divmodmul_api.h"
 #include "core/xansi_api.h"
 #include "core/fileutils_api.h"

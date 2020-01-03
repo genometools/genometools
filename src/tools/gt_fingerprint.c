@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/bioseq_col.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/option_api.h"

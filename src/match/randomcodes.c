@@ -17,7 +17,7 @@
 */
 
 #include <math.h>
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/arraydef.h"
 #include "core/codetype.h"
 #include "core/encseq.h"

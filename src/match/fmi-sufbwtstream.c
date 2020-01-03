@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/divmodmul_api.h"

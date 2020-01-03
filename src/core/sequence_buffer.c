@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/ensure_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/sequence_buffer_rep.h"

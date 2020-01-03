@@ -19,7 +19,7 @@
 #include "core/disc_distri_api.h"
 #include "core/encseq.h"
 #include "core/fasta.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/file_api.h"
 #include "core/fileutils.h"
 #include "core/logger.h"

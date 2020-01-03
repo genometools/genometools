@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/array.h"
 #include "core/cstr_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/io.h"
 #include "core/ma.h"
 #include "extended/obo_parse_tree.h"

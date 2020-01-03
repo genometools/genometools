@@ -28,7 +28,7 @@
 #include "core/cstr_api.h"
 #include "core/disc_distri_api.h"
 #include "core/ensure_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/hashmap-generic.h"
 #include "core/log_api.h"
