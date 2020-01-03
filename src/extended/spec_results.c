@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "core/array.h"
 #include "core/cstr_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/hashmap_api.h"
 #include "core/log_api.h"
 #include "core/ma.h"

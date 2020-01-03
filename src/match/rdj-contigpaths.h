@@ -18,7 +18,7 @@
 #ifndef RDJ_CONTIGPATHS_H
 #define RDJ_CONTIGPATHS_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/encseq.h"
 #include "core/logger.h"
 #include "core/error_api.h"

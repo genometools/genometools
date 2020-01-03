@@ -21,7 +21,7 @@
 #include <limits.h>
 #include "core/str.h"
 #include "core/assert_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/log_api.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"

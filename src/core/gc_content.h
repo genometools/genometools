@@ -19,7 +19,7 @@
 #define GC_CONTENT_H
 
 #include "core/alphabet.h"
-#include "core/file.h"
+#include "core/file_api.h"
 
 /* Show the GC-content for sequence <seq> with length <len> on <outfp>.
    <alpha> has to be compatible with a DNA alphabet. */

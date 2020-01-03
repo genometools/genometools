@@ -17,7 +17,7 @@
 #ifndef BSSM_SEQ_PROCESSOR_H
 #define BSSM_SEQ_PROCESSOR_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 #include "extended/region_mapping_api.h"
 
 typedef struct GthBSSMSeqProcessor GthBSSMSeqProcessor;

@@ -19,7 +19,7 @@
 #define GTHCHAIN_H
 
 #include "core/array_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/range_api.h"
 #include "extended/globalchaining.h"
 #include "gth/jump_table.h"

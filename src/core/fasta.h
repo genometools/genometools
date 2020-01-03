@@ -19,7 +19,7 @@
 #define FASTA_H
 
 #include "core/fasta_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/str_api.h"
 
 /* Print a fasta entry with optional <description> and <suffix> plus mandatory

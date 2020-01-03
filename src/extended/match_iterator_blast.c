@@ -21,7 +21,7 @@
 #include "core/array_api.h"
 #include "core/bittab_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/str_api.h"

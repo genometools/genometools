@@ -18,7 +18,7 @@
 #ifndef FASTQ_H
 #define FASTQ_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/types_api.h"
 
 #define GT_FASTQ_SEPARATOR_SEQ '@'

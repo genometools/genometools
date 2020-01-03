@@ -19,7 +19,7 @@
 #define GTHXML_H
 
 #include <stdbool.h>
-#include "core/file.h"
+#include "core/file_api.h"
 
 /* version for ``regular'' results */
 #define GTH_XML_VERSION                    "1.1"

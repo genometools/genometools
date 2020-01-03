@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include "core/arraydef.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/score_matrix.h"
 #include "gth/editoperation.h"
 

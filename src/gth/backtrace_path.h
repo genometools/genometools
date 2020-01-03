@@ -18,7 +18,7 @@
 #ifndef BACKTRACE_PATH_H
 #define BACKTRACE_PATH_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 #include "gth/cutoffmode.h"
 #include "gth/gthalignment.h"
 #include "gth/gthalphatype.h"

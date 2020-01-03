@@ -19,7 +19,7 @@
 #define RDJ_CONTIGS_WRITER_H
 
 #include "core/encseq.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/logger.h"
 
 typedef struct GtContigsWriter GtContigsWriter;

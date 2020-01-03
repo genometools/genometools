@@ -19,7 +19,7 @@
 #define EVALUATOR_H
 
 #include "core/error_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 
 typedef struct GtEvaluator GtEvaluator;
 

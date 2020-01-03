@@ -16,7 +16,7 @@
 */
 
 #include "core/fileutils_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/hashmap-generic.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"

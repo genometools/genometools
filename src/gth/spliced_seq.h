@@ -19,7 +19,7 @@
 #define SPLICED_SEQ_H
 
 #include "core/array_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 
 typedef struct {
   GtArray *ranges;                /* the ranges of the genomic sequence which

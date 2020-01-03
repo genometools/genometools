@@ -25,7 +25,7 @@
 #include <string.h>
 #include <float.h>
 #include "core/error_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/types_api.h"
 
 typedef struct GthBSSMParam GthBSSMParam;
