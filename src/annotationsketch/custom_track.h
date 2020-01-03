@@ -22,7 +22,7 @@
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/style.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/range.h"
 #include "core/str.h"
 

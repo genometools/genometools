@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "match/sfx-run.h"
 #include "tools/gt_suffixerator.h"
 

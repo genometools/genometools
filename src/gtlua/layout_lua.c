@@ -21,7 +21,7 @@
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/layout.h"
 #include "annotationsketch/luastyle.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/diagram_lua.h"

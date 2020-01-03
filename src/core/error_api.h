@@ -66,6 +66,10 @@ bool        gt_error_is_set(const GtError *err);
 void        gt_error_unset(GtError *err);
 /* Return the error string stored in <err> (the error must be set). */
 const char* gt_error_get(const GtError *err);
+/* Sets the program name assigned to <err> to <progname>. */
+void        gt_error_set_progname(GtError *err, const char *progname);
+/* Returns the program name assigned to <err>. */
+const char* gt_error_get_progname(const GtError *err);
 /* Delete the error object <err>. */
 void        gt_error_delete(GtError *err);
 

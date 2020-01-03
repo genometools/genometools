@@ -18,7 +18,7 @@
 #ifndef GT_GTHSPLIT_H
 #define GT_GTHSPLIT_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "gth/plugins.h"
 
 /* the gthsplit tool */

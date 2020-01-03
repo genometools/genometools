@@ -19,7 +19,7 @@
 #define PGL_H
 
 #include "core/array.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/node_visitor_api.h"
 #include "gth/sa.h"
 

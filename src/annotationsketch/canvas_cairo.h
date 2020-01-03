@@ -23,7 +23,7 @@
 #include "annotationsketch/element.h"
 #include "annotationsketch/layout.h"
 #include "annotationsketch/track.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 int  gt_canvas_cairo_visit_layout_pre(GtCanvas*, GtLayout*, GtError*);
 int  gt_canvas_cairo_visit_layout_post(GtCanvas*, GtLayout*, GtError*);

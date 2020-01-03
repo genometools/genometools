@@ -17,7 +17,7 @@
 
 #include "core/cstr_array.h"
 #include "core/defined-types.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "core/logger.h"

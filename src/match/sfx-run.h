@@ -18,7 +18,7 @@
 #ifndef SFX_RUN_H
 #define SFX_RUN_H
 #include <stdbool.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/logger.h"
 #include "match/sfx-opt.h"
 #include "match/genomediff_opt.h"

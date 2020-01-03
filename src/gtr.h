@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "core/init_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/option_api.h"
 
 /* The GenomeTools runtime (gtr) */

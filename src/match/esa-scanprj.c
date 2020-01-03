@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str.h"
 #include "core/ma.h"
 #include "core/array.h"

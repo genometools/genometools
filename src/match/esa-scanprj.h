@@ -18,7 +18,7 @@
 #ifndef ESA_SCANPRJ_H
 #define ESA_SCANPRJ_H
 #include "core/array.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str.h"
 #include "core/logger.h"
 

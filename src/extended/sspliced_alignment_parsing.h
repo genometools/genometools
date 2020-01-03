@@ -18,7 +18,7 @@
 #ifndef SSPLICED_ALIGNMENT_PARSING_H
 #define SSPLICED_ALIGNMENT_PARSING_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 int gt_sspliced_alignment_parse(GtArray *spliced_alignments,
                                 const char *filename,

@@ -20,7 +20,7 @@
 #define HCR_H
 
 #include "core/alphabet_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str_api.h"
 #include "core/timer_api.h"
 #include "extended/huffcode.h"

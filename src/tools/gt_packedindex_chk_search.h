@@ -17,7 +17,7 @@
 #ifndef GT_PACKEDINDEX_CHK_SEARCH_H
 #define GT_PACKEDINDEX_CHK_SEARCH_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 extern int
 gt_packedindex_chk_search(int argc, const char *argv[], GtError *error);

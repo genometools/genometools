@@ -19,7 +19,7 @@
 #define SCORE_MATRIX_H
 
 #include "core/alphabet.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 typedef struct GtScoreMatrix GtScoreMatrix;
 

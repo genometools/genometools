@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <inttypes.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/minmax.h"
 #include "core/codetype.h"
 #include "core/logger.h"

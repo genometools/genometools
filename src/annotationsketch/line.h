@@ -26,7 +26,7 @@ typedef struct GtLine GtLine;
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/style.h"
 #include "core/array.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 GtLine*   gt_line_new(void);
 void      gt_line_insert_block(GtLine*, GtBlock*); /* takes ownership */

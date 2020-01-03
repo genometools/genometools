@@ -19,7 +19,7 @@
 #ifndef CHAIN_H
 #define CHAIN_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 typedef struct GtChain GtChain;
 

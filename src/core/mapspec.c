@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "core/format64.h"

@@ -19,7 +19,7 @@
 #define LUASERIALIZE_H
 
 #include "lua.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str.h"
 
 int gt_lua_table_to_str(lua_State *L, GtStr *out, int index, GtError*);

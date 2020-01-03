@@ -20,7 +20,7 @@
 
 #include "core/file.h"
 #include "core/encseq.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* The <GtAsqgWriter> class allows one to write string graph information in
    the ASQG format of SGA (Simpsons and Durbin, 2012). */

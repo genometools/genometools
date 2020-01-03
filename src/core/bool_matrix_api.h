@@ -19,7 +19,7 @@
 #define BOOL_MATRIX_API_H
 
 #include <stdbool.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/types_api.h"
 
 /* a two-dimensional matrix containing boolean values */

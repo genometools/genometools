@@ -18,7 +18,7 @@
 #ifndef GT_GTHCONSENSUS_H
 #define GT_GTHCONSENSUS_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "gth/plugins.h"
 
 /* the gthconsensus tool */

@@ -18,7 +18,7 @@
 #ifndef TOOLDRIVER_H
 #define TOOLDRIVER_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/tool_api.h"
 
 /* The prototype of a tool function. */

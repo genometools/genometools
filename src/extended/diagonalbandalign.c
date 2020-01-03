@@ -21,7 +21,7 @@
 #include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/minmax.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/types_api.h"
 #include "core/divmodmul_api.h"
 #include "core/unused_api.h"

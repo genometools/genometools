@@ -19,7 +19,7 @@
 #define ESA_SEQREAD_H
 #include <stdbool.h>
 #include "core/str.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/encseq.h"
 #include "sarr-def.h"
 #include "lcpoverflow.h"

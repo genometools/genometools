@@ -17,7 +17,7 @@
 #ifndef GT_PACKEDINDEX_TRSUFTAB_H
 #define GT_PACKEDINDEX_TRSUFTAB_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 extern int
 gt_packedindex_trsuftab(int argc, const char *argv[], GtError *error);

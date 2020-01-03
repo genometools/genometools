@@ -22,7 +22,7 @@
 #include "annotationsketch/block_api.h"
 #include "annotationsketch/canvas.h"
 #include "annotationsketch/style.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 void        gt_block_insert_element(GtBlock*, GtFeatureNode *node);
 void        gt_block_set_range(GtBlock*, GtRange r);

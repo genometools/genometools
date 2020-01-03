@@ -18,7 +18,7 @@
 #ifndef GT_GTHFILESTAT_H
 #define GT_GTHFILESTAT_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "gth/plugins.h"
 
 /* the gthfilestat tool */

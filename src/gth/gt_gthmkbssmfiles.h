@@ -18,7 +18,7 @@
 #ifndef GT_GTHMKBSSMFILES_H
 #define GT_GTHMKBSSMFILES_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* the gthmkbssmfiles tool */
 int gt_gthmkbssmfiles(int argc, const char **argv, GtError*);

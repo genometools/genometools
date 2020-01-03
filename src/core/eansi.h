@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include "core/error.h"
+#include "core/error_api.h"
 
 /*
   This module contains wrappers for the functions from the standard library we

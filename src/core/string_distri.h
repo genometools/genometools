@@ -18,7 +18,7 @@
 #ifndef STRING_DISTRI_H
 #define STRING_DISTRI_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/file.h"
 
 /* A discrete distribution */

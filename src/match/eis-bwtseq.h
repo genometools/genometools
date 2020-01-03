@@ -24,7 +24,7 @@
  * Representations of Sequences and Full-Text Indexes, 2006)
  */
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str.h"
 #include "core/logger.h"
 #include "match/eis-encidxseq.h"

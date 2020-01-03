@@ -18,7 +18,7 @@
 #ifndef SPLICE_SITE_MODEL_H
 #define SPLICE_SITE_MODEL_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* generic splice site model */
 typedef struct GthSpliceSiteModel GthSpliceSiteModel;

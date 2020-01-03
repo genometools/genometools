@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/logger.h"
 #include "core/option_api.h"
 #include "core/str.h"

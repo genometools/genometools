@@ -17,7 +17,7 @@
 
 #include <stdarg.h>
 #include "core/cstr_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/ma.h"
 #include "core/xansi_api.h"
 

@@ -23,7 +23,7 @@
 
 #include "core/basename_api.h"
 #include "core/encseq_options.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/grep_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"

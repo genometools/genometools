@@ -20,7 +20,7 @@
 #define ENSURE_API_H
 
 #include <stdbool.h>
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* the ensure macro used for unit tests */
 #define gt_ensure(expr)                                                  \

@@ -26,7 +26,7 @@
 #include "core/array2dim_api.h"
 #include "core/bioseq.h"
 #include "core/dlist_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
 #include "core/option_api.h"

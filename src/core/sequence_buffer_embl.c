@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/minmax.h"
 #include "core/sequence_buffer_embl.h"
 #include "core/sequence_buffer_rep.h"

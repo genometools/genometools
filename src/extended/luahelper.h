@@ -19,7 +19,7 @@
 #define LUAHELPER_H
 
 #include "lua.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str_array.h"
 
 int   gt_lua_set_modules_path(lua_State*, GtError*);

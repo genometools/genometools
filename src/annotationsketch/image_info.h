@@ -20,7 +20,7 @@
 
 #include "annotationsketch/image_info_api.h"
 #include "annotationsketch/rec_map.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 GtImageInfo* gt_image_info_ref(GtImageInfo *ii);
 void gt_image_info_set_height(GtImageInfo*, unsigned int);

@@ -33,7 +33,7 @@
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "match/dataalign.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fa.h"
 #include "core/log.h"
 #include "core/minmax.h"

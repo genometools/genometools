@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "lauxlib.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/ma.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"

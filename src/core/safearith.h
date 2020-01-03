@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/safearith_imp.h"
 #include "core/types_api.h"
 

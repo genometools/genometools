@@ -21,7 +21,7 @@
 #include <string.h>
 #include "gt_config.h"
 #include "core/cstr_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/hashmap_api.h"

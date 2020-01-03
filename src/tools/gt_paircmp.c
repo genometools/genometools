@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fasta_reader.h"
 #include "core/fasta_reader_rec.h"
 #include "core/ma_api.h"

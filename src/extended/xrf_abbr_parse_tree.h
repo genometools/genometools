@@ -17,7 +17,7 @@
 #ifndef XRF_ABBR_PARSE_TREE_H
 #define XRF_ABBR_PARSE_TREE_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/xrf_abbr_entry.h"
 
 typedef struct GtXRFAbbrParseTree GtXRFAbbrParseTree;

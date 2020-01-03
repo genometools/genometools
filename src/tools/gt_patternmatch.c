@@ -17,7 +17,7 @@
 
 #include <inttypes.h>
 #include "core/encseq.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/option_api.h"
 #include "core/str.h"
 #include "core/unused_api.h"

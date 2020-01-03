@@ -15,7 +15,7 @@
 */
 
 #include "core/cstr_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fileutils.h"
 #include "core/gtdatapath.h"
 #include "core/ma_api.h"

@@ -19,7 +19,7 @@
 #define SA_H
 
 #include "core/array.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/file.h"
 #include "core/str.h"
 #include "core/strand.h"

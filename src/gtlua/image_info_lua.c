@@ -22,7 +22,7 @@
 #include "lauxlib.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/rec_map.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/image_info_lua.h"

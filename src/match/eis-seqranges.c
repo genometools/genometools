@@ -17,7 +17,7 @@
 #include <string.h>
 
 #include "core/bsearch.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"

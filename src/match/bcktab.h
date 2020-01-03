@@ -19,7 +19,7 @@
 #define BCKTAB_H
 
 #include <limits.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/intbits.h"
 #include "core/codetype.h"
 #include "core/logger_api.h"

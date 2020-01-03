@@ -17,7 +17,7 @@
 
 #include <unistd.h>
 #include "core/cstr_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
 #include "core/ma.h"

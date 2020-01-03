@@ -25,7 +25,7 @@
 #include "core/fileutils.h"
 #include "core/array.h"
 #include "core/endianess_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/format64.h"
 #include "core/codetype.h"

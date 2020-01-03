@@ -16,7 +16,7 @@
 #ifndef GT_PACKEDINDEX_CHK_INTEGRITY_H
 #define GT_PACKEDINDEX_CHK_INTEGRITY_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 extern int
 gt_packedindex_chk_integrity(int argc, const char *argv[], GtError *err);

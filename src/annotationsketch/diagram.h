@@ -21,7 +21,7 @@
 #define DIAGRAM_H
 
 #include "annotationsketch/diagram_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/hashmap.h"
 
 GtHashmap* gt_diagram_get_blocks(GtDiagram *diagram, GtError *err);

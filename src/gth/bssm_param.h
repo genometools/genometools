@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/file.h"
 #include "core/types_api.h"
 

@@ -20,7 +20,7 @@
 
 #include <sys/types.h>
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/intbits.h"
 
 /* The <GtBitInStream> class reads variable length encoded data from a mmap()ed

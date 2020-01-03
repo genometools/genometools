@@ -24,7 +24,7 @@
  * @author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/str.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-suffixerator-interface.h"

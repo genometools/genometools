@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "core/bittab.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/bittab_lua.h"
 #include "gtlua/gtcore_lua.h"

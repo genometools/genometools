@@ -19,7 +19,7 @@
 #ifndef _WIN32
 #include <sys/mman.h>
 #endif
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/option_api.h"
 #include "core/progressbar.h"
 #include "core/unused_api.h"

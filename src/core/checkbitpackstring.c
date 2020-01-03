@@ -22,7 +22,7 @@
 
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/ensure_api.h"
 
 int

@@ -18,7 +18,7 @@
 #ifndef DLIST_H
 #define DLIST_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 #include "core/dlist_api.h"
 

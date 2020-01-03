@@ -18,7 +18,7 @@
 #ifndef BITOUTSTREAM_H
 #define BITOUTSTREAM_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/intbits.h"
 #include "core/bittab_api.h"
 

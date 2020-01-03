@@ -19,7 +19,7 @@
 #ifndef GLOBALCHAINING_H
 #define GLOBALCHAINING_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/chain.h"
 
 typedef struct {
