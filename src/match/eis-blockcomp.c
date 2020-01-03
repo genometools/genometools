@@ -37,7 +37,7 @@
 #include "core/fa_api.h"
 #include "core/log.h"
 #include "core/minmax_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "eis-blockcomp-construct.h"

@@ -19,7 +19,7 @@
 #define TYR_OCCRATIO_H
 
 #include <stdbool.h>
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/error_api.h"
 #include "core/arraydef.h"
 #include "core/logger.h"

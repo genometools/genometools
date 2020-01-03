@@ -27,7 +27,7 @@
 
 #include "core/bitpackstring.h"
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/types_api.h"
 
 #include "core/logger.h"

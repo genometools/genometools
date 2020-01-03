@@ -34,7 +34,7 @@
 #include "core/mathsupport.h"
 #include "core/minmax_api.h"
 #include "core/msort.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/thread_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

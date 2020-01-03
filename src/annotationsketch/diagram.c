@@ -31,7 +31,7 @@
 #include "core/ma_api.h"
 #include "core/msort.h"
 #include "core/log.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/thread_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

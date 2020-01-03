@@ -22,7 +22,7 @@
 #include "core/format64.h"
 #include "core/logger.h"
 #include "core/spacecalc.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/ma_api.h"

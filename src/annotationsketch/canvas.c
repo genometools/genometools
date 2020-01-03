@@ -24,7 +24,7 @@
 #include "core/mathsupport.h"
 #include "core/minmax_api.h"
 #include "core/range_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas.h"

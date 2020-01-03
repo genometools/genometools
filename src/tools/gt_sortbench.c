@@ -24,7 +24,7 @@
 #include "core/mathsupport.h"
 #include "core/qsort_r_api.h"
 #include "core/dual-pivot-qsort.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/timer_api.h"
 #include "core/radix_sort.h"
 #include "core/unused_api.h"

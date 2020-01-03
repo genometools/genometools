@@ -29,7 +29,7 @@
 #include "core/ma_api.h"
 #include "core/minmax_api.h"
 #include "core/range_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/symbol.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

@@ -19,7 +19,7 @@
 #include "match/dataalign.h"
 #include "core/error_api.h"
 #include "core/log.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/undef_api.h"

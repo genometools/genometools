@@ -18,7 +18,7 @@
 #ifndef GFF3_ESCAPING_H
 #define GFF3_ESCAPING_H
 
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* Escape <unescaped_seq> of given <length> for GFF3 format and append the
    result to <escaped_seq>. */

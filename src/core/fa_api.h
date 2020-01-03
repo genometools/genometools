@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <zlib.h>
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* the file allocator module */
 

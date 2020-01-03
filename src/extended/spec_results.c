@@ -22,7 +22,7 @@
 #include "core/hashmap_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array_api.h"
 #include "core/symbol_api.h"
 #include "core/unused_api.h"

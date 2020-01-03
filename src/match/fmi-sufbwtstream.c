@@ -23,7 +23,7 @@
 #include "core/divmodmul_api.h"
 #include "core/encseq_metadata.h"
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/xansi_api.h"
 #include "core/ma_api.h"
 

@@ -33,7 +33,7 @@
 #include "core/parseutils_api.h"
 #include "core/showtime.h"
 #include "core/splitter_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/timer_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

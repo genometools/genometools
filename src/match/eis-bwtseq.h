@@ -25,7 +25,7 @@
  */
 
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/logger.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-mrangealphabet.h"

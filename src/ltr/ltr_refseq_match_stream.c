@@ -22,7 +22,7 @@
 #include "core/fasta_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/extract_feature_sequence.h"

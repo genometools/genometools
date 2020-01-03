@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include "core/error_api.h"
+#include "core/file_api.h"
 #include "core/types_api.h"
 
 /* Objects of the <GtStr> class are strings which grow on demand. */
@@ -71,8 +72,23 @@ void    gt_str_reset(GtStr *str);
 int     gt_str_cmp(const GtStr *str1, const GtStr *str2);
 /* Return the length of <str>. If <str> is <NULL>, 0 is returned. */
 GtUword gt_str_length(const GtStr *str);
+/* Return the memory pointed to by *str. Never returns NULL, not always '\0'
+   terminated. */
+void*  gt_str_get_mem(const GtStr *str);
+/* Remove end of <s> beginning with first occurrence of <c> */
+void   gt_str_clip_suffix(GtStr *s, char c);
+/* Read the next line from file pointer <fpin> and store the result in <str>
+   (without the terminal newline). If the end of file <fpin> is reached, <EOF>
+   is returned, otherwise 0. <str> should be empty, or the next line will be
+   concatenated to its content. */
+int    gt_str_read_next_line(GtStr *str, FILE *fpin);
+/* Read the next line via a <GtFile>-object, but otherwise behave as
+   the previous function. */
+int    gt_str_read_next_line_generic(GtStr*, GtFile*);
 /* Decrease the reference count for <str> or delete it, if this was the last
    reference. */
 void    gt_str_delete(GtStr *str);
+
+int           gt_str_unit_test(GtError*);
 
 #endif

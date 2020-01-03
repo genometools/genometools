@@ -19,7 +19,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/ma_api.h"
 #include "core/array.h"
 #include "core/types_api.h"

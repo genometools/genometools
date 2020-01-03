@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "core/str.h"
+#include "core/str_api.h"
 
 #define GT_CARRIAGE_RETURN  '\r'
 #define GT_END_OF_LINE      '\n'

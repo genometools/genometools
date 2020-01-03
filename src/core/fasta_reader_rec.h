@@ -19,7 +19,7 @@
 #define FASTA_READER_REC_H
 
 #include "core/fasta_reader.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* implements the ``fasta reader'' interface with a recursive descent parser */
 typedef struct GtFastaReaderRec GtFastaReaderRec;

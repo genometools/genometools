@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/disc_distri_api.h"
 #include "core/encseq.h"
 #include "core/fasta_api.h"

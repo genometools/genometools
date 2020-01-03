@@ -21,7 +21,7 @@
 #include "core/array.h"
 #include "core/error_api.h"
 #include "core/file_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/strand.h"
 #include "gth/backtrace_path.h"
 #include "gth/bssm_param.h"

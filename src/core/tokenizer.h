@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include "core/io.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 typedef struct GtTokenizer GtTokenizer;
 

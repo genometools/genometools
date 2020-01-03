@@ -23,7 +23,7 @@
 #include "core/fa_api.h"
 #include "core/filelengthvalues.h"
 #include "core/str_array.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 #include "core/defined-types.h"
 #include "core/format64.h"

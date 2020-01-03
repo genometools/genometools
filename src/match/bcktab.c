@@ -31,7 +31,7 @@
 #include "core/minmax_api.h"
 #include "core/safecast-gen.h"
 #include "core/spacecalc.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "match/bcktab.h"

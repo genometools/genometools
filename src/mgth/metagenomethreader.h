@@ -30,7 +30,7 @@
 #include "core/hashmap-generic.h"
 #include "core/ma_api.h"
 #include "core/option_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/versionfunc.h"
 

@@ -22,7 +22,7 @@
 #include "core/fileutils_api.h"
 #include "core/fa_api.h"
 #include "core/array.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/alphabet.h"
 #include "core/logger.h"
 #include "esa-scanprj.h"

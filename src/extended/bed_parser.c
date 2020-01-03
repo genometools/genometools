@@ -21,7 +21,7 @@
 #include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "extended/bed_parser.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"

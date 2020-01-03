@@ -26,7 +26,7 @@
 #include "core/logger.h"
 #include "core/minmax_api.h"
 #include "core/seq_iterator_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"

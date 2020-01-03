@@ -25,7 +25,7 @@
 #include "core/mapspec.h"
 #include "core/pairbwtidx.h"
 #include "core/safecast-gen.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/ulongbound.h"
 #include "core/xansi_api.h"
 

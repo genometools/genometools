@@ -25,7 +25,7 @@
 #include "core/md5_seqid.h"
 #include "core/seq_col_rep.h"
 #include "core/seq_info_cache.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/undef_api.h"
 
 struct GtEncseqCol {

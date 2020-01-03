@@ -32,7 +32,7 @@
 #include "core/md5_tab.h"
 #include "core/range_api.h"
 #include "core/readmode.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
 #include "core/arraydef.h"

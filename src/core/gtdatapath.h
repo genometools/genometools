@@ -18,7 +18,7 @@
 #ifndef GTDATAPATH_H
 #define GTDATAPATH_H
 
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* get the path to the gtdata/ directory (including it) for the given <prog> */
 GtStr* gt_get_gtdata_path(const char *prog, GtError*);

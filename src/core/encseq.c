@@ -56,7 +56,7 @@
 #include "core/progressbar.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/timer_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"

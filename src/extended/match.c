@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ma_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/match_rep.h"

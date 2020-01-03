@@ -20,7 +20,7 @@
 
 #include "lua.h"
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 int gt_lua_table_to_str(lua_State *L, GtStr *out, int index, GtError*);
 int gt_lua_serializer_unit_test(GtError *err);

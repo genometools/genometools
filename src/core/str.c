@@ -22,7 +22,7 @@
 #include "core/dynalloc.h"
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 

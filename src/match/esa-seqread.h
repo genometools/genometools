@@ -18,7 +18,7 @@
 #ifndef ESA_SEQREAD_H
 #define ESA_SEQREAD_H
 #include <stdbool.h>
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/error_api.h"
 #include "core/encseq.h"
 #include "sarr-def.h"

@@ -20,7 +20,7 @@
 
 #include "core/fptr_api.h"
 #include "core/intbits.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 #define GT_READS2TWOBIT_LIBSPECSEP ':'
 #define GT_READS2TWOBIT_INSERTSEP  ','

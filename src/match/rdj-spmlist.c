@@ -19,7 +19,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <limits.h>
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/assert_api.h"
 #include "core/file_api.h"
 #include "core/log_api.h"

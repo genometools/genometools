@@ -18,7 +18,7 @@
 #ifndef STR_ARRAY_H
 #define STR_ARRAY_H
 
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array_api.h"
 
 /* Returns an array of strings read from fila at <path>. Each line resulting in

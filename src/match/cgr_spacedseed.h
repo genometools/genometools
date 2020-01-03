@@ -19,7 +19,7 @@
 #define CGR_SPACEDSEED_H
 
 #include <stdbool.h>
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array_api.h"
 #include "core/error_api.h"
 
