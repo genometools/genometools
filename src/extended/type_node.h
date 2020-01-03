@@ -17,7 +17,7 @@
 #ifndef TYPE_NODE_H
 #define TYPE_NODE_H
 
-#include "core/bool_matrix.h"
+#include "core/bool_matrix_api.h"
 
 typedef struct GtTypeNode GtTypeNode;
 

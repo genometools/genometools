@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include "core/array_api.h"
-#include "core/bool_matrix.h"
+#include "core/bool_matrix_api.h"
 #include "core/cstr_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
