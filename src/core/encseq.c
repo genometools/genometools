@@ -34,7 +34,7 @@
 #include "core/cstr_api.h"
 #include "core/defined-types.h"
 #include "core/desc_buffer.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq.h"
 #include "core/encseq_access_type.h"
 #include "core/encseq_metadata.h"

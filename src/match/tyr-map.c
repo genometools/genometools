@@ -16,7 +16,7 @@
 */
 
 #include "core/defined-types.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq.h"
 #include "core/fa.h"
 #include "core/unused_api.h"

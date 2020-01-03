@@ -16,7 +16,7 @@
 */
 
 #include "core/codon_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/safearith.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

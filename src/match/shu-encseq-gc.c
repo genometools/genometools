@@ -18,7 +18,7 @@
 #include <stdbool.h>
 
 #include "core/alphabet_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
 #include "core/ensure.h"
 #include "core/ma_api.h"

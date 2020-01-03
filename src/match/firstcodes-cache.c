@@ -16,7 +16,7 @@
 */
 
 #include "core/arraydef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/log_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"

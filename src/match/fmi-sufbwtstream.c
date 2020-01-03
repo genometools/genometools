@@ -20,7 +20,7 @@
 #include "core/fa.h"
 #include "core/alphabet.h"
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq_metadata.h"
 #include "core/error.h"
 #include "core/str.h"

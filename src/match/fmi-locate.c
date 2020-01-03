@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 
 #include "fmindex.h"
 #include "fmi-locate.h"

@@ -38,7 +38,7 @@
 #include "core/log_api.h"
 #include "core/mathsupport.h"
 #include "core/spacecalc.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/format64.h"
 #include "core/fileutils.h"
 #ifdef GT_THREADS_ENABLED

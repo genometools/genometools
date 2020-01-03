@@ -26,7 +26,7 @@
 
 #include "core/arraydef.h"
 #include "core/basename_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
 #include "core/fa.h"
 #include "core/fasta_api.h"

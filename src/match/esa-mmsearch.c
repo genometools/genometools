@@ -16,7 +16,7 @@
 */
 
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/minmax.h"
 #include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/types_api.h"

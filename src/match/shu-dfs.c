@@ -20,7 +20,7 @@
 
 #include "core/array2dim_api.h"
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/format64.h"
 #include "core/log_api.h"
 #include "core/logger.h"

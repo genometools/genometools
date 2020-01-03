@@ -20,7 +20,7 @@
 
 #include "core/arraydef.h"
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/xansi_api.h"

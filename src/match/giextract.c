@@ -24,7 +24,7 @@
 #include "core/fileutils.h"
 #include "core/fa.h"
 #include "core/assert_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/error.h"
 #include "core/fasta.h"
 #include "core/fileutils.h"

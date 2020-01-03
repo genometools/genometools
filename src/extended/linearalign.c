@@ -30,7 +30,7 @@
 #include "core/thread_api.h"
 #endif
 #include "core/unused_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "match/squarededist.h"
 #include "extended/alignment.h"
 #include "extended/maxcoordvalue.h"

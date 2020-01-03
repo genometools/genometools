@@ -18,7 +18,7 @@
 #include <math.h>
 #include <errno.h>
 #include "core/defined-types.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/fa.h"
 #include "core/intbits.h"
 #include "core/mathsupport.h"

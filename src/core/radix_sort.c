@@ -53,7 +53,7 @@
 #include "core/unused_api.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/minmax.h"
 #include "core/types_api.h"
 #include "core/stack-inlined.h"

@@ -31,7 +31,7 @@
 #include "core/xansi_api.h"
 #include "core/types_api.h"
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "match/greedyedist.h"
 #include "alignment.h"
 

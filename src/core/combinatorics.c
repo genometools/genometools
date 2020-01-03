@@ -21,7 +21,7 @@
 
 #include "core/array2dim_api.h"
 #include "core/combinatorics.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/ensure.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"

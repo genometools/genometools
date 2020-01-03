@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"

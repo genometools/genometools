@@ -17,7 +17,7 @@
 
 /* TODO DW write stream reader, that returns only when complete code is read */
 #include <math.h>
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/ensure.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"

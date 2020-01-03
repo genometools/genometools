@@ -20,7 +20,7 @@
 
 #include <inttypes.h>
 #include <string.h>
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/ma_api.h"
 #include "core/safecast-gen.h"
 #include "core/types_api.h"

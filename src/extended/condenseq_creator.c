@@ -20,7 +20,7 @@
 
 #include "core/arraydef.h"
 #include "core/disc_distri_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/fa.h"
 #include "core/log_api.h"
 #include "core/logger.h"

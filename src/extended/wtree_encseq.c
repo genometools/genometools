@@ -20,7 +20,7 @@
 
 #include "core/alphabet_api.h"
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"

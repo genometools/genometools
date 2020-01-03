@@ -16,7 +16,7 @@
 */
 
 #include "core/fa.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/xansi_api.h"
 #include "core/fileutils_api.h"
 #include "core/chardef.h"

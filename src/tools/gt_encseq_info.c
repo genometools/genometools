@@ -23,7 +23,7 @@
 #include "core/array_api.h"
 #include "core/output_file_api.h"
 #include "core/unused_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "tools/gt_encseq_info.h"
 
 typedef struct {

@@ -23,7 +23,7 @@
 #include "core/minmax.h"
 #include "core/error.h"
 #include "core/types_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/unused_api.h"
 #include "extended/diagonalbandalign.h"
 #include "extended/linspace_management.h"
