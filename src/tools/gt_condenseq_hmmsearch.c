@@ -29,7 +29,7 @@
 #include "core/file_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/parseutils_api.h"
 #include "core/showtime.h"
 #include "core/splitter_api.h"

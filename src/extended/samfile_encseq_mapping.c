@@ -18,7 +18,7 @@
 #include "core/hashmap_api.h"
 #include "core/log.h"
 #include "core/cstr_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/samfile_encseq_mapping.h"
 
 struct GtSamfileEncseqMapping

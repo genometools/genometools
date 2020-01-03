@@ -20,7 +20,7 @@
 #include "md5.h"
 #include "core/compat_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/safearith.h"
 #include "core/types_api.h"
 #include "extended/md5set.h"

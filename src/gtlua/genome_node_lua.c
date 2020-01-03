@@ -20,7 +20,7 @@
 #include <string.h>
 #include "lauxlib.h"
 #include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/phase_api.h"
 #include "core/str_array_api.h"
 #include "core/symbol_api.h"

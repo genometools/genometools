@@ -20,7 +20,7 @@
 #include <string.h>
 #include "core/ensure_api.h"
 #include "core/grep.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include <tre/tre.h>

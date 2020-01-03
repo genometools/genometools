@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/comment_node_api.h"
 #include "extended/genome_node_rep.h"

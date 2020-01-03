@@ -24,7 +24,7 @@
 #include "core/fasta_api.h"
 #include "core/fasta_reader.h"
 #include "core/fasta_reader_rec.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/spacecalc.h"
 #include "core/score_matrix.h"

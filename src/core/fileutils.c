@@ -23,7 +23,7 @@
 #include "core/compat_api.h"
 #include "core/cstr_api.h"
 #include "core/fileutils_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
 #include "core/xansi_api.h"

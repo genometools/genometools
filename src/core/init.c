@@ -30,7 +30,7 @@
 #include "core/fa_api.h"
 #include "core/init_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/showtime.h"
 #include "core/spacepeak.h"

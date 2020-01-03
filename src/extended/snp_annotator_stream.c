@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/queue.h"
 #include "core/symbol_api.h"
 #include "core/undef_api.h"

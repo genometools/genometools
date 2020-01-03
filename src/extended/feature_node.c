@@ -22,7 +22,7 @@
 #include "core/cstr_api.h"
 #include "core/ensure_api.h"
 #include "core/hashtable.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/queue_api.h"
 #include "core/strcmp_api.h"
 #include "core/symbol_api.h"

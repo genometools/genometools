@@ -18,7 +18,7 @@
 #include "core/arraydef.h"
 #include "core/divmodmul_api.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "firstcodes-cache.h"
 #include "firstcodes-spacelog.h"

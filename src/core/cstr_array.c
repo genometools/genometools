@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/xansi_api.h"
 
 char** gt_cstr_array_dup(const char **cstr_array)

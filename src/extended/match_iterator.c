@@ -17,7 +17,7 @@
 */
 
 #include "core/class_alloc.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match_iterator_api.h"
 #include "match_iterator_rep.h"

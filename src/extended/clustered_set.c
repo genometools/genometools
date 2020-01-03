@@ -16,7 +16,7 @@
 
 #include "clustered_set_rep.h"
 #include "clustered_set_uf.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/class_alloc.h"
 

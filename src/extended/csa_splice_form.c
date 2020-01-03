@@ -16,7 +16,7 @@
 */
 
 #include "core/array.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/csa_splice_form.h"
 
 struct GtCSASpliceForm {

@@ -17,7 +17,7 @@
 */
 
 #include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/codon_iterator_api.h"
 #include "core/translator.h"
 #include "core/trans_table.h"

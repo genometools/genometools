@@ -24,7 +24,7 @@
 #include "core/divmodmul_api.h"
 #include "core/fa_api.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/safearith.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

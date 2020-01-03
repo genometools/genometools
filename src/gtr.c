@@ -36,7 +36,7 @@
 #include "core/gtdatapath.h"
 #include "core/log.h"
 #include "core/warning_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/multithread_api.h"
 #include "core/option.h"
 #include "core/parseutils.h"

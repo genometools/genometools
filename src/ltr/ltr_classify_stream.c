@@ -19,7 +19,7 @@
 #include "core/array.h"
 #include "core/bittab.h"
 #include "core/class_alloc_lock.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/cstr_api.h"
 #include "core/hashmap_api.h"
 #include "core/undef_api.h"

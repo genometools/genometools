@@ -20,7 +20,7 @@
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/xansi_api.h"
 
 char** gt_cstr_split(const char *cstr, char sep)

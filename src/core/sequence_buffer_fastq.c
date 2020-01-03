@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/sequence_buffer_inline.h"
 #include "core/sequence_buffer_rep.h"

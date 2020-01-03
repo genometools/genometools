@@ -30,7 +30,7 @@
 */
 
 #include <limits.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "esa-seqread.h"
 /* no include for seqnumrelpos.h */
 

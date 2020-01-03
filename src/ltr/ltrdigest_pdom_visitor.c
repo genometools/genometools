@@ -35,7 +35,7 @@
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/str_api.h"

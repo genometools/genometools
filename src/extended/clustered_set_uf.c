@@ -19,7 +19,7 @@
 #include "core/bittab_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/clustered_set.h"
 #include "extended/clustered_set_uf.h"

@@ -67,7 +67,7 @@ END_HWRAPPER
 
 $gt_class_c = <<-END_GT_CLASS_C
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 
 struct <%=klass%>
 {
@@ -276,7 +276,7 @@ $interface_file = <<-INTERFACE_CODE
 
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 
 <%=create_func%>

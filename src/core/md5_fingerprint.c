@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "md5.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/md5_encoder_api.h"
 #include "core/md5_fingerprint_api.h"
 #include "core/safearith.h"

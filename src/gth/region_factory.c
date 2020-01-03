@@ -17,7 +17,7 @@
 
 #include "core/cstr_table.h"
 #include "core/basename_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/hashmap_api.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"

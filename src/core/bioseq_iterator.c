@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/bioseq_iterator.h"
 #include "core/cstr_array.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 
 struct GtBioseqIterator {
   int current_file,

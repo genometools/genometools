@@ -30,7 +30,7 @@
 #include "core/disc_distri_api.h"
 #include "core/fa_api.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/parseutils_api.h"
 #include "core/queue_api.h"

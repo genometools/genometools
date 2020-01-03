@@ -19,7 +19,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/codon_api.h"
 #include "core/codon_iterator_simple_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/orf.h"
 #include "core/translator.h"
 #include "core/trans_table.h"

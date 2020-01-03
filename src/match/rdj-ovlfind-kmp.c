@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/assert_api.h"
 #include "match/rdj-ovlfind-kmp.h"

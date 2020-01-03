@@ -22,7 +22,7 @@
 #include "core/hashmap_api.h"
 #include "core/io.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/xrf_abbr_entry.h"

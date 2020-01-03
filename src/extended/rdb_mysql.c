@@ -20,7 +20,7 @@
 #include <mysql/mysql.h>
 #include "core/class_alloc_lock.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/hashtable.h"
 #include "core/str_api.h"

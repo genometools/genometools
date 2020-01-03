@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/class_alloc_lock.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/str.h"

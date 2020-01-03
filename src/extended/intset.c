@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/intset_rep.h"

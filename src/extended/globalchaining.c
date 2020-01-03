@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include "core/array.h"
 #include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/log.h"
 #include "core/safearith.h"
 #include "core/undef_api.h"

@@ -21,7 +21,7 @@
 #include "core/cstr_api.h"
 #include "core/ensure_api.h"
 #include "core/hashtable.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/md5_seqid.h"
 #include "core/msort.h"
 #include "core/parseutils_api.h"

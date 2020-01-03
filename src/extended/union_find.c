@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/union_find.h"
 
 #define UNION_FIND_TEST_SIZE  1024

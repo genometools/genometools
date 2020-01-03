@@ -30,7 +30,7 @@
 #include "core/error_api.h"
 #include "core/ensure_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/yarandom.h"
 
 enum {

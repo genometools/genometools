@@ -16,7 +16,7 @@
 */
 
 #include "core/fasta_reader_rep.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 
 GtFastaReader* gt_fasta_reader_create(const GtFastaReaderClass *frc)

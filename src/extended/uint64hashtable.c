@@ -19,7 +19,7 @@
 #include "core/assert_api.h"
 #include "core/ensure_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/hashtable.h" /* gt_uint64_key_mul_hash */
 #include "core/spacecalc.h"
 #include "core/format64.h"

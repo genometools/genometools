@@ -21,7 +21,7 @@
 #include "core/cstr_api.h"
 #include "core/encseq_api.h"
 #include "core/fasta_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/range.h"
 #include "core/str_api.h"

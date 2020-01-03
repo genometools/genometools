@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/cstr_api.h"
 #include "core/cstr_table.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/obo_parse_tree.h"
 #include "extended/type_checker_obo.h"
 #include "extended/type_checker_rep.h"

@@ -21,7 +21,7 @@
 #include "core/fa_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/str_api.h"
 #include "core/str_api.h"

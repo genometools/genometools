@@ -27,7 +27,7 @@
 #include "core/cstr_api.h"
 #include "core/ensure_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/thread_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"

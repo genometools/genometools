@@ -19,7 +19,7 @@
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/fa_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/showtime.h"
 #include "core/spacecalc.h"

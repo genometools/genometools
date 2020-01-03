@@ -450,7 +450,7 @@ print <<END_OF_FILE
 */
 
 #include <limits.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "esa-seqread.h"
 #{seqnumrelpos_include(options)}
 END_OF_FILE

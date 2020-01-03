@@ -23,7 +23,7 @@
 #include "core/compat_api.h"
 #include "core/ensure_api.h"
 #include "core/hashmap-generic.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 
 #include "core/disc_distri_api.h"

@@ -19,7 +19,7 @@
 #include "core/array_api.h"
 #include "core/dlist_api.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/yarandom.h"
 #include "extended/ranked_list.h"

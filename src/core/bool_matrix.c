@@ -18,7 +18,7 @@
 #include "core/array.h"
 #include "core/bool_matrix_api.h"
 #include "core/dyn_bittab.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/undef_api.h"
 
 struct GtBoolMatrix {

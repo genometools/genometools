@@ -22,7 +22,7 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"

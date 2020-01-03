@@ -18,7 +18,7 @@
 
 #include "core/codon_api.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/trans_table.h"
 #include "core/unused_api.h"
 

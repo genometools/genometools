@@ -17,7 +17,7 @@
 #include <ctype.h>
 #include "core/chardef.h"
 #include "core/divmodmul_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "extended/scorehandler.h"
 

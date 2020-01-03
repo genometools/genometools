@@ -21,7 +21,7 @@
 
 #include "core/compat_api.h"
 #include "core/fa_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"

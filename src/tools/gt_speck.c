@@ -20,7 +20,7 @@
 #include "core/error_api.h"
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/output_file_api.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"

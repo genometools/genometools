@@ -23,7 +23,7 @@
 #include "core/hashmap_api.h"
 #include "core/logger.h"
 #include "core/logger_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"

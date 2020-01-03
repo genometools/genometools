@@ -18,7 +18,7 @@
 #include "core/encseq.h"
 #include "core/fasta_separator.h"
 #include "core/qsort_r_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/parseutils.h"

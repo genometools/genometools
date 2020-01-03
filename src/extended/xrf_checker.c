@@ -18,7 +18,7 @@
 #include "core/cstr_api.h"
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/splitter_api.h"
 #include "core/unused_api.h"
 #include "extended/xrf_abbr_entry.h"

@@ -20,7 +20,7 @@
 #include "core/compat_api.h"
 #include "core/ensure_api.h"
 #include "core/basename_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 
 char *gt_basename(const char *path)
 {

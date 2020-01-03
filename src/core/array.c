@@ -20,7 +20,7 @@
 #include "core/array.h"
 #include "core/dynalloc.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/msort.h"
 #include "core/mathsupport.h"
 #include "core/qsort_r_api.h"

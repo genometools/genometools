@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/dynalloc.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/splitter.h"
 #include "core/xansi_api.h"
 

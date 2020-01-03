@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/qsort_r_api.h"
 #include "core/dual-pivot-qsort.h"

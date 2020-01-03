@@ -16,7 +16,7 @@
 */
 
 #include "core/file_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/gff3_in_stream_api.h"

@@ -25,7 +25,7 @@
 #include "core/ensure_api.h"
 #include "core/hashmap_api.h"
 #include "core/interval_tree.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/range.h"
 #include "core/undef_api.h"

@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/ensure_api.h"
 #include "core/interval_tree.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/range.h"

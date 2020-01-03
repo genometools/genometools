@@ -18,7 +18,7 @@
 #include "annotationsketch/image_info.h"
 #include "core/array.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/strand_api.h"

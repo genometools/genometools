@@ -24,7 +24,7 @@
 #include <sys/wait.h>
 #endif
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/str_api.h"
 #include "extended/blast_process_call.h"
 #include "core/log_api.h"

@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "annotationsketch/line_breaker_rep.h"
 

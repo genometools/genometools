@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/strand_api.h"
 #include "core/unused_api.h"

@@ -20,7 +20,7 @@
 #include "core/bittab.h"
 #include "core/class_alloc_lock.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/range.h"
 #include "core/unused_api.h"

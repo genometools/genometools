@@ -26,7 +26,7 @@
 #include "core/fileutils_api.h"
 #include "core/hashmap_api.h"
 #include "core/grep_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mail_address.h"
 #include "core/option.h"
 #include "core/parseutils.h"

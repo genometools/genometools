@@ -16,7 +16,7 @@
 */
 
 #include "core/logger_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/str_api.h"
 #include "extended/condenseq.h"

@@ -20,7 +20,7 @@
 
 #include "core/fileutils_api.h"
 #include "core/filelengthvalues.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/sequence_buffer.h"

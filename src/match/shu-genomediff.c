@@ -22,7 +22,7 @@
 #include "core/format64.h"
 #include "core/log_api.h"
 #include "core/logger.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/safearith.h"
 #include "match/eis-voiditf.h"

@@ -172,7 +172,7 @@ void gt_str_delete(GtStr *s)
 Our string class implementation so far looks like this
 
 \begin{lstlisting}
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/str.h"
 
 struct GtStr {
@@ -315,7 +315,7 @@ function pointers given in the \keyword{GtExampleClass} object:
 
 \begin{lstlisting}
 #include "example_rep.h"       /* we need access to the class struct */
-#include "core/ma.h"           /* we need to allocate memory */
+#include "core/ma_api.h"           /* we need to allocate memory */
 
 GtExample* gt_example_create(const GtExampleClass *ec)
 {

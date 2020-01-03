@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_node_rep.h"

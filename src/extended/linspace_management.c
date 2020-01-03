@@ -17,7 +17,7 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/maxcoordvalue.h"
 #include "extended/linspace_management.h"
 

@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/range.h"

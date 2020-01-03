@@ -19,7 +19,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/eof_node_api.h"

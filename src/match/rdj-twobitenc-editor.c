@@ -16,7 +16,7 @@
 */
 
 #include "core/fa_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "match/rdj-twobitenc-editor.h"
 
 struct GtTwobitencEditor

@@ -20,7 +20,7 @@
 #include "core/fastq.h"
 #include "core/hashmap_api.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/undef_api.h"
 #include "core/warning_api.h"

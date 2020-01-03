@@ -22,7 +22,7 @@
 #include "core/assert_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "extended/rmq.h"

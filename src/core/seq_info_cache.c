@@ -16,7 +16,7 @@
 
 #include "core/cstr_api.h"
 #include "core/hashmap_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/seq_info_cache.h"
 
 struct GtSeqInfoCache {

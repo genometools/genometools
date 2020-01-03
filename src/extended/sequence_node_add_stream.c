@@ -19,7 +19,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/cstr_table_api.h"
 #include "core/error_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/queue_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"

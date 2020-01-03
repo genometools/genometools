@@ -21,7 +21,7 @@
 #include "core/fasta_separator.h"
 #include "core/log_api.h"
 #include "core/logger.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/output_file_api.h"
 #include "core/showtime.h"
 #include "core/str_api.h"

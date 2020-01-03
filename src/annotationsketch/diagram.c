@@ -28,7 +28,7 @@
 #include "core/cstr_api.h"
 #include "core/ensure_api.h"
 #include "core/hashmap_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/msort.h"
 #include "core/log.h"
 #include "core/str.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/encseq_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "seqnumrelpos.h"
 
 struct GtSeqnumrelpos

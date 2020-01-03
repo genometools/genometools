@@ -16,7 +16,7 @@
 */
 
 #include "example_rep.h"       /* we need access to the class struct */
-#include "core/ma.h"           /* we need to allocate memory */
+#include "core/ma_api.h"           /* we need to allocate memory */
 
 GtExample* gt_example_create(const GtExampleClass *ec)
 {

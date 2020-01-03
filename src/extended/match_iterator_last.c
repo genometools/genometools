@@ -29,7 +29,7 @@
 #include "core/fileutils_api.h"
 #include "core/hashmap_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/md5_fingerprint_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

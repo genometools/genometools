@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul_api.h"
 #include "core/ensure_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/xansi_api.h"
 #include "extended/multieoplist.h"
 #include "core/log_api.h"

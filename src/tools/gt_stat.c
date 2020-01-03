@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "extended/add_introns_stream_api.h"

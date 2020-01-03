@@ -30,7 +30,7 @@
 #include "core/ensure_api.h"
 #include "core/hashmap_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/msort.h"

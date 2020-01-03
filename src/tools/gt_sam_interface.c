@@ -16,7 +16,7 @@
 */
 
 #include "core/alphabet_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/sam_alignment.h"
 #include "extended/samfile_iterator.h"

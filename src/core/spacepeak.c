@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include "core/spacepeak.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/spacecalc.h"
 #include "core/thread_api.h"
 
