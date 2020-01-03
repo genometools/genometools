@@ -14,14 +14,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ARRAY2DIM_SPARSE_H
-#define ARRAY2DIM_SPARSE_H
+#ifndef ARRAY2DIM_SPARSE_API_H
+#define ARRAY2DIM_SPARSE_API_H
 
 #include "core/array2dim_api.h"
 
 typedef struct {
   GtUword offset,
-                length;
+          length;
 } GtRowInfo;
 
 /* Allocates a new 2-dimensional sparse array with the given number of <ROWS>
