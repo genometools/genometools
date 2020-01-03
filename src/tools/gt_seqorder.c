@@ -20,7 +20,7 @@
 #include "core/qsort_r_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/parseutils.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"

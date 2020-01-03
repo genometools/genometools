@@ -21,7 +21,7 @@
 #include "core/hashmap_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/undef_api.h"
 #include "core/warning_api.h"
 #include "extended/aligned_segments_pile.h"

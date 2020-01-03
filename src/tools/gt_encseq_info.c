@@ -19,7 +19,7 @@
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/array_api.h"
 #include "core/output_file_api.h"
 #include "core/unused_api.h"

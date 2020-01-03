@@ -28,7 +28,7 @@
 #include "core/undef_api.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/mathsupport.h"
 #include "core/bittab_api.h"
 

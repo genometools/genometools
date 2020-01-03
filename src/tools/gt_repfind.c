@@ -26,7 +26,7 @@
 #include "core/tool_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/encseq.h"
 #include "core/showtime.h"
 #include "core/timer_api.h"

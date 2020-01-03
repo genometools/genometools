@@ -22,7 +22,7 @@
 #include "core/fa_api.h"
 #include "core/intbits.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"

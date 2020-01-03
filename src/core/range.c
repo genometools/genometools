@@ -16,7 +16,7 @@
 */
 
 #include "core/ensure_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/msort.h"
 #include "core/range.h"
 #include "core/safearith.h"

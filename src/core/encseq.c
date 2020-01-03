@@ -52,7 +52,7 @@
 #include "core/mapspec.h"
 #include "core/mathsupport.h"
 #include "core/md5_encoder_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/progressbar.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"

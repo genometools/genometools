@@ -22,7 +22,7 @@
  * data, where only one source and multiple consumers exist.
  */
 #include "core/assert_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "match/eis-seqdatasrc.h"
 
 /** every reader is identified by a unique scalar */

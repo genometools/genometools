@@ -28,7 +28,7 @@
 #include "core/format64.h"
 #include "core/mapspec.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/safecast-gen.h"
 #include "core/spacecalc.h"
 #include "core/str.h"

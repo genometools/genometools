@@ -24,7 +24,7 @@
 #include "core/log.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 
 struct GtCustomTrackGcContent {

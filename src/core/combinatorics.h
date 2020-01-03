@@ -19,7 +19,7 @@
 
 #include "core/assert_api.h"
 #include "core/error_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 #include "core/safearith.h"
 #include "core/types_api.h"

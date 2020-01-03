@@ -22,7 +22,7 @@
 #include "core/range.h"
 #include "core/mathsupport.h"
 #include "core/logger.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/compact_ulong_store.h"
 #include "esa-seqread.h"
 #include "sarr-def.h"

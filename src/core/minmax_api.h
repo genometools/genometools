@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MINMAX_H
-#define MINMAX_H
+#ifndef MINMAX_API_H
+#define MINMAX_API_H
 
 /*
   This file defines macros for maximum and minimum computation,

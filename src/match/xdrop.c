@@ -24,7 +24,7 @@
 #include "core/ensure_api.h"
 #include "core/log_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/alignment.h"

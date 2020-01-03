@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "core/array2dim_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/types_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ma_api.h"

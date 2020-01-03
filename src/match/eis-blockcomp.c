@@ -36,7 +36,7 @@
 #include "core/error_api.h"
 #include "core/fa_api.h"
 #include "core/log.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"

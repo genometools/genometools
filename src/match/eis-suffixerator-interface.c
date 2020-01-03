@@ -24,7 +24,7 @@
 #include "core/fa_api.h"
 #include "core/filelengthvalues.h"
 #include "core/logger.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/seq_iterator_api.h"
 #include "core/str.h"
 #include "core/str_array.h"

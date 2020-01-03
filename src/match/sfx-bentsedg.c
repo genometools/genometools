@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/divmodmul_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "core/types_api.h"

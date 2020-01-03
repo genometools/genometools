@@ -22,7 +22,7 @@
 #include "core/file_api.h"
 #include "core/log.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/parseutils_api.h"
 #include "core/queue.h"
 #include "core/qsort_r_api.h"

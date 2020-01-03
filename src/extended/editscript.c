@@ -27,7 +27,7 @@
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

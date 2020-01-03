@@ -27,7 +27,7 @@
 #include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/parseutils_api.h"
 #include "core/range_api.h"
 #include "core/showtime.h"

@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/divmodmul_api.h"
 #include "core/stack-inlined.h"
 

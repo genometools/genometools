@@ -19,7 +19,7 @@
 
 #include <limits.h>
 
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/option_api.h"
 
 /* #include "core/bitpackstring.h" Not necessary. Stefan */

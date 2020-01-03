@@ -17,7 +17,7 @@
 
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "spmsuftab.h"
 
 GtSpmsuftab *gt_spmsuftab_new(GtUword numofentries,

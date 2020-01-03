@@ -18,7 +18,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul_api.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "extended/scorehandler.h"
 
 struct GtScoreHandler {

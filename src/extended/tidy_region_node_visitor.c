@@ -21,7 +21,7 @@
 #include "core/cstr_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/queue.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

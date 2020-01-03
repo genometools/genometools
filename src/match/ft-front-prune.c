@@ -10,7 +10,7 @@
 #include "core/chardef.h"
 #include "core/divmodmul_api.h"
 #include "core/intbits.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/encseq.h"
 #include "core/bitpackstringsimpleop.h"
 #include "match/extend-offset.h"

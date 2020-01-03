@@ -32,7 +32,7 @@
 #include "core/log.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/msort.h"
 #include "core/str.h"
 #include "core/thread_api.h"

@@ -28,7 +28,7 @@
 #include "core/toolbox.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "match/optionargmode.h"
 #include "match/tyr-mkindex.h"
 #include "match/tyr-show.h"

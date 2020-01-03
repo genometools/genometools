@@ -23,7 +23,7 @@
 #include "core/encseq.h"
 #include "core/intbits.h"
 #include "core/logger.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread_api.h"
 #endif

@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/cstr_api.h"
 #include "core/error_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/sequence_buffer_embl.h"
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_inline.h"

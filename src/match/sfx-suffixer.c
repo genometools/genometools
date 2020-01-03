@@ -30,7 +30,7 @@
 #include "core/error_api.h"
 #include "core/unused_api.h"
 #include "core/progressbar.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/fa_api.h"
 #include "core/timer_api.h"
 #include "core/encseq.h"

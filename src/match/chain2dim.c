@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "core/error_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/mathsupport.h" /* for gt_double_equals_double */
 #include "core/unused_api.h"
 #include "core/ma_api.h"

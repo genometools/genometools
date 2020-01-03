@@ -26,7 +26,7 @@
 #include "core/log_api.h"
 #include "core/mathsupport.h"
 #include "core/md5_seqid.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/str_api.h"
 #include "core/undef_api.h"
 #include "extended/feature_type.h"

@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "annotationsketch/cliptype.h"
 #include "annotationsketch/coords.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 
 double gt_coords_convert_point(GtRange viewrange, GtWord pos)
 {

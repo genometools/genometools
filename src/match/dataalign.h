@@ -18,7 +18,7 @@
 #define DATAALIGN_H
 
 #include <stdlib.h>
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/types_api.h"
 
 /*

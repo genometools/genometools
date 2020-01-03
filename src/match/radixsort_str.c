@@ -20,7 +20,7 @@
 #include <string.h>
 #include "core/intbits.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/stack-inlined.h"
 #include "core/qsort-ulong.h"
 #include "sfx-lcpvalues.h"

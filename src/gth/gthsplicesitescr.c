@@ -16,7 +16,7 @@
 */
 
 #include "core/chardef.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 #include "gth/gthsplicesitescr.h"
 

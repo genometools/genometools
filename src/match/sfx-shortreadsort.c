@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include "core/intbits.h"
 #include "core/stack-inlined.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/assert_api.h"
 #include "sfx-lcpvalues.h"
 #include "sfx-shortreadsort.h"

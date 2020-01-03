@@ -24,7 +24,7 @@
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/intbits.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/showtime.h"
 #include "core/undef_api.h"
 #ifdef GT_THREADS_ENABLED

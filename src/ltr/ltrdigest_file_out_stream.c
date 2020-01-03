@@ -27,7 +27,7 @@
 #include "core/fasta_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/range.h"
 #include "core/str.h"
 #include "core/symbol.h"

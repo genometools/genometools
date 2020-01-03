@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/queue_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

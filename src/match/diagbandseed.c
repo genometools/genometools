@@ -31,7 +31,7 @@
 #include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/radix_sort.h"
 #include "core/timer_api.h"
 #include "core/spacecalc.h"

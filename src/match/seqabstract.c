@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "core/encseq.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/types_api.h"
 #include "match/seqabstract.h"
 #include "match/extend-offset.h"

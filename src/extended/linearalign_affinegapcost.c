@@ -21,7 +21,7 @@
 #include "core/divmodmul_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread_api.h"
 #endif
