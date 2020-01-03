@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 #include "core/chardef.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/format64.h"

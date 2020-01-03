@@ -22,7 +22,7 @@
 #endif
 #include <fcntl.h>
 #include <unistd.h>
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"

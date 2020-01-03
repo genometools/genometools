@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/option_api.h"

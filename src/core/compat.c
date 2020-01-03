@@ -23,7 +23,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "core/compat.h"
+#include "core/compat_api.h"
 
 int gt_mkstemp(char *templ)
 {

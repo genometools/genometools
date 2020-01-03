@@ -22,7 +22,7 @@
 #ifndef _WIN32
 #include <sys/wait.h>
 #endif
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/error_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"

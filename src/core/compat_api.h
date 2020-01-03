@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COMPAT_H
-#define COMPAT_H
+#ifndef COMPAT_API_H
+#define COMPAT_API_H
 
 #include "core/types_api.h"
 

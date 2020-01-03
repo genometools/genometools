@@ -24,7 +24,7 @@
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/bittab_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr_api.h"
 #include "core/disc_distri_api.h"
 #include "core/ensure.h"

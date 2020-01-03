@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/xposix.h"
 #include "core/xansi_api.h"
 #include "core/fa.h"

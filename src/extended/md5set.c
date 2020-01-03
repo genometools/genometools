@@ -18,7 +18,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "md5.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/safearith.h"

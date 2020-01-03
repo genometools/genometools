@@ -16,7 +16,7 @@
 
 #include "core/assert_api.h"
 #include "core/bittab_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/file_api.h"

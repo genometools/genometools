@@ -21,7 +21,7 @@
 #include <string.h>
 #include "core/array.h"
 #include "core/assert_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"

@@ -17,7 +17,7 @@
 
 #include <ctype.h>
 #include <math.h>
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/fileutils_api.h"
 #include "core/md5_seqid.h"
 #include "core/safearith.h"

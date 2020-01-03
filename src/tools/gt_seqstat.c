@@ -21,7 +21,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/fileutils_api.h"
 #include "core/xposix.h"
 #include "core/fa.h"

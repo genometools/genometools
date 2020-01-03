@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include "core/array_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/multithread_api.h"

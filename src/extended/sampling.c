@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 #include "core/assert_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/divmodmul.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"

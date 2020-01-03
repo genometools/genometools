@@ -27,7 +27,7 @@
 #include "lua-lpeg.h"
 #include "md5.h"
 #include "ldes56.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr.h"
 #include "core/cstr_array.h"
 #include "core/ensure.h"

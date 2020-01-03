@@ -29,7 +29,7 @@
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
 #include "core/intbits.h"

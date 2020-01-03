@@ -16,7 +16,7 @@
 */
 
 #include "core/array_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/disc_distri_api.h"
 #include "core/format64.h"
 #include "core/ma.h"

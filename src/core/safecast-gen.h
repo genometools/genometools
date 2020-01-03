@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "core/assert_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 

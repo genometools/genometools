@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/fileutils.h"
 #include "core/gtdatapath.h"
 #include "core/log_api.h"

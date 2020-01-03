@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #include "core/assert_api.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/ensure.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"

@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"

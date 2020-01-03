@@ -25,7 +25,7 @@
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "core/dynalloc.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/safearith.h"
 
 /**

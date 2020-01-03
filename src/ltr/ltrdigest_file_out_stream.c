@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "core/class_alloc_lock.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/hashmap.h"

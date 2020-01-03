@@ -16,7 +16,7 @@
 */
 
 #include <expat.h>
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/fa.h"
 #include "core/unused_api.h"
 #include "gth/intermediate.h"
