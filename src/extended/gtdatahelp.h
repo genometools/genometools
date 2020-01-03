@@ -18,7 +18,7 @@
 #ifndef GTDATAHELP_H
 #define GTDATAHELP_H
 
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* execute helpfile gtdata/doc/progname.lua */
 int gt_gtdata_show_help(const char *progname, void *unused, GtError*);

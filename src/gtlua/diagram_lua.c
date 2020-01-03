@@ -22,7 +22,7 @@
 #include "annotationsketch/diagram.h"
 #include "extended/feature_index.h"
 #include "annotationsketch/luastyle.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/diagram_lua.h"

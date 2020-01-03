@@ -18,7 +18,7 @@
 #ifndef GT_GTHBSSMFILEINFO_H
 #define GT_GTHBSSMFILEINFO_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* the gthbssmfileinfo tool */
 int gt_gthbssmfileinfo(int argc, const char **argv, GtError *err);

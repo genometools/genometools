@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
-#include "core/range.h"
+#include "core/ma_api.h"
+#include "core/range_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "gth/gthoutput.h"

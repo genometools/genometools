@@ -18,8 +18,8 @@
 #define SEQ_CON_H
 
 #include "core/alphabet.h"
-#include "core/file.h"
-#include "core/range.h"
+#include "core/file_api.h"
+#include "core/range_api.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
 

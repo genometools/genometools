@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/logger.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"

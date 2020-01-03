@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
-#include "core/fa.h"
+#include "core/error_api.h"
+#include "core/fa_api.h"
 #include "core/filelengthvalues.h"
 #include "core/format64.h"
 #include "core/intbits.h"
@@ -25,7 +25,7 @@
 #include "core/mapspec.h"
 #include "core/pairbwtidx.h"
 #include "core/safecast-gen.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/ulongbound.h"
 #include "core/xansi_api.h"
 

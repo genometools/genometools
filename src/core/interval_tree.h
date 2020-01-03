@@ -18,7 +18,7 @@
 #ifndef INTERVAL_TREE_H
 #define INTERVAL_TREE_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 #include "core/interval_tree_api.h"
 

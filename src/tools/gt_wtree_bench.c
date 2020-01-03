@@ -19,7 +19,7 @@
 
 #include "core/chardef.h"
 #include "core/encseq_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"

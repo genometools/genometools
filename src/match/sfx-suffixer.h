@@ -19,7 +19,7 @@
 #define SFX_SUFFIXER_H
 
 #include "core/encseq_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/logger.h"
 #include "core/readmode.h"
 #include "core/timer_api.h"

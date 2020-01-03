@@ -25,7 +25,7 @@
 #ifndef EIS_SUFFIXERATOR_INTERFACE_H
 #define EIS_SUFFIXERATOR_INTERFACE_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "match/sfx-suffixer.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-seqdatasrc.h"

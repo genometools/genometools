@@ -19,7 +19,7 @@
 #define LTRHARVEST_FASTA_OUT_VISITOR_H
 
 #include "core/encseq_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "extended/node_visitor.h"
 
 /* Implements the <GtNodeVisitor> interface. */

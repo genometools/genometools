@@ -21,7 +21,7 @@
 #include "core/bittab_api.h"
 #include "core/fasta_api.h"
 #include "core/fastq.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/seq_iterator_api.h"
 #include "core/seq_iterator_fastq_api.h"

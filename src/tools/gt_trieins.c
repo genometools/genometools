@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "match/test-mtrieins.h"

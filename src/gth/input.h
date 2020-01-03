@@ -19,7 +19,7 @@
 #define INPUT_H
 
 #include "core/array.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/score_matrix.h"
 #include "core/str_array.h"
 #include "gth/duplicate_check.h"

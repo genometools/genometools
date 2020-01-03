@@ -19,7 +19,7 @@
 #define RDJ_CONTFINDER_H
 
 #include <stdint.h>
-#include "core/file.h"
+#include "core/file_api.h"
 #include "match/reads2twobit.h"
 
 typedef struct GtContfinder GtContfinder;

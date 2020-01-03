@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/hashtable.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/strcmp.h"
 #include "extended/type_checker_builtin_api.h"
 #include "extended/type_checker_rep.h"

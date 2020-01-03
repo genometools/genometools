@@ -18,7 +18,7 @@
 
 #include "core/chardef.h"
 #include "core/log.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "match/eis-specialsrank.h"

@@ -19,7 +19,7 @@
 #define AGS_H
 
 #include "core/array.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "gth/gthoutput.h"
 #include "gth/bssm_param.h"
 #include "gth/pgl.h"

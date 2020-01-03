@@ -19,7 +19,7 @@
 #define ARRAY_H
 
 #include "core/array_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 typedef int (*GtArrayProcessor)(void *elem, void *info, GtError*);
 

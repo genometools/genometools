@@ -20,11 +20,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/huffcode.h"

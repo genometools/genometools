@@ -19,7 +19,7 @@
 #include "core/basename_api.h"
 #include "core/encseq.h"
 #include "core/encseq_options.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/str_api.h"
 #include "core/str_array.h"

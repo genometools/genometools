@@ -18,8 +18,8 @@
 #ifndef ESA_SCANPRJ_H
 #define ESA_SCANPRJ_H
 #include "core/array.h"
-#include "core/error.h"
-#include "core/str.h"
+#include "core/error_api.h"
+#include "core/str_api.h"
 #include "core/logger.h"
 
 #define GT_SCANNEDPRJKEY_ADD(VALNAME,VAL,FORCEREAD)\

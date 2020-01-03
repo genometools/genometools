@@ -18,8 +18,8 @@
 #ifndef STRING_DISTRI_H
 #define STRING_DISTRI_H
 
-#include "core/error.h"
-#include "core/file.h"
+#include "core/error_api.h"
+#include "core/file_api.h"
 
 /* A discrete distribution */
 typedef struct GtStringDistri GtStringDistri;

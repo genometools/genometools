@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DIVMODMUL_H
-#define DIVMODMUL_H
+#ifndef DIVMODMUL_API_H
+#define DIVMODMUL_API_H
 
 #include <math.h>
 /*

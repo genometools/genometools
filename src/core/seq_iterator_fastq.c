@@ -19,7 +19,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/colorspace.h"
 #include "core/cstr_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/filelengthvalues.h"
 #include "core/seq_iterator_fastq_api.h"
 #include "core/seq_iterator_rep.h"

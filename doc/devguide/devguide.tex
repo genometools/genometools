@@ -172,8 +172,8 @@ void gt_str_delete(GtStr *s)
 Our string class implementation so far looks like this
 
 \begin{lstlisting}
-#include "core/ma.h"
-#include "core/str.h"
+#include "core/ma_api.h"
+#include "core/str_api.h"
 
 struct GtStr {
   char *cstr;           /* the actual string (always '\0' terminated) */
@@ -315,7 +315,7 @@ function pointers given in the \keyword{GtExampleClass} object:
 
 \begin{lstlisting}
 #include "example_rep.h"       /* we need access to the class struct */
-#include "core/ma.h"           /* we need to allocate memory */
+#include "core/ma_api.h"           /* we need to allocate memory */
 
 GtExample* gt_example_create(const GtExampleClass *ec)
 {
@@ -1534,7 +1534,7 @@ int  (*UnitTestFunc)(GtError *err);
 
 They must return 0 if the test was successful and -1 if the test has failed.
 The \keyword{gt_ensure} helper macro makes writing unit tests easier. To use it,
-\keyword{#include} the file \keyword{core/ensure.h}. Then write your unit test:
+\keyword{#include} the file \keyword{core/ensure_api.h}. Then write your unit test:
 
 \begin{lstlisting}
 int gt_class_unit_test(GtError *err) /* must be called 'err'! */

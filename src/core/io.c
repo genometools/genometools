@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/io.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 
 struct GtIO {
   GtFile *fp;

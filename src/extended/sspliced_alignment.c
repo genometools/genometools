@@ -16,7 +16,7 @@
 */
 
 #include "core/cstr_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/sspliced_alignment.h"
 
 struct GtSSplicedAlignment {

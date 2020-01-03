@@ -22,7 +22,7 @@
 #include "core/chardef.h"
 #include "core/parseutils.h"
 #include "core/score_matrix.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/tokenizer.h"
 #include "core/undef_api.h"
 #include "core/xansi_api.h"

@@ -18,13 +18,13 @@
 
 #include <string.h>
 #include "core/fileutils_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/progressbar.h"
 #include "core/quality.h"
 #include "core/seq_iterator_fastq_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "tools/gt_readreads.h"
 
 #define SEQUENCE_CHAR_SEPARATOR '|'

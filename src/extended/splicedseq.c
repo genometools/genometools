@@ -17,9 +17,9 @@
 
 #include <string.h>
 #include "core/array.h"
-#include "core/ensure.h"
-#include "core/ma.h"
-#include "core/str.h"
+#include "core/ensure_api.h"
+#include "core/ma_api.h"
+#include "core/str_api.h"
 #include "extended/reverse_api.h"
 #include "extended/splicedseq.h"
 

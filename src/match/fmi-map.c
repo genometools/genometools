@@ -18,11 +18,11 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdbool.h>
-#include "core/error.h"
-#include "core/fileutils.h"
-#include "core/fa.h"
+#include "core/error_api.h"
+#include "core/fileutils_api.h"
+#include "core/fa_api.h"
 #include "core/array.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/alphabet.h"
 #include "core/logger.h"
 #include "esa-scanprj.h"

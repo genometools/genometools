@@ -22,7 +22,7 @@
 #include "core/arraydef.h"
 #include "core/bitpackarray.h"
 #include "core/chardef.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/intbits.h"
 #include "core/filelengthvalues.h"
 #include "core/pairbwtidx.h"

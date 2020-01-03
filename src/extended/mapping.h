@@ -18,7 +18,7 @@
 #ifndef MAPPING_H
 #define MAPPING_H
 
-#include "core/str.h"
+#include "core/str_api.h"
 
 typedef enum {
   GT_MAPPINGTYPE_STRING,

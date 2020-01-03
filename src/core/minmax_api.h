@@ -1,5 +1,6 @@
 /*
-  Copyright (c) 2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,22 +15,34 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COMPAT_H
-#define COMPAT_H
+#ifndef MINMAX_API_H
+#define MINMAX_API_H
 
-#include "core/types_api.h"
+/*
+  This file defines macros for maximum and minimum computation,
+  if they are not already defined.
+*/
 
-#ifndef _WIN32
-#define GT_PATH_SEPARATOR     '/'
-#define GT_PATH_SEPARATOR_STR "/"
-#define GT_PATH_VAR_SEPARATOR ':'
-#else
-#define GT_PATH_SEPARATOR     '\\'
-#define GT_PATH_SEPARATOR_STR "\\"
-#define GT_PATH_VAR_SEPARATOR ';'
+#ifndef MAX
+#define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
 #endif
 
-int     gt_mkstemp(char *templ);
-GtUword gt_pagesize(void);
+#ifndef MIN
+#define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
+#endif
+
+#ifndef MIN3
+#define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
+#endif
+
+#ifndef MAX3
+#define MAX3(a, b, c) (((a)>(b))?((a)>(c)?(a):(c)):((b)>(c)?(b):(c)))
+#endif
+
+#define GT_UPDATE_MAX(MAXVAL,NEWVAL)\
+        if ((MAXVAL) < (NEWVAL))\
+        {\
+          MAXVAL = NEWVAL;\
+        }
 
 #endif

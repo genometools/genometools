@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "core/unused_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/feature_index_api.h"
 #include "extended/feature_index_memory_api.h"
 #include "extended/feature_node.h"

@@ -18,7 +18,7 @@
 #include "core/class_alloc.h"
 #include "core/seq_col.h"
 #include "core/seq_col_rep.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 

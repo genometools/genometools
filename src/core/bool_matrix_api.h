@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BOOL_MATRIX_H
-#define BOOL_MATRIX_H
+#ifndef BOOL_MATRIX_API_H
+#define BOOL_MATRIX_API_H
 
 #include <stdbool.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/types_api.h"
 
 /* a two-dimensional matrix containing boolean values */

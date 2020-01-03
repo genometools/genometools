@@ -19,7 +19,7 @@
 #define SFX_BENTSEDG_H
 #include <stdio.h>
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/codetype.h"
 #include "core/logger_api.h"
 #include "core/encseq.h"

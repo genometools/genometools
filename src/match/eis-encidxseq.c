@@ -16,7 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/log_api.h"
 #include "core/yarandom.h"
 #include "match/eis-encidxseq.h"

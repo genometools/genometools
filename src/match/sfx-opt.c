@@ -19,13 +19,13 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/basename_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/readmode.h"
 #include "core/spacecalc.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/thread_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"

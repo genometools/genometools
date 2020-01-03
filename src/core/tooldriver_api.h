@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TOOLDRIVER_H
-#define TOOLDRIVER_H
+#ifndef TOOLDRIVER_API_H
+#define TOOLDRIVER_API_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/tool_api.h"
 
 /* The prototype of a tool function. */

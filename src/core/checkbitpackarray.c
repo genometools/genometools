@@ -21,7 +21,7 @@
 #include <sys/time.h>
 
 #include "core/bitpackarray.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/log.h"
 #include "core/yarandom.h"
 

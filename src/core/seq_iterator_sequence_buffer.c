@@ -19,9 +19,9 @@
 #include "core/arraydef.h"
 #include "core/chardef.h"
 #include "core/class_alloc_lock.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/desc_buffer.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/seq_iterator_rep.h"
 #include "core/seq_iterator_sequence_buffer.h"
 

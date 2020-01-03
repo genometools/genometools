@@ -18,9 +18,9 @@
 #include <errno.h>
 #include <string.h>
 #include "core/array_api.h"
-#include "core/compat.h"
-#include "core/hashmap.h"
-#include "core/ma.h"
+#include "core/compat_api.h"
+#include "core/hashmap_api.h"
+#include "core/ma_api.h"
 #include "core/multithread_api.h"
 #include "core/spacecalc.h"
 #include "core/spacepeak.h"

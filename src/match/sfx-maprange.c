@@ -18,10 +18,10 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/xposix.h"
 #include "core/xansi_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/intbits.h"
 #include "core/log.h"
 #include "sfx-maprange.h"

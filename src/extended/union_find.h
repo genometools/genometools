@@ -18,7 +18,7 @@
 #ifndef UNION_FIND_H
 #define UNION_FIND_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 /*
   This class implements the union-find data structure (with union-by-rank

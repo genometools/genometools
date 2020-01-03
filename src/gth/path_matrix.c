@@ -16,8 +16,8 @@
 
 #include <stdbool.h>
 #include "core/array2dim_api.h"
-#include "core/divmodmul.h"
-#include "core/minmax.h"
+#include "core/divmodmul_api.h"
+#include "core/minmax_api.h"
 #include "gth/align_common.h"
 #include "gth/align_dna_imp.h"
 #include "gth/path_matrix.h"

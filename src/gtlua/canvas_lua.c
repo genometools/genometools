@@ -20,7 +20,7 @@
 #include "lauxlib.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/luastyle.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/canvas_lua.h"
 #include "gtlua/image_info_lua.h"

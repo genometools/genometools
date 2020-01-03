@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "example_b.h"
 #include "example_rep.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 struct GtExampleB {
   GtExample parent_instance;

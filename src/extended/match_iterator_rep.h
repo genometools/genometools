@@ -20,7 +20,7 @@
 #define MATCH_ITERATOR_REP_H
 
 #include <string.h>
-#include "core/file.h"
+#include "core/file_api.h"
 #include "match.h"
 #include "extended/match_iterator_api.h"
 

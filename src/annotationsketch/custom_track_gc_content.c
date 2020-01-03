@@ -22,9 +22,9 @@
 #include "annotationsketch/custom_track_rep.h"
 #include "core/class_alloc_lock.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 
 struct GtCustomTrackGcContent {

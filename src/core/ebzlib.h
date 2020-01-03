@@ -19,7 +19,7 @@
 #define EBZLIB_H
 
 #include <bzlib.h>
-#include "core/error.h"
+#include "core/error_api.h"
 
 /*
   This module contains wrappers for the functions from the bz2lib we use.

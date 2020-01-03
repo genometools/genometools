@@ -19,17 +19,17 @@
 #include <errno.h>
 #include <string.h>
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/error_api.h"
 #include "core/compact_ulong_store.h"
 #include "core/encseq.h"
 #include "core/filelengthvalues.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/intbits.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 #include "core/stack-inlined.h"
 #include "core/str_array_api.h"

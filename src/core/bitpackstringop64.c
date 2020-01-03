@@ -21,7 +21,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include "core/assert_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/bitpackstring.h"
 
 uint64_t

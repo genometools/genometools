@@ -16,7 +16,7 @@
 */
 
 #include "core/colorspace.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/str_api.h"

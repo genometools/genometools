@@ -17,8 +17,8 @@
 
 #include <stdio.h>
 #include <limits.h>
-#include "core/fa.h"
-#include "core/fileutils.h"
+#include "core/fa_api.h"
+#include "core/fileutils_api.h"
 #include "core/log.h"
 #include "core/xansi_api.h"
 #include "match/rdj-cntlist.h"

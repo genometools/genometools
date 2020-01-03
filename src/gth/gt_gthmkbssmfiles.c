@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "gth/bssm_param.h"

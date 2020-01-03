@@ -16,10 +16,10 @@
 */
 
 #include "core/bioseq_iterator.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/gtdatahelp.h"
 #include "extended/shredder.h"

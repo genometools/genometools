@@ -19,7 +19,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "core/alphabet.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/unused_api.h"
 #include "core/defined-types.h"

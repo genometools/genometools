@@ -22,15 +22,15 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "core/ma.h"
-#include "core/minmax.h"
+#include "core/ma_api.h"
+#include "core/minmax_api.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread_api.h"
 #endif
 #include "core/unused_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "match/squarededist.h"
 #include "extended/alignment.h"
 #include "extended/maxcoordvalue.h"

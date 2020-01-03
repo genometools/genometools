@@ -17,7 +17,7 @@
 #include <ctype.h>
 #include "core/array2dim_api.h"
 #include "extended/maxcoordvalue.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "extended/reconstructalignment.h"
 
 #include "extended/squarealign.h"

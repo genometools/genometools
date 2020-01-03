@@ -17,7 +17,7 @@
 */
 
 #include "core/array.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/chain.h"
 
 struct GtChain {

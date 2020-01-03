@@ -18,7 +18,7 @@
 #ifndef OBO_PARSE_TREE_H
 #define OBO_PARSE_TREE_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/obo_stanza.h"
 
 typedef struct GtOBOParseTree GtOBOParseTree;

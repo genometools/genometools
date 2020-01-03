@@ -17,13 +17,13 @@
 
 #include <limits.h>
 #include <string.h>
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/interval_tree.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
-#include "core/range.h"
-#include "core/str.h"
+#include "core/minmax_api.h"
+#include "core/range_api.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 
 typedef enum GtIntervalTreeNodeColor {

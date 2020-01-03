@@ -20,8 +20,8 @@
 
 /* This file bundles all output related structures and definitions. */
 
-#include "core/error.h"
-#include "core/file.h"
+#include "core/error_api.h"
+#include "core/file_api.h"
 #include "core/types_api.h"
 #include "gth/gthstrandchar.h"
 

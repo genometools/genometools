@@ -19,9 +19,9 @@
 #include "lauxlib.h"
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/luahelper.h"
 
 /* key used to store the Env object in the Lua registry */

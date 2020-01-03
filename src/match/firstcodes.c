@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/arraydef.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
@@ -29,7 +29,7 @@
 #include "core/spacepeak.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread_api.h"
 #endif

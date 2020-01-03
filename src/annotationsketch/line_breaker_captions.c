@@ -17,10 +17,10 @@
 
 #include <math.h>
 #include "core/class_alloc_lock.h"
-#include "core/hashmap.h"
-#include "core/ma.h"
+#include "core/hashmap_api.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "annotationsketch/coords.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/drawing_range.h"

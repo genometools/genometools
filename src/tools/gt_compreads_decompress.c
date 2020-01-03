@@ -20,10 +20,10 @@
 
 #include "core/alphabet_api.h"
 #include "core/basename_api.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/range_api.h"
 #include "core/showtime.h"

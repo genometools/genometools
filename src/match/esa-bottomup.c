@@ -17,7 +17,7 @@
 */
 
 #include <limits.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "esa-bottomup.h"
 #include "esa-seqread.h"
 #include "esa_visitor.h"

@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/disc_distri_api.h"
 #include "core/encseq.h"
-#include "core/fasta.h"
-#include "core/fa.h"
+#include "core/fasta_api.h"
+#include "core/fa_api.h"
 #include "core/file_api.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/logger.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"

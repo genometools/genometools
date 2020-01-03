@@ -16,7 +16,7 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/bed_in_stream.h"
 #include "extended/bed_parser.h"

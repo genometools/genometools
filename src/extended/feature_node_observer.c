@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/feature_node_observer.h"
 
 GtFeatureNodeObserver* gt_feature_node_observer_new()

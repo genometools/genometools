@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "match/dataalign.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 
 #include "match/eis-specialsrank.h"
 #include "match/eis-specialsrank-priv.h"

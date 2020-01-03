@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/undef_api.h"
 #include "extended/aligned_segment.h"
 

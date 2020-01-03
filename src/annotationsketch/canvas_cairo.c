@@ -18,12 +18,12 @@
 #include <math.h>
 #include <string.h>
 #include "core/bittab.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
-#include "core/range.h"
+#include "core/minmax_api.h"
+#include "core/range_api.h"
 #include "core/unused_api.h"
 #include "core/undef_api.h"
 #include "annotationsketch/default_formats.h"

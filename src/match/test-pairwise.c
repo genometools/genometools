@@ -18,7 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdbool.h>
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"

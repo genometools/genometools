@@ -16,8 +16,8 @@
 */
 
 #include "core/class_alloc_lock.h"
-#include "core/ensure.h"
-#include "core/ma.h"
+#include "core/ensure_api.h"
+#include "core/ma_api.h"
 #include "core/codon_api.h"
 #include "core/codon_iterator_simple_api.h"
 #include "core/codon_iterator_rep.h"

@@ -16,13 +16,13 @@
 */
 
 #include "core/encseq_metadata.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/logger.h"
 #include "core/option_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "core/format64.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/mathsupport.h"
 #include "match/echoseq.h"
 #include "match/eis-voiditf.h"

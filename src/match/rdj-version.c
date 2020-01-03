@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/versionfunc.h"
 #include "match/rdj-version.h"
 

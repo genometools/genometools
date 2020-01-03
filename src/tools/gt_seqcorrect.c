@@ -16,15 +16,15 @@
 */
 
 #include <string.h>
-#include "core/fa.h"
-#include "core/ma.h"
+#include "core/fa_api.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/option_api.h"
 #include "core/encseq_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/intbits.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/showtime.h"
 #include "core/undef_api.h"
 #ifdef GT_THREADS_ENABLED

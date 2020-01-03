@@ -18,10 +18,10 @@
 #include <float.h>
 #include <math.h>
 #include "core/unused_api.h"
-#include "core/ensure.h"
-#include "core/error.h"
-#include "core/ma.h"
-#include "core/minmax.h"
+#include "core/ensure_api.h"
+#include "core/error_api.h"
+#include "core/ma_api.h"
+#include "core/minmax_api.h"
 #include "core/types_api.h"
 #include "core/encseq.h"
 #include "core/radix_sort.h"

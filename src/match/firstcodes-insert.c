@@ -18,7 +18,7 @@
 #include "core/intbits.h"
 #include "core/types_api.h"
 #include "core/codetype.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq.h"
 #include "kmercodes.h"
 #include "firstcodes-buf.h"

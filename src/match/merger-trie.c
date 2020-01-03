@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/arraydef.h"
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "core/encseq.h"

@@ -19,7 +19,7 @@
 #define KMERCODES_H
 #include "core/intbits.h"
 #include "core/codetype.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 
 static inline GtCodetype gt_kmercode_at_position(
                                    const GtTwobitencoding *twobitencoding,

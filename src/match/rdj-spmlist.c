@@ -19,15 +19,15 @@
 #include <string.h>
 #include <stdint.h>
 #include <limits.h>
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/assert_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/log_api.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"
-#include "core/ensure.h"
-#include "core/minmax.h"
-#include "core/ma.h"
+#include "core/ensure_api.h"
+#include "core/minmax_api.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match/rdj-spmlist.h"
 /* unit test: */

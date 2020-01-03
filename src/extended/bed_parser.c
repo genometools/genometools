@@ -16,12 +16,12 @@
 
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/io.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "extended/bed_parser.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <float.h>
 #include "core/ma_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"

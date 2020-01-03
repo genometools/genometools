@@ -17,7 +17,7 @@
 #ifndef PATH_MATRIX_H
 #define PATH_MATRIX_H
 
-#include "core/array2dim_sparse.h"
+#include "core/array2dim_sparse_api.h"
 
 typedef struct GthPathMatrix GthPathMatrix;
 

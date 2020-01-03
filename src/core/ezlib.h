@@ -19,7 +19,7 @@
 #define EZLIB_H
 
 #include <zlib.h>
-#include "core/error.h"
+#include "core/error_api.h"
 
 /*
   This module contains wrappers for the functions from the zlib we use.

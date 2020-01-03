@@ -1,7 +1,7 @@
 #include "core/unused_api.h"
 #include "core/assert_api.h"
 #include "core/arraydef.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "match/ft-trimstat.h"
 
 struct GtFtTrimstat

@@ -19,7 +19,7 @@
 #define ALIGNED_SEGMENT_H
 
 #include "core/encseq.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "extended/sam_alignment.h"
 #include "extended/samfile_encseq_mapping.h"
 

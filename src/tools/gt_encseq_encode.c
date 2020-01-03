@@ -18,10 +18,10 @@
 
 #include "core/alphabet.h"
 #include "core/basename_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/encseq.h"
 #include "core/encseq_options.h"
-#include "core/fileutils.h"
+#include "core/fileutils_api.h"
 #include "core/logger_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"

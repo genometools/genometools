@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/luahelper.h"
 #include "extended/stream_evaluator.h"
 #include "gtlua/genome_stream_lua.h"

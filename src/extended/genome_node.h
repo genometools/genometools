@@ -20,8 +20,8 @@
 
 #include "core/bittab.h"
 #include "core/phase_api.h"
-#include "core/range.h"
-#include "core/str.h"
+#include "core/range_api.h"
+#include "core/str_api.h"
 #include "extended/genome_node_api.h"
 
 void          gt_genome_node_set_origin(GtGenomeNode*, GtStr *filename,

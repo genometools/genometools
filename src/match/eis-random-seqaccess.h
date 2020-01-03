@@ -28,7 +28,7 @@
  */
 #include <stdlib.h>
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 #include "match/eis-mrangealphabet.h"
 

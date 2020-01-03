@@ -16,13 +16,13 @@
 */
 
 #include <string.h>
-#include "core/ma.h"
-#include "core/minmax.h"
+#include "core/ma_api.h"
+#include "core/minmax_api.h"
 #include "core/assert_api.h"
 #include "match/rdj-ovlfind-kmp.h"
 /* for unit test: */
 #include "core/array_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 
 gt_kmp_t* gt_kmp_preproc(const char *seq, GtUword seqlen)
 {

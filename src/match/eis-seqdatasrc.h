@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "sfx-suffixgetset.h"
 
 /* sequential data source api */

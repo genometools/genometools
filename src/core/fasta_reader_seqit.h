@@ -19,7 +19,7 @@
 #define FASTA_READER_SEQIT_H
 
 #include "core/fasta_reader.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* implements the ``fasta reader'' interface via the sequence iterator class */
 typedef struct GtFastaReaderSeqIt GtFastaReaderSeqIt;

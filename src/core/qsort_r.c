@@ -38,7 +38,7 @@
 #include <stdlib.h>
 
 #include "core/fptr_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/types_api.h"
 
 static inline void *

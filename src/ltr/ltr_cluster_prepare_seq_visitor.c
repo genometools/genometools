@@ -20,7 +20,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/encseq_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/log.h"
 #include "core/str_api.h"
 #include "core/str_array.h"

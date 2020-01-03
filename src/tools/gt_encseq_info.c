@@ -18,12 +18,12 @@
 #include <stdlib.h>
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"
-#include "core/ma.h"
-#include "core/minmax.h"
+#include "core/ma_api.h"
+#include "core/minmax_api.h"
 #include "core/array_api.h"
 #include "core/output_file_api.h"
 #include "core/unused_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "tools/gt_encseq_info.h"
 
 typedef struct {

@@ -18,7 +18,7 @@
 #ifndef GT_GTHBSSMBUILD_H
 #define GT_GTHBSSMBUILD_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* the gthbssmbuild tool */
 int gt_gthbssmbuild(int argc, const char **argv, GtError*);

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2013 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,16 +14,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FILEUTILS_H
-#define FILEUTILS_H
+#ifndef COMPAT_API_H
+#define COMPAT_API_H
 
-#include "core/fileutils_api.h"
+#include "core/types_api.h"
 
-/* Returns true if the file with the given <path> exists and is a directory,
-   false otherwise. */
-bool gt_file_exists_and_is_dir(const char *path);
+#ifndef _WIN32
+#define GT_PATH_SEPARATOR     '/'
+#define GT_PATH_SEPARATOR_STR "/"
+#define GT_PATH_VAR_SEPARATOR ':'
+#else
+#define GT_PATH_SEPARATOR     '\\'
+#define GT_PATH_SEPARATOR_STR "\\"
+#define GT_PATH_VAR_SEPARATOR ';'
+#endif
 
-/* Compare two files bytewise, fails hard with exit(1) if files differ. */
-void gt_xfile_cmp(const char *file1, const char *file2);
+int     gt_mkstemp(char *templ);
+GtUword gt_pagesize(void);
 
 #endif

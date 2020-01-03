@@ -16,7 +16,7 @@
 */
 
 #include "core/array.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/str_array.h"
 
 struct GtStrArray {

@@ -20,9 +20,9 @@
 #include <string.h>
 #include "core/array_api.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
 #include "core/strand_api.h"

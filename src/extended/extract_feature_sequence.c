@@ -17,7 +17,7 @@
 
 #include "core/codon_iterator_api.h"
 #include "core/codon_iterator_simple_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/trans_table_api.h"
 #include "core/translator_api.h"
 #include "extended/feature_node_iterator_api.h"

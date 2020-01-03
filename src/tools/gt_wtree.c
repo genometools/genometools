@@ -16,8 +16,8 @@
 */
 
 #include "core/cstr_array.h"
-#include "core/error.h"
-#include "core/ma.h"
+#include "core/error_api.h"
+#include "core/ma_api.h"
 #include "core/toolbox_api.h"
 #include "core/unused_api.h"
 #include "tools/gt_wtree.h"

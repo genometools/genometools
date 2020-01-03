@@ -19,7 +19,7 @@
 #define COORDS_H
 
 #include "annotationsketch/drawing_range.h"
-#include "core/range.h"
+#include "core/range_api.h"
 
 /* Returns width-independent coordinates (x,y) with 0 <= x,y <= 1
    for the given 1D coordinate. */

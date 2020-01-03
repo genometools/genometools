@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 
 /*
   This file defines macros to conveniently declare and

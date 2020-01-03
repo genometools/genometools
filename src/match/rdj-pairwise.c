@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/encseq.h"
 #include "core/progressbar.h"
 #include "core/unused_api.h"
@@ -27,7 +27,7 @@
 #include "match/rdj-pairwise.h"
 /* unit test: */
 #include "match/rdj-ensure-output.h"
-#include "core/fasta.h"
+#include "core/fasta_api.h"
 
 struct Read {
   char* seq;

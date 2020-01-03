@@ -26,7 +26,7 @@
 #else
 #include <direct.h>
 #endif
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/xposix.h"
 
 void gt_xclose(int d)

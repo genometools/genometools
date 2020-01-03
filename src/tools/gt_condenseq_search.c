@@ -26,7 +26,7 @@
 #endif
 
 #include "core/cstr_array.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/toolbox_api.h"
 #include "core/unused_api.h"

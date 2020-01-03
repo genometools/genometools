@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/cstr_api.h"
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/parseutils_api.h"
 #include "core/splitter_api.h"
 #include "extended/gap_str.h"

@@ -19,7 +19,7 @@
 #define TYR_BASIC_H
 
 #include "core/arraydef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 
 #define MERSUFFIX     ".mer"
 #define COUNTSSUFFIX  ".mct"

@@ -24,7 +24,7 @@
 #include "core/fileutils_api.h"
 #include "core/basename_api.h"
 #include "core/gtdatapath.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/splitter.h"
 #include "core/unused_api.h"
 #include "extended/gtdatahelp.h"

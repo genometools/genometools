@@ -16,11 +16,11 @@
 */
 
 #include "core/arraydef.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fasta_separator.h"
 #include "core/log_api.h"
 #include "core/xansi_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "extended/assembly_stats_calculator.h"
 #include "match/rdj-contigs-writer.h"
 #include "match/rdj-filesuf-def.h"

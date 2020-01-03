@@ -17,7 +17,7 @@
 
 #include "core/mathsupport.h"
 #include "core/md5_seqid.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/gff3_escaping.h"

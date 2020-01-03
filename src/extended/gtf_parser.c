@@ -18,8 +18,8 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
-#include "core/ma.h"
+#include "core/hashmap_api.h"
+#include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"
 #include "core/strand.h"

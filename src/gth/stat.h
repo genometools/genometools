@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include "core/disc_distri_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* stores all kinds of gth related statistical information */
 typedef struct GthStat GthStat;

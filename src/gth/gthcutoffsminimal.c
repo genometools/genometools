@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/unused_api.h"
 #include "gth/gthcutoffsminimal.h"
 

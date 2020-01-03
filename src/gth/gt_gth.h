@@ -18,7 +18,7 @@
 #ifndef GT_GTH_H
 #define GT_GTH_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "gth/plugins.h"
 
 /* the GenomeThreader similarity-based gene structure prediction tool */

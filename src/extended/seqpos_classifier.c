@@ -18,7 +18,7 @@
 #include <limits.h>
 #include <string.h>
 #include "core/log_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/undef_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"

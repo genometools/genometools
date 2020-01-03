@@ -16,11 +16,11 @@
 */
 
 #include "core/cstr_array.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/option_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"

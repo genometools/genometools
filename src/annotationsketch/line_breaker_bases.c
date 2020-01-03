@@ -17,7 +17,7 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/interval_tree.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/line_breaker_rep.h"

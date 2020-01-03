@@ -22,7 +22,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/types_api.h"
 
 /*

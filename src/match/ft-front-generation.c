@@ -7,7 +7,7 @@
 #include "distribution.h"
 #endif
 #include "core/assert_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match/ft-front-generation.h"

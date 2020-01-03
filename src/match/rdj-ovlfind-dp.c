@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
-#include "core/minmax.h"
+#include "core/ma_api.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 #include "core/log.h"
 #include "match/rdj-ovlfind-dp.h"
 /* unit test: */
 #include <string.h>
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/array_api.h"
 
 typedef struct

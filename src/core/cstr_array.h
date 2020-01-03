@@ -18,7 +18,7 @@
 #ifndef CSTR_ARRAY_H
 #define CSTR_ARRAY_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/types_api.h"
 
 /* Return copy of <gt_cstr_array>. */

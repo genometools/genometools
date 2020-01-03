@@ -17,10 +17,10 @@
 
 #include <stdio.h>
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/str_api.h"
 #include "core/xansi_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/log.h"
 #include "firstcodes-psbuf.h"
 #include "firstcodes-spacelog.h"

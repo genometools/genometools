@@ -19,7 +19,7 @@
 #include "annotationsketch/text_width_calculator.h"
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/thread_api.h"
 #include "core/unused_api.h"
 

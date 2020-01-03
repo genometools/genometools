@@ -19,8 +19,8 @@
 #ifndef SEQUENCE_BUFFER_INLINE_H
 #define SEQUENCE_BUFFER_INLINE_H
 
-#include "core/compat.h"
-#include "core/file.h"
+#include "core/compat_api.h"
+#include "core/file_api.h"
 #include "core/sequence_buffer_rep.h"
 
 /*@unused@*/ static inline int process_char(GtSequenceBuffer *sb,

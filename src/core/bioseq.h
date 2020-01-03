@@ -20,10 +20,10 @@
 
 #include "core/alphabet.h"
 #include "core/encseq.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fasta_reader.h"
 #include "core/seq.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 typedef struct GtBioseq GtBioseq;
 

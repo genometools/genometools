@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/fileutils_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/password_entry.h"
 #include "core/str_api.h"
 #include "core/unused_api.h"

@@ -16,7 +16,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
 #include "core/class_alloc_lock.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node_api.h"
 #include "extended/feature_node_iterator_api.h"

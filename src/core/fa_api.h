@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FA_H
-#define FA_H
+#ifndef FA_API_H
+#define FA_API_H
 
 #ifndef S_SPLINT_S
 #include <bzlib.h>
@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <zlib.h>
 #include "core/error_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 
 /* the file allocator module */
 

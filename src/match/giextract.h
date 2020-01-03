@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "core/str_api.h"
 #include "core/fileutils_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/logger.h"
 
 int gt_extractkeysfromfastafile(bool verbose,

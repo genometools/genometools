@@ -51,7 +51,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/msort.h"
 
 #define ISIZE sizeof (int)

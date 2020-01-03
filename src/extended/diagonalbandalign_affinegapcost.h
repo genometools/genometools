@@ -18,7 +18,7 @@
 #ifndef DIAGONALBANDALIGN_AFFINEGAPCOST_H
 #define DIAGONALBANDALIGN_AFFINEGAPCOST_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/alignment.h"

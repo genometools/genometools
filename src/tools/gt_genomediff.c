@@ -24,7 +24,7 @@
 #include "core/cstr_api.h"
 #include "core/encseq.h"
 #include "core/encseq_options.h"
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"

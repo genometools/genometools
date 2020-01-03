@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/readmode.h"
 
 static char *readmodes[] = {"fwd",

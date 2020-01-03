@@ -21,8 +21,32 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "core/error_api.h"
+#include "core/types_api.h"
 
 /* MemoryAllocation module */
+
+/* Initialize the memory allocator. Only needs to be done once per process. */
+void    gt_ma_init(bool bookkeeping);
+/* Enable bookkeeping for global space peak. */
+void    gt_ma_enable_global_spacepeak(void);
+/* Disable bookkeeping for global space peak. */
+void    gt_ma_disable_global_spacepeak(void);
+/* Return current global space peak, in bytes. */
+GtUword gt_ma_get_space_peak(void);
+/* Return current space usage, in bytes. */
+GtUword gt_ma_get_space_current(void);
+/* Print statistics about current space peak to <fp>. */
+void    gt_ma_show_space_peak(FILE *fp);
+/* Print statistics about allocations to <fp>. */
+void    gt_ma_show_allocations(FILE *fp);
+/* Returns TRUE if any bookeeping is enabled. */
+bool    gt_ma_bookkeeping_enabled(void);
+/* Check if all allocated memory has been freed, prints result to stderr. */
+int     gt_ma_check_space_leak(void);
+/* Finalize and free static data held by memory allocator. */
+void    gt_ma_clean(void);
+int     gt_ma_unit_test(GtError*);
 
 /* Allocate ___uninitialized___ space for an object whose size is specified by
    <size> and return it.

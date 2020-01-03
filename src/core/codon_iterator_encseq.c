@@ -17,8 +17,8 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/encseq.h"
-#include "core/ensure.h"
-#include "core/ma.h"
+#include "core/ensure_api.h"
+#include "core/ma_api.h"
 #include "core/codon_api.h"
 #include "core/codon_iterator_encseq_api.h"
 #include "core/codon_iterator_rep.h"

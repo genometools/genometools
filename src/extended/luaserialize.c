@@ -20,7 +20,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "core/assert_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/unused_api.h"
 #include "extended/luaserialize.h"
 

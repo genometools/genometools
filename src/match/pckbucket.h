@@ -18,8 +18,8 @@
 #ifndef PCKBUCKET_H
 #define PCKBUCKET_H
 
-#include "core/str.h"
-#include "core/error.h"
+#include "core/str_api.h"
+#include "core/error_api.h"
 #include "core/codetype.h"
 #include "eis-voiditf.h"
 #include "splititv.h"

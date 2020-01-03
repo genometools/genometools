@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/bsearch.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/unused_api.h"
 
 static void* bsearch_generic(GtArray *members, const void *key,

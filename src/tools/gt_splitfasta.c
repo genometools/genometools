@@ -16,11 +16,11 @@
 */
 
 #include "core/bioseq.h"
-#include "core/compat.h"
-#include "core/fa.h"
-#include "core/fasta.h"
+#include "core/compat_api.h"
+#include "core/fa_api.h"
+#include "core/fasta_api.h"
 #include "core/fileutils_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/output_file.h"
 #include "core/unused_api.h"

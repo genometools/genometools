@@ -19,7 +19,7 @@
 #define FASTA_READER_H
 
 #include <stdbool.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/types_api.h"
 
 /* the ``fasta reader'' interface */

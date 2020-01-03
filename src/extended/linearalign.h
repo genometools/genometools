@@ -21,7 +21,7 @@
 #define LINEARALIGN_H
 
 #include "core/unused_api.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "extended/linspace_management.h"
 #include "extended/scorehandler.h"
 

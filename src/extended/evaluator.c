@@ -17,8 +17,8 @@
 
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/ensure.h"
-#include "core/ma.h"
+#include "core/ensure_api.h"
+#include "core/ma_api.h"
 #include "extended/evaluator.h"
 
 struct GtEvaluator {

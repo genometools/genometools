@@ -19,7 +19,7 @@
 #define FEATURE_NODE_H
 
 #include "core/bittab.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/strand_api.h"
 #include "core/str_array.h"
 #include "extended/feature_node_api.h"

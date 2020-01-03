@@ -18,9 +18,9 @@
 #ifndef GFA_WRITER_H
 #define GFA_WRITER_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/encseq.h"
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* The <GtGfaWriter> class allows one to write string graph information in
    the GFA format of SGA (Simpsons and Durbin, 2012). */

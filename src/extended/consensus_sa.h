@@ -18,7 +18,7 @@
 #ifndef CONSENSUS_SA_H
 #define CONSENSUS_SA_H
 
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/strand_api.h"
 
 /*

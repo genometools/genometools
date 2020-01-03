@@ -20,7 +20,7 @@
 #include "lualib.h"
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "extended/mapping.h"
 
 struct GtMapping {

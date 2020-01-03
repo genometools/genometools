@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/unused_api.h"
 #include "fmindex.h"
 

@@ -18,7 +18,7 @@
 #ifndef SFX_NEXTCHAR_H
 #define SFX_NEXTCHAR_H
 
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 
 #define ADDNEXTCHAR(CODE,CC,NUMOFCHARS)\
         if ((NUMOFCHARS) == GT_DNAALPHASIZE)\

@@ -15,8 +15,8 @@
 */
 
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
-#include "core/ma.h"
+#include "core/hashmap_api.h"
+#include "core/ma_api.h"
 #include "core/str_api.h"
 #include "core/unused_api.h"
 #include "extended/region_node.h"

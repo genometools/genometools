@@ -18,8 +18,8 @@
 #include <math.h>
 #include "core/alphabet_api.h"
 #include "core/encseq_metadata.h"
-#include "core/ma.h"
-#include "core/str.h"
+#include "core/ma_api.h"
+#include "core/str_api.h"
 #include "core/tool_api.h"
 #include "match/pckbucket.h"
 #include "match/eis-voiditf.h"

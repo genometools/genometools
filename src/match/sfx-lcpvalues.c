@@ -17,8 +17,8 @@
 
 #include "core/arraydef.h"
 #include "core/disc_distri_api.h"
-#include "core/fa.h"
-#include "core/minmax.h"
+#include "core/fa_api.h"
+#include "core/minmax_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/rmq.h"

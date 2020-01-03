@@ -19,7 +19,7 @@
 #define SSPLICED_ALIGNMENT_H
 
 #include <stdbool.h>
-#include "core/range.h"
+#include "core/range_api.h"
 
 /* the simple spliced alignment class */
 typedef struct GtSSplicedAlignment GtSSplicedAlignment;

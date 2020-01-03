@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/alphabet.h"
 #include "core/arraydef.h"
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/fileutils_api.h"
 #include "core/format64.h"
 #include "core/intbits.h"

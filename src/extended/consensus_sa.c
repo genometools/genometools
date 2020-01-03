@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/bittab.h"
 #include "core/log.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/consensus_sa.h"

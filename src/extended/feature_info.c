@@ -17,8 +17,8 @@
 
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
-#include "core/ma.h"
+#include "core/hashmap_api.h"
+#include "core/ma_api.h"
 #include "extended/feature_info.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_defines.h"

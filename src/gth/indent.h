@@ -18,7 +18,7 @@
 #ifndef INDENT_H
 #define INDENT_H
 
-#include "core/file.h"
+#include "core/file_api.h"
 
 /* put <indentlevel> * 2 many blanks on <outfp> */
 void gth_indent(GtFile *outfp, unsigned int indentlevel);

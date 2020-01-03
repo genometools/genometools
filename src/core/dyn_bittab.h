@@ -19,7 +19,7 @@
 #define DYN_BITTAB_H
 
 #include <stdbool.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/types_api.h"
 
 /* a bittab which grows on demand */

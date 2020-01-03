@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/array2dim_sparse.h"
+#include "core/array2dim_sparse_api.h"
 #include "core/unused_api.h"
 
 /* allocate and fill the following sparse matrix:

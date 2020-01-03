@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_inline.h"

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "tools/gt_encseq_sample.h"
 
@@ -28,7 +28,7 @@
 #include "core/undef_api.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "core/mathsupport.h"
 #include "core/bittab_api.h"
 

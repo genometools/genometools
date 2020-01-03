@@ -16,7 +16,7 @@
 */
 
 #include "core/basename_api.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "core/logger.h"

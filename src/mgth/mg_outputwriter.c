@@ -18,7 +18,7 @@
 
 #include "mg_outputwriter.h"
 
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/unused_api.h"
 
 /* Funktion, die nacheinander die erforderlichen Funktionen zur Erstellung

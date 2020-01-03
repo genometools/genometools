@@ -23,7 +23,7 @@
  * eis-sa-common.h for suffix array class objects (type SASeqSrc).
  */
 #include <stdlib.h>
-#include "core/error.h"
+#include "core/error_api.h"
 #include "match/sarr-def.h"
 
 #include "match/eis-mrangealphabet.h"

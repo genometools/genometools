@@ -16,7 +16,7 @@
 */
 
 #include "core/dynalloc.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 
 void* gt_dynalloc(void *ptr, size_t *allocated, size_t size)
 {

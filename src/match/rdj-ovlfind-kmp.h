@@ -30,7 +30,7 @@
 */
 
 #include <stdint.h>
-#include "core/error.h"
+#include "core/error_api.h"
 
 typedef uint16_t gt_kmp_t;
 #define GT_KMP_MAX UINT16_MAX

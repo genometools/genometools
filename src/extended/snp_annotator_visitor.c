@@ -22,7 +22,7 @@
 #include "core/codon_api.h"
 #include "core/complement.h"
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/log.h"
 #include "core/ma_api.h"
 #include "core/strand_api.h"

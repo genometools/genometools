@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"

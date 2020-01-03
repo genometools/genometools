@@ -24,7 +24,7 @@
 #include "core/alphabet.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
-#include "core/divmodmul.h"
+#include "core/divmodmul_api.h"
 #include "core/encseq.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"

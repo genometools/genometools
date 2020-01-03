@@ -17,9 +17,9 @@
 
 #include "core/cstr_api.h"
 #include "core/cstr_table.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 #include "core/hashtable.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/strcmp.h"
 
 struct GtCstrTable {

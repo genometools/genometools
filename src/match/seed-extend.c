@@ -16,7 +16,7 @@
 */
 
 #include <float.h>
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "match/querymatch.h"
 #include "match/xdrop.h"
 #include "match/ft-front-prune.h"

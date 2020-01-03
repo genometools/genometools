@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr_array.h"
 #include "core/ma_api.h"
 #include "core/output_file.h"

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/str_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"

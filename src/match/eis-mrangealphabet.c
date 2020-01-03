@@ -23,7 +23,7 @@
 #include "core/chardef.h"
 #include "match/dataalign.h"
 #include "core/ma_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/str_array.h"
 #include "match/eis-mrangealphabet.h"

@@ -20,7 +20,7 @@
 
 #include <inttypes.h>
 
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/timer_api.h"
 #include "core/types_api.h"
 

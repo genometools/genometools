@@ -21,11 +21,11 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/fileutils_api.h"
 #include "core/xposix.h"
-#include "core/fa.h"
-#include "core/ma.h"
+#include "core/fa_api.h"
+#include "core/ma_api.h"
 #include "core/versionfunc.h"
 #include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/seq_iterator_fastq_api.h"

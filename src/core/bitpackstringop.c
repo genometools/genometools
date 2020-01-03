@@ -20,7 +20,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 /**
  * \if INTERNAL \file bitpackstringop.c \endif
  * Involved (i.e. not inlined) operations on bitstrings.

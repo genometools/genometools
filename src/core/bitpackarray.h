@@ -30,8 +30,8 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
-#include "core/error.h"
-#include "core/ma.h"
+#include "core/error_api.h"
+#include "core/ma_api.h"
 
 struct BitPackArray
 {

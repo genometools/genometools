@@ -16,13 +16,13 @@
 */
 
 #include <string.h> /* memcmp */
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/assert_api.h"
-#include "core/minmax.h"
+#include "core/minmax_api.h"
 #include "match/rdj-ovlfind-bf.h"
 /* for unit test: */
 #include "core/array_api.h"
-#include "core/ensure.h"
+#include "core/ensure_api.h"
 
 static inline bool contfind_bf(const char *a, GtUword alen,
     const char *b, GtUword blen)

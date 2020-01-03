@@ -17,7 +17,7 @@
 
 #include "core/encseq.h"
 #include "core/logger.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match/esa-seqread.h"
 #include "match/rdj-contfind-bottomup.h"

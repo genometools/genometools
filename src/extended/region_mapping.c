@@ -23,7 +23,7 @@
 #include "core/bioseq.h"
 #include "core/bioseq_col.h"
 #include "core/encseq_col.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/md5_seqid.h"
 #include "core/seq_col.h"
 #include "core/str_array.h"

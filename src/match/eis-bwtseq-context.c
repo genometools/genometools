@@ -22,8 +22,8 @@
 
 #include "core/bitpackstring.h"
 #include "match/dataalign.h"
-#include "core/fa.h"
-#include "core/str.h"
+#include "core/fa_api.h"
+#include "core/str_api.h"
 #include "core/xansi_api.h"
 
 #include "match/eis-bitpackseqpos.h"

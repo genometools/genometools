@@ -22,14 +22,14 @@
 #endif
 #include <fcntl.h>
 #include <unistd.h>
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"
 #include "core/ezlib.h"
-#include "core/hashmap.h"
-#include "core/fa.h"
-#include "core/ma.h"
+#include "core/hashmap_api.h"
+#include "core/fa_api.h"
+#include "core/ma_api.h"
 #include "core/spacepeak.h"
 #include "core/thread_api.h"
 #include "core/types_api.h"

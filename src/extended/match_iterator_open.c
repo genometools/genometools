@@ -18,11 +18,11 @@
 
 #include <stdio.h>
 #include "core/class_alloc_lock.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/bittab_api.h"
 #include "core/array_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 #include "core/fileutils_api.h"
 #include "extended/match.h"
 #include "extended/match_open.h"

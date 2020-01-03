@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fa.h"
+#include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/hashmap_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/md5_fingerprint_api.h"
 #include "core/md5_tab.h"
 #include "core/undef_api.h"

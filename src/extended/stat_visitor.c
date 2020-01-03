@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/compat.h"
+#include "core/compat_api.h"
 #include "core/cstr_table_api.h"
 #include "core/disc_distri_api.h"
 #include "core/string_distri.h"

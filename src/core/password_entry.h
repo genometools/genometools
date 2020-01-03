@@ -18,8 +18,8 @@
 #ifndef PASSWORD_ENTRY_H
 #define PASSWORD_ENTRY_H
 
-#include <core/error.h>
-#include <core/str.h>
+#include <core/error_api.h>
+#include <core/str_api.h>
 
 GtStr* gt_get_password(const char *prompt, GtError *err);
 

@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fa.h"
-#include "core/str.h"
+#include "core/fa_api.h"
+#include "core/str_api.h"
 #include "extended/sspliced_alignment.h"
 #include "extended/sspliced_alignment_parsing.h"
 

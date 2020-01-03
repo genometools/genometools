@@ -17,8 +17,8 @@
 
 #include <string.h>
 #include "lauxlib.h"
-#include "core/error.h"
-#include "core/ma.h"
+#include "core/error_api.h"
+#include "core/ma_api.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"
 #include "extended/luahelper.h"
