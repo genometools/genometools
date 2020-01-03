@@ -48,13 +48,17 @@ typedef int (*GtHashmapVisitFunc)(void *key, void *value, void *data,
    strings are identical, regardless of their address in memory */
 GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
                           GtFree valuefree);
-
+/* Like gt_hashmap_new(), but without using GenomeTools' memory allocator. */
+GtHashmap* gt_hashmap_new_no_ma(GtHashType keyhashtype, GtFree keyfree,
+                                GtFree valuefree);
 /* Increase the reference count of <hm>. */
 GtHashmap* gt_hashmap_ref(GtHashmap *hm);
 
 /* Return the value stored in <hashmap> for <key> or <NULL> if no such key
    exists. */
 void*      gt_hashmap_get(GtHashmap *hashmap, const void *key);
+/* Returns the key stored in <hm> for <key> or NULL if no such key exists. */
+void*      gt_hashmap_get_key(GtHashmap *hm, const void *key);
 /* Set the value stored in <hashmap> for <key> to <value>, overwriting the prior
    value for that key if present. */
 void       gt_hashmap_add(GtHashmap *hashmap, void *key, void *value);
@@ -81,4 +85,5 @@ void       gt_hashmap_reset(GtHashmap *hashmap);
 /* Delete <hashmap>, calling the free function if necessary. */
 void       gt_hashmap_delete(GtHashmap *hashmap);
 
+int        gt_hashmap_unit_test(GtError*);
 #endif

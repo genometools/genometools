@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/parseutils.h"
 #include "core/splitter.h"

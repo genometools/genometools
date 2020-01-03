@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "core/dlist.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/thread_api.h"
 #include "extended/genome_node.h"
 

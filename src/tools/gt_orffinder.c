@@ -21,7 +21,7 @@
 #include "core/codon_iterator_encseq_api.h"
 #include "core/encseq.h"
 #include "core/fileutils_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/log.h"
 #include "core/logger.h"
 #include "core/ma.h"

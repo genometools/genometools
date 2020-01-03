@@ -19,7 +19,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/dlist.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

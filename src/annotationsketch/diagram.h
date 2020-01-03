@@ -22,7 +22,7 @@
 
 #include "annotationsketch/diagram_api.h"
 #include "core/error_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 
 GtHashmap* gt_diagram_get_blocks(GtDiagram *diagram, GtError *err);
 GtArray*   gt_diagram_get_custom_tracks(const GtDiagram *diagram);

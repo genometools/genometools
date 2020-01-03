@@ -21,7 +21,7 @@
 #include "core/assert_api.h"
 #include "core/fasta_api.h"
 #include "core/file_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/string_distri.h"

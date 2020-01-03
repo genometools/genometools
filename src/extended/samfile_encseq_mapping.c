@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/log.h"
 #include "core/cstr_api.h"
 #include "core/ma.h"

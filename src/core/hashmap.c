@@ -18,7 +18,7 @@
 #include "core/cstr_api.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/hashmap-generic.h"
 #include "core/types_api.h"
 

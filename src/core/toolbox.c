@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"

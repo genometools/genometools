@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"

@@ -22,7 +22,7 @@
 #include "core/ensure_api.h"
 #include "core/fileutils_api.h"
 #include "core/hashtable.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/hashmap-generic.h"
 #include "core/log_api.h"
 #include "core/ma.h"

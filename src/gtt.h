@@ -19,7 +19,7 @@
 #define GTT_H
 
 #include "core/fptr_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/toolbox.h"
 
 /* The GenomeTools toolbox (gtt) module */

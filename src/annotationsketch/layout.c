@@ -28,7 +28,7 @@
 #include "core/basename_api.h"
 #include "core/cstr_api.h"
 #include "core/ensure_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"

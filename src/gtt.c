@@ -40,7 +40,7 @@
 #include "core/dyn_bittab.h"
 #include "core/encseq.h"
 #include "core/grep_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/hashtable.h"
 #include "core/interval_tree.h"
 #include "core/mathsupport.h"

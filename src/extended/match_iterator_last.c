@@ -27,7 +27,7 @@
 #include "core/encseq.h"
 #include "core/fasta_api.h"
 #include "core/fileutils_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/md5_fingerprint_api.h"

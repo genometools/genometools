@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/range.h"

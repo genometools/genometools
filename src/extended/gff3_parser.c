@@ -23,7 +23,7 @@
 #include "core/assert_api.h"
 #include "core/compat_api.h"
 #include "core/cstr_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
 #include "core/parseutils.h"

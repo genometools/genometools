@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/array_api.h"
 #include "core/compat_api.h"
-#include "core/hashmap.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/multithread_api.h"
 #include "core/spacecalc.h"
