@@ -35,7 +35,7 @@
 #include "core/intbits.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/seq_iterator_fastq_api.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"

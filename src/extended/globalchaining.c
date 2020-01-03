@@ -21,7 +21,7 @@
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/log.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/undef_api.h"
 #include "extended/globalchaining.h"
 

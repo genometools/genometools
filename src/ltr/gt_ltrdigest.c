@@ -27,7 +27,7 @@
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/range_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/gff3_in_stream.h"

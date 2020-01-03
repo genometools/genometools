@@ -23,7 +23,7 @@
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/condenseq.h"

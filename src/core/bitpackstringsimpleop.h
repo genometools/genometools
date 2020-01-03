@@ -26,7 +26,7 @@
 #include "core/bitpackstring.h"
 #include "core/dynalloc.h"
 #include "core/compat_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 
 /**
  * \if INTERNAL \file bitpackstringsimpleop.h \endif

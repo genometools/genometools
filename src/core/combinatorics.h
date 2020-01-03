@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 #include "core/minmax_api.h"
 #include "core/unused_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/types_api.h"
 
 /* The combinatorics module implements some standard approaches for

@@ -24,7 +24,7 @@
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/showtime.h"
 #include "core/splitter_api.h"
 #include "core/undef_api.h"

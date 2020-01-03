@@ -28,7 +28,7 @@
 #include "core/option_api.h"
 #include "core/str_array.h"
 #include "core/output_file_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

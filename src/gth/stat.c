@@ -16,7 +16,7 @@
 */
 
 #include "core/ma_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "gth/default.h"
 #include "gth/gthoutput.h"
 #include "gth/time.h"

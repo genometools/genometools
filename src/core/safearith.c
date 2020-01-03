@@ -18,7 +18,7 @@
 
 #include <limits.h>
 #include "core/ensure_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 

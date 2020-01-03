@@ -26,7 +26,7 @@
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/range_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/showtime.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/undef_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "gth/backtrace_path.h"
 #include "gth/gthcutoffsminimal.h"
 #include "gth/gthcutoffsrelaxed.h"

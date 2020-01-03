@@ -21,7 +21,7 @@
 #include "core/compat_api.h"
 #include "core/log.h"
 #include "core/ma_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/types_api.h"
 #include "extended/md5set.h"
 #include "extended/md5set_primes_table.h"

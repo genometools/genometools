@@ -25,7 +25,7 @@
 #include "core/fa_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"

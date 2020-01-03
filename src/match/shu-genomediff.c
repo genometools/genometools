@@ -24,7 +24,7 @@
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "match/eis-voiditf.h"
 #include "match/esa-seqread.h"
 #include "match/esa-shulen.h"

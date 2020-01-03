@@ -19,7 +19,7 @@
 #include "core/chardef.h"
 #include "core/ma_api.h"
 #include "core/range_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/unused_api.h"
 #include "gth/bssm_param_rep.h"
 #include "gth/default.h"

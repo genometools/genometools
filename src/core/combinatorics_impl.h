@@ -22,7 +22,7 @@
 #include "core/error_api.h"
 #include "core/minmax_api.h"
 #include "core/unused_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 
 #if defined (_LP64) || defined (_WIN64)
 #define GT_BINOMIAL_MAX_N_LN 66UL

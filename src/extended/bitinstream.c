@@ -24,7 +24,7 @@
 #include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/log_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/xansi_api.h"
 #include "extended/bitinstream.h"
 

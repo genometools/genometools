@@ -23,7 +23,7 @@
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/unused_api.h"
 
 #include "match/shu-encseq-gc.h"

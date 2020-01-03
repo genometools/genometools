@@ -34,7 +34,7 @@
 #include "core/mathsupport.h"
 #include "core/parseutils_api.h"
 #include "core/queue_api.h"
-#include "core/safearith.h"
+#include "core/safearith_api.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
