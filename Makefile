@@ -400,7 +400,6 @@ LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/gtlua \
                       src/match \
-                      src/gth \
                       src/ltr \
                       src/mgth
 
