@@ -20,7 +20,7 @@
 #include "core/array.h"
 #include "core/array2dim_api.h"
 #include "core/array2dim_sparse_api.h"
-#include "core/array3dim.h"
+#include "core/array3dim_api.h"
 #include "core/basename_api.h"
 #include "core/bitpackarray.h"
 #include "core/bitpackstring.h"
