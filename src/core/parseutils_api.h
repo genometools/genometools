@@ -61,6 +61,12 @@ int gt_parse_double(double *out, const char *nptr);
 int gt_parse_range(GtRange *rng, const char *start, const char *end,
                    unsigned int line_number, const char *filename, GtError*);
 
+/* Parse the range description in the given <description> and store it in
+   <range>. Range descriptions have the folowing format: III:1000001..2000000
+   That is, the part between ':' and '..' denotes the range start and the part
+   after '..' the end. Returns 0 upon success and -1 upon failure. */
+int gt_parse_description_range(const char *description, GtRange *range);
+
 /* Like <gt_parse_range>, but issues a warning if <start> is larger then <end>
    and swaps both values. It also issues a warning, if <start> and/or <end> is
    not-positive and sets the corresponding value to 1. */
