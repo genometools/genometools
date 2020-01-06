@@ -25,7 +25,7 @@
 #include "core/undef_api.h"
 #include "core/warning_api.h"
 #include "extended/aligned_segments_pile.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/hpol_processor.h"
 #include "extended/reverse_api.h"
 #include "extended/seqpos_classifier.h"

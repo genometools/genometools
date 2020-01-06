@@ -29,7 +29,7 @@
 #include "core/minmax_api.h"
 #include "core/str_api.h"
 #include "core/undef_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 #include "extended/region_node_api.h"

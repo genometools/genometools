@@ -22,7 +22,7 @@
 #include "core/str_array_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/tir_stream.h"
 #include "extended/visitor_stream.h"

@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "core/cstr_table.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/type_checker.h"
 
 struct GtTypeCheckerClass {

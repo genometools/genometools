@@ -27,7 +27,7 @@
 #include "core/unused_api.h"
 #include "extended/cds_visitor_api.h"
 #include "extended/feature_node.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/splicedseq.h"
 

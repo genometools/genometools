@@ -37,7 +37,7 @@
 #include "extended/feature_info.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/gap_str.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_defines.h"

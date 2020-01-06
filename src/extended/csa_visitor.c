@@ -24,7 +24,7 @@
 #include "extended/csa_variable_strands.h"
 #include "extended/csa_visitor.h"
 #include "extended/feature_node.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/gff3_defines.h"
 #include "extended/node_visitor_api.h"
 

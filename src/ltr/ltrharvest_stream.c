@@ -36,7 +36,7 @@
 #include "core/types_api.h"
 #include "core/undef_api.h"
 #include "core/warning_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 #include "match/esa-seqread.h"

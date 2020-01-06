@@ -20,7 +20,7 @@
 #include "core/undef_api.h"
 #include "core/seq_iterator_fastq_api.h"
 #include "core/unused_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/gtdatahelp.h"
 #include "extended/hpol_processor.h"
 #include "tools/gt_hop.h"

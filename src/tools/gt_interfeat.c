@@ -16,7 +16,7 @@
 
 #include "core/ma_api.h"
 #include "core/output_file_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/inter_feature_stream_api.h"

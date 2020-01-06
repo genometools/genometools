@@ -21,7 +21,7 @@
 #include "extended/cds_check_visitor.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_node.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/gff3_defines.h"
 #include "extended/node_visitor_api.h"
 

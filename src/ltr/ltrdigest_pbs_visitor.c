@@ -35,7 +35,7 @@
 #include "extended/extract_feature_sequence.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/reverse_api.h"
 #include "extended/swalign.h"

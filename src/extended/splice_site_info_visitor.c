@@ -26,7 +26,7 @@
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/splice_site_info_visitor.h"
 #include "extended/reverse_api.h"

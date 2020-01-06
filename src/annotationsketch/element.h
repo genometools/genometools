@@ -26,7 +26,7 @@ typedef struct GtElement GtElement;
 #include "annotationsketch/drawing_range.h"
 #include "core/range_api.h"
 #include "core/strand_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/genome_node.h"
 
 /* Creates a complete new <GtElement> object. */

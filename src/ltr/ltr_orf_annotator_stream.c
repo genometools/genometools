@@ -17,7 +17,7 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/hashmap_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/orf_finder_stream.h"
 #include "extended/region_mapping.h"
 #include "ltr/ltr_orf_annotator_stream_api.h"

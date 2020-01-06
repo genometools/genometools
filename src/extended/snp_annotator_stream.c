@@ -26,7 +26,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/merge_stream.h"
 #include "extended/snp_annotator_stream.h"
 #include "extended/snp_annotator_visitor.h"
