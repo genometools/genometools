@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/cstr_api.h"
 #include "core/fasta_api.h"
 #include "core/ma_api.h"

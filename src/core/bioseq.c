@@ -18,7 +18,7 @@
 
 #include <signal.h>
 #include <string.h>
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/cstr_api.h"
 #include "core/disc_distri_api.h"
 #include "core/dynalloc.h"

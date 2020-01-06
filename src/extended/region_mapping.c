@@ -20,7 +20,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "core/assert_api.h"
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/bioseq_col.h"
 #include "core/encseq_col.h"
 #include "core/ma_api.h"

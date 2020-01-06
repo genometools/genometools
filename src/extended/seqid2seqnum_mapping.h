@@ -17,7 +17,7 @@
 #ifndef SEQID2SEQNUM_MAPPING_H
 #define SEQID2SEQNUM_MAPPING_H
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/range_api.h"
 #include "core/seq_col.h"
 

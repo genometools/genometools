@@ -17,7 +17,7 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/bioseq_col.h"
 #include "core/fa_api.h"
 #include "core/fasta_api.h"

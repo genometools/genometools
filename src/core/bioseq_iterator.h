@@ -18,7 +18,7 @@
 #ifndef BIOSEQ_ITERATOR_H
 #define BIOSEQ_ITERATOR_H
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 
 typedef struct GtBioseqIterator GtBioseqIterator;
 

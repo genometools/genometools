@@ -27,7 +27,7 @@
 #if CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
 #endif
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/cstr_api.h"
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"

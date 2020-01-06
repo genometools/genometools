@@ -15,14 +15,14 @@
    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef BIOSEQ_H
-#define BIOSEQ_H
+#ifndef BIOSEQ_API_H
+#define BIOSEQ_API_H
 
-#include "core/alphabet.h"
-#include "core/encseq.h"
+#include "core/alphabet_api.h"
+#include "core/encseq_api.h"
 #include "core/error_api.h"
-#include "core/fasta_reader.h"
-#include "core/seq.h"
+#include "core/fasta_reader_api.h"
+#include "core/seq_api.h"
 #include "core/str_api.h"
 
 typedef struct GtBioseq GtBioseq;

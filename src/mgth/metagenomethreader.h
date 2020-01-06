@@ -24,7 +24,7 @@
 #include <time.h>
 #include "core/array.h"
 #include "core/array2dim_api.h"
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/dlist_api.h"
 #include "core/error_api.h"
 #include "core/hashmap-generic.h"

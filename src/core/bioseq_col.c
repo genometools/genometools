@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/bioseq_col.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"

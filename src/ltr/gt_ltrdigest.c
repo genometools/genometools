@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/encseq.h"
 #include "core/fileutils_api.h"
 #include "core/log.h"

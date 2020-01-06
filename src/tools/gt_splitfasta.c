@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/compat_api.h"
 #include "core/fa_api.h"
 #include "core/fasta_api.h"
