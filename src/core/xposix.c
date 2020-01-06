@@ -27,7 +27,7 @@
 #include <direct.h>
 #endif
 #include "core/compat_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 void gt_xclose(int d)
 {

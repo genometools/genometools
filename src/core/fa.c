@@ -37,7 +37,7 @@
 #include "core/xansi_api.h"
 #include "core/xbsd.h"
 #include "core/xbzlib.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "core/xzlib.h"
 
 /* the file allocator class */

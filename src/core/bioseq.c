@@ -40,7 +40,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 struct GtBioseq {
   bool use_stdin;

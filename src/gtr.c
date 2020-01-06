@@ -47,7 +47,7 @@
 #include "core/unit_testing_api.h"
 #include "core/versionfunc_api.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "core/yarandom.h"
 #include "extended/gtdatahelp.h"
 #include "extended/luahelper.h"

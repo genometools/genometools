@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 #include "core/compat_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "core/xansi_api.h"
 #include "core/fa_api.h"
 #include "core/intbits.h"

@@ -21,7 +21,7 @@
 #include "core/option_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "tools/gt_clean.h"
 
 static GtOptionParser* gt_clean_option_parser_new(GT_UNUSED void

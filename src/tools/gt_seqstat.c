@@ -23,7 +23,7 @@
 
 #include "core/compat_api.h"
 #include "core/fileutils_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "core/fa_api.h"
 #include "core/ma_api.h"
 #include "core/versionfunc_api.h"

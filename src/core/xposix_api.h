@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef XPOSIX_H
-#define XPOSIX_H
+#ifndef XPOSIX_API_H
+#define XPOSIX_API_H
 
 #ifndef S_SPLINT_S
 #ifndef _WIN32

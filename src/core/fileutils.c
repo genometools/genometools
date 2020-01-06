@@ -27,7 +27,7 @@
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 typedef bool (*FileExistsFunc)(const char *path);
 
