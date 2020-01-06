@@ -18,7 +18,7 @@
 #include "clustered_set_uf.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 
 const GtClusteredSetClass* gt_clustered_set_class_new(
   size_t size,

@@ -22,7 +22,7 @@
 /* #include <fontconfig.h> */
 #endif
 #include <string.h>
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/combinatorics.h"
 #include "core/cstr_api.h"

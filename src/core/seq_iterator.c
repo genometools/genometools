@@ -18,7 +18,7 @@
 */
 
 #include "core/arraydef_api.h"
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 #include "core/types_api.h"
 #include "core/seq_iterator_rep.h"
 #include "core/unused_api.h"

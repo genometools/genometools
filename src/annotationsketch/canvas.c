@@ -18,7 +18,7 @@
 #include <math.h>
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"

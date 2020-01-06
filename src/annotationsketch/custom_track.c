@@ -18,7 +18,7 @@
 #include "annotationsketch/custom_track_rep.h"
 #include "annotationsketch/custom_track.h"
 #include "core/assert_api.h"
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 

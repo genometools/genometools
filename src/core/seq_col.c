@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 #include "core/seq_col.h"
 #include "core/seq_col_rep.h"
 #include "core/ma_api.h"

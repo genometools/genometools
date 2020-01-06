@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CLASS_ALLOC_H
-#define CLASS_ALLOC_H
+#ifndef CLASS_ALLOC_API_H
+#define CLASS_ALLOC_API_H
 
 #include <stdlib.h>
 
