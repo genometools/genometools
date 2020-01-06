@@ -32,7 +32,7 @@
 #include "core/assert_api.h"
 #include "core/chardef_api.h"
 #include "core/ensure_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/xansi_api.h"
 #include "extended/coin_hmm.h"
 #include "extended/dice_hmm.h"

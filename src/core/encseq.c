@@ -50,7 +50,7 @@
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/mapspec.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/md5_encoder_api.h"
 #include "core/minmax_api.h"
 #include "core/progressbar.h"

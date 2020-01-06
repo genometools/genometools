@@ -16,7 +16,7 @@
 */
 
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "extended/shredder.h"
 
 struct GtShredder {

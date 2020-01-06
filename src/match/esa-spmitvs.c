@@ -17,7 +17,7 @@
 */
 
 #include "core/unused_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "match/esa_spmitvs_visitor.h"
 #include "esa-spmitvs.h"
 #include "esa-bottomup.h"

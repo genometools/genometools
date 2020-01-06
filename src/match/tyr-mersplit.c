@@ -21,7 +21,7 @@
 #include "core/divmodmul_api.h"
 #include "core/fa_api.h"
 #include "core/intbits.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/minmax_api.h"
 #include "core/str_api.h"
 #include "core/types_api.h"

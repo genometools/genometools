@@ -22,7 +22,7 @@
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/msort.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/qsort_r_api.h"
 #include "core/range_api.h"
 #include "core/unused_api.h"

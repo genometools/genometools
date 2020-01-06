@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/ensure_api.h"
 #include "core/quality.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 
 unsigned int gt_quality_fastq_to_phred(const GtUchar c)
 {

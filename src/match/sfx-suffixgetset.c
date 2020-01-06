@@ -22,7 +22,7 @@
 #include "core/defined-types.h"
 #include "core/logger_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/safearith_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"

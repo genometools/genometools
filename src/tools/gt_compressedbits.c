@@ -22,7 +22,7 @@
 #include "core/intbits.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/str_api.h"
 #include "core/str_api.h"
 #include "core/unused_api.h"

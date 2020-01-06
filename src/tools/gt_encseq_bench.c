@@ -20,7 +20,7 @@
 #include "core/unused_api.h"
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/showtime.h"
 #include "core/logger.h"
 #include "tools/gt_encseq_bench.h"

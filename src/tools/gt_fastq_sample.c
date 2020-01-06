@@ -22,7 +22,7 @@
 #include "core/fasta_api.h"
 #include "core/fastq.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/seq_iterator_api.h"
 #include "core/seq_iterator_fastq_api.h"
 #include "core/str_array_api.h"

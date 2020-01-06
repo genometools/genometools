@@ -21,7 +21,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/qsort_r_api.h"
 #include "core/dual-pivot-qsort.h"
 #include "core/str_api.h"

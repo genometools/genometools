@@ -26,7 +26,7 @@
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/log.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/md5_seqid.h"
 #include "core/minmax_api.h"
 #include "core/multithread_api.h"

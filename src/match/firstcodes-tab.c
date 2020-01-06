@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #ifdef SKDEBUG
 #include "core/disc_distri_api.h"
 #endif

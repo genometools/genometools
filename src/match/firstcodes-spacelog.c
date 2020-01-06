@@ -22,7 +22,7 @@
 #include "core/log_api.h"
 #include "core/spacecalc.h"
 #include "core/spacepeak.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "firstcodes-spacelog.h"
 
 typedef struct

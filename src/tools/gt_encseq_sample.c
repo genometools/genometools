@@ -29,7 +29,7 @@
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "core/minmax_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/bittab_api.h"
 
 #include <string.h>

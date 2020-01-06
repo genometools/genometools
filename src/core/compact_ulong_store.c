@@ -19,7 +19,7 @@
 #include <limits.h>
 #include "intbits.h"
 #include "error_api.h"
-#include "mathsupport.h"
+#include "mathsupport_api.h"
 #include "ensure_api.h"
 #include "assert_api.h"
 #include "compact_ulong_store.h"

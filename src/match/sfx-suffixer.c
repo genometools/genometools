@@ -36,7 +36,7 @@
 #include "core/encseq.h"
 #include "core/safecast-gen.h"
 #include "core/log_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/spacecalc.h"
 #include "core/divmodmul_api.h"
 #include "core/format64.h"

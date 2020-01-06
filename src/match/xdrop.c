@@ -23,7 +23,7 @@
 #include "core/divmodmul_api.h"
 #include "core/ensure_api.h"
 #include "core/log_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/minmax_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"

@@ -16,7 +16,7 @@
 */
 
 #include "mg_computepath.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 
 /* Funktion zur Berechnung der erlaubten Vorgaenger-Leserahmen
    Parameter: aktueller Leserahmen, Position in der Query-Sequence,

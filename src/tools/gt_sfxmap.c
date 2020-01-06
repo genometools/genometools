@@ -23,7 +23,7 @@
 #include "core/unused_api.h"
 #include "core/format64.h"
 #include "core/fa_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "match/echoseq.h"
 #include "match/eis-voiditf.h"
 #include "match/esa-lcpintervals.h"

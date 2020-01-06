@@ -23,7 +23,7 @@
 #include "core/ensure_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/safearith_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"

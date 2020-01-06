@@ -32,7 +32,7 @@
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "esa-fileend.h"
 #include "esa-shulen.h"
 #include "giextract.h"

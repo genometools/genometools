@@ -20,7 +20,7 @@
 #include "core/ma_api.h"
 #include "core/encseq.h"
 #include "core/range_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/logger.h"
 #include "core/minmax_api.h"
 #include "core/compact_ulong_store.h"

@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/strand_api.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_api.h"

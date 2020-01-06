@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "gtlua/mathsupport_lua.h"
 
 static int gt_lua_mathsupport_rand_max(lua_State *L)

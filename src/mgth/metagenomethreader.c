@@ -18,7 +18,7 @@
 #include "core/fileutils_api.h"
 #include "core/file_api.h"
 #include "core/hashmap-generic.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/unused_api.h"
 #include "match/giextract.h"
 #include "mg_xmlparser.h"

@@ -19,7 +19,7 @@
 #include "core/dlist.h"
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/unused_api.h"
 
 #define NUM_OF_TESTS  100

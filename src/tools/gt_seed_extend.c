@@ -26,7 +26,7 @@
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/minmax_api.h"
 #include "core/parseutils_api.h"
 #include "core/range_api.h"
