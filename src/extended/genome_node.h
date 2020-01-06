@@ -40,7 +40,6 @@ int           gt_genome_node_compare_delta(GtGenomeNode**, GtGenomeNode**,
 int           gt_genome_node_compare_numeric_seqids(GtGenomeNode **gn_a,
                                                     GtGenomeNode **gn_b);
 
-void          gt_genome_nodes_show(GtArray *nodes, GtFile *outfp);
 bool          gt_genome_nodes_are_equal_region_nodes(GtGenomeNode*,
                                                      GtGenomeNode*);
 bool          gt_genome_nodes_are_sorted(const GtArray*);
