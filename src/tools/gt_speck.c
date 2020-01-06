@@ -31,7 +31,7 @@
 #include "extended/feature_index_api.h"
 #include "extended/feature_index_memory.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "extended/sort_stream_api.h"
 #include "extended/spec_visitor.h"
 #include "extended/typecheck_info.h"

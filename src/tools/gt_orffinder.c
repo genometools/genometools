@@ -37,7 +37,7 @@
 #include "extended/gff3_out_stream_api.h"
 #include "extended/region_mapping.h"
 #include "extended/orf_finder_stream.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "gt_orffinder.h"
 
 typedef struct {

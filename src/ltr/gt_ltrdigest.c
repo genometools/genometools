@@ -33,7 +33,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/region_mapping.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "extended/visitor_stream.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltr_input_check_visitor.h"

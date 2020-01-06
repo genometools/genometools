@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQID2FILE_H
-#define SEQID2FILE_H
+#ifndef SEQID2FILE_API_H
+#define SEQID2FILE_API_H
 
 #include "core/option_api.h"
 #include "extended/region_mapping_api.h"

@@ -25,7 +25,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtdatahelp.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "tools/gt_extractfeat.h"
 
 typedef struct {

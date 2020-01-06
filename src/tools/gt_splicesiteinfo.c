@@ -25,7 +25,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/splice_site_info_stream.h"
 #include "extended/gtdatahelp.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "tools/gt_splicesiteinfo.h"
 
 typedef struct {

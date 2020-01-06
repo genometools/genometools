@@ -20,7 +20,7 @@
 #include "core/unused_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "extended/sequence_node_add_stream.h"
 #include "extended/visitor_stream.h"
 #include "tools/gt_inlineseq_add.h"
