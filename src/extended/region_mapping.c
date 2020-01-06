@@ -16,18 +16,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
 #include "core/assert_api.h"
 #include "core/bioseq_api.h"
 #include "core/bioseq_col.h"
+#include "core/encseq.h"
 #include "core/encseq_col.h"
 #include "core/ma_api.h"
 #include "core/md5_seqid.h"
 #include "core/seq_col.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "extended/mapping.h"
 #include "extended/region_mapping_api.h"
 #include "extended/seqid2seqnum_mapping.h"
