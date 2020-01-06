@@ -32,7 +32,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/kmer_database.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 #include "match/sfx-mappedstr.h"
 #include "match/xdrop.h"
 

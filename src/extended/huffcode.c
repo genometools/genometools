@@ -28,7 +28,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/huffcode.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 
 typedef struct GtHuffmanSymbol {
   GtUint64 freq;

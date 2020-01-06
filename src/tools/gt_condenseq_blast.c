@@ -50,7 +50,7 @@
 #include "extended/match.h"
 #include "extended/match_blast_api.h"
 #include "extended/match_iterator_blast.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 
 #include "extended/condenseq_search_arguments.h"
 #include "tools/gt_condenseq_blast.h"

@@ -57,7 +57,7 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/yarandom_api.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 
 #ifndef HEIGHT_LIMIT
 #define HEIGHT_LIMIT 64

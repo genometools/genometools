@@ -40,7 +40,7 @@
 #include "core/xansi_api.h"
 #include "extended/condenseq.h"
 #include "extended/condenseq_search_arguments.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 #include "extended/safe_popen.h"
 #include "tools/gt_condenseq_hmmsearch.h"
 

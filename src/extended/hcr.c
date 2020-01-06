@@ -46,7 +46,7 @@
 #include "extended/encdesc.h"
 #include "extended/fasta_header_iterator.h"
 #include "extended/hcr.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 #include "extended/sampling.h"
 
 #define HCR_LOWESTQUALVALUE 0

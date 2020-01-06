@@ -77,7 +77,7 @@
 #include "extended/popcount_tab.h"
 #include "extended/priority_queue.h"
 #include "extended/ranked_list.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 #include "extended/rmq.h"
 #include "extended/splicedseq.h"
 #include "extended/string_matching.h"

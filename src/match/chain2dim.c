@@ -24,7 +24,7 @@
 #include "core/ma_api.h"
 #include "core/arraydef_api.h"
 #include "core/logger.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 #include "extended/ranked_list.h"
 #include "chain2dim.h"
 #include "prsqualint.h"

@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RBTREE_H
-#define RBTREE_H
+#ifndef RBTREE_API_H
+#define RBTREE_API_H
 
 #include "core/error_api.h"
 #include "core/fptr_api.h"
