@@ -21,7 +21,7 @@
 #include "core/array2dim_api.h"
 #include "core/chardef_api.h"
 #include "core/parseutils.h"
-#include "core/score_matrix.h"
+#include "core/score_matrix_api.h"
 #include "core/str_api.h"
 #include "core/tokenizer.h"
 #include "core/undef_api.h"

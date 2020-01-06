@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "core/score_matrix.h"
+#include "core/score_matrix_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/alphabet_lua.h"
 #include "gtlua/score_matrix_lua.h"

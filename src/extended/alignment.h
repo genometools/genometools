@@ -24,7 +24,7 @@
 #include "core/range_api.h"
 #include "core/types_api.h"
 #include "core/error_api.h"
-#include "core/score_matrix.h"
+#include "core/score_matrix_api.h"
 #include "extended/multieoplist.h"
 
 /* the GtAlignment class (an object has to be constructed backwards) */

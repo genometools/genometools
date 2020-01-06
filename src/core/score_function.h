@@ -18,7 +18,7 @@
 #ifndef SCORE_FUNCTION_H
 #define SCORE_FUNCTION_H
 
-#include "core/score_matrix.h"
+#include "core/score_matrix_api.h"
 
 typedef struct GtScoreFunction GtScoreFunction;
 

@@ -27,7 +27,7 @@
 #include "core/ma_api.h"
 #include "core/minmax_api.h"
 #include "core/spacecalc.h"
-#include "core/score_matrix.h"
+#include "core/score_matrix_api.h"
 #include "core/str_api.h"
 #include "core/str_api.h"
 #include "core/str_array.h"

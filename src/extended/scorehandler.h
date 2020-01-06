@@ -17,7 +17,7 @@
 
 #ifndef SCOREHANDLER_H
 #define SCOREHANDLER_H
-#include "core/score_matrix.h"
+#include "core/score_matrix_api.h"
 #include "core/types_api.h"
 #include "extended/alignment.h"
 

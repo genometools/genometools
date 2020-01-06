@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SCORE_MATRIX_H
-#define SCORE_MATRIX_H
+#ifndef SCORE_MATRIX_API_H
+#define SCORE_MATRIX_API_H
 
-#include "core/alphabet.h"
+#include "core/alphabet_api.h"
 #include "core/error_api.h"
 
 typedef struct GtScoreMatrix GtScoreMatrix;
