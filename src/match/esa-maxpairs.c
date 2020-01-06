@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/unused_api.h"
 #include "core/minmax_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "esa-seqread.h"
 #include "esa-lcpintervals.h"
 #include "esa-maxpairs.h"

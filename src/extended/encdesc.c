@@ -21,7 +21,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
 #include "core/bittab_api.h"
 #include "core/compat_api.h"

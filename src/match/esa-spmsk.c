@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "core/readmode_api.h"
 #include "core/error_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "esa-bottomup.h"
 #include "esa-spmsk.h"
 

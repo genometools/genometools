@@ -26,7 +26,7 @@
 
 #include "core/array2dim_api.h"
 #include "core/array_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/compat_api.h"

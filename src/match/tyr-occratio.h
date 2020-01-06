@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/str_api.h"
 #include "core/error_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/logger.h"
 
 int gt_tyr_occratio_func(const char *inputindex,

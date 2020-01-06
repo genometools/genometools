@@ -18,7 +18,7 @@
 #include <string.h>
 #include <stddef.h>
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/disc_distri_api.h"
 #include "core/divmodmul_api.h"
 #include "core/fa_api.h"

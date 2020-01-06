@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include "core/alphabet.h"
 #include "core/array.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/bitpackarray.h"
 #include "core/chardef.h"
 #include "core/checkencchar.h"

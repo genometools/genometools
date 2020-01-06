@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "core/array_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/encseq_api.h"

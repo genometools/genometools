@@ -18,7 +18,7 @@
 #ifndef IDX_LIMDFS_H
 #define IDX_LIMDFS_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 
 #include "core/readmode.h"
 #include "procmatch.h"

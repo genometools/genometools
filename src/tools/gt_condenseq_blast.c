@@ -24,7 +24,7 @@
 #include <sys/wait.h>
 #endif
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/basename_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq_api.h"

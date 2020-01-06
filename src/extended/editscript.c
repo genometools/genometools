@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/chardef.h"
 #include "core/encseq_api.h"
 #include "core/ensure_api.h"

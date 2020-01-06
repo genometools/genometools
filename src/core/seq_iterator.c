@@ -17,7 +17,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/class_alloc.h"
 #include "core/types_api.h"
 #include "core/seq_iterator_rep.h"

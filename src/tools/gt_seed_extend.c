@@ -19,7 +19,7 @@
 #include <limits.h>
 #include <float.h>
 #include "core/alphabet_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
 #include "core/encseq.h"

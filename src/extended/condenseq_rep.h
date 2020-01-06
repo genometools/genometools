@@ -19,7 +19,7 @@
 #define CONDENSEQ_REP_H
 
 #include "core/alphabet_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/encseq_api.h"
 #include "core/types_api.h"
 #include "extended/editscript.h"

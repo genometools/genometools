@@ -23,7 +23,7 @@
 #include "core/str_api.h"
 #include "core/hashmap-generic.h"
 #include "core/logger_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-spacelog.h"
 

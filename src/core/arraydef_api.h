@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ARRAYDEF_H
-#define ARRAYDEF_H
+#ifndef ARRAYDEF_API_H
+#define ARRAYDEF_API_H
 
 #include <inttypes.h>
 #include "core/assert_api.h"

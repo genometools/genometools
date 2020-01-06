@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include "core/alphabet_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/chardef.h"
 #include "core/readmode.h"
 #include "core/types_api.h"

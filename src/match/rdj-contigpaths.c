@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/fa_api.h"
 #include "core/fasta_separator.h"
 #include "core/log_api.h"

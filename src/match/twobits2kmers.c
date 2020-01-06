@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/encseq_api.h"

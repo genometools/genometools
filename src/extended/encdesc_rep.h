@@ -18,7 +18,7 @@
 #ifndef ENCDESC_REP_H
 #define ENCDESC_REP_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/bittab_api.h"
 #include "core/disc_distri_api.h"
 #include "core/hashmap-generic.h"

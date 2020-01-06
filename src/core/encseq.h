@@ -35,7 +35,7 @@
 #include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 
 #define GT_ENCSEQ_VERSION  3
 

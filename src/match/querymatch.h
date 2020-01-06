@@ -23,7 +23,7 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
 #include "querymatch-display.h"

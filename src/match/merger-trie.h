@@ -18,7 +18,7 @@
 #ifndef MERGER_TRIE_H
 #define MERGER_TRIE_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 
 #include "core/encseq.h"
 

@@ -20,7 +20,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/csvline_reader.h"
 
 struct GtCsvlineReader

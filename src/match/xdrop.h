@@ -18,7 +18,7 @@
 #ifndef XDROP_H
 #define XDROP_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/error_api.h"
 #include "extended/multieoplist.h"
 #include "match/seqabstract.h"

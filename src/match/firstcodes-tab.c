@@ -27,7 +27,7 @@
 #include "core/log.h"
 #include "core/spacecalc.h"
 #include "core/hashmap-generic.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-psbuf.h"
 #include "firstcodes-cache.h"

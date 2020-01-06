@@ -55,7 +55,7 @@
 
 #include <stdbool.h>
 #include <math.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
 #include "core/error_api.h"
 #include "core/divmodmul_api.h"

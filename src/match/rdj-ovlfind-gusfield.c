@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
 #include "match/esa-seqread.h"
 #include "core/encseq.h"

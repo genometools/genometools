@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/cstr_api.h"
 #include "core/fa_api.h"
 #include "core/fasta_api.h"

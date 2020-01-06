@@ -18,7 +18,7 @@
 
 #include <math.h>
 #include "core/fa_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/error_api.h"

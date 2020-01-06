@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include "core/alphabet.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/encseq.h"
 #include "core/pairbwtidx.h"
 #include "core/ulongbound.h"

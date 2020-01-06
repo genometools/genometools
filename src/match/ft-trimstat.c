@@ -1,6 +1,6 @@
 #include "core/unused_api.h"
 #include "core/assert_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/minmax_api.h"
 #include "match/ft-trimstat.h"
 

@@ -19,7 +19,7 @@
 #ifndef MAPSPEC_H
 #define MAPSPEC_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/bitpackarray.h"
 #include "core/chardef.h"
 #include "core/error_api.h"

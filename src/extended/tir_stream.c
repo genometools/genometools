@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/encseq.h"
 #include "core/log_api.h"
 #include "core/mathsupport.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/alphabet_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/basename_api.h"
 #include "core/encseq_api.h"
 #include "core/fa_api.h"

@@ -18,7 +18,7 @@
 #ifndef TYR_BASIC_H
 #define TYR_BASIC_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/divmodmul_api.h"
 
 #define MERSUFFIX     ".mer"

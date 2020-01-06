@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/alphabet.h"
 #include "core/array.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq.h"
 #include "core/format64.h"

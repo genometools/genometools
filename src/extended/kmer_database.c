@@ -17,7 +17,7 @@
 */
 
 #include "core/alphabet_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/bittab_api.h"
 #include "core/codetype.h"
 #include "core/encseq_api.h"

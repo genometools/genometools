@@ -22,7 +22,7 @@
 #include "core/mathsupport.h" /* for gt_double_equals_double */
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/logger.h"
 #include "extended/rbtree.h"
 #include "extended/ranked_list.h"

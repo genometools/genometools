@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "match/rectangle-store.h"
 
 struct GtArrayGtDiagbandseedRectangle
