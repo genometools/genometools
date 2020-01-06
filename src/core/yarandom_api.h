@@ -21,8 +21,8 @@
 #undef frand
 #undef RAND_MAX
 
-unsigned int gt_ya_random (void);
-unsigned int gt_ya_rand_init (unsigned int);
+unsigned int gt_ya_random(void);
+unsigned int gt_ya_rand_init(unsigned int);
 void         gt_ya_rand_clean(void);
 
 #define RAND_MAX   0x7FFFFFFF
