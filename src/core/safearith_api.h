@@ -16,15 +16,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SAFEARITH_H
-#define SAFEARITH_H
+#ifndef SAFEARITH_API_H
+#define SAFEARITH_API_H
 
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/error_api.h"
-#include "core/safearith_imp.h"
 #include "core/types_api.h"
 
 /*
@@ -33,6 +32,53 @@
 
   http://www.fefe.de/intof.html
 */
+
+/* generic macros to determine the minimum and maximum value of given <type> */
+#define __HALF_MAX_SIGNED(type)  ((type)1 << (type) (sizeof (type) * 8 - 2))
+#define __MAX_SIGNED(type)       (__HALF_MAX_SIGNED(type) - 1 +               \
+                                  __HALF_MAX_SIGNED(type))
+#define __MIN_SIGNED(type)       ((type) -1 - __MAX_SIGNED(type))
+
+#define __MIN(type)              ((type) -1 < (type) 1                        \
+                                 ? __MIN_SIGNED(type)                         \
+                                 : (type)0)
+#define __MAX(type)              ((type) ~__MIN(type))
+
+/* safely assign <src> to <dest>, returns false on success, true otherwise */
+#define assign(dest, src)                                                     \
+        ({                                                                    \
+          __typeof__(src) __x  = (src);                                       \
+          __typeof__(dest) __y = (__typeof__(dest)) __x;                      \
+          (__x==(__typeof__(src)) __y &&                                      \
+           ((__x < (__typeof__(src)) 1) == (__y < (__typeof__(dest)) 1))      \
+           ? (void)((dest)=__y), false : true);                               \
+         })
+
+/* safely add <a> to <b> and assign the result to <c>,
+   returns false on success, true otherwise */
+#define add_of(c, a, b)                                                       \
+        ({                                                                    \
+          __typeof__(a) __a = a;                                              \
+          __typeof__(b) __b = b;                                              \
+          (__b) < (__typeof__(b)) 1                                           \
+          ? ((__MIN(__typeof__(c)) - (__b) <= (__typeof__(c-__b)) (__a))      \
+             ? assign(c, __a + __b) : true)                                   \
+          : ((__MAX(__typeof__(c)) - (__b) >= (__typeof__(c-__b)) (__a))      \
+             ? assign(c, __a + __b) : true);                                  \
+        })
+
+/* safely subtract <b> from <a> and assign the result to <c>,
+   returns false on success, true otherwise */
+#define sub_of(c, a, b)                                                       \
+        ({                                                                    \
+          __typeof__(a) __a = a;                                              \
+          __typeof__(b) __b = b;                                              \
+          (__b) < (__typeof__(b)) 1                                           \
+          ? ((__MAX(__typeof__(c)) + (__b) >= (__typeof__(c+__b))(__a))       \
+             ? assign(c, __a - __b) : true)                                   \
+          : ((__MIN(__typeof__(c)) + (__b) <= (__typeof__(c+__b))(__a))       \
+             ? assign(c, __a - __b) : true);                                  \
+        })
 
 /* assign <src> to <dest> or exit upon overflow */
 #define gt_safe_assign(dest, src)                                           \
