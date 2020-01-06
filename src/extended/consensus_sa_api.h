@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CONSENSUS_SA_H
-#define CONSENSUS_SA_H
+#ifndef CONSENSUS_SA_API_H
+#define CONSENSUS_SA_API_H
 
 #include "core/range_api.h"
 #include "core/strand_api.h"

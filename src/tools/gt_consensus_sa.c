@@ -18,7 +18,7 @@
 #include "core/fptr_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "extended/consensus_sa.h"
+#include "extended/consensus_sa_api.h"
 #include "extended/sspliced_alignment.h"
 #include "extended/sspliced_alignment_parsing.h"
 #include "tools/gt_consensus_sa.h"
