@@ -25,7 +25,7 @@
 #include "core/ensure_api.h"
 #include "core/intbits.h"
 #include "core/mathsupport_api.h"
-#include "core/yarandom.h" /* necessary to define random() correctly */
+#include "core/yarandom_api.h" /* necessary to define random() correctly */
 #include "core/log_api.h"
 
 #define GT_DBL_MAX_ABS_ERROR 1.0E-100

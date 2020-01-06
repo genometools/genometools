@@ -25,7 +25,7 @@
 #include "core/logger.h"
 #include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 #include "esa-mmsearch.h"
 #include "echoseq.h"
 #include "esa-maxpairs.h"

@@ -56,7 +56,7 @@
 #include "core/mathsupport_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 #include "extended/rbtree.h"
 
 #ifndef HEIGHT_LIMIT

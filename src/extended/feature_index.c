@@ -23,7 +23,7 @@
 #include "core/ma_api.h"
 #include "core/multithread_api.h"
 #include "core/unused_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 #include "extended/feature_index_rep.h"
 #include "extended/feature_node.h"
 #ifdef GT_THREADS_ENABLED

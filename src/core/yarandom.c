@@ -54,7 +54,7 @@
 #include <sys/time.h> /* for gettimeofday() */
 
 #include "core/thread_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 # undef gt_ya_rand_init
 
 /* The following 'random' numbers are taken from CRC, 18th Edition, page 622.

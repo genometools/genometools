@@ -28,7 +28,7 @@
 #include "core/timer_api.h"
 #include "core/radix_sort.h"
 #include "core/unused_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 #include "core/qsort-ulong.h"
 #include "tools/gt_sortbench.h"
 #ifdef GT_THREADS_ENABLED

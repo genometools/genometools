@@ -9,8 +9,8 @@
  * implied warranty.
  */
 
-#ifndef YARANDOM_H
-#define YARANDOM_H
+#ifndef YARANDOM_API_H
+#define YARANDOM_API_H
 
 #undef random
 #undef rand

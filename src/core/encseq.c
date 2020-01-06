@@ -63,7 +63,7 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 
 #undef GT_RANGEDEBUG
 

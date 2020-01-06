@@ -39,7 +39,7 @@
 #include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 
 static bool spacepeak = false;
 static bool showtime = false;
