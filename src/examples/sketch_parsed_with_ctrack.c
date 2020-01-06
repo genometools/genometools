@@ -1,6 +1,6 @@
 #include "genometools.h"
 #include "annotationsketch/custom_track_example.h"
-#include "core/seq.h"
+#include "core/seq_api.h"
 #include "core/bioseq_api.h"
 
 static void handle_error(GtError *err)

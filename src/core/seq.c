@@ -16,7 +16,7 @@
 */
 
 #include "core/ma_api.h"
-#include "core/seq.h"
+#include "core/seq_api.h"
 
 struct GtSeq {
   char *seq, *description;

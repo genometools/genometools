@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQ_H
-#define SEQ_H
+#ifndef SEQ_API_H
+#define SEQ_API_H
 
-#include "core/alphabet.h"
+#include "core/alphabet_api.h"
 
 typedef struct GtSeq GtSeq;
 

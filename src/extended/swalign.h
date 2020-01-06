@@ -19,7 +19,7 @@
 #define SWALIGN_H
 
 #include "core/score_function.h"
-#include "core/seq.h"
+#include "core/seq_api.h"
 #include "extended/alignment.h"
 
 /* (locally) align <u> and <v> (Smith-Waterman algorithm ) with the given score
