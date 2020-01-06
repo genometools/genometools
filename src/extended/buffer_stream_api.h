@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BUFFER_STREAM_H
-#define BUFFER_STREAM_H
+#ifndef BUFFER_STREAM_API_H
+#define BUFFER_STREAM_API_H
 
 #include "extended/node_stream_api.h"
 
