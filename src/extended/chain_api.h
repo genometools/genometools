@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CHAIN_H
-#define CHAIN_H
+#ifndef CHAIN_API_H
+#define CHAIN_API_H
 
 #include "core/error_api.h"
 

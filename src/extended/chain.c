@@ -18,7 +18,7 @@
 
 #include "core/array.h"
 #include "core/ma_api.h"
-#include "extended/chain.h"
+#include "extended/chain_api.h"
 
 struct GtChain {
   GtArray *fragments;

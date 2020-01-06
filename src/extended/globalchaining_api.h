@@ -16,11 +16,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GLOBALCHAINING_H
-#define GLOBALCHAINING_H
+#ifndef GLOBALCHAINING_API_H
+#define GLOBALCHAINING_API_H
 
 #include "core/error_api.h"
-#include "extended/chain.h"
+#include "extended/chain_api.h"
 
 typedef struct {
   GtUword startpos1, /* start of fragment in first sequence */
