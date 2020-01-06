@@ -32,7 +32,7 @@
 #include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #ifndef S_SPLINT_S /* splint reports too many errors for the following */
 #include "match/eis-bwtseq-param.h"
 #endif

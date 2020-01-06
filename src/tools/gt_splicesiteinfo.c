@@ -18,7 +18,7 @@
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"

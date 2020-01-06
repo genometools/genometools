@@ -23,7 +23,7 @@
 #include "core/option_api.h"
 #include "core/progressbar.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/xposix.h"
 #include "tools/gt_mmapandread.h"
 

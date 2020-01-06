@@ -21,7 +21,7 @@
 #include "core/option_api.h"
 #include "core/str_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/cutendpfx.h"
 #include "match/enum-patt.h"
 #include "match/esa-map.h"

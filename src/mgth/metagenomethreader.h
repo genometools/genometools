@@ -32,7 +32,7 @@
 #include "core/option_api.h"
 #include "core/str_api.h"
 #include "core/str_array.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 
 /* jeweils die Anzahl der zu betrachtenden XML-Tags; Definitionen werden auch
  * in Schleifenkoepfen verwendet */

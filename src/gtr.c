@@ -45,7 +45,7 @@
 #include "core/tool_iterator.h"
 #include "core/types_api.h"
 #include "core/unit_testing_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"
 #include "core/yarandom.h"

@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef VERSIONFUNC_H
-#define VERSIONFUNC_H
+#ifndef VERSIONFUNC_API_H
+#define VERSIONFUNC_API_H
 
 void gt_versionfunc(const char *progname);
 void gt_showshortversion(const char *progname);

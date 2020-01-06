@@ -20,7 +20,7 @@
 #include "core/option_api.h"
 #include "core/tool.h"
 #include "core/toolbox_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "tools/gt_encseq_bitextract.h"
 #include "tools/gt_encseq_check.h"
 #include "tools/gt_encseq_decode.h"

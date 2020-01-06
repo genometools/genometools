@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/ma_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/hlk-version.h"
 
 void gt_harlekin_show_version(const char *progname)

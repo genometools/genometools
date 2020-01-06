@@ -28,7 +28,7 @@
 #include "core/str_api.h"
 #include "core/thread_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/sfx-opt.h"
 #include "match/sfx-strategy.h"
 

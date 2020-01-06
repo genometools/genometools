@@ -21,7 +21,7 @@
 #include "core/str_api.h"
 #include "core/tool.h"
 #include "core/toolbox.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/sfx-run.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_packedindex_mkctxmap.h"

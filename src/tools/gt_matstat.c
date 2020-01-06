@@ -21,7 +21,7 @@
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/eis-voiditf.h"
 #include "match/esa-map.h"
 #include "match/esa-minunique.h"

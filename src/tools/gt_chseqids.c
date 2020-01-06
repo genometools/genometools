@@ -19,7 +19,7 @@
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "extended/chseqids_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"

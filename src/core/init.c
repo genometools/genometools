@@ -36,7 +36,7 @@
 #include "core/spacepeak.h"
 #include "core/splitter.h"
 #include "core/symbol.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "core/yarandom.h"

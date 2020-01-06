@@ -38,7 +38,7 @@
 #include "core/str_api.h"
 #include "core/unused_api.h"
 #include "core/undef_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "annotationsketch/canvas_cairo_context.h"
 #include "annotationsketch/custom_track_gc_content_api.h"

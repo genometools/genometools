@@ -24,7 +24,7 @@
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/cgr_spacedseed.h"
 #include "tools/gt_congruence.h"
 

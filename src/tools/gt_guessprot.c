@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "core/fileutils_api.h"
 #include "core/option_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "tools/gt_guessprot.h"
 
 static GtOPrval parse_options(int *parsed_args, int argc, const char **argv,

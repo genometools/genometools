@@ -20,7 +20,7 @@
 #include "core/md5_tab_api.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/xposix.h"
 #include "tools/gt_clean.h"
 
