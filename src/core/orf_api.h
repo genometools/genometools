@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ORF_H
-#define ORF_H
+#ifndef ORF_API_H
+#define ORF_API_H
 
 #include "core/range_api.h"
 

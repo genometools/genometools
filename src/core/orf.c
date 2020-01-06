@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/codon_api.h"
-#include "core/orf.h"
+#include "core/orf_api.h"
 #include "core/range_api.h"
 #include "core/trans_table.h"
 #include "core/undef_api.h"
