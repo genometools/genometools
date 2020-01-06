@@ -30,7 +30,7 @@
 #include <float.h>
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/ensure_api.h"
 #include "core/mathsupport.h"
 #include "core/xansi_api.h"

@@ -18,7 +18,7 @@
 #ifndef SEQUENCE_BUFFER_H
 #define SEQUENCE_BUFFER_H
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/error_api.h"
 #include "core/filelengthvalues.h"
 #include "core/desc_buffer.h"

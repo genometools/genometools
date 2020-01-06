@@ -25,7 +25,7 @@
 #include <unistd.h>
 
 #include "core/bittab_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/compat_api.h"
 #include "core/disc_distri_api.h"
 #include "core/fa_api.h"

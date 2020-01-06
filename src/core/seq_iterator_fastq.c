@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/colorspace.h"
 #include "core/cstr_api.h"

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/ma_api.h"
 #include "sarr-def.h"
 #include "core/safecast-gen.h"

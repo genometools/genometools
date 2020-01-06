@@ -21,7 +21,7 @@
 
 #include "core/arraydef_api.h"
 #include "core/bitpackarray.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/error_api.h"
 #include "core/intbits.h"
 #include "core/filelengthvalues.h"

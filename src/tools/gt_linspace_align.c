@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/cstr_api.h"
 #include "core/fa_api.h"
 #include "core/fasta_api.h"

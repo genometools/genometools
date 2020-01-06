@@ -19,7 +19,7 @@
 #include <stdbool.h>
 
 #include "core/alphabet_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
 #include "core/intbits.h"

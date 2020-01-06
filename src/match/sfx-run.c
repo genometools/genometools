@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"

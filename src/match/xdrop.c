@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ensure_api.h"
 #include "core/log_api.h"

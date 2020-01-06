@@ -21,7 +21,7 @@
 #define ENCSEQ_H
 
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/codetype.h"
 #include "core/disc_distri_api.h"
 #include "core/encseq_api.h"

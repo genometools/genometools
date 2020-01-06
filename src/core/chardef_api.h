@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CHARDEF_H
-#define CHARDEF_H
+#ifndef CHARDEF_API_H
+#define CHARDEF_API_H
 
 #include "core/types_api.h"
 #include "core/assert_api.h"

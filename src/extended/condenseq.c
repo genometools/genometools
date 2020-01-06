@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "core/basename_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/cstr_api.h"
 #include "core/divmodmul_api.h"
 #include "core/fa_api.h"

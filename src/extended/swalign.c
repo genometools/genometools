@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/minmax_api.h"
 #include "core/undef_api.h"
 #include "extended/swalign.h"

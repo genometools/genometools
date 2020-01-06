@@ -17,7 +17,7 @@
 
 #include "core/mathsupport.h"
 #include "core/types_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/unused_api.h"
 #include "core/intbits.h"
 #include "core/ma_api.h"

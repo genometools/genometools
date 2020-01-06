@@ -87,7 +87,7 @@ const GtUchar*     gt_condenseq_extract_encoded(GtCondenseq *condenseq,
 /* Returns the encoded representation of the substring defined by (inclusive)
    range <range> of <condenseq>.
    If the positions include a sequence separator this will be set to the non
-   printable SEPARATOR (core/chardef.h). */
+   printable SEPARATOR (core/chardef_api.h). */
 const GtUchar*     gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
                                                       GtRange range);
 /* Returns the decoded representation of the <id>s sequence of

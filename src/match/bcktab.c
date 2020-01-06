@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/compat_api.h"
 #include "core/error_api.h"
 #include "core/fa_api.h"

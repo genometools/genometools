@@ -19,7 +19,7 @@
 #define QGRAM2CODE_H
 
 #include "core/types_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/codetype.h"
 
 static inline unsigned int qgram2code(GtCodetype *code,

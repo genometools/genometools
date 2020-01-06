@@ -18,7 +18,7 @@
 #include <stdarg.h>
 #include "core/ma_api.h"
 #include "core/types_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/unused_api.h"
 #include "core/assert_api.h"
 #include "core/ma_api.h"

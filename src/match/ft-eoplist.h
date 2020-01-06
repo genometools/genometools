@@ -2,7 +2,7 @@
 #define FT_EOPLIST_H
 #include <stdbool.h>
 #include "core/unused_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/readmode.h"
 #include "match/ft-polish.h"
 

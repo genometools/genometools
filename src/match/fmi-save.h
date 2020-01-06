@@ -19,7 +19,7 @@
 #define FMI_SAVE_H
 
 #include <stdbool.h>
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/error_api.h"
 #include "fmindex.h"
 

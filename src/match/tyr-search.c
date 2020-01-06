@@ -19,7 +19,7 @@
 #include "core/fa_api.h"
 #include "core/unused_api.h"
 #include "core/seq_iterator_sequence_buffer_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/format64.h"
 #include "core/encseq.h"
 #include "core/ma_api.h"

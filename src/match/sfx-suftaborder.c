@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "core/unused_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/minmax_api.h"
 #include "core/encseq.h"
 #include "sfx-suftaborder.h"
