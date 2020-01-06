@@ -21,6 +21,10 @@
 #include "core/error_api.h"
 #include "core/str_array_api.h"
 
+#define GT_START_AMINO       'M'
+#define GT_STOP_AMINO        '*'
+#define GT_STOP_AMINO_CSTR   "*"
+
 typedef struct GtTransTable GtTransTable;
 
 /* The number of the standard translation scheme. */

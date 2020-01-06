@@ -21,10 +21,6 @@
 #include "core/error_api.h"
 #include "core/trans_table_api.h"
 
-#define GT_START_AMINO       'M'
-#define GT_STOP_AMINO        '*'
-#define GT_STOP_AMINO_CSTR   "*"
-
 int gt_trans_table_unit_test(GtError*);
 
 #endif
