@@ -25,7 +25,7 @@
 #include "core/cstr_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/parseutils.h"
 #include "core/queue.h"
 #include "core/splitter.h"

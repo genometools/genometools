@@ -26,7 +26,7 @@
 #include "core/encseq.h"
 #include "core/encseq_col.h"
 #include "core/ma_api.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/seq_col.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"

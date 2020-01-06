@@ -44,7 +44,7 @@
 #include "core/hashtable.h"
 #include "core/interval_tree.h"
 #include "core/mathsupport_api.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/quality.h"
 #include "core/queue.h"
 #include "core/sequence_buffer.h"

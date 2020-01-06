@@ -16,7 +16,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
 #include "extended/feature_node.h"

@@ -27,7 +27,7 @@
 #include "core/error_api.h"
 #include "core/log.h"
 #include "core/mathsupport_api.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/minmax_api.h"
 #include "core/multithread_api.h"
 #include "core/qsort_r_api.h"

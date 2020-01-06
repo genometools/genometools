@@ -21,7 +21,7 @@
 #include "core/grep.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/seq_col_rep.h"
 #include "core/seq_info_cache.h"
 #include "core/undef_api.h"

@@ -19,7 +19,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/ensure_api.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/undef_api.h"
 
 bool gt_md5_seqid_has_prefix(const char *seqid)
