@@ -18,7 +18,7 @@
 #ifndef FASTA_READER_SEQIT_H
 #define FASTA_READER_SEQIT_H
 
-#include "core/fasta_reader.h"
+#include "core/fasta_reader_api.h"
 #include "core/str_api.h"
 
 /* implements the ``fasta reader'' interface via the sequence iterator class */

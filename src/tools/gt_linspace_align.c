@@ -22,7 +22,7 @@
 #include "core/cstr_api.h"
 #include "core/fa_api.h"
 #include "core/fasta_api.h"
-#include "core/fasta_reader.h"
+#include "core/fasta_reader_api.h"
 #include "core/fasta_reader_rec.h"
 #include "core/ma_api.h"
 #include "core/minmax_api.h"

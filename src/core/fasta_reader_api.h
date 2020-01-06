@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_READER_H
-#define FASTA_READER_H
+#ifndef FASTA_READER_API_H
+#define FASTA_READER_API_H
 
 #include <stdbool.h>
 #include "core/error_api.h"
