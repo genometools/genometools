@@ -45,7 +45,6 @@ int           gt_array_iterate(GtArray *array,
 int           gt_array_iterate_reverse(GtArray *array,
                                        GtArrayProcessor array_processor,
                                        void *info, GtError *err);
-void          gt_array_prepend_array(GtArray *dest, const GtArray *src);
 int           gt_array_example(GtError*);
 int           gt_array_unit_test(GtError*);
 
