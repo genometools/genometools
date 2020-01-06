@@ -66,7 +66,7 @@
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
-#include "extended/gff3_escaping.h"
+#include "extended/gff3_escaping_api.h"
 #include "extended/golomb.h"
 #include "extended/hmm.h"
 #include "extended/huffcode.h"

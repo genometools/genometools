@@ -20,7 +20,7 @@
 #include <ctype.h>
 #include "core/ensure_api.h"
 #include "core/undef_api.h"
-#include "extended/gff3_escaping.h"
+#include "extended/gff3_escaping_api.h"
 
 /* escaped characters */
 #define SPACE     "%20"

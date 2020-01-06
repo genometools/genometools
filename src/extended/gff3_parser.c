@@ -41,7 +41,7 @@
 #include "extended/gap_str.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_defines.h"
-#include "extended/gff3_escaping.h"
+#include "extended/gff3_escaping_api.h"
 #include "extended/gff3_parser.h"
 #include "extended/mapping.h"
 #include "extended/orphanage.h"
