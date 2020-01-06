@@ -25,7 +25,7 @@
 #include "extended/gff3_parser.h"
 #include "extended/md5_to_id_visitor.h"
 #include "extended/node_visitor_api.h"
-#include "extended/regular_seqid.h"
+#include "extended/regular_seqid_api.h"
 
 struct GtMD5ToSeqidsVisitor {
   const GtNodeVisitor parent_instance;
