@@ -29,7 +29,7 @@
 #include "core/encseq_options.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
-#include "core/md5_tab.h"
+#include "core/md5_tab_api.h"
 #include "core/range_api.h"
 #include "core/readmode.h"
 #include "core/str_api.h"

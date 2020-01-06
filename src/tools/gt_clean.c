@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/bioseq_api.h"
-#include "core/md5_tab.h"
+#include "core/md5_tab_api.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"

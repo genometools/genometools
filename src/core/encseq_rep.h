@@ -32,7 +32,7 @@
 #include "core/encseq_api.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
-#include "core/md5_tab.h"
+#include "core/md5_tab_api.h"
 #include "core/types_api.h"
 #include "core/str_array_api.h"
 #include "core/defined-types.h"

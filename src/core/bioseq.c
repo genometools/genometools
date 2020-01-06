@@ -33,7 +33,7 @@
 #include "core/hashmap_api.h"
 #include "core/hashmap-generic.h"
 #include "core/ma_api.h"
-#include "core/md5_tab.h"
+#include "core/md5_tab_api.h"
 #include "core/parseutils.h"
 #include "core/sig.h"
 #include "core/str_array.h"

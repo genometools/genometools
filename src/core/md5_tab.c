@@ -20,7 +20,7 @@
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
 #include "core/md5_fingerprint_api.h"
-#include "core/md5_tab.h"
+#include "core/md5_tab_api.h"
 #include "core/undef_api.h"
 #include "core/xansi_api.h"
 

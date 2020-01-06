@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MD5_TAB_H
-#define MD5_TAB_H
+#ifndef MD5_TAB_API_H
+#define MD5_TAB_API_H
 
 #include <stdbool.h>
 #include "core/error_api.h"
