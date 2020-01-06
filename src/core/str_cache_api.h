@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef STR_CACHE_H
-#define STR_CACHE_H
+#ifndef STR_CACHE_API_H
+#define STR_CACHE_API_H
 
 #include "core/str_api.h"
 
