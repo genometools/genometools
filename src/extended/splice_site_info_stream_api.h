@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SPLICE_SITE_INFO_STREAM_H
-#define SPLICE_SITE_INFO_STREAM_H
+#ifndef SPLICE_SITE_INFO_STREAM_API_H
+#define SPLICE_SITE_INFO_STREAM_API_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
