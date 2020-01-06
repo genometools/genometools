@@ -16,7 +16,7 @@
 */
 
 #include "extended/cds_stream_api.h"
-#include "extended/cds_visitor.h"
+#include "extended/cds_visitor_api.h"
 #include "extended/visitor_stream_api.h"
 
 GtNodeStream* gt_cds_stream_new(GtNodeStream *in_stream, GtRegionMapping *rm,

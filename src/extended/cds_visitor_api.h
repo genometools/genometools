@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CDS_VISITOR_H
-#define CDS_VISITOR_H
+#ifndef CDS_VISITOR_API_H
+#define CDS_VISITOR_API_H
 
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtCDSVisitor GtCDSVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_mapping_api.h"
 
 const GtNodeVisitorClass* gt_cds_visitor_class(void);
