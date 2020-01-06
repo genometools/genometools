@@ -36,7 +36,7 @@ typedef void (*GtChainProc)(GtChain*, GtFragment*,
                             GtUword max_gap_width, void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
-   in O(<num_of_fragments>^2) time.
+   in quadratic time w.r.t. <num_of_fragments>.
    Two fragments can maximally be <max_gap_width> many bases away.
    For all global chains of maximal score, the GtChainProc function is called.
    Thereby, GtChainProc does not get the ownership of the GtChain. */
@@ -46,7 +46,7 @@ void gt_globalchaining_max(GtFragment *fragments,
                            void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
-   in O(<num_of_fragments>^2) time.
+   in quadratic time w.r.t. <num_of_fragments>.
    Two fragments can maximally be <max_gap_width> many bases away.
    For all non-overlapping global chains with a coverage of more then
    <mincoverage> of the sequence in dimension 1 (with length <seqlen1>), the
