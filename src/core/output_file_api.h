@@ -18,6 +18,7 @@
 #ifndef OUTPUT_FILE_API_H
 #define OUTPUT_FILE_API_H
 
+#include "core/error_api.h"
 #include "core/file_api.h"
 #include "core/option_api.h"
 
@@ -37,6 +38,11 @@ void              gt_output_file_info_register_options(
                                             GtOutputFileInfo *output_file_info,
                                             GtOptionParser *option_parser,
                                             GtFile **outfp);
+/* Helper function for (rare) tools which do not use the full <GtOutputFileInfo>
+   (usually if directories are involved). */
+GtFile*           gt_output_file_xopen_forcecheck(const char *path,
+                                                  const char *mode, bool force,
+                                                  GtError *err);
 /* Deletes <output_file_info> and frees all associated memory. */
 void              gt_output_file_info_delete(
                                             GtOutputFileInfo *output_file_info);
