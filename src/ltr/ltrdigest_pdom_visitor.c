@@ -31,7 +31,7 @@
 #include "core/codon_iterator_api.h"
 #include "core/codon_iterator_simple_api.h"
 #include "core/cstr_api.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
 #include "core/log.h"

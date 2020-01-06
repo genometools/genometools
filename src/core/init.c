@@ -26,7 +26,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/combinatorics.h"
 #include "core/cstr_api.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/fa_api.h"
 #include "core/init_api.h"
 #include "core/log.h"

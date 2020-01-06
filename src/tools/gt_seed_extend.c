@@ -21,7 +21,7 @@
 #include "core/alphabet_api.h"
 #include "core/arraydef_api.h"
 #include "core/cstr_api.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/encseq.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"

@@ -17,7 +17,7 @@
 */
 
 #include <string.h>
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"

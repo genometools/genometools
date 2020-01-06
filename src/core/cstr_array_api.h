@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CSTR_ARRAY_H
-#define CSTR_ARRAY_H
+#ifndef CSTR_ARRAY_API_H
+#define CSTR_ARRAY_API_H
 
 #include "core/file_api.h"
 #include "core/types_api.h"

@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/option_api.h"
 #include "core/tool.h"
 #include "core/toolbox.h"

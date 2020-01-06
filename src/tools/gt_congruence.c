@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/error_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"

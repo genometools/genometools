@@ -29,7 +29,7 @@
 #include "ldes56.h"
 #include "core/compat_api.h"
 #include "core/cstr.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/ensure_api.h"
 #include "core/fa_api.h"
 #include "core/fileutils_api.h"
