@@ -605,7 +605,7 @@ void gt_eoplist_trace2cigar(GtEoplist *eoplist,bool dtrace,GtUword trace_delta)
       aligned_v = (GtUword) eoplist->trace.spaceint[idx];
     }
     gt_assert(offset_u < eoplist->ulen);
-    aligned_u = MIN(trace_delta,eoplist->ulen - offset_u);
+    aligned_u = GT_MIN(trace_delta,eoplist->ulen - offset_u);
     this_distance = gt_full_front_edist_trace_distance(eoplist->fet_segment,
                                                        eoplist->useq + offset_u,
                                                        aligned_u,
@@ -823,7 +823,7 @@ void gt_eoplist_set_sequences(GtEoplist *eoplist,
 static int gt_eoplist_numwidth(const GtEoplist *eoplist)
 {
   gt_assert(eoplist != NULL);
-  return 1 + log10((double) MAX(eoplist->ustart + eoplist->ulen - 1,
+  return 1 + log10((double) GT_MAX(eoplist->ustart + eoplist->ulen - 1,
                                 eoplist->vstart + eoplist->vlen - 1));
 }
 
@@ -1090,11 +1090,11 @@ void gt_eoplist_format_generic(FILE *fp,
                            topbuf,
                            top_seqlength,
                            top_start_pos,
-                           eoplist->ustart + MIN(idx_u,eoplist->ulen - 1),
+                           eoplist->ustart + GT_MIN(idx_u,eoplist->ulen - 1),
                            midbuf,
                            lowbuf,
                            low_start_pos,
-                           low_start_base + MIN(idx_v,eoplist->vlen - 1),
+                           low_start_base + GT_MIN(idx_v,eoplist->vlen - 1),
                            fp);
   }
   if (eoplist->pol_info != NULL && eoplist->pol_info_out)
@@ -1182,7 +1182,7 @@ void gt_eoplist_format_exact(FILE *fp,
                                              : low_reference - eoplist->vstart;
 
   gt_assert(alignment_show_forward || top_seqlength > 0);
-  width = MIN(eoplist->ulen, eoplist_reader->width);
+  width = GT_MIN(eoplist->ulen, eoplist_reader->width);
   midbuf = topbuf + width;
   for (idx = 0; idx < (GtUword) width; idx++)
   {
@@ -1231,11 +1231,11 @@ void gt_eoplist_format_exact(FILE *fp,
                            topbuf,
                            top_seqlength,
                            top_start_pos,
-                           eoplist->ustart + MIN(idx,eoplist->ulen - 1),
+                           eoplist->ustart + GT_MIN(idx,eoplist->ulen - 1),
                            midbuf,
                            lowbuf,
                            low_start_pos,
-                           eoplist->vstart + MIN(idx,eoplist->vlen - 1),
+                           eoplist->vstart + GT_MIN(idx,eoplist->vlen - 1),
                            fp);
   }
 }

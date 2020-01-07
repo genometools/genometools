@@ -98,7 +98,7 @@ unsigned int gt_recommendedprefixlength(unsigned int numofchars,
     unsigned int mbp = gt_maxbasepower(numofchars);
     if (mbp >= 1U)
     {
-      return MIN(mbp,prefixlength);
+      return GT_MIN(mbp,prefixlength);
     } else
     {
       return prefixlength;
@@ -118,7 +118,7 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
                                           totallength+1,
                                           withspecialsuffixes);
   mbp = gt_maxbasepower(numofchars);
-  maxprefixlen = MIN(mbp,maxprefixlen);
+  maxprefixlen = GT_MIN(mbp,maxprefixlen);
   if (prefixlenbits > 0)
   {
     unsigned int tmplength;

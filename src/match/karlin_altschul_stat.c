@@ -182,8 +182,8 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
     for (jdx = 0; jdx < numofchars; jdx++)
     {
       score = gt_scorehandler_get_replacement(scorehandler, idx, jdx);
-      obs_min = MIN(obs_min, score);
-      obs_max = MAX(obs_max, score);
+      obs_min = GT_MIN(obs_min, score);
+      obs_max = GT_MAX(obs_max, score);
     }
   }
 
@@ -698,10 +698,10 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
   bool converged = false;
 
   /* l_max is the largest nonnegative solution of
-     K * (m - l) * (n - N * l) > MAX(m,n) */
+     K * (m - l) * (n - N * l) > GT_MAX(m,n) */
 
   space = actual_db_length * query_length
-          - MAX(query_length, actual_db_length)/K;
+          - GT_MAX(query_length, actual_db_length)/K;
   if (space < 0)
     return 0; /* length_adjustnment = 0 */
 

@@ -129,8 +129,8 @@ int gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   new_node = gt_interval_tree_node_new(gn, node_range.start, node_range.end);
   gt_interval_tree_insert(info->features, new_node);
   /* update dynamic range */
-  info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
-  info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
+  info->dyn_range.start = GT_MIN(info->dyn_range.start, node_range.start);
+  info->dyn_range.end = GT_MAX(info->dyn_range.end, node_range.end);
   return 0;
 }
 

@@ -138,10 +138,10 @@ static void gt_inlined_qsort_r (Sorttype *arr,GtUword len,void *data)
       continue;
     }
     pn = current.startptr + current.len;
-    minval = MIN ((GtUword) (pa - current.startptr),
+    minval = GT_MIN ((GtUword) (pa - current.startptr),
                   (GtUword) (pb - pa));
     GT_QSORT_VECSWAP (current.startptr, pb - minval, minval);
-    minval = MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
+    minval = GT_MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
     GT_QSORT_VECSWAP (pb, pn - minval, minval);
     if ((minval = (GtUword) (pb - pa)) > 1UL)
     {

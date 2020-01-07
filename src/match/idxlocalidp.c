@@ -27,7 +27,7 @@
 #include "idxlocalisw.h"
 #include "idxlocalidp.h"
 
-#define MINUSINFTY (-1L)
+#define GT_MINUSINFTY (-1L)
 
 typedef struct
 {
@@ -170,20 +170,20 @@ static void secondcolumn (const Limdfsconstinfo *lci,LocaliColumn *outcol,
     ATADDRESS("",outcol);
   }
 #ifdef AFFINE
-  outcol->colvalues[0].repcell = MINUSINFTY;
+  outcol->colvalues[0].repcell = GT_MINUSINFTY;
   outcol->colvalues[0].inscell = lci->scorevalues.gapstart +
                                  lci->scorevalues.gapextend;
-  outcol->colvalues[0].delcell = MINUSINFTY;
+  outcol->colvalues[0].delcell = GT_MINUSINFTY;
 #endif
-  outcol->colvalues[0].bestcell = MINUSINFTY;
+  outcol->colvalues[0].bestcell = GT_MINUSINFTY;
   outcol->colvalues[0].tracebit = Notraceback;
   outcol->maxvalue = 0;
   outcol->pprefixlen = 0;
   for (i = 1UL; i <= lci->querylength; i++)
   {
 #ifdef AFFINE
-    outcol->colvalues[i].delcell = MINUSINFTY;
-    outcol->colvalues[i].inscell = MINUSINFTY;
+    outcol->colvalues[i].delcell = GT_MINUSINFTY;
+    outcol->colvalues[i].inscell = GT_MINUSINFTY;
     outcol->colvalues[i].repcell = REPLACEMENTSCORE(&lci->scorevalues,
                                                     dbchar,lci->query[i-1]);
     outcol->colvalues[i].bestcell = max2(outcol->colvalues[i].delcell,
@@ -191,7 +191,7 @@ static void secondcolumn (const Limdfsconstinfo *lci,LocaliColumn *outcol,
 #else
     Scoretype temp;
 
-    outcol->colvalues[i].bestcell = MINUSINFTY;
+    outcol->colvalues[i].bestcell = GT_MINUSINFTY;
     outcol->colvalues[i].tracebit = Notraceback;
     if (outcol->colvalues[i-1].bestcell > 0)
     {
@@ -235,7 +235,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
   }
   gt_assert(outcol->lenval >= lci->querylength+1);
 #ifdef AFFINE
-  outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = MINUSINFTY;
+  outcol->colvalues[0].repcell = outcol->colvalues[0].delcell = GT_MINUSINFTY;
   if (incol->colvalues[0].inscell > 0)
   {
     if (incol->colvalues[0].bestcell > 0)
@@ -258,14 +258,14 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                                      lci->scorevalues.gapextend;
     } else
     {
-      outcol->colvalues[0].inscell = MINUSINFTY;
+      outcol->colvalues[0].inscell = GT_MINUSINFTY;
     }
   }
   outcol->colvalues[0].bestcell = max3 (outcol->colvalues[0].repcell,
                                         outcol->colvalues[0].inscell,
                                         outcol->colvalues[0].delcell);
 #else
-  outcol->colvalues[0].bestcell = MINUSINFTY;
+  outcol->colvalues[0].bestcell = GT_MINUSINFTY;
   outcol->colvalues[0].tracebit = Notraceback;
 #endif
   outcol->maxvalue = 0;
@@ -280,7 +280,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                                                       dbchar,lci->query[i-1]);
     } else
     {
-      outcol->colvalues[i].repcell = MINUSINFTY;
+      outcol->colvalues[i].repcell = GT_MINUSINFTY;
     }
     if (incol->colvalues[i].inscell > 0)
     {
@@ -304,7 +304,7 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                                        lci->scorevalues.gapextend;
       } else
       {
-        outcol->colvalues[i].inscell = MINUSINFTY;
+        outcol->colvalues[i].inscell = GT_MINUSINFTY;
       }
     }
     if (outcol->colvalues[i-1].delcell > 0)
@@ -329,14 +329,14 @@ static void nextcolumn (const Limdfsconstinfo *lci,
                                        lci->scorevalues.gapextend;
       } else
       {
-        outcol->colvalues[i].delcell = MINUSINFTY;
+        outcol->colvalues[i].delcell = GT_MINUSINFTY;
       }
     }
     outcol->colvalues[i].bestcell = max3 (outcol->colvalues[i].repcell,
                                           outcol->colvalues[i].inscell,
                                           outcol->colvalues[i].delcell);
 #else
-    outcol->colvalues[i].bestcell = MINUSINFTY;
+    outcol->colvalues[i].bestcell = GT_MINUSINFTY;
     outcol->colvalues[i].tracebit = Notraceback;
     if (outcol->colvalues[i-1].bestcell > 0)
     {
@@ -374,7 +374,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
   GtUword i;
   LocaliMatrixvalue nw, west;
 
-  column->colvalues[0].repcell = column->colvalues[0].delcell = MINUSINFTY;
+  column->colvalues[0].repcell = column->colvalues[0].delcell = GT_MINUSINFTY;
   if (column->colvalues[0].inscell > 0)
   {
     if (column->colvalues[0].bestcell > 0)
@@ -397,7 +397,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                      lci->scorevalues.gapextend;
     } else
     {
-      column->colvalues[0].inscell = MINUSINFTY;
+      column->colvalues[0].inscell = GT_MINUSINFTY;
     }
   }
   column->colvalues[0].bestcell = max3 (column->colvalues[0].repcell,
@@ -416,7 +416,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                                       dbchar,lci->query[i-1]);
     } else
     {
-      column->colvalues[i].repcell = MINUSINFTY;
+      column->colvalues[i].repcell = GT_MINUSINFTY;
     }
     if (west.inscell > 0)
     {
@@ -440,7 +440,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                        lci->scorevalues.gapextend;
       } else
       {
-        column->colvalues[i].inscell = MINUSINFTY;
+        column->colvalues[i].inscell = GT_MINUSINFTY;
       }
     }
     if (column->colvalues[i-1].delcell > 0)
@@ -465,7 +465,7 @@ static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                        lci->scorevalues.gapextend;
       } else
       {
-        column->colvalues[i].delcell = MINUSINFTY;
+        column->colvalues[i].delcell = GT_MINUSINFTY;
       }
     }
     nw = west;

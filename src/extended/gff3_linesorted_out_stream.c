@@ -70,9 +70,9 @@ static inline void gt_linesorted_gff3_next_token_pair(const char **s1,
   gt_assert(tokend1 && tokend1 > *s1);
   tokend2 = strchr(*s2, sep);
   gt_assert(tokend2 && tokend2 > *s2);
-  idlength1 = MIN((tokend1 - *s1), len1 - 1);
+  idlength1 = GT_MIN((tokend1 - *s1), len1 - 1);
   gt_assert(idlength1 > 0);
-  idlength2 = MIN((tokend2 - *s2), len2 - 1);
+  idlength2 = GT_MIN((tokend2 - *s2), len2 - 1);
   gt_assert(idlength2 > 0);
   (void) strncpy(buf1, *s1, idlength1);
   (void) strncpy(buf2, *s2, idlength2);

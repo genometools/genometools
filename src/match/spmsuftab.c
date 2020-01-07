@@ -85,5 +85,5 @@ size_t gt_spmsuftab_requiredspace(GtUword numofentries,
 
   return sizeof (GtSpmsuftab) +
          gt_compact_ulong_store_size(numofentries,
-                                     MIN(bitsforpositions,bitsforseqnumrelpos));
+                                     GT_MIN(bitsforpositions,bitsforseqnumrelpos));
 }

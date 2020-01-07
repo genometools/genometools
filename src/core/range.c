@@ -43,10 +43,10 @@ int gt_range_compare_with_delta(const GtRange *range_a, const GtRange *range_b,
 
   gt_assert(range_a->start <= range_a->end && range_b->start <= range_b->end);
 
-  start_min = MIN(range_a->start, range_b->start);
-  start_max = MAX(range_a->start, range_b->start);
-  end_min   = MIN(range_a->end, range_b->end);
-  end_max   = MAX(range_a->end, range_b->end);
+  start_min = GT_MIN(range_a->start, range_b->start);
+  start_max = GT_MAX(range_a->start, range_b->start);
+  end_min   = GT_MIN(range_a->end, range_b->end);
+  end_max   = GT_MAX(range_a->end, range_b->end);
 
   if (start_max - start_min <= delta && end_max - end_min <= delta)
     return 0; /* range_a == range_b */

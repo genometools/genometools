@@ -487,12 +487,12 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     }
     pn = current.startindex + current.len;
     gt_assert(pa >= current.startindex && pb >= pa);
-    s = MIN ((GtUword) (pa - current.startindex),
+    s = GT_MIN ((GtUword) (pa - current.startindex),
              (GtUword) (pb - pa));
     gt_assert(pb >= s);
     GT_QSORT_ARR_VECSWAP (arr, current.startindex, pb - s, s);
     gt_assert(pd >= pc && pn > pd);
-    s = MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
+    s = GT_MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
     gt_assert(pn > s);
     GT_QSORT_ARR_VECSWAP (arr, pb, pn - s, s);
     gt_assert(pb >= pa);

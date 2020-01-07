@@ -148,7 +148,7 @@ static GtUchar gt_sequenceobject_esr_get(GtFtSequenceObject *seq,GtUword idx)
   if (idx >= seq->cache_num_positions)
   {
     const GtUword addamount = 16UL;
-    GtUword cidx, tostore = MIN(seq->cache_num_positions + addamount,
+    GtUword cidx, tostore = GT_MIN(seq->cache_num_positions + addamount,
                                 seq->substringlength);
 
     if (tostore > seq->sequence_cache->allocated)
@@ -300,7 +300,7 @@ static void inline front_prune_add_matches(
                             match_mask;
     if (fv->matchhistory_size < max_history)
     {
-      fv->matchhistory_size = MIN(fv->matchhistory_size + fv->localmatch_count,
+      fv->matchhistory_size = GT_MIN(fv->matchhistory_size + fv->localmatch_count,
                                   max_history);
     }
     fv->row += fv->localmatch_count;
@@ -560,14 +560,14 @@ static GtFtFrontvalue *frontspace_allocate(GtUword minsizeforshift,
 {
   if (trimleft - fs->offset + valid >= fs->allocated)
   {
-    fs->allocated = 255UL + MAX(fs->allocated * 1.2,
+    fs->allocated = 255UL + GT_MAX(fs->allocated * 1.2,
                                            trimleft - fs->offset + valid);
     gt_assert(fs->allocated > trimleft - fs->offset + valid);
     fs->space = gt_realloc(fs->space,sizeof (GtFtFrontvalue) * fs->allocated);
     gt_assert(fs->space != NULL);
   }
   gt_assert(trimleft >= fs->offset);
-  if (trimleft - fs->offset > MAX(valid,minsizeforshift))
+  if (trimleft - fs->offset > GT_MAX(valid,minsizeforshift))
   {
     memcpy(fs->space,((GtFtFrontvalue *) fs->space) + trimleft - fs->offset,
            sizeof (GtFtFrontvalue) * valid);
@@ -725,7 +725,7 @@ GtUword front_prune_edist_inplace(
       {
         validbasefront->matchhistory_bits = (((uint64_t) 1) << seedlength) - 1;
       }
-      validbasefront->matchhistory_size = MIN(max_history,seedlength);
+      validbasefront->matchhistory_size = GT_MIN(max_history,seedlength);
       validbasefront->backreference = 0; /* No back reference */
       validbasefront->max_mismatches = 0;
       front_prune_add_matches(ft_longest_common,validbasefront + distance,

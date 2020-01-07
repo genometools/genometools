@@ -150,12 +150,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                                          true);
         if (params.maxPatLen < 0)
           params.maxPatLen =
-            MAX(params.minPatLen,
+            GT_MAX(params.minPatLen,
                 125 * gt_recommendedprefixlength(numofchars,totalLen,
                                          GT_RECOMMENDED_MULTIPLIER_DEFAULT,
                                          true)/100);
         else
-          params.maxPatLen = MAX(params.maxPatLen, params.minPatLen);
+          params.maxPatLen = GT_MAX(params.maxPatLen, params.minPatLen);
       }
       fprintf(stderr, "Using patterns of lengths "GT_WU" to "GT_WU"\n",
               params.minPatLen, params.maxPatLen);

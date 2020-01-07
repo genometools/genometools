@@ -58,7 +58,7 @@ static GtUword extractprefixbytecode(GtUword merbytes,
 {
   GtUword idx, code = 0;
 
-  for (idx=0; idx < MIN((GtUword) sizeof (GtUword),merbytes); idx++)
+  for (idx=0; idx < GT_MIN((GtUword) sizeof (GtUword),merbytes); idx++)
   {
     code = (code << 8) | bytecode[idx];
     if (GT_MULT4(idx+1) == (GtUword) prefixlength)

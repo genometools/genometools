@@ -141,7 +141,7 @@ gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
   gt_assert(factory);
   while (sfxIdxLeft)
   {
-    GtUword len = MIN(BLOCK_IO_SIZE, sfxIdxLeft);
+    GtUword len = GT_MIN(BLOCK_IO_SIZE, sfxIdxLeft);
     if (SDRRead(readSfxIdx, buf, len)
         != len)
     {

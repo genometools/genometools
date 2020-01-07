@@ -310,7 +310,7 @@ GtUword gt_contigs_graph_append_vertex(GtContigsGraph *cg,
       cg->v_spm[incoming][cg->nof_v].ptr + nof_e;
     if (cg->nof_spm_edges[incoming] + nof_e > cg->alloc_spm_edges[incoming])
     {
-      cg->alloc_spm_edges[incoming] += MAX(GT_CONTIGS_GRAPH_E_INC, nof_e);
+      cg->alloc_spm_edges[incoming] += GT_MAX(GT_CONTIGS_GRAPH_E_INC, nof_e);
       cg->e_spm[incoming] = gt_realloc(cg->e_spm[incoming],
           sizeof (*(cg->e_spm[incoming])) * cg->alloc_spm_edges[incoming]);
     }
@@ -329,7 +329,7 @@ GtUword gt_contigs_graph_append_vertex(GtContigsGraph *cg,
     cg->nof_units += nof_units;
     if (cg->nof_units > cg->alloc_units)
     {
-      cg->alloc_units += MAX(GT_CONTIGS_GRAPH_U_INC, nof_units);
+      cg->alloc_units += GT_MAX(GT_CONTIGS_GRAPH_U_INC, nof_units);
       cg->units = gt_realloc(cg->units,
           sizeof (*cg->units) * (cg->alloc_units));
     }

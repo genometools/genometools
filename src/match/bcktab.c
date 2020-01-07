@@ -1311,7 +1311,7 @@ size_t gt_bcktab_sizeforlcpvalues(const GtBcktab *bcktab)
                     bcktab->maxbucketinfo.specialsmaxbucketsize;
   sizelcps
     = sizeof (GtUword) * gt_bcktab_nonspecialsmaxsize(bcktab);
-  return MAX(sizelcps,sizespeciallcps);
+  return GT_MAX(sizelcps,sizespeciallcps);
 }
 
 GtUword gt_bcktab_maxbucketsize(const GtBcktab *bcktab)

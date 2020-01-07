@@ -92,7 +92,7 @@ static inline void extendqueuesize(GtInl_Queue *q,bool doublesize)
     addconst = q->queuesize;
   } else
   {
-    addconst = MIN(1024UL,q->queuesize);
+    addconst = GT_MIN(1024UL,q->queuesize);
   }
   newsize = q->queuesize + addconst;
   q->queuespace = gt_realloc(q->queuespace,sizeof (*q->queuespace) * newsize);

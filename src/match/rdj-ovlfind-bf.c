@@ -41,7 +41,7 @@ static inline void spmfind_bf(const char *a, GtUword alen,
     void* procdata)
 {
   GtUword len, from;
-  from = MIN(alen, blen);
+  from = GT_MIN(alen, blen);
   if (self_comparison)
     from -= 1;
   for (len = from; len >= minlen; len--)

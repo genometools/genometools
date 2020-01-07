@@ -6051,7 +6051,7 @@ static GtUword fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
       else {
         stopposssptab = esr->encseq->totallength;
       }
-      return MIN(stopposwildcard, stopposssptab);
+      return GT_MIN(stopposwildcard, stopposssptab);
     }
   }
   else {
@@ -6083,7 +6083,7 @@ static GtUword revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
       else {
         stopposssptab = 0;
       }
-      return MAX(stopposwildcard, stopposssptab);
+      return GT_MAX(stopposwildcard, stopposssptab);
     }
   }
   else {
@@ -6871,7 +6871,7 @@ void gt_encseq_showatstartpos(FILE *fp,
   }
   fprintf(fp, "\nsequence=\"");
   if (fwd) {
-    endpos = MIN(startpos + GT_UNITSIN2BITENC - 1, encseq->totallength-1);
+    endpos = GT_MIN(startpos + GT_UNITSIN2BITENC - 1, encseq->totallength-1);
     gt_encseq_extract_encoded(encseq, buffer, startpos, endpos);
     for (pos=0; pos < endpos - startpos + 1; pos++) {
       showbufchar(fp, complement, buffer[pos]);
@@ -6906,10 +6906,10 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
   totallength = encseq->logicaltotallength;
   characters = gt_alphabet_characters(gt_encseq_alphabet(encseq));
   if (depth == 0) {
-    end = MIN(start + maxshow, totallength);
+    end = GT_MIN(start + maxshow, totallength);
   }
   else {
-    end = MIN(start + maxshow, MIN(totallength, start+depth));
+    end = GT_MIN(start + maxshow, GT_MIN(totallength, start+depth));
   }
   for (idx = start; idx <= end; idx++) {
     if (idx == totallength) {
@@ -6983,16 +6983,16 @@ static int gt_encseq_check_comparetwostrings(const GtEncseq *encseq,
   if (fwd) {
     gt_assert(pos1 < totallength);
     gt_assert(pos2 < totallength);
-    maxoffset = MIN(totallength - pos1, totallength - pos2);
+    maxoffset = GT_MIN(totallength - pos1, totallength - pos2);
   }
   else {
-    maxoffset = MIN(pos1+1, pos2+1);
+    maxoffset = GT_MIN(pos1+1, pos2+1);
   }
   if (*maxcommon > 0) {
-    maxoffset = MIN(*maxcommon, maxoffset);
+    maxoffset = GT_MIN(*maxcommon, maxoffset);
   }
   if (maxdepth > 0) {
-    maxoffset = MIN(maxoffset, maxdepth);
+    maxoffset = GT_MIN(maxoffset, maxdepth);
   }
   for (currentoffset = 0; currentoffset <= maxoffset; currentoffset++) {
     cc1 = derefcharboundaries(encseq, fwd, complement,

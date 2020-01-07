@@ -40,7 +40,7 @@ ctxMapILogIsValid(GtUword seqLen, short mapIntervalLog2)
           || mapIntervalLog2 == CTX_MAP_ILOG_AUTOSIZE
           || (mapIntervalLog2 >= 0
               && mapIntervalLog2
-              < MIN(requiredUlongBits(seqLen),
+              < GT_MIN(requiredUlongBits(seqLen),
                     sizeof (GtUword) * CHAR_BIT)));
 }
 

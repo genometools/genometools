@@ -145,7 +145,7 @@ static bool gt_mmsearch(const GtEncseq *dbencseq,
       while (right > left + 1)
       {
         mid = GT_DIV2(left+right);
-        lcplen = MIN(lpref,rpref);
+        lcplen = GT_MIN(lpref,rpref);
         GT_MMSEARCH_COMPARE(ESASUFFIXPTRGET(suftab,mid),lcplen);
         if (retcode <= 0)
         {
@@ -182,7 +182,7 @@ static bool gt_mmsearch(const GtEncseq *dbencseq,
       while (right > left + 1)
       {
         mid = GT_DIV2(left+right);
-        lcplen = MIN(lpref,rpref);
+        lcplen = GT_MIN(lpref,rpref);
         GT_MMSEARCH_COMPARE(ESASUFFIXPTRGET(suftab,mid),lcplen);
         if (retcode >= 0)
         {

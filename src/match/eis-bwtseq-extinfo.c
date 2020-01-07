@@ -213,7 +213,7 @@ locBitsUpperBounds(void *cbState, struct segmentDesc *desc,
       for (i = 0; i < numSegmentDesc; ++i)
       {
         size_t len = desc[i].len;
-        maxSegLen = MAX(len, maxSegLen);
+        maxSegLen = GT_MAX(len, maxSegLen);
         if (state->featureToggles & BWTLocateCount)
           maxBitsTotal += requiredUlongBits(len) * desc[i].repeatCount;
         numSegmentsTotal += desc[i].repeatCount;
@@ -298,7 +298,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
         && locateInterval > 1)
     {
       GtUword stdLocMarks = srcLen / locateInterval,
-        extraLocMarksUpperBound = MIN(srcLen/2, srcLen - stdLocMarks);
+        extraLocMarksUpperBound = GT_MIN(srcLen/2, srcLen - stdLocMarks);
       if (stats)
       {
         GtUword nonValSortSyms = 0;
@@ -309,7 +309,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                 alphabet, MRAEncMapSymbol(alphabet, i),
                 SORTMODE_VALUE, (int *)rangeSort))
             nonValSortSyms += stats->symbolDistributionTable[i];
-        extraLocMarksUpperBound = MIN3(extraLocMarksUpperBound, nonValSortSyms,
+        extraLocMarksUpperBound = GT_MIN3(extraLocMarksUpperBound, nonValSortSyms,
                                        srcLen - nonValSortSyms);
       }
       state->extraLocMarksUpperBound = extraLocMarksUpperBound;

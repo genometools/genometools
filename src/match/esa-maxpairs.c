@@ -139,8 +139,8 @@ static int cartproduct1_maxpairs(GtBUstate_maxpairs *state,
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
     if (state->processmaxpairs(state->processmaxpairsinfo,&state->genericencseq,
-                               fatherdepth,MIN(leafnumber,*spptr),
-                                           MAX(leafnumber,*spptr),err) != 0)
+                               fatherdepth,GT_MIN(leafnumber,*spptr),
+                                           GT_MAX(leafnumber,*spptr),err) != 0)
     {
       return -1;
     }
@@ -169,8 +169,8 @@ static int cartproduct2_maxpairs(GtBUstate_maxpairs *state,
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
                                  &state->genericencseq,
-                                 fatherdepth,MIN(*spptr1,*spptr2),
-                                             MAX(*spptr1,*spptr2),err) != 0)
+                                 fatherdepth,GT_MIN(*spptr1,*spptr2),
+                                             GT_MAX(*spptr1,*spptr2),err) != 0)
       {
         return -1;
       }
@@ -274,8 +274,8 @@ static int processleafedge_maxpairs(bool firstsucc,
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
                                  &state->genericencseq,
-                                 fatherdepth,MIN(leafnumber,*spptr),
-                                             MAX(leafnumber,*spptr),err) != 0)
+                                 fatherdepth,GT_MIN(leafnumber,*spptr),
+                                             GT_MAX(leafnumber,*spptr),err) != 0)
       {
         return -2;
       }
@@ -438,8 +438,8 @@ static int processbranchingedge_maxpairs(bool firstsucc,
       {
         if (state->processmaxpairs(state->processmaxpairsinfo,
                                    &state->genericencseq,
-                                   fatherdepth,MIN(*fptr,*spptr),
-                                               MAX(*fptr,*spptr),err) != 0)
+                                   fatherdepth,GT_MIN(*fptr,*spptr),
+                                               GT_MAX(*fptr,*spptr),err) != 0)
         {
           return -4;
         }

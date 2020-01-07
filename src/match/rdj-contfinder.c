@@ -302,7 +302,7 @@ static inline void gt_contfinder_insertion_sort(
       {
         vlen = (vcorrected > 0) ? contfinder.seppos[vcorrected] -
           contfinder.seppos[vcorrected - 1] : contfinder.seppos[vcorrected] + 1;
-        len = MIN(ulen, vlen);
+        len = GT_MIN(ulen, vlen);
       }
       for (pos = bucket.depth, uvcmp = 0; uvcmp == 0 && pos < len;
           pos += GT_CONTFINDER_KMERSIZE)

@@ -114,7 +114,7 @@ static int gt_ltrelement_format_description(GtLTRElement *e,
   char tmpstr[BUFSIZ];
   gt_assert(buf && e);
 
-  (void) snprintf(tmpstr, MIN(BUFSIZ, (size_t) seqnamelen+1), "%s", e->seqid);
+  (void) snprintf(tmpstr, GT_MIN(BUFSIZ, (size_t) seqnamelen+1), "%s", e->seqid);
   tmpstr[seqnamelen+1] = '\0';
   gt_cstr_rep(tmpstr, ' ', '_');
   ret = snprintf(buf, buflen, "%s_"GT_WU"_"GT_WU"", tmpstr, e->leftLTR_5+1,
@@ -417,7 +417,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
       GtRange rng;
       ls->element.seqid = gt_calloc((size_t) ls->seqnamelen+1, sizeof (char));
       (void) snprintf(ls->element.seqid,
-                      MIN((size_t) gt_str_length(sdesc),
+                      GT_MIN((size_t) gt_str_length(sdesc),
                           (size_t) ls->seqnamelen)+1,
                       "%s", gt_str_get(sdesc));
       gt_cstr_rep(ls->element.seqid, ' ', '_');

@@ -149,7 +149,7 @@ static GtUword gt_diagband_struct_dband_coverage(
                                     GtUword diagband_idx)
 {
   gt_assert(diagband_struct != NULL);
-  return (GtUword) MAX(diagband_struct->score[diagband_idx + 1],
+  return (GtUword) GT_MAX(diagband_struct->score[diagband_idx + 1],
                        diagband_struct->score[diagband_idx - 1])
          + (GtUword) diagband_struct->score[diagband_idx];
 }

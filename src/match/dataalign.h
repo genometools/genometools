@@ -39,8 +39,8 @@ roundUp(GtUint64 v, GtUword multipleOf)
 static inline size_t
 offsetAlign(size_t offset, size_t sizeOfVal2Align)
 {
-  size_t alignBase = MAX(MIN_ALIGN_REQUREMENT,
-                         MIN(sizeOfVal2Align, MAX_ALIGN_REQUIREMENT));
+  size_t alignBase = GT_MAX(MIN_ALIGN_REQUREMENT,
+                         GT_MIN(sizeOfVal2Align, MAX_ALIGN_REQUIREMENT));
   return roundUp(offset, alignBase);
 }
 

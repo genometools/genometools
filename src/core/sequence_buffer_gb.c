@@ -423,7 +423,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     }
     pvt->linenum++;
   }
-  pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+  pvt->nextfree = GT_MIN(currentoutpos, OUTBUFSIZE);
   return had_err;
 }
 

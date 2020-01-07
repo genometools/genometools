@@ -269,7 +269,7 @@ static void interval_tree_max_fixup(GtIntervalTree *it,
     else if (x->right == it->nil && x->left != it->nil)
       x->max = x->left->max;
     else if (x->right != it->nil && x->left != it->nil)
-      x->max = MAX(x->left->max, x->right->max);
+      x->max = GT_MAX(x->left->max, x->right->max);
     x = x->parent;
   }
 }

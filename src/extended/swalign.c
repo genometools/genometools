@@ -56,7 +56,7 @@ static void swalign_fill_table(DPentry **dptable,
       repscore = dptable[i-1][j-1].score + scores[uval][vval];
       delscore = dptable[i-1][j].score + deletion_score;
       insscore = dptable[i][j-1].score + insertion_score;
-      maxscore = MAX(MAX(MAX(repscore, delscore), insscore), 0);
+      maxscore = GT_MAX(GT_MAX(GT_MAX(repscore, delscore), insscore), 0);
       dptable[i][j].score = maxscore;
       dptable[i][j].max_replacement = (maxscore == repscore) ? true : false;
       dptable[i][j].max_deletion    = (maxscore == delscore) ? true : false;

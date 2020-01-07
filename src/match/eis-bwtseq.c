@@ -624,10 +624,10 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
       fputs("Checking context regeneration.\n", stderr);
       {
         GtUword i, start, subSeqLen,
-          maxSubSeqLen = MIN(MAX(MIN_CONTEXT_LEN, seqLen/CONTEXT_FRACTION),
+          maxSubSeqLen = GT_MIN(GT_MAX(MIN_CONTEXT_LEN, seqLen/CONTEXT_FRACTION),
                              MAX_CONTEXT_LEN),
-          numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
-                         MAX(2, seqLen/CONTEXT_INTERVAL));
+          numTries = GT_MIN(MAX_NUM_CONTEXT_CHECKS,
+                         GT_MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
         GtEncseqReader *esr =
            gt_encseq_create_reader_with_readmode(suffixArray.encseq,

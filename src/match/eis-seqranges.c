@@ -536,11 +536,11 @@ gt_SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, GtUword start,
     return;
   /* iterate over ranges left */
   {
-    GtUword s = MAX(start, p->startPos);
+    GtUword s = GT_MAX(start, p->startPos);
     struct seqRange *maxRange = rangeList->ranges + rangeList->numRanges - 1;
     while (s <= end)
     {
-      GtUword overlap = MIN(p->startPos + seqRangeLen(p,
+      GtUword overlap = GT_MIN(p->startPos + seqRangeLen(p,
                                                             rangeList->symBits),
                                   end + 1) - s;
       occStore[MRAEncRevMapSymbol(rangeList->alphabet,
@@ -592,7 +592,7 @@ gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
           symCount -= start - p->startPos;
         if (sym == seqRangeSym(q, symBits))
         {
-          regionLength lastOverlap = MIN(end - q->startPos,
+          regionLength lastOverlap = GT_MIN(end - q->startPos,
                                          seqRangeLen(q, symBits));
           symCount += lastOverlap;
         }
@@ -602,14 +602,14 @@ gt_SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList,
     else
     {
       GtUword symCount = 0;
-      GtUword s = MAX(start, p->startPos);
+      GtUword s = GT_MAX(start, p->startPos);
       Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym);
       unsigned symBits = rangeList->symBits;
       struct seqRange *maxRange = rangeList->ranges + rangeList->numRanges - 1;
       while (s < end)
       {
         if (seqRangeSym(p, symBits) == sym)
-          symCount += MIN(p->startPos + seqRangeLen(p, symBits), end) - s;
+          symCount += GT_MIN(p->startPos + seqRangeLen(p, symBits), end) - s;
         if (p == maxRange)
           break;
         s = (++p)->startPos;
@@ -662,7 +662,7 @@ gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
           symCount -= start - p->startPos;
 
         {
-          regionLength lastOverlap = MIN(end - q->startPos,
+          regionLength lastOverlap = GT_MIN(end - q->startPos,
                                          seqRangeLen(q, symBits));
           symCount += lastOverlap;
         }
@@ -672,12 +672,12 @@ gt_SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList,
     else
     {
       GtUword symCount = 0;
-      GtUword s = MAX(start, p->startPos);
+      GtUword s = GT_MAX(start, p->startPos);
       struct seqRange *maxRange = rangeList->ranges + rangeList->numRanges - 1;
       unsigned symBits = rangeList->symBits;
       while (s < end)
       {
-        symCount += MIN(p->startPos + seqRangeLen(p, symBits), end) - s;
+        symCount += GT_MIN(p->startPos + seqRangeLen(p, symBits), end) - s;
         if (p == maxRange)
           break;
         s = (++p)->startPos;
@@ -711,7 +711,7 @@ gt_SRLApplyRangesToSubString(struct seqRangeList *rangeList,
     {
       size_t i;
       unsigned maxSubstPos =
-        MIN(nextRange->startPos + seqRangeLen(nextRange, symBits),
+        GT_MIN(nextRange->startPos + seqRangeLen(nextRange, symBits),
             start + len) - subStringOffset;
       Symbol sym = MRAEncRevMapSymbol(rangeList->alphabet,
                                       seqRangeSym(nextRange, symBits));

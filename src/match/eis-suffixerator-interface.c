@@ -377,7 +377,7 @@ SfxIGenerate(void *iface,
   {
     if (generateStart < sfxi->lastGeneratedStart + sfxi->lastGeneratedLen)
     {
-      size_t copyLen = MIN(elemsLeft, sfxi->lastGeneratedStart
+      size_t copyLen = GT_MIN(elemsLeft, sfxi->lastGeneratedStart
                            + sfxi->lastGeneratedLen - generateStart),
         charsWritten =
         SDRTranslateSuffixsortspace(xltor, output,

@@ -40,7 +40,7 @@ gt_bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits)
   if (bitTop)
   {
     GtUword mask;
-    unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, bitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
@@ -183,7 +183,7 @@ gt_bsGetUniformUInt32Array(constBitString str, BitOffset offset,
   if (bitTop)
   {
     GtUword mask; /*< all of the bits we want to get from *p */
-    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
@@ -196,7 +196,7 @@ gt_bsGetUniformUInt32Array(constBitString str, BitOffset offset,
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       GtUword mask;
-      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      bits2Read = GT_MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
       mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
@@ -242,7 +242,7 @@ gt_bsGetNonUniformUInt32Array(
   if (bitTop)
   {
     GtUword mask; /*< all of the bits we want to get from *p */
-    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
@@ -255,7 +255,7 @@ gt_bsGetNonUniformUInt32Array(
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       GtUword mask;
-      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      bits2Read = GT_MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
       mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
@@ -309,7 +309,7 @@ gt_bsGetNonUniformInt32Array(
   if (bitTop)
   {
     GtUword mask; /*< all of the bits we want to get from *p */
-    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
@@ -322,7 +322,7 @@ gt_bsGetNonUniformInt32Array(
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       GtUword mask;
-      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      bits2Read = GT_MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
       mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
@@ -412,7 +412,7 @@ gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
 
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         accum = accum << bits2Read
           | ((currentVal) >> (bitsLeft - bits2Read));
@@ -452,7 +452,7 @@ gt_bsStoreUniformUInt32Array(BitString str, BitOffset offset,
               || (bitsLeft < sizeof (accum)*CHAR_BIT - bitsInAccum)))
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         GtUword mask = ~((~(GtUword)0) << bits2Read);
         accum = accum << bits2Read
@@ -540,7 +540,7 @@ gt_bsStoreNonUniformUInt32Array(
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
 
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         accum = accum << bits2Read
           | ((currentVal) >> (bitsLeft - bits2Read));
@@ -586,7 +586,7 @@ gt_bsStoreNonUniformUInt32Array(
               || (bitsLeft < sizeof (accum)*CHAR_BIT - bitsInAccum)))
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         GtUword mask = ~((~(GtUword)0) << bits2Read);
         accum = accum << bits2Read
@@ -675,7 +675,7 @@ gt_bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
   if (bitTop)
   {
     GtUword mask; /*< all of the bits we want to get from *p */
-    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
@@ -688,7 +688,7 @@ gt_bsGetUniformUInt32ArrayAdd(constBitString str, BitOffset offset,
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       GtUword mask;
-      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      bits2Read = GT_MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
       mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
@@ -734,7 +734,7 @@ gt_bsGetNonUniformUInt32ArrayAdd(
   if (bitTop)
   {
     GtUword mask; /*< all of the bits we want to get from *p */
-    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
@@ -747,7 +747,7 @@ gt_bsGetNonUniformUInt32ArrayAdd(
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       GtUword mask;
-      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      bits2Read = GT_MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
       mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
@@ -801,7 +801,7 @@ gt_bsGetNonUniformInt32ArrayAdd(
   if (bitTop)
   {
     GtUword mask; /*< all of the bits we want to get from *p */
-    unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
@@ -814,7 +814,7 @@ gt_bsGetNonUniformInt32ArrayAdd(
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       GtUword mask;
-      bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
+      bits2Read = GT_MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
       mask = (~((~(GtUword)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);

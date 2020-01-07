@@ -212,7 +212,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
 
   gt_assert(useq != NULL && vseq != NULL &&
             useq->len >= u_start && vseq->len >= v_start);
-  maxlen = MIN(useq->len - u_start, vseq->len - v_start);
+  maxlen = GT_MIN(useq->len - u_start, vseq->len - v_start);
   for (lcp = 0; lcp < maxlen; lcp++)
   {
     GtUchar u_cc, v_cc;

@@ -241,7 +241,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         pvt->filelengthtab[pvt->filenum].effectivelength
           += (uint64_t) currentfileadd;
       }
-      pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+      pvt->nextfree = GT_MIN(currentoutpos, OUTBUFSIZE);
       return 0; /* buffer full, finished */
     }
     if (lc == TERMINATOR) {
@@ -331,7 +331,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       }
     }
   }
-  pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+  pvt->nextfree = GT_MIN(currentoutpos, OUTBUFSIZE);
   return had_err;
 }
 

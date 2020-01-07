@@ -96,7 +96,7 @@ unsigned int *gt_plain_lcp13_kasai(GtUword *maxlcp,
     if (fillpos > 0 && fillpos < partwidth)
     {
       GtUword previousstart = (GtUword) suftab[fillpos-1],
-              lastoffset = totallength - MAX(pos,previousstart);
+              lastoffset = totallength - GT_MAX(pos,previousstart);
 
       while (lcpvalue < lastoffset)
       {
@@ -156,7 +156,7 @@ unsigned int *gt_plain_lcp_phialgorithm(bool onlyplcp,
     if (pos != suftab0)
     {
       const unsigned int currentphitab = phitab[pos];
-      const GtUword lastoffset = totallength - MAX(pos,currentphitab);
+      const GtUword lastoffset = totallength - GT_MAX(pos,currentphitab);
       const GtUchar *ptr1 = sequence + pos,
                     *ptr2 = sequence + currentphitab;
 

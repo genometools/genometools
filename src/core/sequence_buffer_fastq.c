@@ -98,7 +98,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 
   /* we need more than one round to deal with the overflowed sequence */
   if (gt_str_length(sbfq->overflowbuffer) > 0) {
-    pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+    pvt->nextfree = GT_MIN(currentoutpos, OUTBUFSIZE);
     return had_err;
   }
 
@@ -173,7 +173,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 
     /* if buffer is full, return it */
     if (currentoutpos >= (GtUword) OUTBUFSIZE) {
-      pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+      pvt->nextfree = GT_MIN(currentoutpos, OUTBUFSIZE);
       had_err = 0;
       break;
     }
@@ -186,7 +186,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
     pvt->filelengthtab[pvt->filenum].effectivelength
       += (uint64_t) currentfileadd;
   }
-  pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+  pvt->nextfree = GT_MIN(currentoutpos, OUTBUFSIZE);
   return had_err;
 }
 

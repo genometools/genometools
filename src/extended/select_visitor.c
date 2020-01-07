@@ -302,8 +302,8 @@ static int select_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
       GtRange range = gt_genome_node_get_range((GtGenomeNode*) rn);
       if (gt_range_overlap(&range, &select_visitor->contain_range)) {
         /* an overlapping contain range was defined -> update range  */
-        range.start = MAX(range.start, select_visitor->contain_range.start);
-        range.end = MIN(range.end, select_visitor->contain_range.end);
+        range.start = GT_MAX(range.start, select_visitor->contain_range.start);
+        range.end = GT_MIN(range.end, select_visitor->contain_range.end);
         gt_genome_node_set_range((GtGenomeNode*) rn, &range);
         gt_queue_add(select_visitor->node_buffer, rn);
       }

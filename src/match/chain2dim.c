@@ -366,10 +366,10 @@ static GtChain2Dimscoretype gapcostCc(const GtChain2Dimmatchtable *matchtable,
              - GT_CHAIN2DIM_GETSTOREDENDPOINT(0,i) - 1,
   value2 = GT_CHAIN2DIM_GETSTOREDSTARTPOINT(1,j)
              - GT_CHAIN2DIM_GETSTOREDENDPOINT(1,i) - 1;
-  return (GtChain2Dimscoretype) MAX(value1,value2);
+  return (GtChain2Dimscoretype) GT_MAX(value1,value2);
 }
 
-#define GT_MINARRAYSPACE(A,TYPE,MINLEN)\
+#define MINARRAYSPACE(A,TYPE,MINLEN)\
         do {\
           if ((MINLEN) >= (A)->allocated##TYPE)\
           {\
@@ -420,7 +420,7 @@ static void gt_chain2dim_retrace_previousinchain(GtChain2Dim *chain,
     /* Use previousinchain */
     matchnum = matchtable->matches[matchnum].previousinchain;
   }
-  GT_MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,lengthofchain);
+  MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,lengthofchain);
   chain->chainedmatches.nextfreeGtChain2Dimref = lengthofchain;
   for (matchnum = retracestart;
        matchnum != GT_CHAIN2DIM_UNDEFPREVIOUS;
@@ -458,7 +458,7 @@ static void gt_chain2dim_nd_retrace_allprevious(
   }
   gt_assert(stack->nextfreeGtChain2DimEdgelevel == 0);
   chain->storedinreverseorder = true;
-  GT_MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,32UL);
+  MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,32UL);
   chain->chainedmatches.spaceGtChain2Dimref[0] = retracestart;
   chain->chainedmatches.nextfreeGtChain2Dimref = 1UL;
   for (idx = matchtable->previousbound[retracestart];
@@ -476,7 +476,7 @@ static void gt_chain2dim_nd_retrace_allprevious(
   {
     GtChain2DimEdgelevel father
       = stack->spaceGtChain2DimEdgelevel[--stack->nextfreeGtChain2DimEdgelevel];
-    GT_MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,father.level + 1);
+    MINARRAYSPACE(&chain->chainedmatches,GtChain2Dimref,father.level + 1);
     chain->chainedmatches.spaceGtChain2Dimref[father.level] = father.son;
     chain->chainedmatches.nextfreeGtChain2Dimref = father.level + 1;
     if (matchtable->previouscount[father.son] == 0)

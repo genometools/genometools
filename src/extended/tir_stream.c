@@ -241,7 +241,7 @@ static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
       /* due to sortedness of the array, the left border shouldn't change... */
       gt_assert(refrng.start <= boundaries->left_tir_start);
       /* ...so only update the right border */
-      refrng.end = MAX(boundaries->right_transformed_end, refrng.end);
+      refrng.end = GT_MAX(boundaries->right_transformed_end, refrng.end);
       if (nooverlapallowed) {
         oldboundaries->skip = true;
         boundaries->skip = true;
@@ -507,7 +507,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
 
       } else
       {
-        GtUword maxleft = MIN(seedptr->pos1 - seqstart1,
+        GtUword maxleft = GT_MIN(seedptr->pos1 - seqstart1,
                                     seedptr->pos2 - seqstart2);
         gt_seqabstract_reinit_encseq(false,GT_READMODE_FORWARD,
                                      sa_useq, encseq, maxleft,
@@ -545,7 +545,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
                                      seedptr->pos2 + seedptr->len);
       } else
       {
-        GtUword maxright = MIN(seqend1 - (seedptr->pos1 + seedptr->len),
+        GtUword maxright = GT_MIN(seqend1 - (seedptr->pos1 + seedptr->len),
                                      seqend2 - (seedptr->pos2 + seedptr->len));
         gt_seqabstract_reinit_encseq(true,GT_READMODE_FORWARD,
                                      sa_useq, encseq, maxright,
@@ -614,7 +614,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
                                    sa_vseq, encseq, vlen,
                                    pair->right_tir_start);
       edist = greedyunitedist(frontresource, sa_useq, sa_vseq);
-      pair->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen, vlen));
+      pair->similarity = 100.0 * (1.0 - (double) edist/GT_MAX(ulen, vlen));
       /* gt_log_log("edist "GT_WU", sim %f", edist, pair->similarity); */
       if (gt_double_smaller_double(pair->similarity,
                                    tir_stream->similarity_threshold)) {

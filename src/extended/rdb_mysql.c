@@ -191,7 +191,7 @@ static GtCstrTable* gt_rdb_mysql_get_tables(GtRDB *rdb, GtError *err)
     GtUword *lengths;
     memset(buf, 0, BUFSIZ);
     lengths = mysql_fetch_lengths(res);
-    (void) snprintf(buf, MIN(BUFSIZ, lengths[0])*sizeof (char), "%s",
+    (void) snprintf(buf, GT_MIN(BUFSIZ, lengths[0])*sizeof (char), "%s",
                     (char*) row[0] ? (char*) row[0] : "NULL");
     gt_cstr_table_add(tab, buf);
   }

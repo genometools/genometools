@@ -679,10 +679,10 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
     = (unsigned int) gt_firstcodes_round(log((double) totallength));
   if (logtotallength >= 8U)
   {
-    fci->markprefixunits = MAX(8U,logtotallength - 8U);
+    fci->markprefixunits = GT_MAX(8U,logtotallength - 8U);
   } else
   {
-    fci->markprefixunits = MIN(kmersize/2U,8U);
+    fci->markprefixunits = GT_MIN(kmersize/2U,8U);
   }
   if (fci->markprefixunits >= 2U)
   {

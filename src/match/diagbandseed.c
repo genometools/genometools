@@ -390,11 +390,11 @@ static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
   gt_assert(lastpos >= firstpos);
   numofpos = lastpos - firstpos;
 
-  subtract = MIN(seedlength - 1, gt_encseq_min_seq_length(encseq)) + 1;
+  subtract = GT_MIN(seedlength - 1, gt_encseq_min_seq_length(encseq)) + 1;
   gt_assert(numofpos + 1 >= numofseq * subtract);
-  ratioofspecial = MIN(totalnumofspecial * numofpos / totalnumofpos, numofpos);
+  ratioofspecial = GT_MIN(totalnumofspecial * numofpos / totalnumofpos, numofpos);
   gt_assert(numofpos >= ratioofspecial);
-  return numofpos - MAX(numofseq * subtract - 1, ratioofspecial);
+  return numofpos - GT_MAX(numofseq * subtract - 1, ratioofspecial);
 }
 
 static GtKmerPosList *gt_kmerpos_list_new(GtUword init_size,
@@ -1232,7 +1232,7 @@ static GtUword gt_diagbandseed_processhistogram(GtUword *histogram,
     } else if (frequency == maxgram + 1) {
       frequency = GT_UWORD_MAX;
     }
-    maxfreq = MIN(maxfreq, frequency);
+    maxfreq = GT_MIN(maxfreq, frequency);
   }
 
   /* determine minimum required memory for error message */
@@ -1991,12 +1991,12 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
         blist = gt_diagbandseed_kmer_iter_next(biter);
       } else
       {
-        GtUword frequency = MAX(alen, blen);
+        GtUword frequency = GT_MAX(alen, blen);
 
         if (frequency <= maxfreq)
         {
           /* add all equal k-mers */
-          frequency = MIN(maxgram, frequency);
+          frequency = GT_MIN(maxgram, frequency);
           gt_assert(frequency > 0);
           if (count_cartesian)
           {
@@ -2149,7 +2149,7 @@ static int gt_diagbandseed_get_mlistlen_maxfreq(GtUword *mlistlen,
                                             FILE *stream,
                                             GtError *err)
 {
-  const GtUword maxgram = MIN(*maxfreq, 8190) + 1; /* Cap on k-mer count */
+  const GtUword maxgram = GT_MIN(*maxfreq, 8190) + 1; /* Cap on k-mer count */
   GtUword *histogram = NULL;
   GtTimer *timer = NULL;
   int had_err = 0;
@@ -4272,7 +4272,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     if (extp->extendgreedy) {
       GtGreedyextendmatchinfo *grextinfo = NULL;
       const double weak_errorperc = (double)(extp->weakends
-                                             ? MAX(extp->errorpercentage, 20)
+                                             ? GT_MAX(extp->errorpercentage, 20)
                                              : extp->errorpercentage);
 
       pol_info = polishing_info_new_with_bias(weak_errorperc,
@@ -4903,7 +4903,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
         GtThread *thread;
         GtUword idx;
         bidx += num_runs_per_thread;
-        const GtUword end = MIN(bidx + num_runs_per_thread, bnumseqranges);
+        const GtUword end = GT_MIN(bidx + num_runs_per_thread, bnumseqranges);
 
         for (idx = bidx; idx < end; idx++) {
           GtUwordPair comb = {aidx, idx};
@@ -4934,7 +4934,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
         GtUword idx;
         bidx = self ? aidx : 0;
         for (idx = bidx;
-             idx < MIN(bidx + num_runs_per_thread, bnumseqranges);
+             idx < GT_MIN(bidx + num_runs_per_thread, bnumseqranges);
              ++idx) {
           if (!bpick || pick->b == idx) {
             GtUwordPair comb = {aidx, idx};

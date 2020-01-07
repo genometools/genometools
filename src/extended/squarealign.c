@@ -278,7 +278,7 @@ static GtWord fillDPtab_in_square_space_local(GtWord **Ltabcolumn,
         {
           Ltabcolumn[i][j] = val;
         }
-        Ltabcolumn[i][j] = MAX(Ltabcolumn[i][j],0);
+        Ltabcolumn[i][j] = GT_MAX(Ltabcolumn[i][j],0);
         maxscore = Ltabcolumn[i][j];
 
         if (maxscore > (GtWord) overall_maxscore)

@@ -37,7 +37,7 @@ gt_bsGet@uTypeTag@(constBitString str, BitOffset offset, unsigned numBits)
   if (bitTop)
   {
     @AccumType@ mask;
-    unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
+    unsigned bits2Read = GT_MIN(bitElemBits - bitTop, bitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(@AccumType@)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;

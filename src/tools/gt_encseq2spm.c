@@ -232,7 +232,7 @@ static bool gt_encseq2spm_kmersize(GtEncseq2spmArguments *arguments,
   }
   else
   {
-    *kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
+    *kmersize = GT_MIN((unsigned int) GT_UNITSIN2BITENC,
         arguments->minmatchlength);
   }
   gt_log_log("kmersize=%u", *kmersize);
