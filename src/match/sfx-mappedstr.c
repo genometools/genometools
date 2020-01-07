@@ -551,7 +551,8 @@ const GtKmercode *gt_kmercodeiterator_encseq_next(
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
                                           kmercodeiterator->spwp->kmersize)
   {
-    gt_kmerstream_shiftrightwithchar(kmercodeiterator->spwp,(GtUchar) GT_WILDCARD);
+    gt_kmerstream_shiftrightwithchar(kmercodeiterator->spwp,
+                                     (GtUchar) GT_WILDCARD);
     gt_kmerstream_newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
     kmercodeiterator->currentposition++;
     return &kmercodeiterator->kmercode;
@@ -695,7 +696,8 @@ int gt_kmercodeiterator_filetab_next(const GtKmercode **kmercodeptr,
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
                                           kmercodeiterator->spwp->kmersize)
   {
-    gt_kmerstream_shiftrightwithchar(kmercodeiterator->spwp,(GtUchar) GT_WILDCARD);
+    gt_kmerstream_shiftrightwithchar(kmercodeiterator->spwp,
+                                     (GtUchar) GT_WILDCARD);
     gt_kmerstream_newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
     kmercodeiterator->currentposition++,
     *kmercodeptr = &kmercodeiterator->kmercode;

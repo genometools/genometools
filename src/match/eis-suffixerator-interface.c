@@ -199,7 +199,8 @@ newSeqStatsFromCharDist(const GtEncseq *encseq,
       = (GtUword) gt_encseq_charcount(encseq,(GtUchar) i);
     regularSymsSum += stats->symbolDistributionTable[i];
   }
-  stats->symbolDistributionTable[GT_WILDCARD] = len - regularSymsSum - numOfSeqs;
+  stats->symbolDistributionTable[GT_WILDCARD] = len - regularSymsSum
+                                                 - numOfSeqs;
   stats->symbolDistributionTable[GT_SEPARATOR] += numOfSeqs;
   stats->symbolDistributionTable[GT_UNDEFBWTCHAR] += 1;
   return stats;

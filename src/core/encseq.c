@@ -4969,7 +4969,7 @@ GtUword gt_encseq_specialranges(const GtEncseq *encseq)
   if (encseq->hasmirror) {
     /* check whether central specialranges can be merged */
     if (gt_encseq_get_encoded_char(encseq, encseq->totallength-1,
-                                   GT_READMODE_FORWARD) == (GtUchar) GT_WILDCARD) {
+                               GT_READMODE_FORWARD) == (GtUchar) GT_WILDCARD) {
       return (encseq->specialcharinfo.specialranges*2)-1;
     } else {
       return (encseq->specialcharinfo.specialranges*2)+1;
@@ -5003,7 +5003,7 @@ GtUword gt_encseq_realspecialranges(const GtEncseq *encseq)
   if (encseq->hasmirror) {
     /* check whether central specialranges can be merged */
     if (gt_encseq_get_encoded_char(encseq, encseq->totallength-1,
-                                   GT_READMODE_FORWARD) == (GtUchar) GT_WILDCARD) {
+                               GT_READMODE_FORWARD) == (GtUchar) GT_WILDCARD) {
       return (encseq->specialcharinfo.realspecialranges*2)-1;
     } else {
       return (encseq->specialcharinfo.realspecialranges*2)+1;

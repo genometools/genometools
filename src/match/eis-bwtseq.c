@@ -624,8 +624,9 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
       fputs("Checking context regeneration.\n", stderr);
       {
         GtUword i, start, subSeqLen,
-          maxSubSeqLen = GT_MIN(GT_MAX(MIN_CONTEXT_LEN, seqLen/CONTEXT_FRACTION),
-                             MAX_CONTEXT_LEN),
+          maxSubSeqLen = GT_MIN(GT_MAX(MIN_CONTEXT_LEN,
+                                seqLen/CONTEXT_FRACTION),
+                                MAX_CONTEXT_LEN),
           numTries = GT_MIN(MAX_NUM_CONTEXT_CHECKS,
                          GT_MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);

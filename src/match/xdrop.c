@@ -242,8 +242,9 @@ void gt_evalxdroparbitscoresextend(bool forward,
          k;         /* lbound - 1 <= k <= ubound + 1*/
   /*The following function calculates the maximal allowed number of
     generations with all front values equal minus infinity.*/
-  const int allowedMININFINITYINTgenerations = GT_MAX(GT_MAX(res->arbitdistances.mis,
-                                                       res->arbitdistances.ins),
+  const int allowedMININFINITYINTgenerations = GT_MAX(
+                                               GT_MAX(res->arbitdistances.mis,
+                                                      res->arbitdistances.ins),
                                                    res->arbitdistances.del) - 1;
   int currentMININFINITYINTgeneration = 0;
   GtXdropfrontvalue tmpfront;

@@ -308,8 +308,8 @@ gt_bsCopy(constBitString src, BitOffset offsetSrc,
           while (bitsInAccum < bits2Write)
           {
             GtUword mask;
-            unsigned bits2Read = GT_MIN3(sizeof (accum) * CHAR_BIT - bitsInAccum,
-                                      bitsLeft, bitElemBits);
+            unsigned bits2Read = GT_MIN3(sizeof (accum) * CHAR_BIT
+                                         - bitsInAccum, bitsLeft, bitElemBits);
             unsigned unreadRightBits = (bitElemBits - bits2Read);
             mask = (~((~(GtUword)0) << bits2Read)) << unreadRightBits;
             accum = (accum << bits2Read) | ((*p) & mask) >> unreadRightBits;

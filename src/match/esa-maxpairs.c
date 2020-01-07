@@ -274,8 +274,9 @@ static int processleafedge_maxpairs(bool firstsucc,
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
                                  &state->genericencseq,
-                                 fatherdepth,GT_MIN(leafnumber,*spptr),
-                                             GT_MAX(leafnumber,*spptr),err) != 0)
+                                 fatherdepth,
+                                 GT_MIN(leafnumber,*spptr),
+                                 GT_MAX(leafnumber,*spptr),err) != 0)
       {
         return -2;
       }

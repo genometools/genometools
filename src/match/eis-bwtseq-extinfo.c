@@ -309,8 +309,9 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                 alphabet, MRAEncMapSymbol(alphabet, i),
                 SORTMODE_VALUE, (int *)rangeSort))
             nonValSortSyms += stats->symbolDistributionTable[i];
-        extraLocMarksUpperBound = GT_MIN3(extraLocMarksUpperBound, nonValSortSyms,
-                                       srcLen - nonValSortSyms);
+        extraLocMarksUpperBound = GT_MIN3(extraLocMarksUpperBound,
+                                          nonValSortSyms,
+                                          srcLen - nonValSortSyms);
       }
       state->extraLocMarksUpperBound = extraLocMarksUpperBound;
     }

@@ -392,7 +392,8 @@ static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
 
   subtract = GT_MIN(seedlength - 1, gt_encseq_min_seq_length(encseq)) + 1;
   gt_assert(numofpos + 1 >= numofseq * subtract);
-  ratioofspecial = GT_MIN(totalnumofspecial * numofpos / totalnumofpos, numofpos);
+  ratioofspecial = GT_MIN(totalnumofspecial * numofpos / totalnumofpos,
+                          numofpos);
   gt_assert(numofpos >= ratioofspecial);
   return numofpos - GT_MAX(numofseq * subtract - 1, ratioofspecial);
 }

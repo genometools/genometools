@@ -114,7 +114,8 @@ static int gt_ltrelement_format_description(GtLTRElement *e,
   char tmpstr[BUFSIZ];
   gt_assert(buf && e);
 
-  (void) snprintf(tmpstr, GT_MIN(BUFSIZ, (size_t) seqnamelen+1), "%s", e->seqid);
+  (void) snprintf(tmpstr, GT_MIN(BUFSIZ, (size_t) seqnamelen+1), "%s",
+                  e->seqid);
   tmpstr[seqnamelen+1] = '\0';
   gt_cstr_rep(tmpstr, ' ', '_');
   ret = snprintf(buf, buflen, "%s_"GT_WU"_"GT_WU"", tmpstr, e->leftLTR_5+1,

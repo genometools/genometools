@@ -26,7 +26,8 @@
 #include "sfx-bltrie.h"
 #include "sfx-suffixgetset.h"
 
-#define GT_BLINDTRIECHAR_GT_ISSPECIAL(X)     ((X) >= (GtBlindtriesymbol) GT_WILDCARD)
+#define GT_BLINDTRIECHAR_GT_ISSPECIAL(X) \
+        ((X) >= (GtBlindtriesymbol) GT_WILDCARD)
 #define GT_BLINDTRIE_REFNULL              0
 #define GT_BLINDTRIE_BITSFORRIGHTSIBLING  31
 #define GT_BLINDTRIE_ROOTIDX              0

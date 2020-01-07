@@ -36,13 +36,14 @@
 */
 
 /* generic macros to determine the minimum and maximum value of given <type> */
-#define GT_SAFE_HALF_MAX_SIGNED(type)  ((type)1 << (type) (sizeof (type) * 8 - 2))
-#define GT_SAFE_MAX_SIGNED(type)       (GT_SAFE_HALF_MAX_SIGNED(type) - 1 +         \
+#define GT_SAFE_HALF_MAX_SIGNED(type)  ((type)1 << (type)                      \
+                                        (sizeof (type) * 8 - 2))
+#define GT_SAFE_MAX_SIGNED(type)       (GT_SAFE_HALF_MAX_SIGNED(type) - 1 +    \
                                         GT_SAFE_HALF_MAX_SIGNED(type))
 #define GT_SAFE_MIN_SIGNED(type)       ((type) -1 - GT_SAFE_MAX_SIGNED(type))
 
-#define GT_SAFE_MIN(type)              ((type) -1 < (type) 1                        \
-                                       ? GT_SAFE_MIN_SIGNED(type)                   \
+#define GT_SAFE_MIN(type)              ((type) -1 < (type) 1                   \
+                                       ? GT_SAFE_MIN_SIGNED(type)              \
                                        : (type)0)
 #define GT_SAFE_MAX(type)              ((type) ~GT_SAFE_MIN(type))
 
@@ -170,7 +171,7 @@ uint64_t      gt_safe_mult_u64_check_func(uint64_t, uint64_t, const char*, int,
 GtUword       gt_safe_mult_ulong_check_func(GtUword, GtUword,
                                             const char*, int,
                                             GtOverflowHandlerFunc, void*);
-/* Overflow-safe multiplication of two unsigned long integers. */
+/* Overflow-safe multiplication of two ulong integers. */
 #define       gt_safe_mult_ulong(i, j) \
               gt_safe_mult_ulong_check_func(i, j, __FILE__, __LINE__, \
                                           gt_safe_default_overflow_handler, \

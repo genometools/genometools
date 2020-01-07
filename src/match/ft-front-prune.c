@@ -300,8 +300,9 @@ static void inline front_prune_add_matches(
                             match_mask;
     if (fv->matchhistory_size < max_history)
     {
-      fv->matchhistory_size = GT_MIN(fv->matchhistory_size + fv->localmatch_count,
-                                  max_history);
+      fv->matchhistory_size = GT_MIN(fv->matchhistory_size
+                                       + fv->localmatch_count,
+                                     max_history);
     }
     fv->row += fv->localmatch_count;
   }

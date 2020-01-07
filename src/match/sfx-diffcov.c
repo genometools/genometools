@@ -1050,7 +1050,8 @@ static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
 #define SETMAXCOUNT(COMP)\
     if (mainsfxstrategy->COMP >= 1UL)\
     {\
-      sfxstrategy->COMP = GT_MAX(2UL,mainsfxstrategy->COMP * sampledproportion);\
+      sfxstrategy->COMP = GT_MAX(2UL,\
+                                 mainsfxstrategy->COMP * sampledproportion);\
     }
     SETMAXCOUNT(maxcountingsort);
     SETMAXCOUNT(maxbltriesort);
@@ -1193,7 +1194,8 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   esr1 = gt_encseq_create_reader_with_readmode(dcov->encseq,dcov->readmode,0);
-  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,GT_DIV2(dcov->maxcode)));
+  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,
+                                                   GT_DIV2(dcov->maxcode)));
   dcov->filltable = gt_filllargestchartable(dcov->numofchars,
                                             dcov->prefixlength);
   gt_assert(dcov->bcktab != NULL);
@@ -1479,7 +1481,8 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
   dcov->bcktab = NULL;
   dcov->multimappower = NULL;
   dcov->maxcode = 0;
-  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,GT_DIV2(dcov->maxcode)));
+  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,
+                                            GT_DIV2(dcov->maxcode)));
   dcov->filltable = NULL;
   dcov->leftborder = NULL;
   diffptr = dcov->diffvalues;
