@@ -19,7 +19,7 @@
 #ifndef LTR_FOUR_CHAR_MOTIF_H
 #define LTR_FOUR_CHAR_MOTIF_H
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/encseq_api.h"
 
 typedef struct

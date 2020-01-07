@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/compat_api.h"
 #include "core/log_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"
 #include "match/esa-map.h"

@@ -17,7 +17,7 @@
 #ifndef KMER_DATABASE_H
 #define KMER_DATABASE_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/codetype.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"

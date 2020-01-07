@@ -17,7 +17,7 @@
 
 #include "core/error_api.h"
 #include "core/option_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/test-mtrieins.h"
 #include "tools/gt_trieins.h"
 

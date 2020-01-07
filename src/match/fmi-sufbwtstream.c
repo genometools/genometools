@@ -19,7 +19,7 @@
 #include <inttypes.h>
 #include "core/fa_api.h"
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq_metadata.h"
 #include "core/error_api.h"

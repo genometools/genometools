@@ -17,7 +17,7 @@
 
 #include "core/fa_api.h"
 #include "core/log_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/xansi_api.h"
 #include "core/undef_api.h"
 #include "extended/union_find.h"

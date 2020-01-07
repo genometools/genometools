@@ -19,7 +19,7 @@
 #define SEQUENCE_BUFFER_REP_H
 
 #include <stdio.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/error_api.h"
 #include "core/file_api.h"
 #include "core/queue.h"

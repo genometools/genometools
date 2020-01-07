@@ -21,7 +21,7 @@
 #define ENCSEQ_H
 
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/codetype.h"
 #include "core/disc_distri_api.h"
 #include "core/encseq_api.h"
@@ -29,13 +29,13 @@
 #include "core/encseq_options.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
-#include "core/md5_tab.h"
+#include "core/md5_tab_api.h"
 #include "core/range_api.h"
 #include "core/readmode.h"
 #include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 
 #define GT_ENCSEQ_VERSION  3
 

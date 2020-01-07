@@ -23,7 +23,7 @@
 #include "core/error_api.h"
 #include "core/logger.h"
 #include "core/option_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-param.h"
 #include "match/eis-encidxseq-construct.h"

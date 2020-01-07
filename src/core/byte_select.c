@@ -16,7 +16,7 @@
 */
 
 #include "core/byte_select_api.h"
-  #include "core/chardef.h"
+  #include "core/chardef_api.h"
 
 const unsigned char gt_byte_select[] = {
   /* select first bit */

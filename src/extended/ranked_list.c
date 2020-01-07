@@ -21,9 +21,9 @@
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 #include "extended/ranked_list.h"
-/*#include "extended/rbtree.h"*/
+/*#include "extended/rbtree_api.h"*/
 
 struct GtRankedList
 {

@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include "core/ma_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/encseq_api.h"
 #include "core/encseq_options.h"
 #include "core/fasta_separator.h"

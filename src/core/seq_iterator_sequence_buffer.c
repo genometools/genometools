@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/arraydef.h"
-#include "core/chardef.h"
+#include "core/arraydef_api.h"
+#include "core/chardef_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/compat_api.h"
 #include "core/desc_buffer.h"

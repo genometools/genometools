@@ -31,7 +31,7 @@
 #include "core/thread_api.h"
 #endif
 #include "core/warning_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "tools/gt_seqcorrect.h"
 #include "match/reads2twobit.h"
 #include "match/rdj-twobitenc-editor.h"

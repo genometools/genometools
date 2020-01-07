@@ -19,14 +19,14 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/error_api.h"
-#include "core/fasta_reader.h"
+#include "core/fasta_reader_api.h"
 #include "core/fasta_reader_rec.h"
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "extended/diagonalbandalign.h"
 #include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/linearalign_affinegapcost.h"

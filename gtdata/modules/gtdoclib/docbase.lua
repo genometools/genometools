@@ -22,6 +22,19 @@ local w = require 'warning'
 
 DocBase = {}
 
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. dump(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
+end
+
 function DocBase:new()
   o = {}
   o.classes = {}
@@ -156,7 +169,8 @@ function DocBase:process_ast(ast, be_verbose)
     else
       local keyword = ast[1]
       if be_verbose then
-        print("keyword: " .. keyword)
+        print("keyword: ")
+        print(dump(keyword))
       end
       if keyword == "class" then
         o.last_module = nil

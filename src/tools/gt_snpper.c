@@ -24,7 +24,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gtdatahelp.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "extended/snp_annotator_stream.h"
 #include "tools/gt_snpper.h"
 

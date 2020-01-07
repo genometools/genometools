@@ -26,6 +26,8 @@
 #include "core/types_api.h"
 #include "core/error_api.h"
 
+#define GT_DNABASES "aAcCgGtTuU"
+
 /* The following type is for storing alphabets.*/
 typedef struct GtAlphabet GtAlphabet;
 

@@ -18,7 +18,7 @@
 #ifndef LTRDIGEST_PBS_VISITOR_H
 #define LTRDIGEST_PBS_VISITOR_H
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/error_api.h"
 #include "core/range_api.h"
 #include "extended/node_visitor_api.h"

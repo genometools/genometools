@@ -16,7 +16,7 @@
 
 #include <stdlib.h>
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/log.h"
 #include "core/minmax_api.h"
 #include "core/unused_api.h"

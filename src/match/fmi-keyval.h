@@ -19,7 +19,7 @@
 #define FMI_KEYVAL_H
 #include <stdbool.h>
 #include "core/types_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "fmindex.h"
 
 GtUword gt_determinenumberofspecialstostore(const GtSpecialcharinfo

@@ -24,7 +24,7 @@
 #include "core/str_array.h"
 #include "extended/feature_node_api.h"
 #include "extended/feature_node_observer.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
 

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CLASS_ALLOC_H
-#define CLASS_ALLOC_H
+#ifndef VERSIONFUNC_API_H
+#define VERSIONFUNC_API_H
 
-#include <stdlib.h>
+/* VersionFunc module */
 
-void* gt_class_alloc(size_t size);
-void  gt_class_alloc_clean(void);
+/* Prints the GenomeTools version header with <progname> being the name of the
+   tool where it is called from. */
+void gt_versionfunc(const char *progname);
+/* Prints the short GenomeTools version header with <progname> being the name
+   of the tool where it is called from. */
+void gt_showshortversion(const char *progname);
 
 #endif

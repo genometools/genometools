@@ -14,14 +14,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/bioseq_col.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/grep.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/seq_col_rep.h"
 #include "core/seq_info_cache.h"
 #include "core/undef_api.h"

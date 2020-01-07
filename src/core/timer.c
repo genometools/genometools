@@ -23,7 +23,7 @@
 #include "core/str_api.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 typedef enum {
   TIMER_RUNNING,

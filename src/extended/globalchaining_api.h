@@ -16,11 +16,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GLOBALCHAINING_H
-#define GLOBALCHAINING_H
+#ifndef GLOBALCHAINING_API_H
+#define GLOBALCHAINING_API_H
 
 #include "core/error_api.h"
-#include "extended/chain.h"
+#include "extended/chain_api.h"
+
+/* GlobalChaining module */
 
 typedef struct {
   GtUword startpos1, /* start of fragment in first sequence */
@@ -31,12 +33,15 @@ typedef struct {
   void *data;              /* arbitrary data associated with fragment */
 } GtFragment;
 
-typedef void (*GtChainProc)(GtChain*, GtFragment*,
+/* Function to process a chain. <frags> is an array of <GtFragment>s,
+   of size <num_of_fragments>. <max_gap_width> and <cpinfo> are passed from
+   the <gt_globalchaining_*()> calls. */
+typedef void (*GtChainProc)(GtChain *c, GtFragment *frags,
                             GtUword num_of_fragments,
                             GtUword max_gap_width, void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
-   in O(<num_of_fragments>^2) time.
+   in quadratic time w.r.t. <num_of_fragments>.
    Two fragments can maximally be <max_gap_width> many bases away.
    For all global chains of maximal score, the GtChainProc function is called.
    Thereby, GtChainProc does not get the ownership of the GtChain. */
@@ -46,7 +51,7 @@ void gt_globalchaining_max(GtFragment *fragments,
                            void *cpinfo);
 
 /* Perform global chaining with overlaps of <num_of_fragments> many <fragments>
-   in O(<num_of_fragments>^2) time.
+   in quadratic time w.r.t. <num_of_fragments>.
    Two fragments can maximally be <max_gap_width> many bases away.
    For all non-overlapping global chains with a coverage of more then
    <mincoverage> of the sequence in dimension 1 (with length <seqlen1>), the

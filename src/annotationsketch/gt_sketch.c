@@ -28,7 +28,7 @@
 #include "core/splitter.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "extended/add_introns_stream_api.h"
 #include "extended/bed_in_stream.h"

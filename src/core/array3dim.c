@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/array3dim.h"
+#include "core/array3dim_api.h"
 #include "core/unused_api.h"
 
 /* example usage of the array3dim macros */

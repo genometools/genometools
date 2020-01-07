@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/defined-types.h"
 #include "core/error_api.h"
 #include "core/format64.h"
@@ -27,7 +27,7 @@
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/minmax_api.h"
 #include "match/optionargmode.h"
 #include "match/tyr-mkindex.h"

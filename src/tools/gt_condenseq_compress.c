@@ -21,7 +21,7 @@
 #include "core/logger.h"
 #include "core/logger_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/minmax_api.h"
 #include "core/safearith_api.h"
 #include "core/undef_api.h"

@@ -31,7 +31,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/gff3_defines.h"
 #include "extended/gff3_linesorted_out_stream.h"
 #include "extended/gff3_visitor.h"

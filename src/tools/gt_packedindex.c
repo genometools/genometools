@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/error_api.h"
 #include "core/option_api.h"
 #include "core/str_api.h"
 #include "core/tool.h"
 #include "core/toolbox.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/sfx-run.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_packedindex_mkctxmap.h"

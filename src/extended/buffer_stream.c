@@ -16,7 +16,7 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/queue_api.h"
-#include "extended/buffer_stream.h"
+#include "extended/buffer_stream_api.h"
 #include "extended/node_stream_api.h"
 
 struct GtBufferStream {

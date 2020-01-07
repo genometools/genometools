@@ -22,11 +22,11 @@
 /* #include <fontconfig.h> */
 #endif
 #include <string.h>
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/combinatorics.h"
 #include "core/cstr_api.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/fa_api.h"
 #include "core/init_api.h"
 #include "core/log.h"
@@ -36,10 +36,10 @@
 #include "core/spacepeak.h"
 #include "core/splitter.h"
 #include "core/symbol.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 
 static bool spacepeak = false;
 static bool showtime = false;

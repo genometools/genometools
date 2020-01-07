@@ -19,14 +19,14 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "core/arraydef.h"
-#include "core/chardef.h"
+#include "core/arraydef_api.h"
+#include "core/chardef_api.h"
 #include "core/encseq_api.h"
 #include "core/ensure_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/minmax_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"

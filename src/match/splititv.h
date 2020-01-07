@@ -19,7 +19,7 @@
 #define SPLITITV_H
 
 #include "core/types_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 
 typedef struct
 {

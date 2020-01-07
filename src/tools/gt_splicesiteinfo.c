@@ -18,14 +18,14 @@
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/splice_site_info_stream.h"
+#include "extended/splice_site_info_stream_api.h"
 #include "extended/gtdatahelp.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "tools/gt_splicesiteinfo.h"
 
 typedef struct {

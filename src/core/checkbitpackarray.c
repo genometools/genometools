@@ -23,7 +23,7 @@
 #include "core/bitpackarray.h"
 #include "core/ensure_api.h"
 #include "core/log.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */

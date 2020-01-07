@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/cstr_table.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/multithread_api.h"
 #include "core/symbol.h"
 #include "core/unused_api.h"

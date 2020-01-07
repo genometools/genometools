@@ -20,7 +20,7 @@
 #include "core/ma_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/bed_in_stream.h"
 #include "extended/feature_index_api.h"

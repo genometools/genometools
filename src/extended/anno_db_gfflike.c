@@ -34,7 +34,7 @@
 #include "core/fa_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/anno_db_prepared_stmt.h"
 #include "extended/anno_db_schema_rep.h"

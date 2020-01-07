@@ -20,7 +20,7 @@
 
 #include "core/bitpackstring.h"
 #include "core/combinatorics.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/dynalloc.h"
 #include "core/log.h"
 #include "core/ma_api.h"

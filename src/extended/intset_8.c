@@ -29,7 +29,7 @@
 #include "core/ensure_api.h"
 #include "core/intbits.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/unused_api.h"
 #include "extended/intset_8.h"
 #include "extended/io_function_pointers.h"

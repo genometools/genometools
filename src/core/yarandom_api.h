@@ -9,8 +9,10 @@
  * implied warranty.
  */
 
-#ifndef YARANDOM_H
-#define YARANDOM_H
+#ifndef YARANDOM_API_H
+#define YARANDOM_API_H
+
+/* Yarandom module */
 
 #undef random
 #undef rand
@@ -21,12 +23,19 @@
 #undef frand
 #undef RAND_MAX
 
-unsigned int gt_ya_random (void);
-unsigned int gt_ya_rand_init (unsigned int);
+/* Return a random number. */
+unsigned int gt_ya_random(void);
+/* Initialize random number generator using given seed. */
+unsigned int gt_ya_rand_init(unsigned int);
+/* Clean up static data for random number generator. */
 void         gt_ya_rand_clean(void);
 
-#define RAND_MAX   0x7FFFFFFF
-#define random()   ((GtWord) (gt_ya_random() & RAND_MAX))
+/* Maximum random number (2147483647) */
+#define RAND_MAX \
+        0x7FFFFFFF
+/* Return random number up to RAND_MAX. */
+#define random() \
+        ((GtWord) (gt_ya_random() & RAND_MAX))
 
 /*#define srandom(i) ya_rand_init(0)*/
 

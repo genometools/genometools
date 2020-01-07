@@ -19,7 +19,7 @@
 #include "core/class_alloc_lock.h"
 #include "extended/csa_stream_api.h"
 #include "extended/csa_visitor.h"
-#include "extended/consensus_sa.h"
+#include "extended/consensus_sa_api.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 

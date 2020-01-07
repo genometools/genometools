@@ -22,21 +22,30 @@
 #include "core/error_api.h"
 #include "core/types_api.h"
 
-/* a two-dimensional matrix containing boolean values */
+/* <GtBoolMatrix> implements a two-dimensional matrix containing boolean
+   values. */
 typedef struct GtBoolMatrix GtBoolMatrix;
 
+/* Create a new, empty <GtBoolMatrix>. */
 GtBoolMatrix* gt_bool_matrix_new(void);
-bool          gt_bool_matrix_get(GtBoolMatrix*, GtUword firstdim,
+/* Returns the value at position <firstdim>, <seconddim> from <bm>. */
+bool          gt_bool_matrix_get(GtBoolMatrix *bm, GtUword firstdim,
                                  GtUword seconddim);
-void          gt_bool_matrix_set(GtBoolMatrix*, GtUword firstdim,
-                                 GtUword seconddim, bool);
-GtUword       gt_bool_matrix_get_first_column(const GtBoolMatrix*,
+/* Sets the value at position <firstdim>, <seconddim> in <bm> to <b>. */
+void          gt_bool_matrix_set(GtBoolMatrix *bm, GtUword firstdim,
+                                 GtUword seconddim, bool b);
+/* Returns the first value from column position <firstdim> from <bm>. */
+GtUword       gt_bool_matrix_get_first_column(const GtBoolMatrix *bm,
                                               GtUword firstdim);
-GtUword       gt_bool_matrix_get_last_column(const GtBoolMatrix*,
+/* Returns the last value from column position <firstdim> from <bm>. */
+GtUword       gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
                                              GtUword firstdim);
-GtUword       gt_bool_matrix_get_next_column(const GtBoolMatrix*,
+/* Returns the next value from column position <firstdim> from <bm>,
+   with <i> being the current position. */
+GtUword       gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
                                              GtUword firstdim,
                                              GtUword i);
-void          gt_bool_matrix_delete(GtBoolMatrix*);
+/* Deletes <bm>. */
+void          gt_bool_matrix_delete(GtBoolMatrix *bm);
 
 #endif

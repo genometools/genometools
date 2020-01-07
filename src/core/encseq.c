@@ -25,9 +25,9 @@
 #include <ctype.h>
 #include "core/alphabet.h"
 #include "core/array.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/bitpackarray.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/checkencchar.h"
 #include "core/codetype.h"
 #include "core/complement.h"
@@ -50,7 +50,7 @@
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/mapspec.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/md5_encoder_api.h"
 #include "core/minmax_api.h"
 #include "core/progressbar.h"
@@ -62,8 +62,8 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
-#include "core/yarandom.h"
+#include "core/xposix_api.h"
+#include "core/yarandom_api.h"
 
 #undef GT_RANGEDEBUG
 

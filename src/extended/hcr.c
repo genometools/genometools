@@ -26,9 +26,9 @@
 
 #include "core/array2dim_api.h"
 #include "core/array_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/compat_api.h"
 #include "core/fa_api.h"
 #include "core/fileutils_api.h"
@@ -46,7 +46,7 @@
 #include "extended/encdesc.h"
 #include "extended/fasta_header_iterator.h"
 #include "extended/hcr.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 #include "extended/sampling.h"
 
 #define HCR_LOWESTQUALVALUE 0

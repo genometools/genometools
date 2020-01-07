@@ -22,7 +22,7 @@
 #include "core/fa_api.h"
 #include "core/fileutils_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/range_api.h"
 #include "core/showtime.h"
 #include "core/undef_api.h"

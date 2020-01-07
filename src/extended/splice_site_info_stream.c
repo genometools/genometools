@@ -19,7 +19,7 @@
 #include "core/class_alloc_lock.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
-#include "extended/splice_site_info_stream.h"
+#include "extended/splice_site_info_stream_api.h"
 #include "extended/splice_site_info_visitor.h"
 
 struct GtSpliceSiteInfoStream {

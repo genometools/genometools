@@ -16,7 +16,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "core/md5_seqid.h"
+#include "core/md5_seqid_api.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
 #include "extended/feature_node.h"
@@ -25,7 +25,7 @@
 #include "extended/gff3_parser.h"
 #include "extended/md5_to_id_visitor.h"
 #include "extended/node_visitor_api.h"
-#include "extended/regular_seqid.h"
+#include "extended/regular_seqid_api.h"
 
 struct GtMD5ToSeqidsVisitor {
   const GtNodeVisitor parent_instance;

@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ARRAY3DIM_H
-#define ARRAY3DIM_H
+#ifndef ARRAY3DIM_API_H
+#define ARRAY3DIM_API_H
 
 #include "core/error_api.h"
 #include "core/ma_api.h"

@@ -23,7 +23,7 @@
 #include "core/log.h"
 #include "core/safearith_api.h"
 #include "core/undef_api.h"
-#include "extended/globalchaining.h"
+#include "extended/globalchaining_api.h"
 
 #define UNDEFPREVIOUS           num_of_fragments
 #define GETSTOREDSTARTPOINT(DIM,IDX)\

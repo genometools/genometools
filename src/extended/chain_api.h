@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c)       2007 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2004       Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2004, 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,10 +16,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef VERSIONFUNC_H
-#define VERSIONFUNC_H
+#ifndef CHAIN_API_H
+#define CHAIN_API_H
 
-void gt_versionfunc(const char *progname);
-void gt_showshortversion(const char *progname);
+#include "core/error_api.h"
+
+typedef struct GtChain GtChain;
+
+GtChain* gt_chain_new(void);
+void     gt_chain_reset(GtChain*);
+GtWord   gt_chain_get_score(const GtChain*);
+void     gt_chain_set_score(GtChain*, GtWord);
+void     gt_chain_add_fragnum(GtChain*, GtUword fragnum);
+void     gt_chain_set_fragnum(GtChain*, GtUword idx, GtUword fragnum);
+GtUword  gt_chain_get_fragnum(const GtChain*, GtUword idx);
+GtUword  gt_chain_size(const GtChain*);
+void     gt_chain_delete(GtChain*);
 
 #endif

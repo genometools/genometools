@@ -23,7 +23,7 @@
 #include <fcntl.h>
 #include "core/class_alloc_lock.h"
 #include "core/cstr.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/encseq.h"
 #include "core/fasta_api.h"
 #include "core/fileutils_api.h"

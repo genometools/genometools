@@ -19,7 +19,7 @@
 #include "core/minmax_api.h"
 #include "core/unused_api.h"
 #include "core/timer_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "sfx-lwcheck.h"
 #include "bare-encseq.h"
 #include "sfx-sain.h"

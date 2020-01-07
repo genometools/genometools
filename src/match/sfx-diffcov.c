@@ -55,13 +55,13 @@
 
 #include <stdbool.h>
 #include <math.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
 #include "core/error_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ma_api.h"
 #include "core/minmax_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/unused_api.h"
 #include "core/intbits.h"
 #include "core/encseq.h"

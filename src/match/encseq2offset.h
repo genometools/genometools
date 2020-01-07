@@ -19,7 +19,7 @@
 #define ENCSEQ2OFFSET_H
 
 #include "core/types_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "match/sarr-def.h"
 
 GtUword *gt_encseqtable2sequenceoffsets(GtUword *totallength,

@@ -15,7 +15,7 @@
 */
 
 #include "core/ma_api.h"
-#include "core/str_cache.h"
+#include "core/str_cache_api.h"
 
 struct GtStrCache {
   GtStr **cache;

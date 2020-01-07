@@ -17,7 +17,7 @@
 
 #include <limits.h>
 #include "core/assert_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "initeqsvec.h"
 
 void gt_initeqsvector(GtUword *eqsvector,

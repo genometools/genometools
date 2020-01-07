@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <ctype.h>
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ma_api.h"
 #include "core/minmax_api.h"

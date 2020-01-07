@@ -22,14 +22,14 @@
 #include <string.h>
 #include <ctype.h>
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/cstr_api.h"
 #include "core/ensure_api.h"
 #include "core/fileutils_api.h"
 #include "core/fa_api.h"
 #include "core/gtdatapath.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/str_array.h"
 #include "core/thread_api.h"
 #include "core/unused_api.h"

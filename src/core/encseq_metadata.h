@@ -19,7 +19,7 @@
 #define ENCSEQ_METADATA_H
 
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/encseq_access_type.h"
 #include "core/error_api.h"
 

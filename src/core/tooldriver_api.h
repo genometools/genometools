@@ -21,12 +21,16 @@
 #include "core/error_api.h"
 #include "core/tool_api.h"
 
+typedef struct GtLicense GtLicense;
+
+/* Tooldriver module */
+
 /* The prototype of a tool function. */
 typedef int (*GtToolFunc)(int argc, const char **argv, GtError *err);
 
-typedef struct GtLicense GtLicense;
-
+/* Create a <GtLicense> from a string. */
 typedef GtLicense* (*GtLicenseConstructor)(const char *argv0);
+/* Delete a <GtLicense>. */
 typedef void       (*GtLicenseDestructor)(GtLicense*);
 
 /* The tool driver module allows one to compile a tool into a separate binary.
@@ -35,6 +39,7 @@ typedef void       (*GtLicenseDestructor)(GtLicense*);
 */
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);
 
+/* Like <gt_tooldriver()>, with license support. */
 int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
                                GtLicense **license_out,
                                GtLicenseConstructor, GtLicenseDestructor);

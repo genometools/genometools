@@ -19,13 +19,13 @@
 #include <stdbool.h>
 
 #include "core/alphabet_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/compressed_bitsequence.h"

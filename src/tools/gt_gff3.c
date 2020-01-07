@@ -20,7 +20,7 @@
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/undef_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_defines.h"

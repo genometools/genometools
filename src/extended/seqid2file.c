@@ -17,7 +17,7 @@
 
 #include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "extended/region_mapping.h"
 
 struct GtSeqid2FileInfo {

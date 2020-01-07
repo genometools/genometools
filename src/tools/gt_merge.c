@@ -18,7 +18,7 @@
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"

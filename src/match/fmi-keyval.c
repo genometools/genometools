@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "core/divmodmul_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/safecast-gen.h"
 #include "fmindex.h"
 #include "fmi-keyval.h"

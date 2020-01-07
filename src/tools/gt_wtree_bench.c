@@ -17,10 +17,10 @@
 
 #include <ctype.h>
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/encseq_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "extended/wtree_encseq.h"

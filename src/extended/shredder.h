@@ -18,7 +18,7 @@
 #ifndef SHREDDER_H
 #define SHREDDER_H
 
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 
 typedef struct GtShredder GtShredder;
 

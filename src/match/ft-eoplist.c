@@ -5,9 +5,9 @@
 #include <math.h>
 #include <ctype.h>
 #include "core/assert_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/minmax_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/divmodmul_api.h"
 #include "core/readmode.h"
 #include "match/ft-polish.h"

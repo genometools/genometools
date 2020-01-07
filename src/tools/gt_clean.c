@@ -16,12 +16,12 @@
 */
 
 #include <string.h>
-#include "core/bioseq.h"
-#include "core/md5_tab.h"
+#include "core/bioseq_api.h"
+#include "core/md5_tab_api.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
-#include "core/xposix.h"
+#include "core/versionfunc_api.h"
+#include "core/xposix_api.h"
 #include "tools/gt_clean.h"
 
 static GtOptionParser* gt_clean_option_parser_new(GT_UNUSED void

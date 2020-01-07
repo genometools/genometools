@@ -23,7 +23,7 @@
 #include <sys/time.h>
 #include <float.h>
 #include <math.h>
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/codetype.h"
 #include "core/complement.h"
 #include "core/cstr_api.h"

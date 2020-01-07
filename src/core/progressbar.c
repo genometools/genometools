@@ -28,7 +28,7 @@
 #include "core/process.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 #ifndef _WIN32
 #define DEFAULT_WINDOW_SIZE  80

@@ -24,19 +24,19 @@
 #include <sys/wait.h>
 #endif
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/basename_api.h"
 #include "core/divmodmul_api.h"
 #include "core/encseq_api.h"
 #include "core/fa_api.h"
 #include "core/fasta_api.h"
-#include "core/fasta_reader.h"
+#include "core/fasta_reader_api.h"
 #include "core/fasta_reader_rec.h"
 #include "core/fileutils_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/output_file_api.h"
 #include "core/parseutils_api.h"
 #include "core/range_api.h"
@@ -50,7 +50,7 @@
 #include "extended/match.h"
 #include "extended/match_blast_api.h"
 #include "extended/match_iterator_blast.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 
 #include "extended/condenseq_search_arguments.h"
 #include "tools/gt_condenseq_blast.h"

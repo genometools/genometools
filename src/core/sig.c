@@ -18,7 +18,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include "core/sig.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 void gt_sig_register_all(void (*func)(int sigraised))
 {

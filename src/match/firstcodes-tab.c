@@ -20,14 +20,14 @@
 #include "core/assert_api.h"
 #include "core/divmodmul_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #ifdef SKDEBUG
 #include "core/disc_distri_api.h"
 #endif
 #include "core/log.h"
 #include "core/spacecalc.h"
 #include "core/hashmap-generic.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-psbuf.h"
 #include "firstcodes-cache.h"

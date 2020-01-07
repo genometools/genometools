@@ -17,12 +17,12 @@
 
 #include <math.h>
 #include "core/fa_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/error_api.h"
 #include "core/logger_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/radix_sort.h"
 #include "core/showtime.h"
 #include "core/spacecalc.h"

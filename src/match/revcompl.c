@@ -17,7 +17,7 @@
 
 #include "core/types_api.h"
 #include "core/assert_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/readmode.h"
 
 void gt_inplace_reverse_complement(GtUchar *seq,GtUword len)

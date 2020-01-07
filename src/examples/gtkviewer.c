@@ -2,7 +2,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include "genometools.h"
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 
 GtDiagram *d = NULL;
 GtLayout *l = NULL;

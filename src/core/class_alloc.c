@@ -16,7 +16,7 @@
 */
 
 #include "core/array.h"
-#include "core/class_alloc.h"
+#include "core/class_alloc_api.h"
 #include "core/ma_api.h"
 
 static GtArray *c_classes = NULL;

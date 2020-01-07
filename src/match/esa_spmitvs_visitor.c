@@ -18,7 +18,7 @@
 
 #include <math.h>
 #include "core/class_alloc_lock.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/unused_api.h"
 #include "esa-seqread.h"
 #include "esa-spmitvs.h"

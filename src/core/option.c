@@ -34,7 +34,7 @@
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 typedef enum {
   OPTION_BOOL,

@@ -15,11 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ORF_H
-#define ORF_H
+#ifndef ORF_API_H
+#define ORF_API_H
 
 #include "core/range_api.h"
 
+/* ORF module */
+
+/* Function to handle ORFs produced by <gt_determine_ORFs()>. */
 typedef void (*GtORFProcessor)(void *data, GtRange *orf, GtUword framenum,
                                const char *frame, bool ends_with_stop_codon);
 

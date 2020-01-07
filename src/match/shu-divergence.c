@@ -21,7 +21,7 @@
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/log_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/unused_api.h"
 #include "match/shu-divergence.h"
 

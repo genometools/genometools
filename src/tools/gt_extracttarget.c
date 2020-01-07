@@ -16,7 +16,7 @@
 */
 
 #include <string.h>
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/cstr_api.h"
 #include "core/fasta_api.h"
 #include "core/ma_api.h"
@@ -26,7 +26,7 @@
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
-#include "extended/gff3_escaping.h"
+#include "extended/gff3_escaping_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/string_matching.h"
 #include "tools/gt_extracttarget.h"

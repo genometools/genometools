@@ -17,7 +17,7 @@
 
 #include "core/encseq.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/parseutils_api.h"
 #include "core/readmode_api.h"
 #include "core/unused_api.h"

@@ -19,7 +19,7 @@
 #include "core/unused_api.h"
 #include "tools/gt_encseq_sample.h"
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/encseq_api.h"
 #include "core/encseq_options.h"
 #include "core/fasta_separator.h"
@@ -29,7 +29,7 @@
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "core/minmax_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/bittab_api.h"
 
 #include <string.h>

@@ -16,7 +16,7 @@
 */
 
 #include "core/byte_popcount_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 
 const unsigned char gt_byte_popcount[] = {
   (GtUchar) 0, (GtUchar) 1, (GtUchar) 1, (GtUchar) 2,

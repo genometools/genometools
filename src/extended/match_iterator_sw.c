@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "core/encseq.h"
 #include "core/ma_api.h"
-#include "core/seq.h"
+#include "core/seq_api.h"
 #include "core/score_function.h"
 #include "core/unused_api.h"
 #include "extended/alignment.h"

@@ -18,7 +18,7 @@
 
 #include <string.h>
 #include "core/cstr_api.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
 #include "core/xansi_api.h"

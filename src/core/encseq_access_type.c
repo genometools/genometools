@@ -21,7 +21,7 @@
 #include "core/alphabet.h"
 #include "core/assert_api.h"
 #include "core/bitpackarray.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/encseq.h"
 #include "core/encseq_access_type.h"
 #include "core/filelengthvalues.h"

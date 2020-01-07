@@ -18,7 +18,7 @@
 #ifndef ESA_SPLITITV_H
 #define ESA_SPLITITV_H
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/types_api.h"
 
 #include "core/encseq.h"

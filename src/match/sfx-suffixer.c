@@ -24,9 +24,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/assert_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/error_api.h"
 #include "core/unused_api.h"
 #include "core/progressbar.h"
@@ -36,7 +36,7 @@
 #include "core/encseq.h"
 #include "core/safecast-gen.h"
 #include "core/log_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/spacecalc.h"
 #include "core/divmodmul_api.h"
 #include "core/format64.h"

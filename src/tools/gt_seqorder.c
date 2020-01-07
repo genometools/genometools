@@ -19,7 +19,7 @@
 #include "core/fasta_separator.h"
 #include "core/qsort_r_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/minmax_api.h"
 #include "core/parseutils.h"
 #include "core/unused_api.h"

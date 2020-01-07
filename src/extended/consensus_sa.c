@@ -21,7 +21,7 @@
 #include "core/ma_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "extended/consensus_sa.h"
+#include "extended/consensus_sa_api.h"
 
 typedef struct {
   const void *set_of_sas;

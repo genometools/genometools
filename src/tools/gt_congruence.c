@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/error_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
@@ -24,7 +24,7 @@
 #include "core/tool.h"
 #include "core/toolbox.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/cgr_spacedseed.h"
 #include "tools/gt_congruence.h"
 

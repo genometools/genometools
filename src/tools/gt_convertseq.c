@@ -25,7 +25,7 @@
 #include "core/output_file_api.h"
 #include "core/sequence_buffer.h"
 #include "core/seq_iterator_sequence_buffer.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/progressbar.h"
 #include "extended/reverse_api.h"
 #include "core/unused_api.h"

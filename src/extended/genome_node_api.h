@@ -18,6 +18,7 @@
 #ifndef GENOME_NODE_API_H
 #define GENOME_NODE_API_H
 
+#include "core/file_api.h"
 #include "core/fptr_api.h"
 #include "core/range_api.h"
 #include "core/str_api.h"
@@ -98,6 +99,9 @@ void          gt_genome_nodes_sort_stable(GtArray *nodes);
    In the case of an error, -1 is returned and <err> is set accordingly. */
 int           gt_genome_node_accept(GtGenomeNode *genome_node,
                                     GtNodeVisitor *node_visitor, GtError *err);
+
+/* Outputs the nodes <nodes> to the output <outfp>. */
+void          gt_genome_nodes_show(GtArray *nodes, GtFile *outfp);
 
 /* Decrease the reference count for <genome_node> or delete it, if this was the
    last reference. */

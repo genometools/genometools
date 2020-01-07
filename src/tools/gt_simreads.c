@@ -24,7 +24,7 @@
 #include "core/fileutils_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/progressbar.h"

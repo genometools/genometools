@@ -21,14 +21,14 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/qsort_r_api.h"
 #include "core/dual-pivot-qsort.h"
 #include "core/str_api.h"
 #include "core/timer_api.h"
 #include "core/radix_sort.h"
 #include "core/unused_api.h"
-#include "core/yarandom.h"
+#include "core/yarandom_api.h"
 #include "core/qsort-ulong.h"
 #include "tools/gt_sortbench.h"
 #ifdef GT_THREADS_ENABLED

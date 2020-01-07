@@ -16,8 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_TYPE_H
-#define FEATURE_TYPE_H
+#ifndef FEATURE_TYPE_API_H
+#define FEATURE_TYPE_API_H
 
 /* Some predefined feature type strings. */
 #define gt_ft_CDS                          "CDS"

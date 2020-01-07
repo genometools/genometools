@@ -23,12 +23,12 @@
 #include "core/ensure_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/safearith_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/huffcode.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 
 typedef struct GtHuffmanSymbol {
   GtUint64 freq;

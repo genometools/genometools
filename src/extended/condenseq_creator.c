@@ -18,7 +18,7 @@
 #include <string.h>
 #include <stddef.h>
 
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/disc_distri_api.h"
 #include "core/divmodmul_api.h"
 #include "core/fa_api.h"
@@ -32,7 +32,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/kmer_database.h"
-#include "extended/rbtree.h"
+#include "extended/rbtree_api.h"
 #include "match/sfx-mappedstr.h"
 #include "match/xdrop.h"
 

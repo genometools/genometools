@@ -19,7 +19,7 @@
 #include "core/divmodmul_api.h"
 #include "core/xansi_api.h"
 #include "core/fileutils_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "eis-voiditf.h"
 #include "pckbucket.h"
 #include "initbasepower.h"

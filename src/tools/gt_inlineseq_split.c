@@ -21,7 +21,7 @@
 #include "extended/node_stream_api.h"
 #include "extended/gff3_in_stream_api.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/seqid2file.h"
+#include "extended/seqid2file_api.h"
 #include "extended/sequence_node_out_stream.h"
 #include "extended/sequence_node_out_visitor.h"
 

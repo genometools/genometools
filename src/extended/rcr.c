@@ -25,13 +25,13 @@
 #include <unistd.h>
 
 #include "core/bittab_api.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/compat_api.h"
 #include "core/disc_distri_api.h"
 #include "core/fa_api.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/parseutils_api.h"
 #include "core/queue_api.h"
 #include "core/safearith_api.h"

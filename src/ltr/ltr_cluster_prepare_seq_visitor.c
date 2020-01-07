@@ -26,7 +26,7 @@
 #include "core/str_array.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/node_visitor_api.h"
 #include "ltr/ltr_cluster_prepare_seq_visitor.h"
 
@@ -112,8 +112,8 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
       if (!attr)
         continue;
       range = gt_genome_node_get_range((GtGenomeNode*) curnode);
-      (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer, range.start,
-                      range.end);
+      (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer,
+                      range.start, range.end);
       if (!gt_hashmap_get(lcv->encseq_builders, attr)) {
         eb = gt_encseq_builder_new(gt_encseq_alphabet(lcv->src_encseq));
         gt_encseq_builder_create_ssp_tab(eb);
@@ -149,8 +149,8 @@ static int gt_ltr_cluster_prepare_seq_visitor_feature_node(GtNodeVisitor *nv,
         gt_free(tmp);
         continue;
       }
-      (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer, range.start,
-                      range.end);
+      (void) snprintf(header, 2*BUFSIZ, "%s_"GT_WU"_"GT_WU"", buffer,
+                      range.start, range.end);
       if (!gt_hashmap_get(lcv->encseq_builders, tmp)) {
         eb = gt_encseq_builder_new(gt_encseq_alphabet(lcv->src_encseq));
         gt_encseq_builder_create_ssp_tab(eb);

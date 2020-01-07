@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MD5_TAB_H
-#define MD5_TAB_H
+#ifndef MD5_TAB_API_H
+#define MD5_TAB_API_H
 
 #include <stdbool.h>
 #include "core/error_api.h"
@@ -24,9 +24,12 @@
 
 #define GT_MD5_TAB_FILE_SUFFIX ".md5"
 
+/* <GtMd5Tab> is a table referencing sequences in a sequence collection. */
 typedef struct GtMD5Tab GtMD5Tab;
 
+/* Function used to retrieve a cleartext sequence for an index number. */
 typedef const char* (*GtGetSeqFunc)(void *seqs, GtUword index);
+/* Function used to retrieve a sequence length for an index number. */
 typedef GtUword     (*GtGetSeqLenFunc)(void *seqs, GtUword index);
 
 /* Create a new MD5 table object for sequences contained in <sequence_file>.
@@ -51,13 +54,17 @@ GtMD5Tab*     gt_md5_tab_new_from_cache_file(const char *cache_file,
                                              bool use_file_locking,
                                              GtError *err);
 
+/* Increment reference count for <md5_tab>. */
 GtMD5Tab*     gt_md5_tab_ref(GtMD5Tab *md5_tab);
+/* Do not use file locking for <md5_tab>. */
 void          gt_md5_tab_disable_file_locking(GtMD5Tab *md5_tab);
 /* Return the MD5 sum for sequence <index>. */
 const char*   gt_md5_tab_get(const GtMD5Tab*, GtUword index);
 /* Map <md5> back to sequence index. */
 GtUword       gt_md5_tab_map(GtMD5Tab*, const char *md5);
-GtUword       gt_md5_tab_size(const GtMD5Tab*);
+/* Return the size of the <md5_tab>. */
+GtUword       gt_md5_tab_size(const GtMD5Tab *md5_tab);
+/* Decrement reference count for or delete <md5_tab>. */
 void          gt_md5_tab_delete(GtMD5Tab *md5_tab);
 
 #endif

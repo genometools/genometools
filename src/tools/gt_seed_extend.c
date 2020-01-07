@@ -19,14 +19,14 @@
 #include <limits.h>
 #include <float.h>
 #include "core/alphabet_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/cstr_api.h"
-#include "core/cstr_array.h"
+#include "core/cstr_array_api.h"
 #include "core/encseq.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "core/minmax_api.h"
 #include "core/parseutils_api.h"
 #include "core/range_api.h"

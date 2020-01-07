@@ -17,7 +17,7 @@
 #ifndef EIS_BWTSEQ_PRIV_H
 #define EIS_BWTSEQ_PRIV_H
 
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-extinfo.h"
 #include "match/eis-encidxseq.h"

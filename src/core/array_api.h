@@ -95,6 +95,8 @@ void     gt_array_sort_stable_with_data(GtArray *array,
    <array_a> and <array_b> must have the same <gt_array_size()> and
    <gt_array_elem_size()>. */
 int      gt_array_cmp(const GtArray *array_a, const GtArray *array_b);
+/* Prepend the items from <src> to <dest>. */
+void     gt_array_prepend_array(GtArray *dest, const GtArray *src);
 /* Decrease the reference count for <array> or delete it, if this was the last
    reference. */
 void     gt_array_delete(GtArray *array);

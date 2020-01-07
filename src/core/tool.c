@@ -16,7 +16,7 @@
 */
 
 #include "core/ma_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/tool.h"
 
 struct GtTool {

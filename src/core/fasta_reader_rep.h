@@ -19,7 +19,7 @@
 #define FASTA_READER_REP_H
 
 #include <stdio.h>
-#include "core/fasta_reader.h"
+#include "core/fasta_reader_api.h"
 
 struct GtFastaReaderClass {
   size_t size;

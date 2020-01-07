@@ -24,7 +24,7 @@
 #include "core/ma_api.h"
 #include "core/option_api.h"
 #include "core/unused_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "core/warning_api.h"
 #include "tools/gt_skproto.h"
 

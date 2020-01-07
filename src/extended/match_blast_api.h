@@ -73,7 +73,7 @@ void gt_match_blast_set_align_length(GtMatchBlast *mb, GtUword length);
 /* Sets <similarity> to be the match similarity in <mb>. */
 void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity);
 
-/* Sets <num to be the number of mismatches in <mb>. */
+/* Sets <num> to be the number of mismatches in <mb>. */
 void gt_match_blast_set_mismatches(GtMatchBlast *mb, GtUword mm_num);
 
 /* Sets <num> to be the number of gap openings in <mb>. */

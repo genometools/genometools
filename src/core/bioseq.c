@@ -18,7 +18,7 @@
 
 #include <signal.h>
 #include <string.h>
-#include "core/bioseq.h"
+#include "core/bioseq_api.h"
 #include "core/cstr_api.h"
 #include "core/disc_distri_api.h"
 #include "core/dynalloc.h"
@@ -33,14 +33,14 @@
 #include "core/hashmap_api.h"
 #include "core/hashmap-generic.h"
 #include "core/ma_api.h"
-#include "core/md5_tab.h"
+#include "core/md5_tab_api.h"
 #include "core/parseutils.h"
 #include "core/sig.h"
 #include "core/str_array.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
+#include "core/xposix_api.h"
 
 struct GtBioseq {
   bool use_stdin;

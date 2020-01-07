@@ -18,7 +18,7 @@
 #ifndef CSA_VARIABLE_STRANDS_H
 #define CSA_VARIABLE_STRANDS_H
 
-#include "extended/consensus_sa.h"
+#include "extended/consensus_sa_api.h"
 #include "extended/csa_gene.h"
 
 /*

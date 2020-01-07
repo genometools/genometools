@@ -15,33 +15,33 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ARRAYDEF_H
-#define ARRAYDEF_H
+#ifndef ARRAYDEF_API_H
+#define ARRAYDEF_API_H
 
 #include <inttypes.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
 
-/*
-  This file defines macros to conveniently declare and
-  manipulate dynamic arrays whose size grow on demand. Each dynamic
-  array over some type T
-  is implemented by a structure consisting of three components:
-  - space##T is a pointer to the space block of type T allocated for the array.
-  - allocated##T is an GtUword value storing the number of entries in the
-    array currently allocated.
-  - nextfree##T holds the smallest index of the array where no value is stored.
-  Here ## is the concatenation operator of the C-preprocessor.
-  The following macro expands to a corresponding type definition over
-  some given TYPE.
-*/
-#define GT_DECLAREARRAYSTRUCT(TYPE)     \
-        typedef struct                  \
-        {                               \
-          TYPE *space##TYPE;            \
+/* Arraydef module */
+
+/* This file defines macros to conveniently declare and
+   manipulate dynamic arrays whose size grow on demand. Each dynamic
+   array over some type T
+   is implemented by a structure consisting of three components:
+   - space##T is a pointer to the space block of type T allocated for the array.
+   - allocated##T is an GtUword value storing the number of entries in the
+     array currently allocated.
+   - nextfree##T holds the smallest index of the array where no value is stored.
+   Here ## is the concatenation operator of the C-preprocessor. */
+
+/* GT_DECLAREARRAYSTRUCT expands to a corresponding type definition over
+   some given type. */
+#define GT_DECLAREARRAYSTRUCT(TYPE)\
+        typedef struct {\
+          TYPE *space##TYPE;\
           GtUword allocated##TYPE,\
-          nextfree##TYPE;               \
+          nextfree##TYPE;\
         } GtArray##TYPE
 
 /*

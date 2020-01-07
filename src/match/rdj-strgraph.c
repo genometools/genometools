@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include "core/array_api.h"
-#include "core/arraydef.h"
+#include "core/arraydef_api.h"
 #include "core/disc_distri_api.h"
 #include "core/ensure_api.h"
 #include "core/fasta_api.h"

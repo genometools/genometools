@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef REGULAR_SEQID_H
-#define REGULAR_SEQID_H
+#ifndef CLASS_ALLOC_API_H
+#define CLASS_ALLOC_API_H
 
-#include "core/str_api.h"
+#include <stdlib.h>
 
-/* Parse ``regular'' sequence ID from <description> and save it in <seqid>. */
-void gt_regular_seqid_save(GtStr *seqid, GtStr *description);
+/* ClassAlloc module */
+
+/* Allocates space for a class with size <size>. */
+void* gt_class_alloc(size_t size);
+/* Frees static memory allocated for classes. */
+void  gt_class_alloc_clean(void);
 
 #endif

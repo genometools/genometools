@@ -23,7 +23,7 @@
 #include "core/error_api.h"
 #include "core/ensure_api.h"
 #include "core/ma_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "extended/priority_queue.h"
 
 #define GT_HEAP_PARENT(X)  GT_DIV2(X)

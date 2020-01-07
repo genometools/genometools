@@ -53,7 +53,7 @@ void    gt_str_append_char(GtStr *str, char c);
 void    gt_str_append_double(GtStr *str, double d, int precision);
 /* Append double <d> to <str> in scientific notation e.g. 0.52e10,
    with given <precision>. */
-void gt_str_append_sci_double(GtStr *dest, double d, int precision);
+void    gt_str_append_sci_double(GtStr *dest, double d, int precision);
 /* Append <ulong> to <str>. */
 GT_DEPRECATED("use gt_str_append_uword() instead")
 void    gt_str_append_ulong(GtStr *str, GtUword ulong);
@@ -87,8 +87,8 @@ int    gt_str_read_next_line(GtStr *str, FILE *fpin);
 int    gt_str_read_next_line_generic(GtStr*, GtFile*);
 /* Decrease the reference count for <str> or delete it, if this was the last
    reference. */
-void    gt_str_delete(GtStr *str);
+void   gt_str_delete(GtStr *str);
 
-int           gt_str_unit_test(GtError*);
+int    gt_str_unit_test(GtError*);
 
 #endif

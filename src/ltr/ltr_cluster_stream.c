@@ -30,7 +30,7 @@
 #include "extended/clustered_set_uf.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/feature_type.h"
+#include "extended/feature_type_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/match.h"
 #include "extended/match_iterator_api.h"

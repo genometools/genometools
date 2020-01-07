@@ -21,7 +21,7 @@
 #include "core/minmax_api.h"
 #include "core/option_api.h"
 #include "core/str_api.h"
-#include "core/versionfunc.h"
+#include "core/versionfunc_api.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-param.h"
 #include "core/encseq.h"

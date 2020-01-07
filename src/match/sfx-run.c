@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "core/alphabet.h"
-#include "core/chardef.h"
+#include "core/chardef_api.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"
@@ -32,7 +32,7 @@
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/mathsupport.h"
+#include "core/mathsupport_api.h"
 #include "esa-fileend.h"
 #include "esa-shulen.h"
 #include "giextract.h"
