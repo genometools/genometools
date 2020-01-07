@@ -375,7 +375,7 @@ static void gt_linspace_print_sequence(const GtUchar *characters,
       cc = seq[idx];
     } else
     {
-      if (ISSPECIAL(seq[idx]))
+      if (GT_ISSPECIAL(seq[idx]))
       {
         cc = wildcardshow;
       } else

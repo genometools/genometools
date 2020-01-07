@@ -322,12 +322,12 @@ static GtUword gt_sainseq_getchar(const GtSainseq *sainseq,
         GtUchar cc = gt_encseq_get_encoded_char(sainseq->seq.encseq,
                                                 position,
                                                 sainseq->readmode);
-        return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (GtUword) cc;
+        return GT_ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (GtUword) cc;
       }
     case GT_SAIN_BARE_ENCSEQ:
       {
         GtUchar cc = sainseq->seq.plainseq[position];
-        return ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (GtUword) cc;
+        return GT_ISSPECIAL(cc) ? GT_UNIQUEINT(position) : (GtUword) cc;
       }
   }
 #ifndef S_SPLINT_S

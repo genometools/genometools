@@ -28,25 +28,25 @@ int gt_ltr_four_char_motif_encode (GtLTRFourCharMotif *motif,
   unsigned int i;
 
   symbolmap = gt_alphabet_symbolmap(gt_encseq_alphabet(encseq));
-  if ( symbolmap[(unsigned int)motif->firstleft] == (GtUchar) UNDEFCHAR)
+  if ( symbolmap[(unsigned int)motif->firstleft] == (GtUchar) GT_UNDEFCHAR)
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstleft);
     return -1;
   }
-  if ( symbolmap[(unsigned int)motif->secondleft] == (GtUchar) UNDEFCHAR )
+  if ( symbolmap[(unsigned int)motif->secondleft] == (GtUchar) GT_UNDEFCHAR )
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondleft);
     return -1;
   }
-  if ( symbolmap[(unsigned int)motif->firstright] == (GtUchar) UNDEFCHAR )
+  if ( symbolmap[(unsigned int)motif->firstright] == (GtUchar) GT_UNDEFCHAR )
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstright);
     return -1;
   }
-  if ( symbolmap[(unsigned int)motif->secondright] == (GtUchar) UNDEFCHAR )
+  if ( symbolmap[(unsigned int)motif->secondright] == (GtUchar) GT_UNDEFCHAR )
   {
     gt_error_set(err,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondright);
@@ -55,7 +55,7 @@ int gt_ltr_four_char_motif_encode (GtLTRFourCharMotif *motif,
 
   for (i=0; i<=(unsigned int) UCHAR_MAX; i++)
   {
-    c_tab[i] = (GtUchar) UNDEFCHAR;
+    c_tab[i] = (GtUchar) GT_UNDEFCHAR;
   }
   /* define complementary symbols */
   c_tab[symbolmap['a']] = symbolmap['t'];

@@ -118,7 +118,7 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
   offset = 0;
   while (qptr <= query + querylen - spse->seedwidth)
   {
-    skipvalue = containsspecialbytestring(qptr,offset,spse->seedwidth);
+    skipvalue = gt_containsspecialbytestring(qptr,offset,spse->seedwidth);
     if (skipvalue == spse->seedwidth)
     {
       offset = spse->seedwidth-1;

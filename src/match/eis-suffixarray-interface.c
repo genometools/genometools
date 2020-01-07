@@ -217,7 +217,7 @@ gt_SANewMRAEnc(const GtAlphabet *gtalphabet)
   MRAEnc *alphabet;
   gt_assert(gtalphabet != NULL);
   alphabet = gt_MRAEncGTAlphaNew(gtalphabet);
-  gt_MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
+  gt_MRAEncAddSymbolToRange(alphabet, GT_SEPARATOR, 1);
   return alphabet;
 }
 

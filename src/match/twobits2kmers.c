@@ -306,7 +306,7 @@ void gt_encseq_faststream(const GtEncseq *encseq,
           pairbitsum += (uint64_t) cc;
           ccesr = gt_encseq_reader_next_encoded_char(esr);
           pairbitsum += (uint64_t) ccesr;
-          gt_assert(cc == ccesr || ISSPECIAL(ccesr));
+          gt_assert(cc == ccesr || GT_ISSPECIAL(ccesr));
         }
         break;
       case BSRS_reader_multi:

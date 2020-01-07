@@ -632,8 +632,8 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
                           limdfsresources->genericindex->suffixarray->encseq,
                           pos,
                           limdfsresources->genericindex->suffixarray->readmode);
-    if (cc != (GtUchar) SEPARATOR &&
-        (!limdfsresources->nowildcards || cc != (GtUchar) WILDCARD))
+    if (cc != (GtUchar) GT_SEPARATOR &&
+        (!limdfsresources->nowildcards || cc != (GtUchar) GT_WILDCARD))
     {
 #ifdef SKDEBUG
       printf("cc=%u\n",(unsigned int) cc);
@@ -731,8 +731,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     {
       cc = gt_Bwtseqcontextiterator_next(&bound,bsci);
     }
-    if (cc != (GtUchar) SEPARATOR &&
-        (!limdfsresources->nowildcards || cc != (GtUchar) WILDCARD))
+    if (cc != (GtUchar) GT_SEPARATOR &&
+        (!limdfsresources->nowildcards || cc != (GtUchar) GT_WILDCARD))
     {
       Lcpintervalwithinfo *outstate;
 #ifdef SKDEBUG
@@ -1006,7 +1006,7 @@ static void esa_splitandprocess(Limdfsresources *limdfsresources,
     Indexbounds child;
     GtUword bound;
 
-    child.inchar = (GtUchar) WILDCARD;
+    child.inchar = (GtUchar) GT_WILDCARD;
     child.offset = parent->offset+1;
     child.code = 0;  /* not used, but we better define it */
     for (bound = firstspecial; bound <= parent->rightbound; bound++)
@@ -1106,7 +1106,7 @@ static void pck_splitandprocess(Limdfsresources *limdfsresources,
 
       child.offset = parent->offset+1;
       child.code = 0;  /* not used, but we better define it */
-      if (cc != (GtUchar) SEPARATOR)
+      if (cc != (GtUchar) GT_SEPARATOR)
       {
         child.leftbound = bound;
         child.inchar = cc;

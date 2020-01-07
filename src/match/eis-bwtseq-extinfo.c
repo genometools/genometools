@@ -359,7 +359,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, GtUword seqLen,
 #endif
       accessSequence(origSeqAccess, syms + 1, 0, 1);
     gt_assert(retcode == 1);
-    syms[0] = UNDEFBWTCHAR;
+    syms[0] = GT_UNDEFBWTCHAR;
   }
   else /* pos == seqLen - 1 */
   {
@@ -368,7 +368,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, GtUword seqLen,
 #endif
       accessSequence(origSeqAccess, syms, seqLen - 2, 1);
     gt_assert(retcode == 1);
-    syms[1] = UNDEFBWTCHAR;
+    syms[1] = GT_UNDEFBWTCHAR;
   }
   {
     AlphabetRangeID range[2];
@@ -456,7 +456,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
         if (mapVal != 0)
           accessSequence(state->origSeqAccess, &BWTSym, mapVal - 1, 1);
         else
-          BWTSym = UNDEFBWTCHAR;
+          BWTSym = GT_UNDEFBWTCHAR;
         if (state->rangeSort[MRAEncGetRangeOfSymbol(
                 alphabet, MRAEncMapSymbol(alphabet, BWTSym))]
             == SORTMODE_RANK)

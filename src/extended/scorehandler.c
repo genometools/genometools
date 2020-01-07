@@ -110,7 +110,7 @@ GtWord gt_scorehandler_get_replacement(const GtScoreHandler *scorehandler,
   {
     if (scorehandler->mappedsequence)
     {
-      return ISSPECIAL(a) || ISSPECIAL(b) || a != b
+      return GT_ISSPECIAL(a) || GT_ISSPECIAL(b) || a != b
                ? scorehandler->mismatchscore
                : scorehandler->matchscore;
     }

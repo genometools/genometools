@@ -33,7 +33,7 @@
   pvt = sb->pvt;
   if (pvt->symbolmap != NULL) {
     charcode = pvt->symbolmap[(unsigned int) cc];
-    if (charcode == UNDEFCHAR) {
+    if (charcode == GT_UNDEFCHAR) {
       gt_error_set(err, "illegal character '%c': file \"%s\", line "GT_LLU"",
                         cc,
                         gt_str_array_get(pvt->filenametab,
@@ -41,7 +41,7 @@
                         (GtUint64) pvt->linenum);
       return -2;
     }
-    if (ISSPECIAL((GtUchar) charcode)) {
+    if (GT_ISSPECIAL((GtUchar) charcode)) {
       pvt->lastspeciallength++;
     } else {
       if (pvt->lastspeciallength > 0)

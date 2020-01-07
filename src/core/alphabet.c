@@ -175,7 +175,7 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
   for (cnum=0; cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
   {
-    alpha->symbolmap[cnum] = (GtUchar) UNDEFCHAR;
+    alpha->symbolmap[cnum] = (GtUchar) GT_UNDEFCHAR;
   }
   alpha->mapdomain = NULL;
   alpha->characters = gt_malloc(sizeof (GtUchar) *
@@ -206,7 +206,7 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
           cc = LINE(column);
           if (ispunct((int) cc) || isalnum((int) cc))
           {
-            if (alpha->symbolmap[(unsigned int) cc] != (GtUchar) UNDEFCHAR)
+            if (alpha->symbolmap[(unsigned int) cc] != (GtUchar) GT_UNDEFCHAR)
             {
               gt_error_set(err,"cannot map symbol '%c' to %u: "
                             "it is already mapped to %u",
@@ -293,7 +293,7 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
     {
       if (alpha->symbolmap[cnum] == (GtUchar) (alpha->mapsize - 1))
       {
-        alpha->symbolmap[cnum] = (GtUchar) WILDCARD;
+        alpha->symbolmap[cnum] = (GtUchar) GT_WILDCARD;
         alpha->mappedwildcards++;
       }
     }
@@ -339,7 +339,7 @@ static void assign_dna_symbolmap(GtUchar *symbolmap)
 
   for (cnum=0; cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
   {
-    symbolmap[cnum] = (GtUchar) UNDEFCHAR;
+    symbolmap[cnum] = (GtUchar) GT_UNDEFCHAR;
   }
   symbolmap[(unsigned int) 'a'] = (GtUchar) 0;
   symbolmap[(unsigned int) 'A'] = (GtUchar) 0;
@@ -353,7 +353,7 @@ static void assign_dna_symbolmap(GtUchar *symbolmap)
   symbolmap[(unsigned int) 'U'] = (GtUchar) 3;
   for (cnum=0; DNAWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) DNAWILDCARDS[cnum]] = (GtUchar) WILDCARD;
+    symbolmap[(unsigned int) DNAWILDCARDS[cnum]] = (GtUchar) GT_WILDCARD;
   }
 }
 
@@ -447,8 +447,8 @@ void gt_alphabet_add_wildcard(GtAlphabet *alphabet, char wildcard)
                                    (size_t) alphabet->domainsize + 1);
   alphabet->mapdomain[alphabet->domainsize] = (GtUchar) wildcard;
   alphabet->domainsize++;
-  alphabet->symbolmap[(int) wildcard] = (GtUchar) WILDCARD;
-  if (alphabet->wildcardshow == (GtUchar) UNDEFCHAR) {
+  alphabet->symbolmap[(int) wildcard] = (GtUchar) GT_WILDCARD;
+  if (alphabet->wildcardshow == (GtUchar) GT_UNDEFCHAR) {
     alphabet->wildcardshow = (GtUchar) wildcard;
     alphabet->mapsize++;
   }
@@ -480,7 +480,7 @@ static void assign_dna_alphabet(GtAlphabet *alpha)
   alpha->mapsize = MAPSIZEDNA;
   alpha->characters = gt_calloc((size_t) UCHAR_MAX+1, sizeof (GtUchar));
   memcpy(alpha->characters,"acgt",(size_t) (MAPSIZEDNA-1));
-  alpha->characters[WILDCARD] = (GtUchar) DNAWILDCARDS[0];
+  alpha->characters[GT_WILDCARD] = (GtUchar) DNAWILDCARDS[0];
   alpha->characters[MAPSIZEDNA-1] = (GtUchar) DNAWILDCARDS[0];
   assign_dna_symbolmap(alpha->symbolmap);
 }
@@ -491,7 +491,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
 
   for (cnum=0; cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
   {
-    symbolmap[cnum] = (GtUchar) UNDEFCHAR;
+    symbolmap[cnum] = (GtUchar) GT_UNDEFCHAR;
   }
   for (cnum=0; PROTEINUPPERAMINOACIDS[cnum] != '\0'; cnum++)
   {
@@ -499,7 +499,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
   }
   for (cnum=0; PROTEINWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) PROTEINWILDCARDS[cnum]] = (GtUchar) WILDCARD;
+    symbolmap[(unsigned int) PROTEINWILDCARDS[cnum]] = (GtUchar) GT_WILDCARD;
   }
 }
 
@@ -547,7 +547,7 @@ static void assign_protein_alphabet(GtAlphabet *alpha)
   alpha->mapsize = MAPSIZEPROTEIN;
   alpha->characters = gt_calloc((size_t) UCHAR_MAX+1, sizeof (GtUchar));
   memcpy(alpha->characters,PROTEINUPPERAMINOACIDS,(size_t) (MAPSIZEPROTEIN-1));
-  alpha->characters[WILDCARD] = (GtUchar) PROTEINWILDCARDS[0];
+  alpha->characters[GT_WILDCARD] = (GtUchar) PROTEINWILDCARDS[0];
   alpha->characters[MAPSIZEPROTEIN-1] = (GtUchar) PROTEINWILDCARDS[0];
   assignproteinsymbolmap(alpha->symbolmap);
 }
@@ -621,8 +621,8 @@ GtAlphabet* gt_alphabet_new_empty(void)
   a->bitspersymbol = 0;
   a->reference_count = 0;
   a->refmutex = gt_mutex_new();
-  a->wildcardshow = (GtUchar) UNDEFCHAR;
-  memset(a->symbolmap, (int) UNDEFCHAR, (size_t) GT_MAXALPHABETCHARACTER+1);
+  a->wildcardshow = (GtUchar) GT_UNDEFCHAR;
+  memset(a->symbolmap, (int) GT_UNDEFCHAR, (size_t) GT_MAXALPHABETCHARACTER+1);
   a->mapdomain = NULL;
   a->characters = NULL;
   a->alphadef = NULL;
@@ -776,8 +776,8 @@ void gt_alphabet_printf_symbolstring(const GtAlphabet *alphabet,
 static inline char converttoprettysymbol(const GtAlphabet *alphabet,
                                          GtUchar currentchar)
 {
-  gt_assert(alphabet != NULL && currentchar != (GtUchar) SEPARATOR);
-  if (currentchar < (GtUchar) WILDCARD)
+  gt_assert(alphabet != NULL && currentchar != (GtUchar) GT_SEPARATOR);
+  if (currentchar < (GtUchar) GT_WILDCARD)
   {
     gt_assert((unsigned int) currentchar < alphabet->mapsize-1);
     return (char) alphabet->characters[(int) currentchar];
@@ -935,7 +935,7 @@ bool gt_alphabet_is_dna(const GtAlphabet *alphabet)
 
 bool gt_alphabet_valid_input(const GtAlphabet *alphabet, char c)
 {
-  if (alphabet->symbolmap[(int) c] != (GtUchar) UNDEFCHAR)
+  if (alphabet->symbolmap[(int) c] != (GtUchar) GT_UNDEFCHAR)
     return true;
   return false;
 }
@@ -943,7 +943,7 @@ bool gt_alphabet_valid_input(const GtAlphabet *alphabet, char c)
 GtUchar gt_alphabet_encode(const GtAlphabet *alphabet, char c)
 {
   gt_assert(alphabet);
-  gt_assert(alphabet->symbolmap[(int) c] != (GtUchar) UNDEFCHAR);
+  gt_assert(alphabet->symbolmap[(int) c] != (GtUchar) GT_UNDEFCHAR);
   return alphabet->symbolmap[(int) c];
 }
 
@@ -962,7 +962,7 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
   gt_assert(alphabet && out && in);
   for (i = 0; i < length; i++) {
     GtUchar cc = alphabet->symbolmap[(int) in[i]];
-    gt_assert(cc != (GtUchar) UNDEFCHAR);
+    gt_assert(cc != (GtUchar) GT_UNDEFCHAR);
     out[i] = cc;
   }
 }

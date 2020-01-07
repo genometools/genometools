@@ -38,8 +38,8 @@ void gt_initeqsvector(GtUword *eqsvector,
        pptr < pattern + patternlength && shiftmask != 0;
        pptr++, shiftmask <<= 1)
   {
-    gt_assert(*pptr != (GtUchar) SEPARATOR);
-    if (*pptr != (GtUchar) WILDCARD)
+    gt_assert(*pptr != (GtUchar) GT_SEPARATOR);
+    if (*pptr != (GtUchar) GT_WILDCARD)
     {
       eqsvector[(GtUword) *pptr] |= shiftmask;
     }
@@ -64,8 +64,8 @@ void gt_initeqsvectorrev(GtUword *eqsvectorrev,
        pptr >= pattern && shiftmask != 0;
        pptr--, shiftmask <<= 1)
   {
-    gt_assert(*pptr != (GtUchar) SEPARATOR);
-    if (*pptr != (GtUchar) WILDCARD)
+    gt_assert(*pptr != (GtUchar) GT_SEPARATOR);
+    if (*pptr != (GtUchar) GT_WILDCARD)
     {
       eqsvectorrev[(GtUword) *pptr] |= shiftmask;
     }

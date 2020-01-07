@@ -28,7 +28,7 @@
    These files are parsed on-the-fly and the sequences and descriptions
    contained in them are made available.
    Sequences can be read character-wise using gt_sequence_buffer_next(), with
-   SEPARATOR symbols in between (see chardef.h).
+   GT_SEPARATOR symbols in between (see chardef.h).
    Note that the <GtSequenceBuffer> is a rather low-level tool for efficient
    sequence access. For simple access to whole sequences, use the
    <GtSeqIterator> class. */

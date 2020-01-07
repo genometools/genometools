@@ -178,7 +178,7 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, GtUword pos)
       gt_encseq_reader_reinit_with_readmode(esr, encseq, readmode, samplePos);
       do {
         samplePos++;
-        if (ISSPECIAL(gt_encseq_reader_next_encoded_char(esr)))
+        if (GT_ISSPECIAL(gt_encseq_reader_next_encoded_char(esr)))
           ++rankCount;
       } while (samplePos < encseqQueryMax);
     }

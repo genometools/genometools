@@ -36,8 +36,8 @@
                       distval = ulen
 
 #define COMPUTENEWDIST(CC)\
-        gt_assert((CC) != (GtUchar) SEPARATOR);\
-        if ((CC) != (GtUchar) WILDCARD)\
+        gt_assert((CC) != (GtUchar) GT_SEPARATOR);\
+        if ((CC) != (GtUchar) GT_WILDCARD)\
         {\
           Eq = eqsvector[(GtUword) (CC)];\
         } else\
@@ -152,7 +152,7 @@ Definedunsignedlong gt_forwardprefixmatch(const GtEncseq *encseq,
   {
     gt_assert(pos - startpos <= (GtUword) (ulen + maxdistance));
     cc = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
-    if (nowildcards && cc == (GtUchar) WILDCARD)
+    if (nowildcards && cc == (GtUchar) GT_WILDCARD)
     {
       result.defined = false;
       result.valueunsignedlong = 0;

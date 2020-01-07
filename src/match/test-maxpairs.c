@@ -89,7 +89,7 @@ static GtUword gt_samplesubstring(bool replacespecialchars,
 
     for (idx = 0; idx < substringlength; idx++)
     {
-      if (ISSPECIAL(seqspace[idx]))
+      if (GT_ISSPECIAL(seqspace[idx]))
       {
         seqspace[idx] = (GtUchar) (random() % numofchars);
       }
@@ -246,7 +246,7 @@ static GtUword *gt_sequence2markpositions(GtUword *numofsequences,
   *numofsequences = 1UL;
   for (idx=0; idx<seqlen; idx++)
   {
-    if (seq[idx] == (GtUchar) SEPARATOR)
+    if (seq[idx] == (GtUchar) GT_SEPARATOR)
     {
       (*numofsequences)++;
     }
@@ -259,7 +259,7 @@ static GtUword *gt_sequence2markpositions(GtUword *numofsequences,
   spacemarkpos = gt_malloc(sizeof *spacemarkpos * allocatedmarkpos);
   for (idx=0, nextfreemarkpos = 0; idx<seqlen; idx++)
   {
-    if (seq[idx] == (GtUchar) SEPARATOR)
+    if (seq[idx] == (GtUchar) GT_SEPARATOR)
     {
       spacemarkpos[nextfreemarkpos++] = idx;
     }
@@ -316,12 +316,12 @@ int gt_testmaxpairs(const char *indexname,
     gt_assert(dbseq != NULL);
     query = dbseq + dblen + 1;
     gt_assert(query != NULL);
-    dbseq[dblen] = SEPARATOR;
+    dbseq[dblen] = GT_SEPARATOR;
     querylen = gt_samplesubstring(true,query,encseq,substringlength);
     if (querylen < (GtUword) minlength || dblen < (GtUword) minlength ||
-        dbseq[0] == SEPARATOR || query[0] == SEPARATOR ||
-        dbseq[substringlength-1] == SEPARATOR ||
-        query[substringlength-1] == SEPARATOR)
+        dbseq[0] == GT_SEPARATOR || query[0] == GT_SEPARATOR ||
+        dbseq[substringlength-1] == GT_SEPARATOR ||
+        query[substringlength-1] == GT_SEPARATOR)
     {
       continue;
     }

@@ -62,7 +62,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
   /* did the last buffer end with a sequence boundary?
      if so, we need to provide an additional separator! */
   if (sbfq->carryseparator) {
-    pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+    pvt->outbuf[currentoutpos++] = (GtUchar) GT_SEPARATOR;
     currentfileread++;
     pvt->lastspeciallength++;
     currentfileadd++;
@@ -88,7 +88,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
     if (*(overflowedstring) != '\0') {
       gt_str_set(sbfq->overflowbuffer, overflowedstring);
     } else {
-      pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+      pvt->outbuf[currentoutpos++] = (GtUchar) GT_SEPARATOR;
       currentfileread++;
       pvt->lastspeciallength++;
       gt_str_reset(sbfq->overflowbuffer);
@@ -152,7 +152,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
       if (currentoutpos >= (GtUword) OUTBUFSIZE)
         sbfq->carryseparator = true;
       else {
-        pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+        pvt->outbuf[currentoutpos++] = (GtUchar) GT_SEPARATOR;
         pvt->lastspeciallength++;
         currentfileadd++;
       }

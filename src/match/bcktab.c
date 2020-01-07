@@ -1403,7 +1403,7 @@ void gt_bcktab_consistencyofsuffix(int line,
     }
     cc = gt_encseq_get_encoded_char(encseq,suffix->startpos + idx,
                                            readmode);
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       firstspecial = idx;
       break;

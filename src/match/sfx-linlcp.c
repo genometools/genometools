@@ -53,7 +53,7 @@ GtUword *gt_ENCSEQ_lcp13_kasai(const GtEncseq *encseq,
         cc1 = gt_encseq_get_encoded_char(encseq, pos+lcpvalue, readmode);
         cc2 = gt_encseq_get_encoded_char(encseq, previousstart+lcpvalue,
                                                 readmode);
-        if (cc1 == cc2 && ISNOTSPECIAL(cc1))
+        if (cc1 == cc2 && GT_ISNOTSPECIAL(cc1))
         {
           lcpvalue++;
         } else
@@ -104,7 +104,7 @@ unsigned int *gt_plain_lcp13_kasai(GtUword *maxlcp,
 
         cc1 = sequence[pos+lcpvalue];
         cc2 = sequence[previousstart+lcpvalue];
-        if (cc1 == cc2 && (!withspecial || ISNOTSPECIAL(cc1)))
+        if (cc1 == cc2 && (!withspecial || GT_ISNOTSPECIAL(cc1)))
         {
           lcpvalue++;
         } else
@@ -164,7 +164,7 @@ unsigned int *gt_plain_lcp_phialgorithm(bool onlyplcp,
       {
         GtUchar cc1 = ptr1[lcpvalue];
         GtUchar cc2 = ptr2[lcpvalue];
-        if (cc1 == cc2 && (!withspecial || ISNOTSPECIAL(cc1)))
+        if (cc1 == cc2 && (!withspecial || GT_ISNOTSPECIAL(cc1)))
         {
           lcpvalue++;
         } else
@@ -259,7 +259,7 @@ static void gt_ENCSEQ_set_relevant_from_inversetab(
       if (pos > 0)
       {
         GtUchar cc = gt_encseq_get_encoded_char(encseq, pos-1, readmode);
-        if (ISSPECIAL(cc))
+        if (GT_ISSPECIAL(cc))
         {
           gt_compact_ulong_store_update(rightposinverse, pos, idx);
         }
@@ -386,7 +386,7 @@ static GtUword gt_ENCSEQ_sa2ranknext(GtCompactUlongStore *ranknext,
     if (pos > 0)
     {
       GtUchar cc = gt_encseq_get_encoded_char(encseq, pos-1, readmode);
-      if (ISNOTSPECIAL(cc))
+      if (GT_ISNOTSPECIAL(cc))
       {
         gt_assert(occless[cc] < partwidth);
         gt_compact_ulong_store_update(ranknext, occless[cc], idx);
@@ -418,7 +418,7 @@ static GtUword gt_ENCSEQ_sa2ranknext(GtCompactUlongStore *ranknext,
       {
         GtUchar cc = gt_encseq_get_encoded_char(encseq, range.start-1,
                                                 readmode);
-        if (ISNOTSPECIAL(cc))
+        if (GT_ISNOTSPECIAL(cc))
         {
           gt_assert(occless[cc] < partwidth);
           gt_compact_ulong_store_update(ranknext, occless[cc], specialidx);
@@ -504,7 +504,7 @@ GtCompactUlongStore *gt_ENCSEQ_lcp9_manzini(GtCompactUlongStore *spacefortab,
           previouscc1pos++;
           cc1 = gt_encseq_reader_next_encoded_char(esr1);
         }
-        if (ISSPECIAL(cc1))
+        if (GT_ISSPECIAL(cc1))
         {
           break;
         }

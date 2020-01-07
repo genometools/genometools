@@ -218,7 +218,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
     GtUchar u_cc, v_cc;
 
     u_cc = gt_seqabstract_get_encoded_char(rightextension,useq,u_start + lcp);
-    if (ISSPECIAL(u_cc))
+    if (GT_ISSPECIAL(u_cc))
     {
       break;
     }
@@ -227,7 +227,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
       u_cc = GT_COMPLEMENTBASE(u_cc);
     }
     v_cc = gt_seqabstract_get_encoded_char(rightextension,vseq,v_start + lcp);
-    if (ISSPECIAL(v_cc))
+    if (GT_ISSPECIAL(v_cc))
     {
       break;
     }
@@ -253,12 +253,12 @@ char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
   {
     GtUchar cc = gt_seqabstract_get_encoded_char(rightextension,seq,idx);
 
-    if (cc == WILDCARD)
+    if (cc == GT_WILDCARD)
     {
       buffer[idx] = '#';
     } else
     {
-      if (cc == SEPARATOR)
+      if (cc == GT_SEPARATOR)
       {
         buffer[idx] = '$';
       } else

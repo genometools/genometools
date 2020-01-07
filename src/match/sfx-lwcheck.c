@@ -104,7 +104,7 @@ static void gt_suftab_bk_suffixorder(LW_accesschar accesschar,
     if (position > 0)
     {
       GtUchar cc = accesschar(encseq,position-1,readmode);
-      if (ISNOTSPECIAL(cc))
+      if (GT_ISNOTSPECIAL(cc))
       {
         GtUword checkpos;
 
@@ -219,7 +219,7 @@ void gt_suftab_lightweightcheck(LW_accesschar accesschar,
     cc = accesschar(encseq,position,readmode);
     if (idx > 0)
     {
-      if (ISSPECIAL(cc))
+      if (GT_ISSPECIAL(cc))
       {
         if (firstspecial == totallength)
         {
@@ -229,7 +229,7 @@ void gt_suftab_lightweightcheck(LW_accesschar accesschar,
           rangestore[rangeidx].end = idx-1;
           rangestore[rangeidx++].firstchar = previouscc;
         }
-        if (ISSPECIAL(previouscc))
+        if (GT_ISSPECIAL(previouscc))
         {
           if (previouspos > position)
           {
@@ -241,7 +241,7 @@ void gt_suftab_lightweightcheck(LW_accesschar accesschar,
         }
       } else
       {
-        if (ISSPECIAL(previouscc))
+        if (GT_ISSPECIAL(previouscc))
         {
           fprintf(stderr, "incorrect order: "GT_WU"="GT_WU"=SPECIAL > "
                   "%u="GT_WU"="GT_WU"\n", idx-1, position, (unsigned int) cc,
@@ -270,7 +270,7 @@ void gt_suftab_lightweightcheck(LW_accesschar accesschar,
       }
     } else
     {
-      if (ISSPECIAL(cc))
+      if (GT_ISSPECIAL(cc))
       {
         firstspecial = 0;
       }

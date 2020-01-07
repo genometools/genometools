@@ -27,13 +27,13 @@ def getc_call(key,posexpr,seqaccess = false)
     return "(GtUword) array[#{posexpr}]"
   elsif key == "BARE_ENCSEQ"
     if seqaccess
-      return "(GtUword)\nISSPECIAL(tmpcc =\nplainseq[#{posexpr}])\n" +
+      return "(GtUword)\nGT_ISSPECIAL(tmpcc =\nplainseq[#{posexpr}])\n" +
              "  ? GT_UNIQUEINT(#{posexpr}) : (GtUword) tmpcc"
     else
       return "(GtUword)\nplainseq[#{posexpr}]"
     end
   elsif seqaccess
-    return "ISSPECIAL(tmpcc =\ngt_encseq_reader_next_encoded_char(esr))\n" +
+    return "GT_ISSPECIAL(tmpcc =\ngt_encseq_reader_next_encoded_char(esr))\n" +
                " ? GT_UNIQUEINT(#{posexpr}) : (GtUword) tmpcc"
   else
     return "(GtUword) gt_encseq_get_encoded_char(\n" +
@@ -45,7 +45,7 @@ end
 
 def special2unique(key,cc,start)
   if key == "ENCSEQ" || key == "BARE_ENCSEQ"
-    return "if (ISSPECIAL(#{cc})) { #{cc} = GT_UNIQUEINT(#{start}); }"
+    return "if (GT_ISSPECIAL(#{cc})) { #{cc} = GT_UNIQUEINT(#{start}); }"
   else
     return ""
   end

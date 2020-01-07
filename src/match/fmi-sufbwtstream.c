@@ -224,10 +224,10 @@ static int nextesamergedsufbwttabvalues(Definedunsignedlong *longest,
       }
       longest->defined = true;
       longest->valueunsignedlong = bwtpos;
-      *bwtvalue = (GtUchar) UNDEFBWTCHAR;
+      *bwtvalue = (GtUchar) GT_UNDEFBWTCHAR;
     } else
     {
-      *bwtvalue = (GtUchar) SEPARATOR;
+      *bwtvalue = (GtUchar) GT_SEPARATOR;
     }
   } else
   {
@@ -457,7 +457,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
         *markptr++ = suftabvalue;
         nextmark += fmindex->markdist;
       }
-      if (ISBWTSPECIAL(cc))
+      if (GT_ISBWTSPECIAL(cc))
       {
         if (storeindexpos && bwtpos < firstignorespecial)
         {

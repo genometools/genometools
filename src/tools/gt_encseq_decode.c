@@ -128,7 +128,7 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
 
   /* -sepchar */
   optionsep = gt_option_new_string("sepchar",
-                                   "specify character to print as SEPARATOR",
+                                   "specify character to print as GT_SEPARATOR",
                                    arguments->sepchar, "|");
   gt_option_parser_add_option(op, optionsep);
   gt_option_imply(optionsep, optionmode);
@@ -296,7 +296,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
       if (args->singlechars) {
         for (j = from; j <= to; j++) {
           char cc = gt_encseq_get_decoded_char(encseq, j, args->rm);
-          if (cc == (char) SEPARATOR)
+          if (cc == (char) GT_SEPARATOR)
             cc = gt_str_get(args->sepchar)[0];
           gt_xfputc(cc, stdout);
         }
@@ -305,7 +305,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
         if (esr) {
           for (j = from; j <= to; j++) {
             char cc = gt_encseq_reader_next_decoded_char(esr);
-            if (cc == (char) SEPARATOR)
+            if (cc == (char) GT_SEPARATOR)
               cc = gt_str_get(args->sepchar)[0];
             gt_xfputc(cc, stdout);
           }

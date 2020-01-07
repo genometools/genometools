@@ -1120,7 +1120,7 @@ static void dc_fill_samplelcpvalues(bool cmpcharbychar,GtDifferencecover *dcov)
                                                dcov->readmode);
               cc2 = gt_encseq_get_encoded_char(dcov->encseq,start1+lcpinherit,
                                                dcov->readmode);
-              if (ISSPECIAL(cc1) || ISSPECIAL(cc2) || cc1 != cc2)
+              if (GT_ISSPECIAL(cc1) || GT_ISSPECIAL(cc2) || cc1 != cc2)
               {
                 break;
               }
@@ -1492,7 +1492,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
       if (pos < dcov->totallength)
       {
         cc = gt_encseq_get_encoded_char(dcov->encseq,pos,dcov->readmode);
-        if (ISSPECIAL(cc))
+        if (GT_ISSPECIAL(cc))
         {
           fullspecials++;
         }
@@ -1532,7 +1532,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
       if (pos < dcov->totallength)
       {
         cc = gt_encseq_get_encoded_char(dcov->encseq,pos,dcov->readmode);
-        if (ISNOTSPECIAL(cc))
+        if (GT_ISNOTSPECIAL(cc))
         {
           dc_suffixptrset(dcov,posinserted,pos);
           posinserted++;

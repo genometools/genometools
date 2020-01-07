@@ -202,7 +202,7 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
       cc = seq->bytesequenceptr[accesspos];
     }
   }
-  if (seq->dir_is_complement && cc != WILDCARD)
+  if (seq->dir_is_complement && cc != GT_WILDCARD)
   {
     return GT_COMPLEMENTBASE(cc);
   }
@@ -221,7 +221,7 @@ static inline bool ft_sequenceobject_symbol_match(
   } else
   {
     const GtUchar cu = ft_sequenceobject_get_char(useq,upos);
-    return (cu != WILDCARD && cu == ft_sequenceobject_get_char(vseq,vpos))
+    return (cu != GT_WILDCARD && cu == ft_sequenceobject_get_char(vseq,vpos))
              ? true
              : false;
   }
@@ -861,7 +861,7 @@ static void inline gt_full_front_prune_add_matches(GtFtFrontvalue *midfront,
   for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv);
        upos < ulen && vpos < vlen &&
        useq[upos] == vseq[vpos]
-       && ISNOTSPECIAL(useq[upos])
+       && GT_ISNOTSPECIAL(useq[upos])
        ;
        upos++, vpos++)
        /* Nothing */;

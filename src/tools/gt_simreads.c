@@ -412,7 +412,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
     for (i = 0; i < readlen; i++)
     {
       ch = gt_encseq_reader_next_encoded_char(target_reader);
-      if (ch == (GtUchar)SEPARATOR)
+      if (ch == (GtUchar) GT_SEPARATOR)
       {
         break;
       }

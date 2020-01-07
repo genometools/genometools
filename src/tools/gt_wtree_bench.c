@@ -131,10 +131,10 @@ static int gt_wtree_bench_bench_wtree(GtWtree *wt,
     symbol = gt_wtree_access(wt, gt_rand_max(length-1));
     c = gt_wtree_encseq_unmap_decoded(wt, symbol);
     switch (c) {
-      case (char) SEPARATOR:
+      case (char) GT_SEPARATOR:
         printf("$");
         break;
-      case (char) UNDEFCHAR:
+      case (char) GT_UNDEFCHAR:
         gt_error_set(err, "undefined char in sequence, can't print");
         had_err = 1;
         break;

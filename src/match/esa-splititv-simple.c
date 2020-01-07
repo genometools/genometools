@@ -22,7 +22,7 @@
 #include "esa-splititv.h"
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
-                             ? (GtUchar) SEPARATOR\
+                             ? (GtUchar) GT_SEPARATOR\
                              : gt_encseq_get_encoded_char(ENCSEQ, \
                                                                  POS, \
                                                                  readmode))

@@ -177,7 +177,7 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
       for (idx = 0; !had_err && idx < str_len; idx++)
       {
         charcode = seqit->symbolmap[(unsigned int) input_str[idx]];
-        if (charcode == UNDEFCHAR) {
+        if (charcode == GT_UNDEFCHAR) {
           gt_error_set(err, "illegal character '%c': file \"%s\", line "GT_WU"",
                             input_str[idx],
                             gt_str_array_get(seqit->filenametab,
@@ -185,7 +185,7 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
                             (GtUword) seqit->curline);
           had_err = -2;
         }
-        if (ISSPECIAL(charcode)) {
+        if (GT_ISSPECIAL(charcode)) {
           seqit->lastspeciallength++;
         } else {
           if (seqit->lastspeciallength > 0)

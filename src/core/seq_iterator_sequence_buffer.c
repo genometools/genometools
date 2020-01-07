@@ -133,7 +133,7 @@ static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
     {
       seqit->currentread++;
     }
-    if (charcode == (GtUchar) SEPARATOR)
+    if (charcode == (GtUchar) GT_SEPARATOR)
     {
       if (seqit->sequencebuffer.nextfreeGtUchar == 0 && seqit->withsequence)
       {

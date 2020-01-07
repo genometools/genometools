@@ -88,7 +88,7 @@ static inline GtUword **get_special_pos(const FMindex *index,
   for (row_idx = 0; row_idx < first_special_row; row_idx ++)
   {
     cc = gt_bwtseqgetsymbol(row_idx, index);
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       special_char_rows_and_pos[0][special_idx] = row_idx;
       special_char_rows_and_pos[1][special_idx] =

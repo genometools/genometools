@@ -128,7 +128,7 @@ static GtOptionParser* gt_encseq_sample_option_parser_new(void *tool_arguments)
 
   /* -sepchar */
   optionsep = gt_option_new_string("sepchar",
-                                   "specify character to print as SEPARATOR",
+                                   "specify character to print as GT_SEPARATOR",
                                    arguments->sepchar, "|");
   gt_option_parser_add_option(op, optionsep);
   gt_option_imply(optionsep, optionmode);

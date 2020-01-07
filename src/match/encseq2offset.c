@@ -81,16 +81,16 @@ GtUword *gt_encseqtable2sequenceoffsets(
         = gt_encseq_get_encoded_char(suffixarraytable[idx].encseq,
                                      0,
                                      suffixarraytable[idx].readmode);
-      if (ISSPECIAL(lastofprevious))
+      if (GT_ISSPECIAL(lastofprevious))
       {
-        if (ISSPECIAL(firstofcurrent))
+        if (GT_ISSPECIAL(firstofcurrent))
         {
           tmpspecialranges--;
           tmprealspecialranges--;
         }
       } else
       {
-        if (ISNOTSPECIAL(firstofcurrent))
+        if (GT_ISNOTSPECIAL(firstofcurrent))
         {
           tmpspecialranges++;
           tmprealspecialranges++;

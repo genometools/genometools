@@ -44,7 +44,7 @@ GtUword gt_suffixarrayuniqueforward (const void *genericindex,
   {
     if (itv.left < itv.right)
     {
-      if (qptr >= qend || ISSPECIAL(*qptr) ||
+      if (qptr >= qend || GT_ISSPECIAL(*qptr) ||
           !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                            suffixarray->readmode,
                                            totallength,
@@ -84,7 +84,7 @@ GtUword gt_suffixarraymstats (const void *genericindex,
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     gt_assert(itv.left <= itv.right);
-    if (qptr >= qend || ISSPECIAL(*qptr) ||
+    if (qptr >= qend || GT_ISSPECIAL(*qptr) ||
         !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                       suffixarray->readmode,
                                       totallength,
@@ -124,7 +124,7 @@ GtUword gt_suffixarrayfindmums (const void *genericindex,
   for (qptr = qstart; /* Nothing */; qptr++, offset++)
   {
     gt_assert(itv.left <= itv.right);
-    if (qptr >= qend || ISSPECIAL(*qptr) ||
+    if (qptr >= qend || GT_ISSPECIAL(*qptr) ||
         !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                          suffixarray->readmode,
                                          totallength,
@@ -163,7 +163,7 @@ GtRange gt_suffixarrayfindinterval (const void *genericindex,
   {
     Simplelcpinterval itv;
 
-    if (qptr >= qend || ISSPECIAL(*qptr) ||
+    if (qptr >= qend || GT_ISSPECIAL(*qptr) ||
         !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                          suffixarray->readmode,
                                          totallength,

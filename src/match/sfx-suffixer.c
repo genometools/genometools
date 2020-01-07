@@ -243,7 +243,7 @@ static GtCodetype getencseqcode(const GtEncseq *encseq,
   {
     gt_assert((GtUword) (pos + idx) < totallength);
     cc = gt_encseq_get_encoded_char_nospecial(encseq,pos + idx,readmode);
-    gt_assert(ISNOTSPECIAL(cc));
+    gt_assert(GT_ISNOTSPECIAL(cc));
     code += multimappower[idx][cc];
   }
   return code;

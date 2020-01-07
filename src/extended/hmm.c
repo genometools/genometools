@@ -172,7 +172,7 @@ void gt_hmm_set_emission_probability(GtHMM *hmm,
   gt_assert(hmm);
   gt_assert(probability >= 0.0 && probability <= 1.0);
   gt_assert(state_num < hmm->num_of_states);
-  symbol_num = (symbol_num == WILDCARD) ? hmm->num_of_symbols - 1 : symbol_num;
+  symbol_num = (symbol_num == GT_WILDCARD) ? hmm->num_of_symbols - 1 : symbol_num;
   gt_assert(symbol_num < hmm->num_of_symbols);
   if (probability == 0.0)
     hmm->emission_prob[state_num][symbol_num] = MINUSINFINITY;
@@ -186,7 +186,7 @@ double gt_hmm_get_emission_probability(const GtHMM *hmm,
 {
   gt_assert(hmm);
   gt_assert(state_num < hmm->num_of_states);
-  symbol_num = (symbol_num == WILDCARD) ? hmm->num_of_symbols - 1 : symbol_num;
+  symbol_num = (symbol_num == GT_WILDCARD) ? hmm->num_of_symbols - 1 : symbol_num;
   gt_assert(symbol_num < hmm->num_of_symbols);
   if (hmm->emission_prob[state_num][symbol_num] == MINUSINFINITY)
     return 0.0;
@@ -319,7 +319,7 @@ void gt_hmm_decode(const GtHMM *hmm,
 
   /* fill DP table */
   for (row = 0; row < num_of_rows; row++) { /* first column */
-    if (emissions[0] == WILDCARD)
+    if (emissions[0] == GT_WILDCARD)
       emission = hmm->num_of_symbols - 1;
     else
       emission = emissions[0];
@@ -330,7 +330,7 @@ void gt_hmm_decode(const GtHMM *hmm,
   }
 
   for (column = 1; column < num_of_columns; column++) { /* other columns */
-    if (emissions[column] == WILDCARD)
+    if (emissions[column] == GT_WILDCARD)
       emission = hmm->num_of_symbols - 1;
     else
       emission = emissions[column];

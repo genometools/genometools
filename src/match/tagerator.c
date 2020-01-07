@@ -336,14 +336,14 @@ static int dotransformtag(GtUchar *transformedtag,
   for (idx = 0; idx < taglen; idx++)
   {
     charcode = symbolmap[currenttag[idx]];
-    if (charcode == (GtUchar) UNDEFCHAR)
+    if (charcode == (GtUchar) GT_UNDEFCHAR)
     {
       gt_error_set(err,"undefined character '%c' in tag number " Formatuint64_t,
                 currenttag[idx],
                 PRINTuint64_tcast(tagnumber));
       return -1;
     }
-    if (charcode == (GtUchar) WILDCARD)
+    if (charcode == (GtUchar) GT_WILDCARD)
     {
       if (replacewildcard)
       {

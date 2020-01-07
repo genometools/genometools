@@ -41,7 +41,7 @@ GtUword gt_skfmuniqueforward (const void *genericindex,
   gt_assert(qstart < qend);
   qptr = qstart;
   cc = *qptr++;
-  if (ISSPECIAL(cc))
+  if (GT_ISSPECIAL(cc))
   {
     return 0;
   }
@@ -50,7 +50,7 @@ GtUword gt_skfmuniqueforward (const void *genericindex,
   while (qptr < qend && bwtbound.lbound + 1 < bwtbound.ubound)
   {
     cc = *qptr;
-    if (ISSPECIAL (cc))
+    if (GT_ISSPECIAL (cc))
     {
       return 0;
     }
@@ -85,7 +85,7 @@ GtUword gt_skfmmstats (const void *genericindex,
   gt_assert(qstart < qend);
   qptr = qstart;
   cc = *qptr;
-  if (ISSPECIAL(cc))
+  if (GT_ISSPECIAL(cc))
   {
     return 0;
   }
@@ -99,7 +99,7 @@ GtUword gt_skfmmstats (const void *genericindex,
   for (qptr++; qptr < qend; qptr++)
   {
     cc = *qptr;
-    if (ISSPECIAL (cc))
+    if (GT_ISSPECIAL (cc))
     {
       break;
     }

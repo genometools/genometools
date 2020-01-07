@@ -48,7 +48,7 @@ static GtCodetype qgram2codefillspecial(unsigned int numofchars,
   {
     /* for testing */
     cc = gt_encseq_get_encoded_char(encseq,startpos,readmode);
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       integercode = (GtCodetype) (numofchars - 1);
       foundspecial = true;
@@ -73,7 +73,7 @@ static GtCodetype qgram2codefillspecial(unsigned int numofchars,
       {
         /* for testing */
         cc = gt_encseq_get_encoded_char(encseq,pos,readmode);
-        if (ISSPECIAL(cc))
+        if (GT_ISSPECIAL(cc))
         {
           ADDNEXTCHAR(integercode,numofchars-1,numofchars);
           foundspecial = true;

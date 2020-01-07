@@ -189,7 +189,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
       startpos = gt_suffixsortspace_getdirect(suffixsortspace,pos);
       if (startpos == 0)
       {
-        cc = (GtUchar) UNDEFBWTCHAR;
+        cc = (GtUchar) GT_UNDEFBWTCHAR;
       } else
       {
         if (outfileinfo->outfpbwttab != NULL)

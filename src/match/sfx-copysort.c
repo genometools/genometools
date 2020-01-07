@@ -178,7 +178,7 @@ static GtUword *leftcontextofspecialchardist(unsigned int numofchars,
         if (range.end < totallength)
         {
           cc = gt_encseq_get_encoded_char(encseq,range.end,convertedreadmode);
-          if (ISNOTSPECIAL(cc))
+          if (GT_ISNOTSPECIAL(cc))
           {
             specialchardist[cc]++;
           }
@@ -191,7 +191,7 @@ static GtUword *leftcontextofspecialchardist(unsigned int numofchars,
         if (range.start > 0)
         {
           cc = gt_encseq_get_encoded_char(encseq,range.start-1,readmode);
-          if (ISNOTSPECIAL(cc))
+          if (GT_ISNOTSPECIAL(cc))
           {
             specialchardist[cc]++;
           }
@@ -205,7 +205,7 @@ static GtUword *leftcontextofspecialchardist(unsigned int numofchars,
     if (gt_encseq_lengthofspecialprefix(encseq) == 0)
     {
       cc = gt_encseq_get_encoded_char(encseq,0,convertedreadmode);
-      gt_assert(ISNOTSPECIAL(cc));
+      gt_assert(GT_ISNOTSPECIAL(cc));
       specialchardist[cc]++;
     }
   } else
@@ -213,7 +213,7 @@ static GtUword *leftcontextofspecialchardist(unsigned int numofchars,
     if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
     {
       cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
-      gt_assert(ISNOTSPECIAL(cc));
+      gt_assert(GT_ISNOTSPECIAL(cc));
       specialchardist[cc]++;
     }
   }
@@ -411,7 +411,7 @@ static void gt_copysort_forwardderive(const GtBucketspec2 *bucketspec2,
       GtUchar cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
                                               startpos-1,
                                               bucketspec2->readmode);
-      if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
+      if (GT_ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         GT_SUFFIXSORTSPACE_EXPORT_SET(suffixsortspace,exportptr,
                                       targetoffset[cc],startpos - 1);
@@ -438,7 +438,7 @@ static void gt_copysort_backwardderive(const GtBucketspec2 *bucketspec2,
       GtUchar cc = gt_encseq_get_encoded_char(bucketspec2->encseq,
                                               startpos-1,
                                               bucketspec2->readmode);
-      if (ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
+      if (GT_ISNOTSPECIAL(cc) && !bucketspec2->superbuckettab[cc].sorted)
       {
         GT_SUFFIXSORTSPACE_EXPORT_SET(suffixsortspace,exportptr,
                                       targetoffset[cc],startpos - 1);

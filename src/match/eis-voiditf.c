@@ -84,9 +84,9 @@ bool gt_BwtseqpositionwithoutSEPiterator_next(GtUword *pos,
       cc = BWTSeqGetSym(bspi->bwtseq, bspi->currentbound);
     } else
     {
-      cc = SEPARATOR;
+      cc = GT_SEPARATOR;
     }
-    if (cc != SEPARATOR)
+    if (cc != GT_SEPARATOR)
     {
       *pos = gt_BWTSeqLocateMatch(bspi->bwtseq,
                                   bspi->currentbound,
@@ -166,7 +166,7 @@ GtUchar gt_bwtseqgetsymbol(GtUword bound,const FMindex *fmindex)
   {
     return BWTSeqGetSym((const BWTSeq *) fmindex, bound);
   }
-  return SEPARATOR;
+  return GT_SEPARATOR;
 }
 
 GtUchar gt_Bwtseqcontextiterator_next(GtUword *bound,
@@ -179,7 +179,7 @@ GtUchar gt_Bwtseqcontextiterator_next(GtUword *bound,
     cc = BWTSeqGetSym(bsci->bwtseq, bsci->bound);
   } else
   {
-    cc = SEPARATOR;
+    cc = GT_SEPARATOR;
   }
   *bound = bsci->bound = BWTSeqLFMap(bsci->bwtseq, bsci->bound, &bsci->extBits);
   return cc;
@@ -390,7 +390,7 @@ void bwtrangewithspecial(GT_UNUSED GtArrayBoundswithchar *bwci,
     = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),1);
   gt_assert(rangesize < (AlphabetRangeSize) 4);
   BWTSeqPosPairRangeOcc(bwtseq, 1, parent->left, parent->right,rangeOccs);
-    inchar = WILDCARD
+    inchar = GT_WILDCARD
     bwtcode = MRAEncMapSymbol(EISGetAlphabet(bwtseq->seqIdx),WILDCARD);
     idx = bwtcode -  MRAEncGetRangeBase(EISGetAlphabet(bwtseq->seqIdx),1);
     if (rangeOccs[idx] < rangeOccs[rangesize+idx])

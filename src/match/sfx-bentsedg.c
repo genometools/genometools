@@ -43,10 +43,10 @@
                                                           POS,bsr->readmode)
 #define ACCESSCHARSEQ(ESR)     gt_encseq_reader_next_encoded_char(ESR)
 #define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
-                                ISNOTSPECIAL(ACCESSCHARRAND(POS)))
+                                GT_ISNOTSPECIAL(ACCESSCHARRAND(POS)))
 
 #define DEREFSTOPPOSSEQ(VAR,POS,STOPPOS,ESR)\
-        (((POS) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
+        (((POS) < (STOPPOS) && GT_ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
         ((GtUword) VAR) : GT_UNIQUEINT(POS))
 
 #define DEREFSEQ(VAR,POS,ESR) DEREFSTOPPOSSEQ(VAR,POS,bsr->totallength,ESR)
@@ -76,7 +76,7 @@
         VAR = (((cptr = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX)+\
                         depth)\
                 < bsr->totallength &&\
-                ISNOTSPECIAL(TMPVAR = ACCESSCHARRAND(cptr)))\
+                GT_ISNOTSPECIAL(TMPVAR = ACCESSCHARRAND(cptr)))\
                     ? ((GtUword) TMPVAR) : GT_UNIQUEINT(cptr))
 
 typedef GtEndofTwobitencoding GtSfxcmp;

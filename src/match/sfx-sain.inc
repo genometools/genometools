@@ -1198,11 +1198,11 @@ static int gt_sain_ENCSEQ_compare_Sstarstrings(const GtSainseq *sainseq,
     cc1 = (GtUword) gt_encseq_get_encoded_char(
 encseq,
 (GtUword) (start1),
-sainseq->readmode);if (ISSPECIAL(cc1)) { cc1 = GT_UNIQUEINT(start1); };
+sainseq->readmode);if (GT_ISSPECIAL(cc1)) { cc1 = GT_UNIQUEINT(start1); };
     cc2 = (GtUword) gt_encseq_get_encoded_char(
 encseq,
 (GtUword) (start2),
-sainseq->readmode);if (ISSPECIAL(cc2)) { cc2 = GT_UNIQUEINT(start2); };
+sainseq->readmode);if (GT_ISSPECIAL(cc2)) { cc2 = GT_UNIQUEINT(start2); };
     if (cc1 < cc2)
     {
       return -1;
@@ -1252,7 +1252,7 @@ esr = gt_encseq_create_reader_with_readmode(
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
-    GtUword currentcc = ISSPECIAL(tmpcc =
+    GtUword currentcc = GT_ISSPECIAL(tmpcc =
 gt_encseq_reader_next_encoded_char(esr))
  ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||
@@ -1300,7 +1300,7 @@ esr = gt_encseq_create_reader_with_readmode(
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
-    GtUword currentcc = ISSPECIAL(tmpcc =
+    GtUword currentcc = GT_ISSPECIAL(tmpcc =
 gt_encseq_reader_next_encoded_char(esr))
  ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||
@@ -1352,7 +1352,7 @@ esr = gt_encseq_create_reader_with_readmode(
   for (position = (GtUsainindextype) (sainseq->totallength-1); /* Nothing */;
        position--)
   {
-    GtUword currentcc = ISSPECIAL(tmpcc =
+    GtUword currentcc = GT_ISSPECIAL(tmpcc =
 gt_encseq_reader_next_encoded_char(esr))
  ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||
@@ -1398,9 +1398,9 @@ static int gt_sain_BARE_ENCSEQ_compare_Sstarstrings(const GtSainseq *sainseq,
       return -1;
     }
     cc1 = (GtUword)
-plainseq[start1];if (ISSPECIAL(cc1)) { cc1 = GT_UNIQUEINT(start1); };
+plainseq[start1];if (GT_ISSPECIAL(cc1)) { cc1 = GT_UNIQUEINT(start1); };
     cc2 = (GtUword)
-plainseq[start2];if (ISSPECIAL(cc2)) { cc2 = GT_UNIQUEINT(start2); };
+plainseq[start2];if (GT_ISSPECIAL(cc2)) { cc2 = GT_UNIQUEINT(start2); };
     if (cc1 < cc2)
     {
       return -1;
@@ -1447,7 +1447,7 @@ GtUchar tmpcc;
        position--)
   {
     GtUword currentcc = (GtUword)
-ISSPECIAL(tmpcc =
+GT_ISSPECIAL(tmpcc =
 plainseq[position])
   ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||
@@ -1492,7 +1492,7 @@ GtUchar tmpcc;
        position--)
   {
     GtUword currentcc = (GtUword)
-ISSPECIAL(tmpcc =
+GT_ISSPECIAL(tmpcc =
 plainseq[position])
   ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||
@@ -1541,7 +1541,7 @@ GtUchar tmpcc;
        position--)
   {
     GtUword currentcc = (GtUword)
-ISSPECIAL(tmpcc =
+GT_ISSPECIAL(tmpcc =
 plainseq[position])
   ? GT_UNIQUEINT(position) : (GtUword) tmpcc;
     bool currentisStype = (currentcc < nextcc ||

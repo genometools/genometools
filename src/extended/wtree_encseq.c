@@ -309,16 +309,16 @@ static void gt_wtree_encseq_delete(GT_UNUSED GtWtree *wtree)
 static inline GtWtreeSymbol gt_wtree_encseq_map(GtWtreeEncseq *wtree_encseq,
                                                 GtUchar symbol)
 {
-  if (ISNOTSPECIAL(symbol))
+  if (GT_ISNOTSPECIAL(symbol))
     return (GtWtreeSymbol) symbol;
   else {
-    if (symbol == (GtUchar) SEPARATOR) {
+    if (symbol == (GtUchar) GT_SEPARATOR) {
       return (GtWtreeSymbol) wtree_encseq->alpha_size - 1;
     }
-    if (symbol == (GtUchar) WILDCARD)
+    if (symbol == (GtUchar) GT_WILDCARD)
       return (GtWtreeSymbol) wtree_encseq->alpha_size - 2;
   }
-  gt_assert(symbol == (GtUchar) UNDEFCHAR);
+  gt_assert(symbol == (GtUchar) GT_UNDEFCHAR);
   return (GtWtreeSymbol) wtree_encseq->alpha_size - 3;
 }
 
@@ -332,11 +332,11 @@ char gt_wtree_encseq_unmap_decoded(GtWtree *wtree,
   wtree_encseq = gt_wtree_encseq_cast(wtree);
   switch (wtree_encseq->alpha_size - encseq_sym) {
     case 1:
-      return (char) SEPARATOR;
+      return (char) GT_SEPARATOR;
     case 2:
-      return gt_alphabet_decode(wtree_encseq->alpha, (GtUchar) WILDCARD);
+      return gt_alphabet_decode(wtree_encseq->alpha, (GtUchar) GT_WILDCARD);
     case 3:
-      return (char) UNDEFCHAR;
+      return (char) GT_UNDEFCHAR;
     default:
       return gt_alphabet_decode(wtree_encseq->alpha, encseq_sym);
   }
@@ -467,7 +467,7 @@ GtWtree* gt_wtree_encseq_new(GtEncseq *encseq)
   wtree_encseq->encseq = gt_encseq_ref(encseq);
   wtree_encseq->alpha = gt_alphabet_ref(gt_encseq_alphabet(encseq));
   /* encoded chars + WC given by gt_alphabet_size,
-     we have to encode UNDEFCHAR and SEPARATOR too */
+     we have to encode GT_UNDEFCHAR and GT_SEPARATOR too */
   wtree_encseq->alpha_size = gt_alphabet_size(wtree_encseq->alpha) + 2;
   wtree->members->num_of_symbols = (GtUword) wtree_encseq->alpha_size;
   /* levels in tree: \lceil log_2(\sigma)\rceil */

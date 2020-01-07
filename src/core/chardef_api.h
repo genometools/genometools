@@ -31,47 +31,47 @@
   separator symbol in multiple seq
 */
 
-#define SEPARATOR       UCHAR_MAX
+#define GT_SEPARATOR       UCHAR_MAX
 
 /*
   wildcard symbol in multiple seq
 */
 
-#define WILDCARD        (SEPARATOR-1)
+#define GT_WILDCARD        (GT_SEPARATOR-1)
 
 /*
   undefined character, only to be used in conjunction with symbol maps
 */
 
-#define UNDEFCHAR       (SEPARATOR-2)
+#define GT_UNDEFCHAR       (GT_SEPARATOR-2)
 
 /*
-  either WILDCARD or SEPARATOR
+  either GT_WILDCARD or GT_SEPARATOR
 */
 
-#define ISSPECIAL(C)    ((C) >= (GtUchar) WILDCARD)
+#define GT_ISSPECIAL(C)    ((C) >= (GtUchar) GT_WILDCARD)
 
 /*
-  neither WILDCARD nor SEPARATOR
+  neither GT_WILDCARD nor GT_SEPARATOR
 */
 
-#define ISNOTSPECIAL(C) ((C) < (GtUchar) WILDCARD)
+#define GT_ISNOTSPECIAL(C) ((C) < (GtUchar) GT_WILDCARD)
 
 /*
   undefined character, only to be used in conjunction with the Burrows-Wheeler
   transform
 */
 
-#define UNDEFBWTCHAR    WILDCARD
+#define GT_UNDEFBWTCHAR    GT_WILDCARD
 
 /*
-  Either special character or UNDEFBWTCHAR
+  Either special character or GT_UNDEFBWTCHAR
 */
 
-#define ISBWTSPECIAL(C) ((C) >= (GtUchar) UNDEFBWTCHAR)
+#define GT_ISBWTSPECIAL(C) ((C) >= (GtUchar) GT_UNDEFBWTCHAR)
 
 /*@unused@*/ static inline GtUword
-                            containsspecialbytestring(const GtUchar *seq,
+                            gt_containsspecialbytestring(const GtUchar *seq,
                                                       GtUword offset,
                                                       GtUword len)
 {
@@ -80,7 +80,7 @@
   gt_assert(offset < len);
   for (sptr=seq+offset; sptr < seq + len; sptr++)
   {
-    if (ISSPECIAL(*sptr))
+    if (GT_ISSPECIAL(*sptr))
     {
       return (GtUword) (sptr - seq);
     }

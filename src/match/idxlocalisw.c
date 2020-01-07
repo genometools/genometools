@@ -59,10 +59,10 @@ static Scoretype swlocalsimilarityscore(Scoretype *scol,
     nw = 0;
     vcurrent = gt_encseq_get_encoded_char(vencseq,j,
                                                    GT_READMODE_FORWARD);
-    gt_assert(vcurrent != (GtUchar) SEPARATOR);
+    gt_assert(vcurrent != (GtUchar) GT_SEPARATOR);
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
-      gt_assert(*uptr != (GtUchar) SEPARATOR);
+      gt_assert(*uptr != (GtUchar) GT_SEPARATOR);
       we = *scolptr;
       *scolptr = *(scolptr-1) + scorevalues->gapextend;
       if ((val = nw + REPLACEMENTSCORE(scorevalues,*uptr,vcurrent)) > *scolptr)
@@ -136,11 +136,11 @@ static void swlocalsimilarityregion(DPpoint *scol,
   {
     vcurrent = gt_encseq_get_encoded_char(vencseq,j,
                                                    GT_READMODE_FORWARD);
-    gt_assert(vcurrent != (GtUchar) SEPARATOR);
+    gt_assert(vcurrent != (GtUchar) GT_SEPARATOR);
     nw = *scol;
     for (scolptr = scol+1, uptr = useq; uptr < useq + ulen; scolptr++, uptr++)
     {
-      gt_assert(*uptr != (GtUchar) SEPARATOR);
+      gt_assert(*uptr != (GtUchar) GT_SEPARATOR);
       we = *scolptr;
       scolptr->similarity = (scolptr-1)->similarity + scorevalues->gapextend;
       scolptr->lu = (scolptr-1)->lu + 1;
@@ -207,14 +207,14 @@ static void swmaximalDPedges(Retracebits *edges,
   {
     vcurrent = gt_encseq_get_encoded_char(vencseq,j,
                                                    GT_READMODE_FORWARD);
-    gt_assert(vcurrent != (GtUchar) SEPARATOR);
+    gt_assert(vcurrent != (GtUchar) GT_SEPARATOR);
     nw = *scol;
     *scol = nw + scorevalues->gapextend;
     *eptr = INSERTIONBIT;
     for (scolptr = scol+1, uptr = useq, eptr++; uptr < useq + ulen;
          scolptr++, uptr++, eptr++)
     {
-      gt_assert(*uptr != (GtUchar) SEPARATOR);
+      gt_assert(*uptr != (GtUchar) GT_SEPARATOR);
       we = *scolptr;
       *scolptr = *(scolptr-1) + scorevalues->gapextend;
       *eptr = DELETIONBIT;

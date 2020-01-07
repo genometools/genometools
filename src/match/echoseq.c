@@ -43,7 +43,7 @@ void gt_symbolstring2fasta(FILE *fpout,
   for (i = 0, j = 0; ; i++)
   {
     currentchar = w[i];
-    if (currentchar == (GtUchar) SEPARATOR)
+    if (currentchar == (GtUchar) GT_SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
       j = 0;
@@ -56,7 +56,7 @@ void gt_symbolstring2fasta(FILE *fpout,
       fprintf(fpout,"\n");
       break;
     }
-    if (currentchar != (GtUchar) SEPARATOR)
+    if (currentchar != (GtUchar) GT_SEPARATOR)
     {
       j++;
       if (j >= width)
@@ -87,7 +87,7 @@ void gt_encseq2symbolstring(FILE *fpout,
   for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
     currentchar = gt_encseq_reader_next_encoded_char(esr);
-    if (currentchar == (GtUchar) SEPARATOR)
+    if (currentchar == (GtUchar) GT_SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
       j = 0;
@@ -100,7 +100,7 @@ void gt_encseq2symbolstring(FILE *fpout,
       fprintf(fpout,"\n");
       break;
     }
-    if (currentchar != (GtUchar) SEPARATOR)
+    if (currentchar != (GtUchar) GT_SEPARATOR)
     {
       j++;
       if (j >= width)
@@ -128,7 +128,7 @@ void gt_fprintfencseq(FILE *fpout,
     currentchar = gt_encseq_get_encoded_char(encseq,
                                                     idx,
                                                     GT_READMODE_FORWARD);
-    gt_assert(ISNOTSPECIAL(currentchar));
+    gt_assert(GT_ISNOTSPECIAL(currentchar));
     gt_alphabet_echo_pretty_symbol(alpha,fpout,currentchar);
   }
 }

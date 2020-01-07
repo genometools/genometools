@@ -142,7 +142,7 @@ static void pckbuckettable_followleafedge(Pckbuckettable *pckbt,
   {
     bdleaf.depth++;
     cc = gt_Bwtseqcontextiterator_next(&bdleaf.lowerbound,bsci);
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       break;
     }

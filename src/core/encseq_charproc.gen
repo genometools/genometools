@@ -1,4 +1,4 @@
-          if (ISNOTSPECIAL(charcode))
+          if (GT_ISNOTSPECIAL(charcode))
           {
 #ifdef WITHEQUALLENGTH_DES_SSP
             lengthofcurrentsequence++;
@@ -46,7 +46,7 @@
               }
               lastnonspecialrangelength = 0;
             }
-            if (charcode == (GtUchar) WILDCARD)
+            if (charcode == (GtUchar) GT_WILDCARD)
             {
               if (wildcardprefix)
               {
@@ -71,7 +71,7 @@
 #endif
             } else
             {
-              gt_assert(charcode == (GtUchar) SEPARATOR);
+              gt_assert(charcode == (GtUchar) GT_SEPARATOR);
               if (wildcardprefix)
               {
                 wildcardprefix = false;

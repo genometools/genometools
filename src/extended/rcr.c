@@ -187,7 +187,7 @@ static inline GtUchar rcr_bambase2gtbase(uint8_t base, GtAlphabet *alpha)
 {
   switch (base) {
     case BAMBASEN:
-      return (GtUchar) WILDCARD;
+      return (GtUchar) GT_WILDCARD;
     default:
       return gt_alphabet_encode(alpha, rcr_bambase2char(base));
   }
@@ -201,7 +201,7 @@ static GtBitsequence rcr_transencode(GtUchar ref, GtUchar base,
           code_g = gt_alphabet_encode(alpha, 'G'),
           code_t = gt_alphabet_encode(alpha, 'T');
 
-  if (base == (GtUchar) WILDCARD)
+  if (base == (GtUchar) GT_WILDCARD)
     return (GtBitsequence) 3;
 
   if (ref == code_a) {
@@ -236,7 +236,7 @@ static GtBitsequence rcr_transencode(GtUchar ref, GtUchar base,
     if (base == code_g)
       return (GtBitsequence) 2;
   }
-  if (ref == (GtUchar) WILDCARD) {
+  if (ref == (GtUchar) GT_WILDCARD) {
     if (base == code_a)
       return (GtBitsequence) 0;
     if (base == code_c)
@@ -257,7 +257,7 @@ static GtUchar rcr_transdecode(GtUchar ref, GtBitsequence transcode,
           code_g = gt_alphabet_encode(alpha, 'G'),
           code_t = gt_alphabet_encode(alpha, 'T');
 
-  if (ref == (GtUchar) WILDCARD) {
+  if (ref == (GtUchar) GT_WILDCARD) {
     switch (transcode) {
        case 0:
          return code_a;
@@ -270,7 +270,7 @@ static GtUchar rcr_transdecode(GtUchar ref, GtBitsequence transcode,
     }
   }
   else if (transcode == (GtBitsequence) 3)
-    return (GtUchar) WILDCARD;
+    return (GtUchar) GT_WILDCARD;
   else {
     if (ref == code_a) {
       switch (transcode) {
@@ -615,7 +615,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
             /* use alphabet_size - 1 as wildcard symbol */
             /* TODO DW change this, it doesn't matter if wildcard is in a
                continuous range with the rest */
-            if (base == (GtUchar) WILDCARD)
+            if (base == (GtUchar) GT_WILDCARD)
               base = (GtUchar) (alpha_size - 1);
 
             rcr_huff_encode_write(rcr_enc, rcr_enc->bases_huff,
@@ -1696,7 +1696,7 @@ static int rcr_decode_insert_var(GtRcrDecoder *rcr_dec,
   had_err = rcr_huff_read(info->base_hbwd, bitstream, &symbol, err);
   while (!had_err && symbol != info->alpha_size) {
     if (symbol == (info->alpha_size - 1)) {
-      base = (GtUchar) WILDCARD;
+      base = (GtUchar) GT_WILDCARD;
     }
     else
       base = (GtUchar) symbol;

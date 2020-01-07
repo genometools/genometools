@@ -194,7 +194,7 @@ static GtSortedlengthinfo *gt_sortedlengthinfo_new(const GtEncseq *encseq,
                sortedlengthinfo->numofdifferentseqlen] = seqlen;
             gt_assert(gt_encseq_get_encoded_char(encseq,currentpos,
                                                  GT_READMODE_FORWARD)
-                      == (GtUchar) SEPARATOR);
+                      == (GtUchar) GT_SEPARATOR);
           }
           currentpos += 1UL + seqlen;
         }
@@ -222,7 +222,7 @@ static GtUword gt_sortedlengthinfo_seqnum(const GtEncseq *encseq,
 
   gt_assert(position < totallength);
   if (gt_encseq_get_encoded_char(encseq,position,GT_READMODE_FORWARD)
-                    == (GtUchar) SEPARATOR) {
+                    == (GtUchar) GT_SEPARATOR) {
     return ULONG_MAX;
   }
   recordnum = gt_encseq_sep2seqnum(sortedlengthinfo->seqlenseppos,

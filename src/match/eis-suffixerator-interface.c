@@ -199,9 +199,9 @@ newSeqStatsFromCharDist(const GtEncseq *encseq,
       = (GtUword) gt_encseq_charcount(encseq,(GtUchar) i);
     regularSymsSum += stats->symbolDistributionTable[i];
   }
-  stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
-  stats->symbolDistributionTable[SEPARATOR] += numOfSeqs;
-  stats->symbolDistributionTable[UNDEFBWTCHAR] += 1;
+  stats->symbolDistributionTable[GT_WILDCARD] = len - regularSymsSum - numOfSeqs;
+  stats->symbolDistributionTable[GT_SEPARATOR] += numOfSeqs;
+  stats->symbolDistributionTable[GT_UNDEFBWTCHAR] += 1;
   return stats;
 }
 
@@ -306,7 +306,7 @@ gt_SfxINewMRAEnc(const sfxInterface *si)
   MRAEnc *alphabet;
   gt_assert(si);
   alphabet = gt_MRAEncGTAlphaNew(gt_SfxIGetAlphabet(si));
-  gt_MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
+  gt_MRAEncAddSymbolToRange(alphabet, GT_SEPARATOR, 1);
   return alphabet;
 }
 

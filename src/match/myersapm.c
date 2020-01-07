@@ -104,14 +104,14 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
   for (pos = 0; pos < mor->totallength; pos++)
   {
     cc = gt_encseq_reader_next_encoded_char(mor->esr);
-    if (cc == (GtUchar) SEPARATOR)
+    if (cc == (GtUchar) GT_SEPARATOR)
     {
       Pv = ~0UL;
       Mv = 0UL;
       score = patternlength;
     } else
     {
-      if (cc == (GtUchar) WILDCARD)
+      if (cc == (GtUchar) GT_WILDCARD)
       {
         Eq = 0;
       } else

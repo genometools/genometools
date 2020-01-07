@@ -24,7 +24,7 @@
 #include "match/pckbucket.h"
 
 enum {
-  bwtTerminatorSym = SEPARATOR - 3,
+  bwtTerminatorSym = GT_SEPARATOR - 3,
 };
 
 struct BWTSeq

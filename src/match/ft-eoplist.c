@@ -894,7 +894,7 @@ void gt_eoplist_format_generic(FILE *fp,
           }
           if (characters != NULL)
           {
-            if (ISSPECIAL(cc_a))
+            if (GT_ISSPECIAL(cc_a))
             {
               cc_a = wildcardshow;
               is_match = false;
@@ -907,7 +907,7 @@ void gt_eoplist_format_generic(FILE *fp,
               }
               cc_a = characters[cc_a];
             }
-            if (ISSPECIAL(cc_b))
+            if (GT_ISSPECIAL(cc_b))
             {
               cc_b = wildcardshow;
               is_match = false;
@@ -984,7 +984,7 @@ void gt_eoplist_format_generic(FILE *fp,
                                                       : eoplist->ulen-1-idx_u];
           if (characters != NULL)
           {
-            if (ISSPECIAL(cc_a))
+            if (GT_ISSPECIAL(cc_a))
             {
               topbuf[pos] = wildcardshow;
             } else
@@ -1035,7 +1035,7 @@ void gt_eoplist_format_generic(FILE *fp,
           midbuf[pos] = EOPLIST_MISMATCHSYMBOL;
           if (characters != NULL)
           {
-            if (ISSPECIAL(cc_b))
+            if (GT_ISSPECIAL(cc_b))
             {
               lowbuf[pos] = wildcardshow;
             } else
@@ -1284,7 +1284,7 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
           {
             const GtUchar a = eoplist->useq[sumulen+idx],
                           b = eoplist->vseq[sumvlen+idx];
-            if (a == b && !ISSPECIAL(a))
+            if (a == b && !GT_ISSPECIAL(a))
             {
               gt_assert(co.eoptype == GtMatchOp);
             } else
@@ -1292,7 +1292,7 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
               gt_assert(!distinguish_mismatch_match ||
                         co.eoptype == GtMismatchOp);
             }
-            if (!distinguish_mismatch_match && (a != b || ISSPECIAL(a)))
+            if (!distinguish_mismatch_match && (a != b || GT_ISSPECIAL(a)))
             {
               sumdist++;
             }
