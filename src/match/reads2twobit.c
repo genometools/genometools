@@ -2329,6 +2329,6 @@ void gt_reads2twobit_enable_descs(GtReads2Twobit *r2t, bool clipped,
   }
   else
   {
-    r2t->descsfp = gt_xtmpfp_generic(NULL, TMPFP_AUTOREMOVE);
+    r2t->descsfp = gt_xtmpfp_generic(NULL, GT_TMPFP_AUTOREMOVE);
   }
 }

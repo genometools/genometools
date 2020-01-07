@@ -4706,7 +4706,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   stream_tab[0] = stdout;
   for (tidx = 1; !had_err && tidx < gt_jobs; tidx++) {
     stream_tab[tidx]
-      = gt_xtmpfp_generic(NULL, TMPFP_OPENBINARY | TMPFP_AUTOREMOVE);
+      = gt_xtmpfp_generic(NULL, GT_TMPFP_OPENBINARY | GT_TMPFP_AUTOREMOVE);
   }
 #endif
   if (arg->verbose || gt_querymatch_gfa2_display(arg->extp->out_display_flag))
