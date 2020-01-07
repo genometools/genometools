@@ -22,7 +22,8 @@
 #include "extended/node_stream_api.h"
 #include "extended/region_mapping_api.h"
 
-/* implements the ``genome_stream'' interface */
+/* The <GtSpliceSiteInfoStream> is a <GtNodeStream> that gathers splice
+   site information from <GtFeatureNode>s. */
 typedef struct GtSpliceSiteInfoStream GtSpliceSiteInfoStream;
 
 const GtNodeStreamClass* gt_splice_site_info_stream_class(void);
@@ -30,11 +31,12 @@ const GtNodeStreamClass* gt_splice_site_info_stream_class(void);
 /* Create a GtSpliceSiteInfoStream, takes ownership of <region_mapping>. */
 GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
                                              GtRegionMapping *region_mapping);
-/* Returns <true> if an intron has been processed, <false> otherwise */
-bool          gt_splice_site_info_stream_show(GtNodeStream*, GtFile*);
-
-bool          gt_splice_site_info_stream_intron_processed(GtNodeStream*);
-bool          gt_splice_site_info_stream_show_canonical(GtNodeStream*,
+/* Prints splice site information gathered in <ns> to <outfp>. */
+bool          gt_splice_site_info_stream_show(GtNodeStream *ns, GtFile *outfp);
+/* Returns <true> if an intron has been processed in <ns>, <false> otherwise */
+bool          gt_splice_site_info_stream_intron_processed(GtNodeStream *ns);
+/* Print information for canonical splice sites as stored in <ns>. */
+bool          gt_splice_site_info_stream_show_canonical(GtNodeStream *ns,
                                                         bool show_gc);
 
 #endif

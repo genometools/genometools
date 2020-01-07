@@ -24,13 +24,20 @@
 #include "core/error_api.h"
 #include "core/types_api.h"
 
+/* Mathsupport module */
+
 /* Returns the log of the sum of two log probabilities. */
 double       gt_logsum(double p1, double p2);
+/* Returns TRUE if the passed double value equals 1. */
 bool         gt_double_equals_one(double);
+/* Returns TRUE if <d1> equals <d2>. */
 bool         gt_double_equals_double(double, double);
-int          gt_double_compare(double, double);
-bool         gt_double_smaller_double(double, double);
-bool         gt_double_larger_double(double, double);
+/* Compares two doubles with standard comparator semantics. */
+int          gt_double_compare(double d1, double d2);
+/* Returns TRUE if <d1> is smaller than <d2>. */
+bool         gt_double_smaller_double(double d1, double d2);
+/* Returns TRUE if <d1> is larger than <d2>. */
+bool         gt_double_larger_double(double d1, double d2);
 
 /* Returns a random number between 0 and maximal_value. */
 GtUword      gt_rand_max(GtUword maximal_value);
@@ -40,7 +47,8 @@ double       gt_rand_max_double(double maximal_value);
 double       gt_rand_0_to_1(void);
 /* Returns a random character from 'a' to 'z'. */
 char         gt_rand_char(void);
-/* Retuns the log base 2 of an integer <maxvalue> in O(wordsize) operations */
+/* Retuns the log base 2 of an integer <maxvalue> in
+   __O(wordsize)__ operations */
 unsigned int gt_determinebitspervalue(GtUword maxvalue);
 /* Determine pow(base,exponent) for small values of exponent */
 GtUword      gt_power_for_small_exponents(unsigned int base,

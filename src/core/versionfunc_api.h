@@ -18,7 +18,13 @@
 #ifndef VERSIONFUNC_API_H
 #define VERSIONFUNC_API_H
 
+/* VersionFunc module */
+
+/* Prints the GenomeTools version header with <progname> being the name of the
+   tool where it is called from. */
 void gt_versionfunc(const char *progname);
+/* Prints the short GenomeTools version header with <progname> being the name
+   of the tool where it is called from. */
 void gt_showshortversion(const char *progname);
 
 #endif

@@ -19,23 +19,26 @@
 
 #include "core/str_api.h"
 
+/* <GtStrCache> is a string cache. That is, the first time a certain string is
+   requested with the method <gt_str_cache_get()>, a new string object is
+   created via <str_constructor> and then cached and returned.
+   Subsequent calls to <gt_str_cache_get()> for the same string return a
+   new reference made from the cached string. */
 typedef struct GtStrCache GtStrCache;
 
+/* Function to obtain a <GtStr> from a <str_source>, given an <index>. */
 typedef GtStr* (*GtStrConstructorFunc)(void *str_source, GtUword index);
 
 /* Create a new string cache object for <num_of_strings> many strings creatable
-   from <str_source> with the function <str_constructor>.
-   That is, the first time a certain string is requested with the method
-   <gt_str_cache_get()>, a new string object is created via <str_constructor>
-   and then cached and returned. Subsequent calls to <gt_str_cache_get()> for
-   the same string return a new reference made from the cached string. */
+   from <str_source> with the function <str_constructor>. */
 GtStrCache* gt_str_cache_new(void *str_source,
                              GtStrConstructorFunc str_constructor,
                              GtUword num_of_strings);
-void        gt_str_cache_delete(GtStrCache*);
 /* Return a new (i.e., the caller is responsible to free it) <GtStr*> object
-   for string with given <index>. The mechanics of the cache are described in
-   detail in the documentation of <gt_str_cache_new()>. */
-GtStr*      gt_str_cache_get(GtStrCache*, GtUword index);
+   from <str_cache> for string with given <index>. The mechanics of the cache
+   are described in detail in the documentation of <GtStrCache>. */
+GtStr*      gt_str_cache_get(GtStrCache *str_cache, GtUword index);
+/* Delete <str_cache>. */
+void        gt_str_cache_delete(GtStrCache *str_cache);
 
 #endif

@@ -22,7 +22,11 @@
 #include <stdbool.h>
 #include "core/error_api.h"
 
-/* the ensure macro used for unit tests */
+/* Ensure module */
+
+/* The ensure macro used for unit tests. If the expression <expr> evaluates
+   to FALSE, the <GtError> <err> will be set and <had_err> will be set to -1.
+   These variables are expected to exist when using this macro. */
 #define gt_ensure(expr)                                                  \
   do {                                                                   \
     if (!had_err) {                                                      \

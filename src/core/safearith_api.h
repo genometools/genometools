@@ -26,6 +26,8 @@
 #include "core/error_api.h"
 #include "core/types_api.h"
 
+/* Safearith module */
+
 /*
   This module allows one to do safe arithmetics in C (preventing overflows).
   For an introduction to the theory behind this see
@@ -44,7 +46,7 @@
                                  : (type)0)
 #define __MAX(type)              ((type) ~__MIN(type))
 
-/* safely assign <src> to <dest>, returns false on success, true otherwise */
+/* Safely assign <src> to <dest>, returns false on success, true otherwise. */
 #define assign(dest, src)                                                     \
         ({                                                                    \
           __typeof__(src) __x  = (src);                                       \
@@ -54,8 +56,8 @@
            ? (void)((dest)=__y), false : true);                               \
          })
 
-/* safely add <a> to <b> and assign the result to <c>,
-   returns false on success, true otherwise */
+/* Safely add <a> to <b> and assign the result to <c>,
+   returns false on success, true otherwise. */
 #define add_of(c, a, b)                                                       \
         ({                                                                    \
           __typeof__(a) __a = a;                                              \
@@ -67,8 +69,8 @@
              ? assign(c, __a + __b) : true);                                  \
         })
 
-/* safely subtract <b> from <a> and assign the result to <c>,
-   returns false on success, true otherwise */
+/* Safely subtract <b> from <a> and assign the result to <c>,
+   returns false on success, true otherwise. */
 #define sub_of(c, a, b)                                                       \
         ({                                                                    \
           __typeof__(a) __a = a;                                              \
@@ -80,7 +82,7 @@
              ? assign(c, __a - __b) : true);                                  \
         })
 
-/* assign <src> to <dest> or exit upon overflow */
+/* Assign <src> to <dest> or exit upon overflow. */
 #define gt_safe_assign(dest, src)                                           \
         do {                                                                \
           if (assign(dest, src)) {                                          \
@@ -90,7 +92,7 @@
           }                                                                 \
         } while (false)
 
-/* add <a> to <b> and assign the result to <c> or exit upon overflow */
+/* Add <a> to <b> and assign the result to <c> or exit upon overflow. */
 #define gt_safe_add(c, a, b)                                              \
         do {                                                              \
           if (add_of(c, a, b)) {                                          \
@@ -100,8 +102,8 @@
           }                                                               \
         } while (false)
 
-/* subtract <b> from <a> and assign the result to <c> or exit upon overflow */
-/* Warning: this will result in an overflow if c is signed and a and b are
+/* Subtract <b> from <a> and assign the result to <c> or exit upon overflow.
+   Warning: this will result in an overflow if c is signed and a and b are
    unsigned values, as integer promotion will garble the tests. */
 #define gt_safe_sub(c, a, b)                                                 \
         do {                                                                 \
@@ -112,6 +114,7 @@
           }                                                                  \
         } while (false)
 
+/* Function called when an integer overflow occurs. */
 typedef void  (GtOverflowHandlerFunc)(const char *src_file, int src_line,
                                       void *data);
 
@@ -119,6 +122,7 @@ void          gt_safe_default_overflow_handler(const char*, int, void*);
 
 int           gt_safe_abs_check_func(int, const char*, int,
                                      GtOverflowHandlerFunc, void*);
+/* Overflow-safe version of <abs()>. */
 #define       gt_safe_abs(j) \
               gt_safe_abs_check_func(j, __FILE__, __LINE__, \
                                      gt_safe_default_overflow_handler, NULL)
@@ -127,6 +131,7 @@ int           gt_safe_abs_check_func(int, const char*, int,
 
 GtWord        gt_safe_labs_check_func(GtWord, const char*, int,
                                       GtOverflowHandlerFunc, void*);
+/* Overflow-safe version of <labs()>. */
 #define       gt_safe_labs(j) \
               gt_safe_labs_check_func(j, __FILE__, __LINE__, \
                                       gt_safe_default_overflow_handler, NULL)
@@ -135,6 +140,7 @@ GtWord        gt_safe_labs_check_func(GtWord, const char*, int,
 
 GtInt64       gt_safe_llabs_check_func(GtInt64, const char*, int,
                                        GtOverflowHandlerFunc, void*);
+/* Overflow-safe version of <llabs()>. */
 #define       gt_safe_llabs(j) \
               gt_safe_llabs_check_func(j, __FILE__, __LINE__, \
                                        gt_safe_default_overflow_handler, NULL)
@@ -143,6 +149,7 @@ GtInt64       gt_safe_llabs_check_func(GtInt64, const char*, int,
 
 uint32_t      gt_safe_mult_u32_check_func(uint32_t, uint32_t, const char*, int,
                                           GtOverflowHandlerFunc, void*);
+/* Overflow-safe multiplication of two unsigned 32-bit integers. */
 #define       gt_safe_mult_u32(i, j) \
               gt_safe_mult_u32_check_func(i, j, __FILE__, __LINE__, \
                                           gt_safe_default_overflow_handler, \
@@ -152,6 +159,7 @@ uint32_t      gt_safe_mult_u32_check_func(uint32_t, uint32_t, const char*, int,
 
 uint64_t      gt_safe_mult_u64_check_func(uint64_t, uint64_t, const char*, int,
                                           GtOverflowHandlerFunc, void*);
+/* Overflow-safe multiplication of two unsigned 64-bit integers. */
 #define       gt_safe_mult_u64(i, j) \
               gt_safe_mult_u64_check_func(i, j, __FILE__, __LINE__, \
                                           gt_safe_default_overflow_handler, \
@@ -162,6 +170,7 @@ uint64_t      gt_safe_mult_u64_check_func(uint64_t, uint64_t, const char*, int,
 GtUword       gt_safe_mult_ulong_check_func(GtUword, GtUword,
                                             const char*, int,
                                             GtOverflowHandlerFunc, void*);
+/* Overflow-safe multiplication of two unsigned long integers. */
 #define       gt_safe_mult_ulong(i, j) \
               gt_safe_mult_ulong_check_func(i, j, __FILE__, __LINE__, \
                                           gt_safe_default_overflow_handler, \
@@ -172,6 +181,7 @@ GtUword       gt_safe_mult_ulong_check_func(GtUword, GtUword,
 
 GtWord        gt_safe_cast2long_check_func(GtUword, const char*, int,
                                            GtOverflowHandlerFunc, void*);
+/* Overflow-safe typecast to long. */
 #define       gt_safe_cast2long(j) \
               gt_safe_cast2long_check_func(j, __FILE__, __LINE__, \
                                       gt_safe_default_overflow_handler, NULL)
@@ -180,6 +190,7 @@ GtWord        gt_safe_cast2long_check_func(GtUword, const char*, int,
 
 GtUword       gt_safe_cast2ulong_check_func(GtWord, const char*, int,
                                             GtOverflowHandlerFunc, void*);
+/* Overflow-safe typecast to unsigned long. */
 #define       gt_safe_cast2ulong(j) \
               gt_safe_cast2ulong_check_func(j, __FILE__, __LINE__, \
                                       gt_safe_default_overflow_handler, NULL)
@@ -188,6 +199,7 @@ GtUword       gt_safe_cast2ulong_check_func(GtWord, const char*, int,
 
 GtUword       gt_safe_cast2ulong_64_check_func(uint64_t, const char*, int,
                                                GtOverflowHandlerFunc, void*);
+/* Overflow-safe typecast to ulong64. */
 #define       gt_safe_cast2ulong_64(j) \
               gt_safe_cast2ulong_64_check_func(j, __FILE__, __LINE__, \
                                       gt_safe_default_overflow_handler, NULL)

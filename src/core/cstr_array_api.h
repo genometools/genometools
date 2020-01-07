@@ -21,14 +21,21 @@
 #include "core/file_api.h"
 #include "core/types_api.h"
 
-/* Return copy of <gt_cstr_array>. */
+/* CstrArray module */
+
+/* Return copy of <cstr_array>. */
 char**  gt_cstr_array_dup(const char **cstr_array);
-/* Use p and a blank as prefix for cstr_array[0] and return the result. */
+/* Use <p> and a blank as prefix for <cstr_array[0]> and return the result. */
 char**  gt_cstr_array_prefix_first(const char **cstr_array, const char *p);
+/* Use p as prefix for <cstr_array[0]> and return the result. */
 char**  gt_cstr_array_preprend(const char **cstr_array, const char *p);
-void    gt_cstr_array_show(char **cstr_array, FILE*);
-void    gt_cstr_array_show_genfile(const char **cstr_array, GtFile*);
-GtUword gt_cstr_array_size(const char **cstr_array); /* O(n) */
+/* Print <cstr_array> to <fp>, separated b newlines. */
+void    gt_cstr_array_show(char **cstr_array, FILE *fp);
+/* Print <cstr_array> to <fp>, separated b newlines. */
+void    gt_cstr_array_show_genfile(const char **cstr_array, GtFile *fp);
+/* Return the count of strings in <cstr_array>. O(n). */
+GtUword gt_cstr_array_size(const char **cstr_array);
+/* Delete <cstr_array>. */
 void    gt_cstr_array_delete(char **cstr_array);
 
 #endif

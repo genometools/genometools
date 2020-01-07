@@ -19,17 +19,27 @@
 
 #include "core/types_api.h"
 
+/* Compat module */
+
 #ifndef _WIN32
+/* Path separator, as char. */
 #define GT_PATH_SEPARATOR     '/'
+/* Path separator, as string. */
 #define GT_PATH_SEPARATOR_STR "/"
+/* Path component separator, as char. */
 #define GT_PATH_VAR_SEPARATOR ':'
 #else
+/* Path separator, as char. */
 #define GT_PATH_SEPARATOR     '\\'
+/* Path separator, as string. */
 #define GT_PATH_SEPARATOR_STR "\\"
+/* Path component separator, as char. */
 #define GT_PATH_VAR_SEPARATOR ';'
 #endif
 
+/* Return (read-write) handle of temporary file, with template <templ>. */
 int     gt_mkstemp(char *templ);
+/* Returns the page size of the current platform. */
 GtUword gt_pagesize(void);
 
 #endif

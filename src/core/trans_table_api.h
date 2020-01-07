@@ -21,18 +21,23 @@
 #include "core/error_api.h"
 #include "core/str_array_api.h"
 
-#define GT_START_AMINO       'M'
-#define GT_STOP_AMINO        '*'
-#define GT_STOP_AMINO_CSTR   "*"
-
+/* The <GtTransTable> represents a __translation table__, i.e. a mapping between
+   codons and amino acids, as well as associated metadata. */
 typedef struct GtTransTable GtTransTable;
 
-/* The number of the standard translation scheme. */
+/* ``Start' amino acid as char. */
+#define GT_START_AMINO       'M'
+/* ``Stop'' symbol as char. */
+#define GT_STOP_AMINO        '*'
+/* ``Stop'' symbol as string constant. */
+#define GT_STOP_AMINO_CSTR   "*"
+
+/* The index number of the standard translation scheme. */
 #define GT_STANDARD_TRANSLATION_SCHEME 1U
 
 /* Returns a <GtStrArray> of translation scheme descriptions, each of the
-   format "%d: %s" where the number is the translation scheme number (usable in
-   <gt_translator_set_translation_scheme()> and the string is the scheme
+   format "%d: %s", where the number is the translation scheme number (usable
+   in <gt_translator_set_translation_scheme()>) and the string is the scheme
    name. */
 GtStrArray*   gt_trans_table_get_scheme_descriptions(void);
 
@@ -57,9 +62,11 @@ int           gt_trans_table_translate_codon(const GtTransTable *tt,
                                              char c1, char c2, char c3,
                                              char *amino, GtError *err);
 
+/* Returns TRUE if the codon <c1>,<c2>,<c3> is a start codon in <tt>. */
 bool          gt_trans_table_is_start_codon(const GtTransTable *tt,
                                             char c1, char c2, char c3);
 
+/* Returns TRUE if the codon <c1>,<c2>,<c3> is a stop codon in <tt>. */
 bool          gt_trans_table_is_stop_codon(const GtTransTable *tt,
                                            char c1, char c2, char c3);
 

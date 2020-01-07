@@ -22,6 +22,8 @@
 #include "core/error_api.h"
 #include "extended/chain_api.h"
 
+/* GlobalChaining module */
+
 typedef struct {
   GtUword startpos1, /* start of fragment in first sequence */
                 endpos1,   /* end of fragment in first sequence */
@@ -31,7 +33,10 @@ typedef struct {
   void *data;              /* arbitrary data associated with fragment */
 } GtFragment;
 
-typedef void (*GtChainProc)(GtChain*, GtFragment*,
+/* Function to process a chain. <frags> is an array of <GtFragment>s,
+   of size <num_of_fragments>. <max_gap_width> and <cpinfo> are passed from
+   the <gt_globalchaining_*()> calls. */
+typedef void (*GtChainProc)(GtChain *c, GtFragment *frags,
                             GtUword num_of_fragments,
                             GtUword max_gap_width, void *cpinfo);
 

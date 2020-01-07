@@ -20,8 +20,15 @@
 
 #include "core/error_api.h"
 
+/* UnitTest module */
+
+/* A unit test function. It is assumed to return 0 on successful test
+   completion, otherwise <err> should be set accordingly. */
 typedef int (*GtUnitTestFunc)(GtError*);
 
+/* Run unit test. <key> is expected to be a C string, <value> a
+   <GtUnitTestFunc>. <data> is assumed to be a pointer to an int,
+   containing the test return code. <err> should not be touched. */
 int gt_unit_test_run(void *key, void *value, void *data, GtError *err);
 
 #endif

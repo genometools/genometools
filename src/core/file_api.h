@@ -37,38 +37,38 @@ typedef struct GtFile GtFile;
    the file <path> could not be opened. The compression mode is determined by
    the ending of <path> (gzip compression if it ends with '.gz', bzip2
    compression if it ends with '.bz2', and uncompressed otherwise). */
-GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
+GtFile*     gt_file_new(const char *path, const char *mode, GtError *err);
 
 /* Increments the reference count of <file>. */
-GtFile* gt_file_ref(GtFile *file);
+GtFile*     gt_file_ref(GtFile *file);
 
 /* Create a new <GtFile> object from a normal file pointer <fp>. */
-GtFile* gt_file_new_from_fileptr(FILE *fp);
+GtFile*     gt_file_new_from_fileptr(FILE *fp);
 
 /* <printf(3)> for generic <file>. */
-void    gt_file_xprintf(GtFile *file, const char *format, ...)
+void        gt_file_xprintf(GtFile *file, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
 
 /* Write <\0>-terminated C string <cstr> to <file>. Similar to <fputs(3)>, but
    terminates on error. */
-void    gt_file_xfputs(const char *cstr, GtFile *file);
+void        gt_file_xfputs(const char *cstr, GtFile *file);
 
 /* Write single character <c> to <file>. Similar to <fputc(3)>, but terminates
    on error. */
-void    gt_file_xfputc(int c, GtFile *file);
+void        gt_file_xfputc(int c, GtFile *file);
 
 /* Return next character from <file> or <EOF>, if end-of-file is reached. */
-int     gt_file_xfgetc(GtFile *file);
+int         gt_file_xfgetc(GtFile *file);
 
 /* Read up to <nbytes> from generic <file> and store result in <buf>, returns
    bytes read. */
-int     gt_file_xread(GtFile *file, void *buf, size_t nbytes);
+int         gt_file_xread(GtFile *file, void *buf, size_t nbytes);
 
 /* Write <nbytes> from <buf> to given generic <file>. */
-void    gt_file_xwrite(GtFile *file, void *buf, size_t nbytes);
+void        gt_file_xwrite(GtFile *file, void *buf, size_t nbytes);
 
 /* Rewind the generic <file>. */
-void    gt_file_xrewind(GtFile *file);
+void        gt_file_xrewind(GtFile *file);
 
 /* Returns <GT_FILE_MODE_GZIP> if file with <path> ends with '.gz',
    <GT_FILE_MODE_BZIP2> if it ends with '.bz2', and <GT_FILE_MODE_UNCOMPRESSED>
@@ -105,10 +105,11 @@ GtFileMode  gt_file_mode(const GtFile *file);
 /* Unget character <c> to <file> (which obviously cannot be <NULL>).
    Can only be used once at a time. */
 void        gt_file_unget_char(GtFile *file, char c);
+
 /* Close the underlying file handle and destroy the <file> object. */
-void    gt_file_delete(GtFile *file);
+void        gt_file_delete(GtFile *file);
 
 /* Destroy the file handle object, but do not close the underlying handle. */
-void    gt_file_delete_without_handle(GtFile*);
+void        gt_file_delete_without_handle(GtFile*);
 
 #endif

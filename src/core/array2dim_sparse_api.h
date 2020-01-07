@@ -19,6 +19,8 @@
 
 #include "core/array2dim_api.h"
 
+/* Array2dim module */
+
 typedef struct {
   GtUword offset,
           length;

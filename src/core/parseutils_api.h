@@ -34,17 +34,18 @@ int gt_parse_int(int *out, const char *nptr);
    Returns 0 upon success and -1 upon failure. */
 int gt_parse_uint(unsigned int *out, const char *nptr);
 
+GT_DEPRECATED("use gt_parse_word() instead")
 /* Parse long from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
-GT_DEPRECATED("use gt_parse_word() instead")
 int gt_parse_long(GtWord *out, const char *nptr);
 /* Parse GtWord from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
 int gt_parse_word(GtWord *out, const char *nptr);
 
-/* Parse ulong from <nptr> and store result in <out>.
-   Returns 0 upon success and -1 upon failure. */
 GT_DEPRECATED("use gt_parse_uword() instead")
+/* Parse ulong from <nptr> and store result in <out>.
+   Returns 0 upon success and -1 upon failure. Deprecated, use
+   <gt_parse_uword()> instead.*/
 int gt_parse_ulong(GtUword *out, const char *nptr);
 /* Parse GtUword from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */

@@ -19,11 +19,18 @@
 
 #include "extended/node_stream_api.h"
 
-/* Implements the <GtNodeStream> interface. */
+/* The <GtBufferStream> is a <GtNodeStream> that buffers <GtGenomeNode>s. */
 typedef struct GtBufferStream GtBufferStream;
 
 const GtNodeStreamClass* gt_buffer_stream_class(void);
+
+/* Create a new <GtBufferStream>, reading from <in_stream>. The stream is
+   initially configured to buffer nodes read from the input until
+   <gt_buffer_stream_dequeue()> switches it to dequeue mode. In this mode,
+   calls to <gt_node_stream_next()> will deliver the stored nodes in FIFO
+   order. */
 GtNodeStream*            gt_buffer_stream_new(GtNodeStream *in_stream);
-void                     gt_buffer_stream_dequeue(GtBufferStream*);
+/* Switch stream <bs> to dequeue mode. */
+void                     gt_buffer_stream_dequeue(GtBufferStream *bs);
 
 #endif

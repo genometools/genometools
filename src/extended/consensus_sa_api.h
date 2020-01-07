@@ -21,30 +21,36 @@
 #include "core/range_api.h"
 #include "core/strand_api.h"
 
-/*
-  This module implements the method to construct consensus spliced alignments
+/* ConsensusSplicedAlignment module */
 
-  B.J. Haas, A.L. Delcher, S.M. Mount, J.R. Wortman, R.K. Smith Jr,
-  L.I. Hannick, R. Maiti, C.M. Ronning, D.B. Rusch, C.D. Town, S.L. Salzberg,
-  and O. White. Improving the Arabidopsis genome annotation using maximal
-  transcript alignment assemblies. Nucleic Acids Res., 31(19):5654-5666, 2003.
-
-  following the description on page 972 and 973 of the paper
-
-  G. Gremme, V. Brendel, M.E. Sparks, and S. Kurtz. Engineering a Software Tool
-  for Gene Structure Prediction in Higher Organisms. Information and Software
-  Technology, 47(15):965-978, 2005.
-*/
-
+/* Function to obtain the genomic range from spliced alignment <sa>. */
 typedef GtRange  (*GetGenomicRangeFunc)(const void *sa);
+/* Function to obtain the strand from spliced alignment <sa>. */
 typedef GtStrand (*GetStrandFunc)(const void *sa);
+/* Function to obtain exon ranges from spliced alignment <sa>. */
 typedef void   (*GetExonsFunc)(GtArray *exon_ranges, const void *sa);
+/* Function to process the generated from the consensus spliced alignment
+   process. */
 typedef void   (*ProcessSpliceFormFunc)(GtArray *spliced_alignments_in_form,
                                         const void *set_of_sas,
                                         GtUword number_of_sas,
                                         size_t size_of_sa,
                                         void *userdata);
 
+/*
+  Construct consensus spliced alignments according to:
+
+  B.J. Haas, A.L. Delcher, S.M. Mount, J.R. Wortman, R.K. Smith Jr,
+  L.I. Hannick, R. Maiti, C.M. Ronning, D.B. Rusch, C.D. Town, S.L. Salzberg,
+  and O. White. Improving the Arabidopsis genome annotation using maximal
+  transcript alignment assemblies. Nucleic Acids Res., 31(19):5654-5666, 2003.
+
+  following the description on page 972 and 973 of the paper:
+
+  G. Gremme, V. Brendel, M.E. Sparks, and S. Kurtz. Engineering a Software Tool
+  for Gene Structure Prediction in Higher Organisms. Information and Software
+  Technology, 47(15):965-978, 2005.
+*/
 void gt_consensus_sa(const void *set_of_sas, GtUword number_of_sas,
                      size_t size_of_sa, GetGenomicRangeFunc, GetStrandFunc,
                      GetExonsFunc, ProcessSpliceFormFunc, void *userdata);

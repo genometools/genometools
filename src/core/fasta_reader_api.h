@@ -22,8 +22,10 @@
 #include "core/error_api.h"
 #include "core/types_api.h"
 
-/* the ``fasta reader'' interface */
 typedef struct GtFastaReaderClass GtFastaReaderClass;
+
+/* <GtFastaReader> is an interface to iteratively process the sequences in
+   a FASTA file, with multiple implementations. */
 typedef struct GtFastaReader GtFastaReader;
 
 typedef enum {
@@ -40,16 +42,18 @@ typedef int (*GtFastaReaderProcDescription)(const char *description,
 typedef int (*GtFastaReaderProcSequencePart)(const char *seqpart,
                                              GtUword length, void *data,
                                              GtError*);
-/* Gets called after a fasta entry has been read */
+/* Gets called after a fasta entry has been read. */
 typedef int (*GtFastaReaderProcSequenceLength)(GtUword, void *data,
                                                GtError*);
 
-/* Construct a new fasta reader for the file named <sequence_filename>, pass
-   <NULL> to read from stdin. */
-int          gt_fasta_reader_run(GtFastaReader*, GtFastaReaderProcDescription,
+/* Run <fr> with the given handler functions and <data> for common storage.
+   A value less than zero is returned on error and <err> is set accordingly. */
+int          gt_fasta_reader_run(GtFastaReader *fr,
+                                 GtFastaReaderProcDescription,
                                  GtFastaReaderProcSequencePart,
                                  GtFastaReaderProcSequenceLength, void *data,
                                  GtError*);
-void         gt_fasta_reader_delete(GtFastaReader*);
+/* Delete <fr>. */
+void         gt_fasta_reader_delete(GtFastaReader *fr);
 
 #endif

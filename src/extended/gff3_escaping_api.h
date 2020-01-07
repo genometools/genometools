@@ -20,17 +20,19 @@
 
 #include "core/str_api.h"
 
+/* GFF3Escaping module */
+
 /* Escape <unescaped_seq> of given <length> for GFF3 format and append the
    result to <escaped_seq>. */
 void gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
                     GtUword length);
 
 /* Unescape GFF3 format <escaped_seq> of given <length> and append the result to
-   <unescaped_seq>. */
+   <unescaped_seq>. Returns a value less than zero on error. <err> is set
+   accordingly. */
 int  gt_gff3_unescape(GtStr *unescaped_seq, const char *escaped_seq,
-                      GtUword length, GtError*);
+                      GtUword length, GtError *err);
 
-/* Perform unit test of GFF3 format escaping module */
 int  gt_gff3_escaping_unit_test(GtError*);
 
 #endif

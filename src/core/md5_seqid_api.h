@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include "core/error_api.h"
 
+/* MD5Seqid module */
+
 #define GT_MD5_SEQID_PREFIX      "md5:"
 #define GT_MD5_SEQID_PREFIX_LEN  4
 #define GT_MD5_SEQID_HASH_LEN    32

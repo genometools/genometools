@@ -21,24 +21,34 @@
 #include "core/alphabet_api.h"
 #include "core/error_api.h"
 
+/* <GtScoreMatrix> represents a matrix of signed integer values, for example
+   for scoring alphabet symbols against each other. */
 typedef struct GtScoreMatrix GtScoreMatrix;
 
 /* A score matrix is always defined over a given <alphabet>. */
 GtScoreMatrix* gt_score_matrix_new(GtAlphabet *alphabet);
-/* Create empty score matrix with same dimension as given score matrix */
+/* Create empty score matrix with same dimension as <scorematrix>. */
 GtScoreMatrix* gt_score_matrix_clone_empty(const GtScoreMatrix *scorematrix);
 /* Read in a protein score matrix from the given <path> and return it. */
 GtScoreMatrix* gt_score_matrix_new_read_protein(const char *path, GtError *err);
 /* Read in score matrix from <path> over given <alphabet> and return it. */
 GtScoreMatrix* gt_score_matrix_new_read(const char *path, GtAlphabet *alphabet,
                                         GtError *err);
-unsigned int   gt_score_matrix_get_dimension(const GtScoreMatrix*);
-int            gt_score_matrix_get_score(const GtScoreMatrix*,
-                                         unsigned int, unsigned int);
-void           gt_score_matrix_set_score(GtScoreMatrix*,
-                                         unsigned int, unsigned int, int);
-const int**    gt_score_matrix_get_scores(const GtScoreMatrix*);
-void           gt_score_matrix_show(const GtScoreMatrix*, FILE*);
-void           gt_score_matrix_delete(GtScoreMatrix*);
+/* Return the dimension of <scorematrix>. */
+unsigned int   gt_score_matrix_get_dimension(const GtScoreMatrix *scorematrix);
+/* Return the score value in <scorematrix> at positions (<idx1>,<idx2>). */
+int            gt_score_matrix_get_score(const GtScoreMatrix *scorematrix,
+                                         unsigned int idx1, unsigned int idx2);
+/* Set the score value in <scorematrix> at positions (<idx1>,<idx2>) to
+   <score>. */
+void           gt_score_matrix_set_score(GtScoreMatrix *scorematrix,
+                                         unsigned int idx1, unsigned int idx2,
+                                         int score);
+/* Return the score values in <scorematrix> as a two-dimensional array. */
+const int**    gt_score_matrix_get_scores(const GtScoreMatrix *scorematrix);
+/* Print <scorematrix> to output <fp>. */
+void           gt_score_matrix_show(const GtScoreMatrix *scorematrix, FILE *fp);
+/* Delete <scorematrix>. */
+void           gt_score_matrix_delete(GtScoreMatrix *scorematrix);
 
 #endif

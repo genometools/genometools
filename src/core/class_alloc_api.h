@@ -20,7 +20,11 @@
 
 #include <stdlib.h>
 
+/* ClassAlloc module */
+
+/* Allocates space for a class with size <size>. */
 void* gt_class_alloc(size_t size);
+/* Frees static memory allocated for classes. */
 void  gt_class_alloc_clean(void);
 
 #endif
