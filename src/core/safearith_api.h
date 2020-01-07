@@ -36,70 +36,70 @@
 */
 
 /* generic macros to determine the minimum and maximum value of given <type> */
-#define __HALF_MAX_SIGNED(type)  ((type)1 << (type) (sizeof (type) * 8 - 2))
-#define __MAX_SIGNED(type)       (__HALF_MAX_SIGNED(type) - 1 +               \
-                                  __HALF_MAX_SIGNED(type))
-#define __MIN_SIGNED(type)       ((type) -1 - __MAX_SIGNED(type))
+#define GT_SAFE_HALF_MAX_SIGNED(type)  ((type)1 << (type) (sizeof (type) * 8 - 2))
+#define GT_SAFE_MAX_SIGNED(type)       (GT_SAFE_HALF_MAX_SIGNED(type) - 1 +         \
+                                        GT_SAFE_HALF_MAX_SIGNED(type))
+#define GT_SAFE_MIN_SIGNED(type)       ((type) -1 - GT_SAFE_MAX_SIGNED(type))
 
-#define __MIN(type)              ((type) -1 < (type) 1                        \
-                                 ? __MIN_SIGNED(type)                         \
-                                 : (type)0)
-#define __MAX(type)              ((type) ~__MIN(type))
+#define GT_SAFE_MIN(type)              ((type) -1 < (type) 1                        \
+                                       ? GT_SAFE_MIN_SIGNED(type)                   \
+                                       : (type)0)
+#define GT_SAFE_MAX(type)              ((type) ~GT_SAFE_MIN(type))
 
 /* Safely assign <src> to <dest>, returns false on success, true otherwise. */
-#define assign(dest, src)                                                     \
-        ({                                                                    \
-          __typeof__(src) __x  = (src);                                       \
-          __typeof__(dest) __y = (__typeof__(dest)) __x;                      \
-          (__x==(__typeof__(src)) __y &&                                      \
-           ((__x < (__typeof__(src)) 1) == (__y < (__typeof__(dest)) 1))      \
-           ? (void)((dest)=__y), false : true);                               \
+#define gt_safearith_assign(dest, src)                                         \
+        ({                                                                     \
+          __typeof__(src) __x  = (src);                                        \
+          __typeof__(dest) __y = (__typeof__(dest)) __x;                       \
+          (__x==(__typeof__(src)) __y &&                                       \
+           ((__x < (__typeof__(src)) 1) == (__y < (__typeof__(dest)) 1))       \
+           ? (void)((dest)=__y), false : true);                                \
          })
 
 /* Safely add <a> to <b> and assign the result to <c>,
    returns false on success, true otherwise. */
-#define add_of(c, a, b)                                                       \
-        ({                                                                    \
-          __typeof__(a) __a = a;                                              \
-          __typeof__(b) __b = b;                                              \
-          (__b) < (__typeof__(b)) 1                                           \
-          ? ((__MIN(__typeof__(c)) - (__b) <= (__typeof__(c-__b)) (__a))      \
-             ? assign(c, __a + __b) : true)                                   \
-          : ((__MAX(__typeof__(c)) - (__b) >= (__typeof__(c-__b)) (__a))      \
-             ? assign(c, __a + __b) : true);                                  \
+#define gt_safearith_add_of(c, a, b)                                           \
+        ({                                                                     \
+          __typeof__(a) __a = a;                                               \
+          __typeof__(b) __b = b;                                               \
+          (__b) < (__typeof__(b)) 1                                            \
+          ? ((GT_SAFE_MIN(__typeof__(c)) - (__b) <= (__typeof__(c-__b)) (__a)) \
+             ? gt_safearith_assign(c, __a + __b) : true)                       \
+          : ((GT_SAFE_MAX(__typeof__(c)) - (__b) >= (__typeof__(c-__b)) (__a)) \
+             ? gt_safearith_assign(c, __a + __b) : true);                      \
         })
 
 /* Safely subtract <b> from <a> and assign the result to <c>,
    returns false on success, true otherwise. */
-#define sub_of(c, a, b)                                                       \
+#define gt_safearith_sub_of(c, a, b)                                          \
         ({                                                                    \
           __typeof__(a) __a = a;                                              \
           __typeof__(b) __b = b;                                              \
           (__b) < (__typeof__(b)) 1                                           \
-          ? ((__MAX(__typeof__(c)) + (__b) >= (__typeof__(c+__b))(__a))       \
-             ? assign(c, __a - __b) : true)                                   \
-          : ((__MIN(__typeof__(c)) + (__b) <= (__typeof__(c+__b))(__a))       \
-             ? assign(c, __a - __b) : true);                                  \
+          ? ((GT_SAFE_MAX(__typeof__(c)) + (__b) >= (__typeof__(c+__b))(__a)) \
+             ? gt_safearith_assign(c, __a - __b) : true)                      \
+          : ((GT_SAFE_MIN(__typeof__(c)) + (__b) <= (__typeof__(c+__b))(__a)) \
+             ? gt_safearith_assign(c, __a - __b) : true);                     \
         })
 
 /* Assign <src> to <dest> or exit upon overflow. */
-#define gt_safe_assign(dest, src)                                           \
-        do {                                                                \
-          if (assign(dest, src)) {                                          \
-            fprintf(stderr, "%s, l.%d: overflow in assignment\n", __FILE__, \
-                    __LINE__);                                              \
-            exit(EXIT_FAILURE);                                             \
-          }                                                                 \
+#define gt_safe_assign(dest, src)                                            \
+        do {                                                                 \
+          if (gt_safearith_assign(dest, src)) {                              \
+            fprintf(stderr, "%s, l.%d: overflow in assignment\n", __FILE__,  \
+                    __LINE__);                                               \
+            exit(EXIT_FAILURE);                                              \
+          }                                                                  \
         } while (false)
 
 /* Add <a> to <b> and assign the result to <c> or exit upon overflow. */
-#define gt_safe_add(c, a, b)                                              \
-        do {                                                              \
-          if (add_of(c, a, b)) {                                          \
-            fprintf(stderr, "%s, l.%d: overflow in addition\n", __FILE__, \
-                    __LINE__);                                            \
-            exit(EXIT_FAILURE);                                           \
-          }                                                               \
+#define gt_safe_add(c, a, b)                                                 \
+        do {                                                                 \
+          if (gt_safearith_add_of(c, a, b)) {                                \
+            fprintf(stderr, "%s, l.%d: overflow in addition\n", __FILE__,    \
+                    __LINE__);                                               \
+            exit(EXIT_FAILURE);                                              \
+          }                                                                  \
         } while (false)
 
 /* Subtract <b> from <a> and assign the result to <c> or exit upon overflow.
@@ -107,7 +107,7 @@
    unsigned values, as integer promotion will garble the tests. */
 #define gt_safe_sub(c, a, b)                                                 \
         do {                                                                 \
-          if (sub_of(c, a, b)) {                                             \
+          if (gt_safearith_sub_of(c, a, b)) {                                \
             fprintf(stderr, "%s, l.%d: overflow in subtraction\n", __FILE__, \
                     __LINE__);                                               \
             exit(EXIT_FAILURE);                                              \
