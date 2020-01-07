@@ -86,7 +86,7 @@ GtUword gt_rand_max(GtUword maximal_value)
 {
   GtUword r;
   gt_assert(maximal_value);
-  r = ((double) random() / ((double) RAND_MAX + 1) * (maximal_value + 1));
+  r = ((double) random() / ((double) GT_RAND_MAX + 1) * (maximal_value + 1));
   gt_assert(r <= maximal_value);
   return r;
 }
@@ -95,7 +95,7 @@ double gt_rand_max_double(double maximal_value)
 {
   double r;
   gt_assert(maximal_value);
-  r = ((double) random() / RAND_MAX) * maximal_value; /* XXX */
+  r = ((double) random() / GT_RAND_MAX) * maximal_value; /* XXX */
   gt_assert(r >= 0.0 && r <= maximal_value);
   return r;
 }
@@ -103,7 +103,7 @@ double gt_rand_max_double(double maximal_value)
 double gt_rand_0_to_1(void)
 {
   double r;
-  r = (double) random() / RAND_MAX;
+  r = (double) random() / GT_RAND_MAX;
   gt_assert(r >= 0.0 && r <= 1.0);
   return r;
 }

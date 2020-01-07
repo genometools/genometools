@@ -31,11 +31,11 @@ unsigned int gt_ya_rand_init(unsigned int);
 void         gt_ya_rand_clean(void);
 
 /* Maximum random number (2147483647) */
-#define RAND_MAX \
+#define GT_RAND_MAX \
         0x7FFFFFFF
 /* Return random number up to RAND_MAX. */
 #define random() \
-        ((GtWord) (gt_ya_random() & RAND_MAX))
+        ((GtWord) (gt_ya_random() & GT_RAND_MAX))
 
 /*#define srandom(i) ya_rand_init(0)*/
 
@@ -50,7 +50,7 @@ void         gt_ya_rand_clean(void);
 #if defined (__GNUC__) && (__GNUC__ >= 2)
  /* Implement frand using GCC's statement-expression extension. */
 
-# define frand(f)                                                       \
+# define gt_frand(f)                                                    \
   __extension__                                                         \
   ({ double tmp = ((((double) random()) * ((double) (f))) /             \
                    ((double) ((unsigned int)~0)));                      \
@@ -59,7 +59,7 @@ void         gt_ya_rand_clean(void);
 #else /* not GCC2 - implement frand using a global variable.*/
 
 /*@unused@*/ static double _frand_tmp_;
-# define frand(f)                                                       \
+# define gt_frand(f)                                                    \
   (_frand_tmp_ = ((((double) random()) * ((double) (f))) /              \
                   ((double) ((unsigned int)~0))),                       \
    _frand_tmp_ < 0 ? (-_frand_tmp_) : _frand_tmp_)
