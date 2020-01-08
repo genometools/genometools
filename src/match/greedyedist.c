@@ -108,8 +108,8 @@ static void frontspecparms(const GtFrontResource *ftres,
     fspec->width = p + p + 1;
   } else
   {
-    fspec->left = MAX(-ftres->ulen,-p);
-    fspec->width = MIN(ftres->vlen,p) - fspec->left + 1;
+    fspec->left = GT_MAX(-ftres->ulen,-p);
+    fspec->width = GT_MIN(ftres->vlen,p) - fspec->left + 1;
   }
 #ifdef SKDEBUG
   printf("p="GT_WD",offset="GT_WD",left="GT_WD",width="GT_WD"\n",p,
@@ -294,7 +294,7 @@ GtUword greedyunitedist(GtFrontResource *ftres,
   gt_assert(gt_seqabstract_length(vseq) < (GtUword) LONG_MAX);
   ftres->ulen = (GtWord) gt_seqabstract_length(useq);
   ftres->vlen = (GtWord) gt_seqabstract_length(vseq);
-  ftres->integermin = -MAX(ftres->ulen,ftres->vlen);
+  ftres->integermin = -GT_MAX(ftres->ulen,ftres->vlen);
   prevfspec = &frontspecspace[0];
   firstfrontforward(useq,vseq,ftres,prevfspec);
   if (ftres->ulen == ftres->vlen &&
@@ -303,7 +303,7 @@ GtUword greedyunitedist(GtFrontResource *ftres,
     realdistance = 0;
   } else
   {
-    for (kval=1UL, r=1-MIN(ftres->ulen,ftres->vlen);
+    for (kval=1UL, r=1-GT_MIN(ftres->ulen,ftres->vlen);
          /* Nothing */ ; kval++, r++)
     {
       if (prevfspec == &frontspecspace[0])

@@ -1311,7 +1311,7 @@ size_t gt_bcktab_sizeforlcpvalues(const GtBcktab *bcktab)
                     bcktab->maxbucketinfo.specialsmaxbucketsize;
   sizelcps
     = sizeof (GtUword) * gt_bcktab_nonspecialsmaxsize(bcktab);
-  return MAX(sizelcps,sizespeciallcps);
+  return GT_MAX(sizelcps,sizespeciallcps);
 }
 
 GtUword gt_bcktab_maxbucketsize(const GtBcktab *bcktab)
@@ -1403,7 +1403,7 @@ void gt_bcktab_consistencyofsuffix(int line,
     }
     cc = gt_encseq_get_encoded_char(encseq,suffix->startpos + idx,
                                            readmode);
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       firstspecial = idx;
       break;

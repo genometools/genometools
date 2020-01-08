@@ -223,7 +223,7 @@ GtUword gt_alignment_eval_generic(bool mapped,bool downcase,
                   b = alignment->v[idx_v];
           if (mapped)
           {
-            if (ISSPECIAL(a) || ISSPECIAL(b) || a != b)
+            if (GT_ISSPECIAL(a) || GT_ISSPECIAL(b) || a != b)
             {
               sumcost++;
             }
@@ -300,7 +300,7 @@ static GtWord gt_alignment_eval_generic_with_score(bool mapped,
               sumscore += gt_score_matrix_get_score(scorematrix, a, b);
             } else
             {
-              sumscore += (ISSPECIAL(a) || ISSPECIAL(b) ||
+              sumscore += (GT_ISSPECIAL(a) || GT_ISSPECIAL(b) ||
                            characters[a] != characters[b]) ? mismatchscore
                                                            : matchscore;
             }
@@ -409,7 +409,7 @@ static GtWord gt_alignment_eval_generic_with_affine_score(
               sumscore += gt_score_matrix_get_score(scorematrix, a, b);
             } else
             {
-              if (ISSPECIAL(a) || ISSPECIAL(b) ||
+              if (GT_ISSPECIAL(a) || GT_ISSPECIAL(b) ||
                   characters[a] != characters[b])
               {
                 sumscore += mismatchscore;
@@ -566,9 +566,9 @@ void gt_alignment_show_generic(GtUchar *buffer,
 
           if (characters != NULL)
           {
-            topbuf[pos] = ISSPECIAL(a) ? wildcardshow : characters[a];
-            is_match = (a == b && !ISSPECIAL(a)) ? true : false;
-            lowbuf[pos] = ISSPECIAL(b) ? wildcardshow : characters[b];
+            topbuf[pos] = GT_ISSPECIAL(a) ? wildcardshow : characters[a];
+            is_match = (a == b && !GT_ISSPECIAL(a)) ? true : false;
+            lowbuf[pos] = GT_ISSPECIAL(b) ? wildcardshow : characters[b];
           } else
           {
             topbuf[pos] = a;
@@ -595,7 +595,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
 
           if (characters != NULL)
           {
-            topbuf[pos] = ISSPECIAL(a) ? wildcardshow : characters[a];
+            topbuf[pos] = GT_ISSPECIAL(a) ? wildcardshow : characters[a];
           } else
           {
             topbuf[pos] = a;
@@ -614,7 +614,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
           midbuf[pos] = (GtUchar) MISMATCHSYMBOL;
           if (characters != NULL)
           {
-            lowbuf[pos] = ISSPECIAL(b) ? wildcardshow : characters[b];
+            lowbuf[pos] = GT_ISSPECIAL(b) ? wildcardshow : characters[b];
           } else
           {
             lowbuf[pos] = b;
@@ -717,7 +717,7 @@ static int gt_alignment_check_match(const GtAlignment *alignment,GtError *err)
   {
     GtUchar cc_u = alignment->u[idx];
     GtUchar cc_v = alignment->v[idx];
-    if (ISSPECIAL(cc_u) || ISSPECIAL(cc_v) || cc_u != cc_v)
+    if (GT_ISSPECIAL(cc_u) || GT_ISSPECIAL(cc_v) || cc_u != cc_v)
     {
       if (err == NULL)
       {

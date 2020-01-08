@@ -394,14 +394,14 @@ static GtUword gt_sfxmap_determinenumberofwholeleaves(
   for (idx = 0; idx < totallength; idx++)
   {
     cc = gt_encseq_reader_next_encoded_char(esr);
-    if (cc == (GtUchar) SEPARATOR)
+    if (cc == (GtUchar) GT_SEPARATOR)
     {
       sequencestart = true;
     } else
     {
       if (sequencestart)
       {
-        if (cc != (GtUchar) WILDCARD)
+        if (cc != (GtUchar) GT_WILDCARD)
         {
           wholeleafcount++;
         }
@@ -438,7 +438,7 @@ static int gt_sfxmap_comparefullsuffixes(const GtEncseq *encseq,
   {
     if (pos1 >= totallength)
     {
-      cc1 = (GtUchar) SEPARATOR;
+      cc1 = (GtUchar) GT_SEPARATOR;
     } else
     {
       cc1 = (esr1 != NULL) ? gt_encseq_reader_next_encoded_char(esr1)
@@ -446,15 +446,15 @@ static int gt_sfxmap_comparefullsuffixes(const GtEncseq *encseq,
     }
     if (pos2 >= totallength)
     {
-      cc2 = (GtUchar) SEPARATOR;
+      cc2 = (GtUchar) GT_SEPARATOR;
     } else
     {
       cc2 = (esr2 != NULL) ? gt_encseq_reader_next_encoded_char(esr2)
                            : gt_encseq_get_encoded_char(encseq,pos2,readmode);
     }
-    if (ISSPECIAL(cc1))
+    if (GT_ISSPECIAL(cc1))
     {
-      if (ISSPECIAL(cc2))
+      if (GT_ISSPECIAL(cc2))
       {
         if (pos1 < pos2)
         {
@@ -477,7 +477,7 @@ static int gt_sfxmap_comparefullsuffixes(const GtEncseq *encseq,
       break;
     } else
     {
-      if (ISSPECIAL(cc2))
+      if (GT_ISSPECIAL(cc2))
       {
         *maxlcp = pos1 - start1;
         retval = -1; /* a < b */
@@ -636,7 +636,7 @@ static int gt_sfxmap_checkentiresuftab(const char *filename,
                                                      ESASUFFIXPTRGET(suftab,
                                                                      idx),
                                                      readmode)
-                   : SEPARATOR);
+                   : GT_SEPARATOR);
         fprintf(stderr,", maxlcp(bruteforce) = "GT_WU" != "GT_WU"(fast)\n",
                           maxlcp, currentlcp);
         exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -811,7 +811,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
           for (idx = (GtUword) 1; idx<totallength; idx++)
           {
             if (suffixarray.bwttab[idx-1] != suffixarray.bwttab[idx] ||
-                ISSPECIAL(suffixarray.bwttab[idx]))
+                GT_ISSPECIAL(suffixarray.bwttab[idx]))
             {
               bwtdifferentconsecutive++;
             }
@@ -827,7 +827,7 @@ static int gt_sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
             while (gt_readnextfromstream_GtUchar(&cc,&suffixarray.bwttabstream)
                    == 1)
             {
-              if (prevcc != cc || ISSPECIAL(cc))
+              if (prevcc != cc || GT_ISSPECIAL(cc))
               {
                 bwtdifferentconsecutive++;
               }

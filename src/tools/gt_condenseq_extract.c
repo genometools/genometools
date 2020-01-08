@@ -128,7 +128,7 @@ gt_condenseq_extract_option_parser_new(void *tool_arguments)
 
   /* -sepchar */
   option = gt_option_new_string("sepchar",
-                                "specify character to print as SEPARATOR "
+                                "specify character to print as GT_SEPARATOR "
                                 "(implies option -output concat",
                                 arguments->sepchar, "|");
   gt_option_parser_add_option(op, option);

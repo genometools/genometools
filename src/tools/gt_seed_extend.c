@@ -951,14 +951,14 @@ static int gt_seed_extend_runner(int argc,
   } else {
     maxseedlength = gt_maxbasepower(nchars) - 1;
   }
-  maxseqlength = MIN(gt_encseq_max_seq_length(aencseq),
+  maxseqlength = GT_MIN(gt_encseq_max_seq_length(aencseq),
                      gt_encseq_max_seq_length(bencseq));
 
   if (arguments->dbs_seedlength == UINT_MAX)
   {
     if (arguments->maxmat == 1)
     {
-      arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
+      arguments->dbs_seedlength = GT_MIN(maxseedlength, arguments->se_alignlength);
     } else
     {
       unsigned int local_seedlength, log_avg_totallength;
@@ -968,19 +968,19 @@ static int gt_seed_extend_runner(int argc,
       log_avg_totallength
         = (unsigned int) gt_round_to_long(gt_log_base(avg_totallength,
                                                       (double) nchars));
-      local_seedlength = (unsigned int) MIN3(log_avg_totallength,
+      local_seedlength = (unsigned int) GT_MIN3(log_avg_totallength,
                                              maxseqlength,maxseedlength);
-      arguments->dbs_seedlength = MAX(local_seedlength, 2);
+      arguments->dbs_seedlength = GT_MAX(local_seedlength, 2);
     }
     if (gt_option_is_set(arguments->se_ref_op_spacedseed))
     {
-      arguments->dbs_seedlength = MIN(maxseedlength,
+      arguments->dbs_seedlength = GT_MIN(maxseedlength,
                                       (arguments->dbs_seedlength * 3)/2);
-      arguments->dbs_seedlength = MAX(arguments->dbs_seedlength,
+      arguments->dbs_seedlength = GT_MAX(arguments->dbs_seedlength,
                                       GT_SPACED_SEED_FIRST_SPAN);
     }
   }
-  if (!had_err && arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength))
+  if (!had_err && arguments->dbs_seedlength > GT_MIN(maxseedlength, maxseqlength))
   {
     if (maxseedlength <= maxseqlength) {
       gt_error_set(err, "maximum seedlength for alphabet of size %u is %u "

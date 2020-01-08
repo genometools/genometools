@@ -28,10 +28,10 @@ void gt_inplace_reverse_complement(GtUchar *seq,GtUword len)
        frontptr <= backptr; frontptr++, backptr--)
   {
     tmp = *frontptr;
-    gt_assert((ISSPECIAL(*backptr) || *backptr < 4) &&
-              (ISSPECIAL(tmp) || tmp < 4));
-    *frontptr = ISSPECIAL(*backptr) ? *backptr : GT_COMPLEMENTBASE(*backptr);
-    *backptr = ISSPECIAL(tmp) ? tmp : GT_COMPLEMENTBASE(tmp);
+    gt_assert((GT_ISSPECIAL(*backptr) || *backptr < 4) &&
+              (GT_ISSPECIAL(tmp) || tmp < 4));
+    *frontptr = GT_ISSPECIAL(*backptr) ? *backptr : GT_COMPLEMENTBASE(*backptr);
+    *backptr = GT_ISSPECIAL(tmp) ? tmp : GT_COMPLEMENTBASE(tmp);
   }
 }
 
@@ -54,7 +54,7 @@ void gt_inplace_complement(GtUchar *seq,GtUword len)
 
   for (ptr = seq; ptr < seq + len; ptr++)
   {
-    gt_assert(ISSPECIAL(*ptr) || *ptr < 4);
+    gt_assert(GT_ISSPECIAL(*ptr) || *ptr < 4);
     *ptr = GT_COMPLEMENTBASE(*ptr);
   }
 }

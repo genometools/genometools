@@ -248,7 +248,7 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
   verbose_logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX,
       stdout);
   gt_logger_log(verbose_logger, "verbose output activated");
-  kmersize = MIN((unsigned int) GT_UNITSIN2BITENC, arguments->minmatchlength);
+  kmersize = GT_MIN((unsigned int) GT_UNITSIN2BITENC, arguments->minmatchlength);
 
   el = gt_encseq_loader_new();
   gt_encseq_loader_drop_description_support(el);

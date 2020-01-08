@@ -23,20 +23,20 @@
   if they are not already defined.
 */
 
-#ifndef MAX
-#define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
+#ifndef GT_MAX
+#define GT_MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
 #endif
 
-#ifndef MIN
-#define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
+#ifndef GT_MIN
+#define GT_MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
 #endif
 
-#ifndef MIN3
-#define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
+#ifndef GT_MIN3
+#define GT_MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 #endif
 
-#ifndef MAX3
-#define MAX3(a, b, c) (((a)>(b))?((a)>(c)?(a):(c)):((b)>(c)?(b):(c)))
+#ifndef GT_MAX3
+#define GT_MAX3(a, b, c) (((a)>(b))?((a)>(c)?(a):(c)):((b)>(c)?(b):(c)))
 #endif
 
 #define GT_UPDATE_MAX(MAXVAL,NEWVAL)\

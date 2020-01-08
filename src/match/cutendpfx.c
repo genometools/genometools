@@ -49,7 +49,7 @@ static inline unsigned int prefixqgram2code(GtCodetype *code,
   for (i = (int) (qvalueprefix-1); i>=0; i--)
   {
     a = qgram[i];
-    if (ISSPECIAL(a))
+    if (GT_ISSPECIAL(a))
     {
       return (unsigned int) i;
     }

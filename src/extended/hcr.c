@@ -207,7 +207,7 @@ static GtBaseQualDistr* hcr_base_qual_distr_new_from_file(FILE *fp,
     read = gt_xfread_one(&cur_freq, fp);
     gt_assert(read == one);
     cur_char_code = gt_alphabet_encode(alpha, read_char_code);
-    if (cur_char_code == (GtUchar) WILDCARD)
+    if (cur_char_code == (GtUchar) GT_WILDCARD)
       gt_safe_assign(cur_char_code, bqd->wildcard_indx);
     bqd->distr[cur_qual][cur_char_code] = cur_freq;
     if ((unsigned) cur_qual > max_qual)
@@ -264,7 +264,7 @@ static int hcr_base_qual_distr_add(GtBaseQualDistr *bqd, const GtUchar *qual,
       if (cur_qual >= bqd->qrange_end)
         cur_qual = bqd->qrange_end;
     }
-    if (cur_char_code == WILDCARD)
+    if (cur_char_code == GT_WILDCARD)
       bqd->distr[cur_qual][bqd->wildcard_indx]++;
     else
       bqd->distr[cur_qual][cur_char_code]++;
@@ -317,7 +317,7 @@ static GtUword hcr_write_seq(GtHcrSeqEncoder *seq_encoder,
   for (i = 0; i < len; i++) {
     cur_char_code = (unsigned) seq[i];
 
-    if (cur_char_code == WILDCARD)
+    if (cur_char_code == GT_WILDCARD)
       cur_char_code = gt_alphabet_size(seq_encoder->alpha) - 1;
 
     cur_qual = (unsigned) qual[i];
@@ -476,7 +476,7 @@ static int hcr_huffman_write_base_qual_freq(GtUword symbol,
 
   gt_safe_assign(base, (symbol % gt_alphabet_size(info->alpha)));
   if (base == (GtUchar) gt_alphabet_size(info->alpha) - 1)
-    base = (GtUchar) WILDCARD;
+    base = (GtUchar) GT_WILDCARD;
   gt_safe_assign(base, (toupper(gt_alphabet_decode(info->alpha, base))));
 
   gt_xfwrite_one(&base, info->output);
@@ -872,7 +872,7 @@ static unsigned char get_base_from_symbol(GtHcrSeqDecoder *seq_dec,
 {
   unsigned char base = (unsigned char) symbol % seq_dec->alphabet_size;
   if (base == (unsigned char) seq_dec->alphabet_size)
-    return (unsigned char) WILDCARD;
+    return (unsigned char) GT_WILDCARD;
   return base;
 }
 

@@ -64,7 +64,7 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
   gt_assert(gt_MRAEncGetSize(alphabet) ==  alphabetSize + 1);
   alphabetSize = gt_MRAEncGetSize(alphabet);
   bwtSeq->bwtTerminatorFallback = bwtTerminatorFlat
-    = MRAEncMapSymbol(alphabet, UNDEFBWTCHAR);
+    = MRAEncMapSymbol(alphabet, GT_UNDEFBWTCHAR);
   bwtSeq->bwtTerminatorFallbackRange = 1;
   bwtSeq->count = counts;
   bwtSeq->rangeSort = rangeSort;
@@ -178,7 +178,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     qptr = query + queryLen - 1;
     qend = query - 1;
   }
-  gt_assert(ISNOTSPECIAL(*qptr));
+  gt_assert(GT_ISNOTSPECIAL(*qptr));
   cc = (unsigned int) *qptr;
   prebwt.mbtab = gt_bwtseq2mbtab((const FMindex *) bwtSeq);
   if (prebwt.mbtab != NULL)
@@ -204,7 +204,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   {
     GtUwordPair occPair;
 
-    gt_assert(ISNOTSPECIAL(*qptr));
+    gt_assert(GT_ISNOTSPECIAL(*qptr));
     cc = (unsigned int) *qptr;
     if (prebwt.mbtab != NULL && prebwt.depth < prebwt.maxdepth)
     {
@@ -241,7 +241,7 @@ GtUword gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
 #ifdef SKDEBUG
   printf("# start cc=%u\n",cc);
 #endif
-  if (ISSPECIAL(cc))
+  if (GT_ISSPECIAL(cc))
   {
     return 0;
   }
@@ -261,7 +261,7 @@ GtUword gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
 #ifdef SKDEBUG
     printf("# cc=%u\n",cc);
 #endif
-    if (ISSPECIAL (cc))
+    if (GT_ISSPECIAL (cc))
     {
       return 0;
     }
@@ -308,7 +308,7 @@ GtUword gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
 #ifdef SKDEBUG
   printf("# start cc=%u\n",cc);
 #endif
-  if (ISSPECIAL(cc))
+  if (GT_ISSPECIAL(cc))
   {
     return 0;
   }
@@ -333,7 +333,7 @@ GtUword gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
 #ifdef SKDEBUG
     printf("# cc=%u\n",cc);
 #endif
-    if (ISSPECIAL (cc))
+    if (GT_ISSPECIAL (cc))
     {
       break;
     }
@@ -571,11 +571,11 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
          * will not return the terminator symbol */
         {
           Symbol sym = BWTSeqGetSym(bwtSeq, nextLocate);
-          if (sym != UNDEFBWTCHAR)
+          if (sym != GT_UNDEFBWTCHAR)
           {
             gt_error_set(err, "symbol mismatch at position "GT_WU": "
                       "%d vs. reference symbol %d", i - 1, (int)sym,
-                      (int)UNDEFBWTCHAR);
+                      (int)GT_UNDEFBWTCHAR);
             retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
             break;
           }
@@ -624,10 +624,11 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
       fputs("Checking context regeneration.\n", stderr);
       {
         GtUword i, start, subSeqLen,
-          maxSubSeqLen = MIN(MAX(MIN_CONTEXT_LEN, seqLen/CONTEXT_FRACTION),
-                             MAX_CONTEXT_LEN),
-          numTries = MIN(MAX_NUM_CONTEXT_CHECKS,
-                         MAX(2, seqLen/CONTEXT_INTERVAL));
+          maxSubSeqLen = GT_MIN(GT_MAX(MIN_CONTEXT_LEN,
+                                seqLen/CONTEXT_FRACTION),
+                                MAX_CONTEXT_LEN),
+          numTries = GT_MIN(MAX_NUM_CONTEXT_CHECKS,
+                         GT_MAX(2, seqLen/CONTEXT_INTERVAL));
         Symbol *contextBuf = gt_malloc(sizeof (Symbol) * MAX_CONTEXT_LEN);
         GtEncseqReader *esr =
            gt_encseq_create_reader_with_readmode(suffixArray.encseq,
@@ -658,7 +659,7 @@ gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
           }
           while (j < subSeqLen)
           {
-            Symbol symRef = UNDEFBWTCHAR;
+            Symbol symRef = GT_UNDEFBWTCHAR;
             Symbol symCmp = contextBuf[j];
             if (symCmp != symRef)
             {

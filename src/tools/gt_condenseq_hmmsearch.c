@@ -216,7 +216,7 @@ static void hmmsearch_create_fine_fas(GtStr *fine_fasta_filename,
   FILE *outfp;
 
   tree_iter = gt_rbtree_iter_new_from_first(seqnums);
-  outfp = gt_xtmpfp_generic(fine_fasta_filename, TMPFP_USETEMPLATE);
+  outfp = gt_xtmpfp_generic(fine_fasta_filename, GT_TMPFP_USETEMPLATE);
   gt_outfp = gt_file_new_from_fileptr(outfp);
   seqnum = gt_rbtree_iter_data(tree_iter);
   while (seqnum != NULL) {

@@ -22,7 +22,7 @@
 #include "esa-splititv.h"
 
 #define SEQUENCE(ENCSEQ,POS) (((POS) == totallength) \
-                             ? (GtUchar) SEPARATOR\
+                             ? (GtUchar) GT_SEPARATOR\
                              : gt_encseq_get_encoded_char(ENCSEQ, \
                                                                  POS, \
                                                                  readmode))
@@ -117,9 +117,9 @@ GtUword gt_findmaximalprefixinESA(const GtEncseq *encseq,
 
   for (idx = 0; idx < querylen; idx++)
   {
-    if (ISSPECIAL(query[idx]))
+    if (GT_ISSPECIAL(query[idx]))
     {
-      gt_assert(query[idx] != SEPARATOR);
+      gt_assert(query[idx] != GT_SEPARATOR);
       break;
     }
     if (!gt_lcpintervalfindcharchildintv(encseq,
@@ -170,7 +170,7 @@ void gt_lcpintervalsplitwithoutspecial(GtArrayBoundswithchar *bwci,
   {
     leftcc = SEQUENCE(encseq,ESASUFFIXPTRGET(suftab,leftbound) + parentoffset);
     gt_assert(bwci->nextfreeBoundswithchar < bwci->allocatedBoundswithchar);
-    if (ISSPECIAL(leftcc))
+    if (GT_ISSPECIAL(leftcc))
     {
       ADDPREVIOUSRBOUND(rightbound);
       ADDCURRENTLBOUND(rightbound+1);
@@ -206,7 +206,7 @@ GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
 
   ccl = SEQUENCE(encseq,ESASUFFIXPTRGET(suftab,parentleft) + parentoffset);
   ccr = SEQUENCE(encseq,ESASUFFIXPTRGET(suftab,parentright) + parentoffset);
-  if (ccl != ccr || ISSPECIAL(ccl))
+  if (ccl != ccr || GT_ISSPECIAL(ccl))
   {
     return alphasize;
   }

@@ -431,7 +431,7 @@ static GtUword gt_esa2shulengthatposition(const Suffixarray *suffixarray,
         printf("read %u\n",(unsigned int) *qptr);
       }
       */
-      if (qptr >= qend || ISSPECIAL(*qptr) ||
+      if (qptr >= qend || GT_ISSPECIAL(*qptr) ||
           !gt_lcpintervalfindcharchildintv(suffixarray->encseq,
                                            suffixarray->readmode,
                                            totallength,
@@ -463,7 +463,7 @@ static GtUword gt_esa2shulengthquery(const Suffixarray *suffixarray,
 
   for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
-    if (ISSPECIAL(*qptr))
+    if (GT_ISSPECIAL(*qptr))
     {
       gmatchlength = 0;
     } else

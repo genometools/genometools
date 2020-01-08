@@ -102,7 +102,7 @@ gt_MRAEncGTAlphaNew(const GtAlphabet *alpha)
     symsPerRange[0] = numofchars;
   }
   /* handle special symbols */
-  mappings[WILDCARD] = numofchars;
+  mappings[GT_WILDCARD] = numofchars;
   symsPerRange[1] = 1;
   result = gt_newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings);
   gt_free(mappings);

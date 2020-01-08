@@ -134,7 +134,7 @@ void gt_querymatchoutoptions_extend(
     gt_assert(querymatchoutoptions != NULL);
     querymatchoutoptions->front_trace = front_trace_new();
     querymatchoutoptions->pol_info
-      = polishing_info_new_with_bias(weakends ? MAX(errorpercentage,20)
+      = polishing_info_new_with_bias(weakends ? GT_MAX(errorpercentage,20)
                                               : errorpercentage,
                                      matchscore_bias,
                                      history_size);

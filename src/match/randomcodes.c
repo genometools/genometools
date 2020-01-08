@@ -958,7 +958,7 @@ static inline GtUword gt_randomcodes_calculate_nofsamples(
     gt_assert(gt_encseq_min_seq_length(encseq) <= (GtUword)bucketkeysize);
   }
   nofsamples = nofkmers / sampling_factor;
-  return MAX(GT_RANDOMCODES_NOFSAMPLES_MIN, nofsamples);
+  return GT_MAX(GT_RANDOMCODES_NOFSAMPLES_MIN, nofsamples);
 }
 
 static void gt_randomcodes_generate_sampling_positions(GtUword *buffer,

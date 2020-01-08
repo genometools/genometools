@@ -24,14 +24,14 @@
 /* ConsensusSplicedAlignment module */
 
 /* Function to obtain the genomic range from spliced alignment <sa>. */
-typedef GtRange  (*GetGenomicRangeFunc)(const void *sa);
+typedef GtRange  (*GtGetGenomicRangeFunc)(const void *sa);
 /* Function to obtain the strand from spliced alignment <sa>. */
-typedef GtStrand (*GetStrandFunc)(const void *sa);
+typedef GtStrand (*GtGetStrandFunc)(const void *sa);
 /* Function to obtain exon ranges from spliced alignment <sa>. */
-typedef void   (*GetExonsFunc)(GtArray *exon_ranges, const void *sa);
+typedef void   (*GtGetExonsFunc)(GtArray *exon_ranges, const void *sa);
 /* Function to process the generated from the consensus spliced alignment
    process. */
-typedef void   (*ProcessSpliceFormFunc)(GtArray *spliced_alignments_in_form,
+typedef void   (*GtProcessSpliceFormFunc)(GtArray *spliced_alignments_in_form,
                                         const void *set_of_sas,
                                         GtUword number_of_sas,
                                         size_t size_of_sa,
@@ -52,7 +52,7 @@ typedef void   (*ProcessSpliceFormFunc)(GtArray *spliced_alignments_in_form,
   Technology, 47(15):965-978, 2005.
 */
 void gt_consensus_sa(const void *set_of_sas, GtUword number_of_sas,
-                     size_t size_of_sa, GetGenomicRangeFunc, GetStrandFunc,
-                     GetExonsFunc, ProcessSpliceFormFunc, void *userdata);
+                     size_t size_of_sa, GtGetGenomicRangeFunc, GtGetStrandFunc,
+                     GtGetExonsFunc, GtProcessSpliceFormFunc, void *userdata);
 
 #endif

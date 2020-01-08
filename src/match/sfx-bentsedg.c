@@ -43,10 +43,10 @@
                                                           POS,bsr->readmode)
 #define ACCESSCHARSEQ(ESR)     gt_encseq_reader_next_encoded_char(ESR)
 #define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
-                                ISNOTSPECIAL(ACCESSCHARRAND(POS)))
+                                GT_ISNOTSPECIAL(ACCESSCHARRAND(POS)))
 
 #define DEREFSTOPPOSSEQ(VAR,POS,STOPPOS,ESR)\
-        (((POS) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
+        (((POS) < (STOPPOS) && GT_ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
         ((GtUword) VAR) : GT_UNIQUEINT(POS))
 
 #define DEREFSEQ(VAR,POS,ESR) DEREFSTOPPOSSEQ(VAR,POS,bsr->totallength,ESR)
@@ -76,7 +76,7 @@
         VAR = (((cptr = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX)+\
                         depth)\
                 < bsr->totallength &&\
-                ISNOTSPECIAL(TMPVAR = ACCESSCHARRAND(cptr)))\
+                GT_ISNOTSPECIAL(TMPVAR = ACCESSCHARRAND(cptr)))\
                     ? ((GtUword) TMPVAR) : GT_UNIQUEINT(cptr))
 
 typedef GtEndofTwobitencoding GtSfxcmp;
@@ -1259,13 +1259,13 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
       }
     }
     gt_assert(pb >= pa);
-    wtmp = MIN(pa,pb-pa);
+    wtmp = GT_MIN(pa,pb-pa);
     /* move w elements at the left to the middle */
     gt_assert(pb >= wtmp && wtmp <= pb - wtmp);
     vectorswap(bsr->sssp, subbucketleft, subbucketleft+pb-wtmp, wtmp);
     gt_assert(pd >= pc);
     gt_assert(bucketright >= pd);
-    wtmp = MIN(pd-pc, bucketright-pd);
+    wtmp = GT_MIN(pd-pc, bucketright-pd);
     /* move w elements at the right to the middle */
     gt_assert(bucketright + 1 >= wtmp && pb + wtmp <= bucketright+1-wtmp);
     vectorswap(bsr->sssp, subbucketleft+pb, subbucketleft+bucketright+1-wtmp,

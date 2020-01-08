@@ -57,7 +57,7 @@ static double get_val_for_pos(GtCustomTrackGcContent *ctgc, GtUword pos)
     }
     bases++;
   }
-  return ((double) gc_count)/((double) MIN(ctgc->windowsize, bases));
+  return ((double) gc_count)/((double) GT_MIN(ctgc->windowsize, bases));
 }
 
 int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,

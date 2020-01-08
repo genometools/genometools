@@ -82,7 +82,7 @@ static void affinealign_fill_table(GtAffinealignDPentry **dptable,
           Rvalue = add_safe_max(dptable[i-1][j-1].Rvalue, rcost);
           Dvalue = add_safe_max(dptable[i-1][j-1].Dvalue, rcost);
           Ivalue = add_safe_max(dptable[i-1][j-1].Ivalue, rcost);
-          minvalue = MIN3(Rvalue, Dvalue, Ivalue);
+          minvalue = GT_MIN3(Rvalue, Dvalue, Ivalue);
           gt_assert(minvalue != LONG_MAX);
           dptable[i][j].Rvalue = minvalue;
           /* set backtracing edge */
@@ -102,7 +102,7 @@ static void affinealign_fill_table(GtAffinealignDPentry **dptable,
           Dvalue = add_safe_max(dptable[i-1][j].Dvalue, gap_extension);
           Ivalue = add_safe_max(dptable[i-1][j].Ivalue,
                                 gap_opening + gap_extension);
-          minvalue = MIN3(Rvalue, Dvalue, Ivalue);
+          minvalue = GT_MIN3(Rvalue, Dvalue, Ivalue);
           gt_assert(minvalue != ULONG_MAX);
           dptable[i][j].Dvalue = minvalue;
           /* set backtracing edge */
@@ -122,7 +122,7 @@ static void affinealign_fill_table(GtAffinealignDPentry **dptable,
           Dvalue = add_safe_max(dptable[i][j-1].Dvalue,
                                 gap_opening + gap_extension);
           Ivalue = add_safe_max(dptable[i][j-1].Ivalue, gap_extension);
-          minvalue = MIN3(Rvalue, Dvalue, Ivalue);
+          minvalue = GT_MIN3(Rvalue, Dvalue, Ivalue);
           gt_assert(minvalue != LONG_MAX);
           dptable[i][j].Ivalue = minvalue;
           /* set backtracing edge */
@@ -146,7 +146,7 @@ GtWord gt_affinealign_traceback(GtAlignment *align,
   GtAffineAlignEdge edge;
   gt_assert(align && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
-  minvalue = MIN3(dptable[i][j].Rvalue, dptable[i][j].Dvalue,
+  minvalue = GT_MIN3(dptable[i][j].Rvalue, dptable[i][j].Dvalue,
                   dptable[i][j].Ivalue);
   if (dptable[i][j].Rvalue == minvalue)
     edge = Affine_R;
@@ -351,7 +351,7 @@ static GtWord affinealign_fill_table_local(GtAffinealignDPentry **Atabcolumn,
     Atabcolumn[0][j].Rvalue = GT_WORD_MIN;
     Atabcolumn[0][j].Dvalue = GT_WORD_MIN;
     Atabcolumn[0][j].Ivalue = gap_opening + gap_extension;
-    temp = MAX3(Atabcolumn[0][j].Rvalue,
+    temp = GT_MAX3(Atabcolumn[0][j].Rvalue,
                 Atabcolumn[0][j].Dvalue,
                 Atabcolumn[0][j].Ivalue);
     Atabcolumn[0][j].totalvalue = ((temp > 0)? temp : 0);
@@ -385,7 +385,8 @@ static GtWord affinealign_fill_table_local(GtAffinealignDPentry **Atabcolumn,
       Dvalue = add_safe_min(Atabcolumn[i-1][j-1].Dvalue, replacement);
       Ivalue = add_safe_min(Atabcolumn[i-1][j-1].Ivalue, replacement);
       totalvalue = add_safe_min(Atabcolumn[i-1][j-1].totalvalue, replacement);
-      Atabcolumn[i][j].Rvalue = MAX(MAX(Rvalue, Dvalue),MAX(Ivalue,totalvalue));
+      Atabcolumn[i][j].Rvalue = GT_MAX(GT_MAX(Rvalue, Dvalue),
+                                       GT_MAX(Ivalue,totalvalue));
       /* set backtracing edge */
       if (Rvalue == Atabcolumn[i][j].Rvalue)
         Atabcolumn[i][j].Redge = Affine_R;
@@ -404,7 +405,8 @@ static GtWord affinealign_fill_table_local(GtAffinealignDPentry **Atabcolumn,
                             gap_opening + gap_extension);
       totalvalue = add_safe_min(Atabcolumn[i-1][j].totalvalue,
                                 gap_opening + gap_extension);
-      Atabcolumn[i][j].Dvalue = MAX(MAX(Rvalue, Dvalue),MAX(Ivalue,totalvalue));
+      Atabcolumn[i][j].Dvalue = GT_MAX(GT_MAX(Rvalue, Dvalue),
+                                       GT_MAX(Ivalue,totalvalue));
       /* set backtracing edge */
       if (Rvalue == Atabcolumn[i][j].Dvalue)
         Atabcolumn[i][j].Dedge = Affine_R;
@@ -423,7 +425,8 @@ static GtWord affinealign_fill_table_local(GtAffinealignDPentry **Atabcolumn,
       Ivalue = add_safe_min(Atabcolumn[i][j-1].Ivalue,gap_extension);
       totalvalue = add_safe_min(Atabcolumn[i][j-1].totalvalue,
                                 gap_extension + gap_opening);
-      Atabcolumn[i][j].Ivalue = MAX(MAX(Rvalue, Dvalue),MAX(Ivalue,totalvalue));
+      Atabcolumn[i][j].Ivalue = GT_MAX(GT_MAX(Rvalue, Dvalue),
+                                       GT_MAX(Ivalue,totalvalue));
       /* set backtracing edge */
       if (Rvalue == Atabcolumn[i][j].Ivalue)
         Atabcolumn[i][j].Iedge = Affine_R;
@@ -435,7 +438,7 @@ static GtWord affinealign_fill_table_local(GtAffinealignDPentry **Atabcolumn,
         Atabcolumn[i][j].Iedge = Affine_X;
 
       /*calculate totalvalue*/
-      temp = MAX3(Atabcolumn[i][j].Rvalue,
+      temp = GT_MAX3(Atabcolumn[i][j].Rvalue,
                   Atabcolumn[i][j].Dvalue,
                   Atabcolumn[i][j].Ivalue);
       Atabcolumn[i][j].totalvalue = temp > 0 ? temp : 0;
@@ -467,8 +470,8 @@ static void affinealign_traceback_local(GtAlignment *align,
   i = max_end.a;
   j = max_end.b;
 
-  maxvalue = MAX(MAX(dptable[i][j].Rvalue, dptable[i][j].Dvalue),
-                  MAX(dptable[i][j].Ivalue,dptable[i][j].totalvalue));
+  maxvalue = GT_MAX(GT_MAX(dptable[i][j].Rvalue, dptable[i][j].Dvalue),
+                  GT_MAX(dptable[i][j].Ivalue,dptable[i][j].totalvalue));
   gt_assert(gt_maxcoordvalue_get_value(max) == maxvalue);
 
   if (dptable[i][j].Rvalue == maxvalue)

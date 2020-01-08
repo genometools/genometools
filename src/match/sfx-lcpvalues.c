@@ -96,12 +96,12 @@ static GtUword computelocallcpvalue(const Suffixwithcode *previoussuffix,
 
   if (previoussuffix->code == currentsuffix->code)
   {
-    lcpvalue = MIN(previoussuffix->prefixindex,
+    lcpvalue = GT_MIN(previoussuffix->prefixindex,
                    currentsuffix->prefixindex);
   } else
   {
     gt_assert(previoussuffix->code < currentsuffix->code);
-    lcpvalue = MIN(previoussuffix->prefixindex,currentsuffix->prefixindex);
+    lcpvalue = GT_MIN(previoussuffix->prefixindex,currentsuffix->prefixindex);
     if (minchanged < lcpvalue)
     {
       lcpvalue = minchanged;
@@ -608,7 +608,7 @@ void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
       if (outlcpinfo->previousbucketwasempty)
       {
         outlcpinfo->minchanged
-          = MIN(outlcpinfo->minchanged,
+          = GT_MIN(outlcpinfo->minchanged,
                 gt_turningwheel_minchanged(outlcpinfo->turnwheel));
       } else
       {

@@ -67,7 +67,7 @@ static inline void spmfind_kmp(const char *a, GtUword alen,
 {
   gt_kmp_t q;
   GtUword max_matchlen;
-  max_matchlen = MIN(alen, blen);
+  max_matchlen = GT_MIN(alen, blen);
   if (self_comparison)
     max_matchlen -= 1;
   q = findnextmatch(a, b, alen - max_matchlen, alen - 1, pi);

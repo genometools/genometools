@@ -247,8 +247,8 @@ static inline gt_radixsort_str_bucketnum_t
     /* now take the overflow into account */
     ova = GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(a);
     ovb = GT_RADIXSORT_STR_OVERFLOW_NONSPECIAL(b);
-    maxcodeslcp = GT_RADIXSORT_STR_KMERSIZE - MAX(ova, ovb);
-    return MIN(codeslcp, maxcodeslcp);
+    maxcodeslcp = GT_RADIXSORT_STR_KMERSIZE - GT_MAX(ova, ovb);
+    return GT_MIN(codeslcp, maxcodeslcp);
   }
   return 0;
 }
@@ -337,7 +337,7 @@ static void gt_radixsort_str_insertionsort(GtRadixsortstringinfo *rsi,
         }
         gt_lcptab_update(lcpvalues,subbucketleft,pl,
                          sortmaxdepth == 0 ? lcpvalue
-                                           : MIN(lcpvalue,sortmaxdepth));
+                                           : GT_MIN(lcpvalue,sortmaxdepth));
       }
       if (uvcmp < 0)
       {
@@ -456,7 +456,7 @@ void gt_radixsort_str_eqlen(GtRadixsortstringinfo *rsi,
               gt_lcptab_update(lcpvalues,subbucketleft,offset,
                                sortmaxdepth == 0
                                  ? subbucket.lcp
-                                 : MIN(subbucket.lcp,sortmaxdepth));
+                                 : GT_MIN(subbucket.lcp,sortmaxdepth));
             }
           }
           if (GT_RADIXSORT_STR_HAS_OVERFLOW(bucketnum))

@@ -26,7 +26,7 @@ sfxIdx2BWTSym(GtUword sufIdx, const GtEncseq *encseq,
 {
   return sufIdx != 0
     ? gt_encseq_get_encoded_char(encseq, sufIdx - 1, readmode)
-    : (GtUchar) UNDEFBWTCHAR;
+    : (GtUchar) GT_UNDEFBWTCHAR;
 }
 
 static inline size_t

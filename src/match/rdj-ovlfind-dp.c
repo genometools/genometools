@@ -222,7 +222,7 @@ GtContfind gt_ovlfind_dp(const char *u, GtUword m,
   }
   else
   {
-    max_edist = (GtUword)(max_error * MAX(m,n));
+    max_edist = (GtUword)(max_error * GT_MAX(m,n));
     row = gt_malloc(sizeof (GtOvlfindDpCell) * (n + 1));
     col = gt_malloc(sizeof (GtOvlfindDpCell) * (m + 1));
 

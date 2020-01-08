@@ -76,7 +76,7 @@ GT_RADIX_KEY(UINT8_MAX,rightshift,sourceptr->uint64_b)]++;
   for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
        bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
   {
-    const GtUword elems2copy = MIN(rbuf->buf_size,(GtUword) count[binnum]);
+    const GtUword elems2copy = GT_MIN(rbuf->buf_size,(GtUword) count[binnum]);
 
     if (elems2copy > 0)
     {

@@ -65,7 +65,7 @@ const GtUchar *gt_windowiterator_next(GtUword *currentpos,
   while (wit->currentpos < wit->endpos)
   {
     currentchar = gt_encseq_reader_next_encoded_char(wit->esr);
-    if (ISSPECIAL(currentchar))
+    if (GT_ISSPECIAL(currentchar))
     {
       wit->bufsize = wit->firstpos = 0;
     } else
@@ -144,7 +144,7 @@ static void iteroverallwords(const GtEncseq *encseq,
   {
     currentchar = gt_encseq_get_encoded_char(encseq, esr, currentpos,
                                              GT_READMODE_FORWARD);
-    if (ISSPECIAL(currentchar))
+    if (GT_ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;
     } else

@@ -45,7 +45,7 @@ enum sfxDataRequest {
 };
 
 /**
- * @return Symbol at position sufIdx or UNDEFBWTCHAR i.e. the terminator
+ * @return Symbol at position sufIdx or GT_UNDEFBWTCHAR i.e. the terminator
  */
 static inline GtUchar
 sfxIdx2BWTSym(GtUword sufIdx, const GtEncseq *encseq,

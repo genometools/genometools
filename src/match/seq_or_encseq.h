@@ -19,14 +19,14 @@
         (SORE)->seqlength = SEQLENGTH
 
 #define GT_SEQORENCSEQ_INIT_SEQ(SORE,SEQ,SEQDESC,SEQLENGTH,CHARACTERS,\
-                                WILDCARDSHOW,HASWILDCARDS)\
+                                GT_WILDCARDSHOW,HASWILDCARDS)\
         (SORE)->encseq = NULL;\
         (SORE)->seq = SEQ;\
         (SORE)->desc = SEQDESC;\
         (SORE)->seqlength = SEQLENGTH;\
         (SORE)->seqstartpos = 0;\
         (SORE)->characters = CHARACTERS;\
-        (SORE)->wildcardshow = WILDCARDSHOW;\
+        (SORE)->wildcardshow = GT_WILDCARDSHOW;\
         (SORE)->haswildcards = HASWILDCARDS
 
 typedef struct

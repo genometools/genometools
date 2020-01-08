@@ -55,7 +55,7 @@ GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity)
 {
   gt_assert(errorpercentage <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             sensitivity >= 90 && sensitivity - 90 <= 10);
-  return best_xdropbelow[MIN(sensitivity - 90,9)][errorpercentage];
+  return best_xdropbelow[GT_MIN(sensitivity - 90,9)][errorpercentage];
 }
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
@@ -388,7 +388,8 @@ void gt_optimal_maxalilendiff_perc_mat_history(
 
       gt_assert(errorpercentage <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
                 sensitivity >= 90 && sensitivity - 90 <= 10);
-      best_value = best_percmathistory_maxalilendiff[MIN(sensitivity - 90,9)];
+      best_value = best_percmathistory_maxalilendiff[GT_MIN(sensitivity
+                                                               - 90,9)];
       *maxalignedlendifference = best_value[errorpercentage].maxalilendiff;
       *perc_mat_history = best_value[errorpercentage].percmathistory;
     } else
@@ -469,8 +470,8 @@ double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq)
     double ratio;
     int bias_index;
 
-    ratio = (double) MIN(atcount, gccount) / (atcount + gccount);
-    bias_index = (int) MAX(0.0, (ratio + 0.025) * 20.0 - 1.0);
+    ratio = (double) GT_MIN(atcount, gccount) / (atcount + gccount);
+    bias_index = (int) GT_MAX(0.0, (ratio + 0.025) * 20.0 - 1.0);
     gt_assert(bias_index < sizeof bias_factor/sizeof bias_factor[0]);
     return bias_factor[bias_index];
   }
@@ -1102,7 +1103,7 @@ static bool gt_extend_sesp(bool forxdrop,
   if (sesp->same_encseq && sesp->dbseqnum == sesp->queryseqnum)
   {
     gt_assert(sesp->querystart_relative >= v_left_ext);
-    r_urightbound = MIN(sesp->dbseqlength,
+    r_urightbound = GT_MIN(sesp->dbseqlength,
                          sesp->querystart_relative - v_left_ext);
   } else
   {

@@ -31,7 +31,7 @@ typedef struct
             gapextend;    /* must be negative */
 } Scorevalues;
 
-#define REPLACEMENTSCORE(SV,A,B) (((A) != (B) || ISSPECIAL(A))\
+#define REPLACEMENTSCORE(SV,A,B) (((A) != (B) || GT_ISSPECIAL(A))\
                                    ? (SV)->mismatchscore\
                                    : (SV)->matchscore)
 

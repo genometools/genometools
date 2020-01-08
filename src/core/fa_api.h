@@ -98,15 +98,15 @@ void    gt_fa_xbzclose(BZFILE *stream);
 
 enum tmpfp_flags
 {
-  TMPFP_AUTOREMOVE    = 1 << 0, /**< otherwise template holds a valid
+  GT_TMPFP_AUTOREMOVE    = 1 << 0, /**< otherwise template holds a valid
                                  * path to (re-)open the temporary
                                  * file created */
-  TMPFP_USETEMPLATE   = 1 << 1, /**< if set use string template
+  GT_TMPFP_USETEMPLATE   = 1 << 1, /**< if set use string template
                                  * given, otherwise the value of
                                  * template is overwritten with an
                                  * interval default */
-  TMPFP_OPENBINARY    = 1 << 2, /**< use stdio mode "w+b", "w+" otherwise */
-  TMPFP_DEFAULT_FLAGS = 0,
+  GT_TMPFP_OPENBINARY    = 1 << 2, /**< use stdio mode "w+b", "w+" otherwise */
+  GT_TMPFP_DEFAULT_FLAGS = 0,
 };
 /* Create a temp file optionally using template analogous to mkstemp(3). */
 #define gt_xtmpfp_generic(template_code, flags) \
@@ -117,7 +117,7 @@ FILE*   gt_xtmpfp_generic_func(GtStr *template_code, enum tmpfp_flags flags,
 /* Create a temp file optionally using template analogous to mkstemp(3), with
    default flags. */
 #define gt_xtmpfp(template_code)\
-        gt_xtmpfp_generic(template_code, TMPFP_DEFAULT_FLAGS)
+        gt_xtmpfp_generic(template_code, GT_TMPFP_DEFAULT_FLAGS)
 
 #define gt_fa_heap_read(PATH,LENPTR,ERR)\
         gt_fa_heap_read_func(PATH,LENPTR,__FILE__,__LINE__,ERR)

@@ -133,7 +133,7 @@ static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
     {
       seqit->currentread++;
     }
-    if (charcode == (GtUchar) SEPARATOR)
+    if (charcode == (GtUchar) GT_SEPARATOR)
     {
       if (seqit->sequencebuffer.nextfreeGtUchar == 0 && seqit->withsequence)
       {
@@ -158,7 +158,7 @@ static int gt_seq_iterator_sequence_buffer_next(GtSeqIterator *si,
     if (seqit->withsequence)
     {
       GT_STOREINARRAY(&seqit->sequencebuffer, GtUchar,
-                   MAX(1024UL, seqit->sequencebuffer.nextfreeGtUchar * 0.5),
+                   GT_MAX(1024UL, seqit->sequencebuffer.nextfreeGtUchar * 0.5),
                    charcode);
     } else
     {

@@ -66,7 +66,7 @@ static GtUchar gt_mmsearch_accessquery(const GtQueryrepresentation *queryrep,
   }
   if (GT_ISDIRCOMPLEMENT(queryrep->readmode))
   {
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       return cc;
     }
@@ -102,7 +102,7 @@ static GtUchar gt_mmsearch_accessquery(const GtQueryrepresentation *queryrep,
           retcode = (int) (currentquerychar - currentdbchar);\
           if (retcode == 0)\
           {\
-            if (ISSPECIAL(currentdbchar) && ISSPECIAL(currentquerychar))\
+            if (GT_ISSPECIAL(currentdbchar) && GT_ISSPECIAL(currentquerychar))\
             {\
               retcode = -1;\
               break;\
@@ -145,7 +145,7 @@ static bool gt_mmsearch(const GtEncseq *dbencseq,
       while (right > left + 1)
       {
         mid = GT_DIV2(left+right);
-        lcplen = MIN(lpref,rpref);
+        lcplen = GT_MIN(lpref,rpref);
         GT_MMSEARCH_COMPARE(ESASUFFIXPTRGET(suftab,mid),lcplen);
         if (retcode <= 0)
         {
@@ -182,7 +182,7 @@ static bool gt_mmsearch(const GtEncseq *dbencseq,
       while (right > left + 1)
       {
         mid = GT_DIV2(left+right);
-        lcplen = MIN(lpref,rpref);
+        lcplen = GT_MIN(lpref,rpref);
         GT_MMSEARCH_COMPARE(ESASUFFIXPTRGET(suftab,mid),lcplen);
         if (retcode >= 0)
         {
@@ -358,7 +358,7 @@ static bool gt_mmsearch_isleftmaximal(const GtEncseq *dbencseq,
   dbleftchar = gt_encseq_get_encoded_char(dbencseq, /* Random access */
                                           dbstart-1,
                                           readmode);
-  if (ISSPECIAL(dbleftchar) ||
+  if (GT_ISSPECIAL(dbleftchar) ||
       dbleftchar != gt_mmsearch_accessquery(querysubstring->queryrep,
                                             querysubstring->currentoffset-1))
   {
@@ -382,7 +382,7 @@ static bool gt_mum_isleftmaximal(const GtEncseq *dbencseq,
   dbleftchar = gt_encseq_get_encoded_char(dbencseq, /* Random access */
                                           dbstart-1,
                                           readmode);
-  if (ISSPECIAL(dbleftchar) || dbleftchar != query[queryoffset-1])
+  if (GT_ISSPECIAL(dbleftchar) || dbleftchar != query[queryoffset-1])
   {
     return true;
   }
@@ -411,7 +411,7 @@ static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
        dbpos++, querypos++)
   {
     dbchar = gt_encseq_reader_next_encoded_char(esr);
-    if (ISSPECIAL(dbchar) ||
+    if (GT_ISSPECIAL(dbchar) ||
         dbchar != gt_mmsearch_accessquery(querysubstring->queryrep,querypos))
     {
       break;
@@ -477,7 +477,7 @@ void gt_queryuniquematch(bool selfmatch,
                          NULL);
       processquerymatch(processquerymatchinfo,querymatchspaceptr);
     }
-    if (queryrep->sequence[offset] == (GtUchar) SEPARATOR)
+    if (queryrep->sequence[offset] == (GtUchar) GT_SEPARATOR)
     {
       localqueryunitnum++;
       localqueryoffset = 0;
@@ -572,7 +572,7 @@ static void gt_querysubstringmatch(bool selfmatch,
     gt_mmsearchiterator_delete(mmsi);
     mmsi = NULL;
     if (gt_mmsearch_accessquery(queryrep,querysubstring.currentoffset)
-        == (GtUchar) SEPARATOR)
+        == (GtUchar) GT_SEPARATOR)
     {
       localqueryunitnum++;
       localqueryoffset = 0;

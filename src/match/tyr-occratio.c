@@ -102,7 +102,7 @@ static void iteritvdistribution(GtArrayuint64_t *distribution,
          pos = startpos + length - 1;
          ulen <= (GtUword) maxmersize &&
          pos < totallength &&
-         ISNOTSPECIAL(gt_encseq_get_encoded_char(encseq,pos,readmode));
+         GT_ISNOTSPECIAL(gt_encseq_get_encoded_char(encseq,pos,readmode));
          pos++, ulen++)
     {
       if (ulen >= (GtUword) minmersize)

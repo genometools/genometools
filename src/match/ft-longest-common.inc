@@ -907,7 +907,7 @@ static GtUword ft_longest_common_twobit_twobit_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -923,7 +923,7 @@ static GtUword ft_longest_common_twobit_twobit_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -966,7 +966,7 @@ static GtUword ft_longest_common_twobit_encseq_reader_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
           break;
@@ -980,7 +980,7 @@ static GtUword ft_longest_common_twobit_encseq_reader_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_sequenceobject_esr_get(vseq,vptr))
           break;
@@ -1029,7 +1029,7 @@ static GtUword ft_longest_common_twobit_encseq_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1045,7 +1045,7 @@ static GtUword ft_longest_common_twobit_encseq_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1096,7 +1096,7 @@ static GtUword ft_longest_common_twobit_bytes_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
+        if (cu == GT_WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
           break;
         uptr += ustep;
         vptr += vstep;matchlength++;
@@ -1108,7 +1108,7 @@ static GtUword ft_longest_common_twobit_bytes_wildcard(
         const GtUchar cu = gt_twobitencoding_char_at_pos(
                               useq->twobitencoding,
                               uptr);
-        if (cu == WILDCARD || cu != *vptr)
+        if (cu == GT_WILDCARD || cu != *vptr)
           break;
         uptr += ustep;
         vptr += vstep;matchlength++;
@@ -1145,7 +1145,7 @@ static GtUword ft_longest_common_encseq_reader_twobit_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -1159,7 +1159,7 @@ static GtUword ft_longest_common_encseq_reader_twobit_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -1193,7 +1193,7 @@ static GtUword ft_longest_common_encseq_reader_encseq_reader_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
           break;
@@ -1205,7 +1205,7 @@ static GtUword ft_longest_common_encseq_reader_encseq_reader_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_sequenceobject_esr_get(vseq,vptr))
           break;
@@ -1244,7 +1244,7 @@ static GtUword ft_longest_common_encseq_reader_encseq_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1258,7 +1258,7 @@ static GtUword ft_longest_common_encseq_reader_encseq_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1299,7 +1299,7 @@ static GtUword ft_longest_common_encseq_reader_bytes_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
+        if (cu == GT_WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
           break;
         uptr++;
         vptr += vstep;
@@ -1309,7 +1309,7 @@ static GtUword ft_longest_common_encseq_reader_bytes_wildcard(
       do
       {
         const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
-        if (cu == WILDCARD || cu != *vptr)
+        if (cu == GT_WILDCARD || cu != *vptr)
           break;
         uptr++;
         vptr += vstep;
@@ -1356,7 +1356,7 @@ static GtUword ft_longest_common_encseq_twobit_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -1372,7 +1372,7 @@ static GtUword ft_longest_common_encseq_twobit_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -1415,7 +1415,7 @@ static GtUword ft_longest_common_encseq_encseq_reader_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
           break;
@@ -1429,7 +1429,7 @@ static GtUword ft_longest_common_encseq_encseq_reader_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_sequenceobject_esr_get(vseq,vptr))
           break;
@@ -1478,7 +1478,7 @@ static GtUword ft_longest_common_encseq_encseq_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1494,7 +1494,7 @@ static GtUword ft_longest_common_encseq_encseq_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1545,7 +1545,7 @@ static GtUword ft_longest_common_encseq_bytes_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
+        if (cu == GT_WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
           break;
         uptr += ustep;
         vptr += vstep;matchlength++;
@@ -1557,7 +1557,7 @@ static GtUword ft_longest_common_encseq_bytes_wildcard(
         const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
                     uptr,
                     GT_READMODE_FORWARD);
-        if (cu == WILDCARD || cu != *vptr)
+        if (cu == GT_WILDCARD || cu != *vptr)
           break;
         uptr += ustep;
         vptr += vstep;matchlength++;
@@ -1602,7 +1602,7 @@ static GtUword ft_longest_common_bytes_twobit_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -1616,7 +1616,7 @@ static GtUword ft_longest_common_bytes_twobit_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_twobitencoding_char_at_pos(
                               vseq->twobitencoding,
@@ -1657,7 +1657,7 @@ static GtUword ft_longest_common_bytes_encseq_reader_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
           break;
@@ -1669,7 +1669,7 @@ static GtUword ft_longest_common_bytes_encseq_reader_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_sequenceobject_esr_get(vseq,vptr))
           break;
@@ -1716,7 +1716,7 @@ static GtUword ft_longest_common_bytes_encseq_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1730,7 +1730,7 @@ static GtUword ft_longest_common_bytes_encseq_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD ||
+        if (cu == GT_WILDCARD ||
             cu !=
             gt_encseq_get_encoded_char(vseq->encseq,
                     vptr,
@@ -1779,7 +1779,7 @@ static GtUword ft_longest_common_bytes_bytes_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
+        if (cu == GT_WILDCARD || cu != GT_COMPLEMENTBASE(*vptr))
           break;
         uptr += ustep;
         vptr += vstep;matchlength++;
@@ -1789,7 +1789,7 @@ static GtUword ft_longest_common_bytes_bytes_wildcard(
       do
       {
         const GtUchar cu = *uptr;
-        if (cu == WILDCARD || cu != *vptr)
+        if (cu == GT_WILDCARD || cu != *vptr)
           break;
         uptr += ustep;
         vptr += vstep;matchlength++;

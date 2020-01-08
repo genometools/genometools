@@ -142,7 +142,7 @@ static void spse_nextLimdfsstate(const Limdfsconstinfo *mt,
 #endif
   SpseLimdfsconstinfo *mti = (SpseLimdfsconstinfo*) mt;
 
-  gt_assert(ISNOTSPECIAL(currentchar));
+  gt_assert(GT_ISNOTSPECIAL(currentchar));
   gt_assert(currentdepth > 0);
   gt_assert(incol->pathmatches);
 
@@ -160,7 +160,7 @@ static void spse_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
   SpseLimdfsstate *col = (SpseLimdfsstate *) aliascol;
   const SpseLimdfsconstinfo *mti = (const SpseLimdfsconstinfo*) mt;
 
-  gt_assert(ISNOTSPECIAL(currentchar));
+  gt_assert(GT_ISNOTSPECIAL(currentchar));
   gt_assert(currentdepth > 0);
   col->pathmatches = setpathmatch(mti->seedbitvector,
                                   mti->pattern,

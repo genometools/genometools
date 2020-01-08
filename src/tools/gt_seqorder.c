@@ -189,7 +189,7 @@ static int seqorder_str_compare_lex(const void *v1, const void *v2, void *data)
 
   desc1 = gt_encseq_description((GtEncseq*) data, &desclen1, n1);
   desc2 = gt_encseq_description((GtEncseq*) data, &desclen2, n2);
-  rval = strncmp(desc1, desc2, MIN(desclen1, desclen2) * sizeof *desc1);
+  rval = strncmp(desc1, desc2, GT_MIN(desclen1, desclen2) * sizeof *desc1);
   if (rval == 0)
   {
     if (desclen1 > desclen2)
@@ -216,10 +216,10 @@ static int seqorder_str_compare_num(const void *v1, const void *v2, void *data)
   char buf[BUFSIZ];
   desc1 = gt_encseq_description((GtEncseq*) data, &desclen1, n1);
   desc2 = gt_encseq_description((GtEncseq*) data, &desclen2, n2);
-  (void) strncpy(buf, desc1, MIN(BUFSIZ, desclen1) * sizeof (char));
+  (void) strncpy(buf, desc1, GT_MIN(BUFSIZ, desclen1) * sizeof (char));
   buf[desclen1] = '\0';
   arval = gt_parse_uword(&anum, buf);
-  (void) strncpy(buf, desc2, MIN(BUFSIZ, desclen2) * sizeof (char));
+  (void) strncpy(buf, desc2, GT_MIN(BUFSIZ, desclen2) * sizeof (char));
   buf[desclen2] = '\0';
   brval = gt_parse_uword(&bnum, buf);
   if (arval == 0 && brval == 0)

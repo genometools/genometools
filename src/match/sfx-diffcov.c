@@ -1050,7 +1050,8 @@ static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
 #define SETMAXCOUNT(COMP)\
     if (mainsfxstrategy->COMP >= 1UL)\
     {\
-      sfxstrategy->COMP = MAX(2UL,mainsfxstrategy->COMP * sampledproportion);\
+      sfxstrategy->COMP = GT_MAX(2UL,\
+                                 mainsfxstrategy->COMP * sampledproportion);\
     }
     SETMAXCOUNT(maxcountingsort);
     SETMAXCOUNT(maxbltriesort);
@@ -1120,7 +1121,7 @@ static void dc_fill_samplelcpvalues(bool cmpcharbychar,GtDifferencecover *dcov)
                                                dcov->readmode);
               cc2 = gt_encseq_get_encoded_char(dcov->encseq,start1+lcpinherit,
                                                dcov->readmode);
-              if (ISSPECIAL(cc1) || ISSPECIAL(cc2) || cc1 != cc2)
+              if (GT_ISSPECIAL(cc1) || GT_ISSPECIAL(cc2) || cc1 != cc2)
               {
                 break;
               }
@@ -1193,7 +1194,8 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   esr1 = gt_encseq_create_reader_with_readmode(dcov->encseq,dcov->readmode,0);
-  dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
+  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,
+                                                   GT_DIV2(dcov->maxcode)));
   dcov->filltable = gt_filllargestchartable(dcov->numofchars,
                                             dcov->prefixlength);
   gt_assert(dcov->bcktab != NULL);
@@ -1479,7 +1481,8 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
   dcov->bcktab = NULL;
   dcov->multimappower = NULL;
   dcov->maxcode = 0;
-  dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
+  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,
+                                            GT_DIV2(dcov->maxcode)));
   dcov->filltable = NULL;
   dcov->leftborder = NULL;
   diffptr = dcov->diffvalues;
@@ -1492,7 +1495,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
       if (pos < dcov->totallength)
       {
         cc = gt_encseq_get_encoded_char(dcov->encseq,pos,dcov->readmode);
-        if (ISSPECIAL(cc))
+        if (GT_ISSPECIAL(cc))
         {
           fullspecials++;
         }
@@ -1532,7 +1535,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
       if (pos < dcov->totallength)
       {
         cc = gt_encseq_get_encoded_char(dcov->encseq,pos,dcov->readmode);
-        if (ISNOTSPECIAL(cc))
+        if (GT_ISNOTSPECIAL(cc))
         {
           dc_suffixptrset(dcov,posinserted,pos);
           posinserted++;
@@ -1751,8 +1754,8 @@ static GtUword gt_differencecover_eval_lcp(const GtLcptrace *lcptrace,
     gt_assert(dcov->rmq != NULL);
     return (GtUword)
             gt_rmq_find_min_value(dcov->rmq,
-                                  MIN(lcptrace->idx1,lcptrace->idx2)+1,
-                                  MAX(lcptrace->idx1,lcptrace->idx2))
+                                  GT_MIN(lcptrace->idx1,lcptrace->idx2)+1,
+                                  GT_MAX(lcptrace->idx1,lcptrace->idx2))
              + lcptrace->offset;
   }
   return (GtUword) lcptrace->offset;
@@ -2047,13 +2050,13 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (QSORTNAME(Datatype) data,
     pn = current.startindex + current.len;
     gt_assert(pa >= current.startindex);
     gt_assert(pb >= pa);
-    s = MIN ((GtUword) (pa - current.startindex),
+    s = GT_MIN ((GtUword) (pa - current.startindex),
              (GtUword) (pb - pa));
     gt_assert(pb >= s);
     GT_QSORT_ARR_VECSWAP (data, current.startindex, pb - s, s);
     gt_assert(pd >= pc);
     gt_assert(pn > pd);
-    s = MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
+    s = GT_MIN ((GtUword) (pd - pc), (GtUword) (pn - pd - 1));
     gt_assert(pn > s);
     GT_QSORT_ARR_VECSWAP (data, pb, pn - s, s);
     gt_assert(pb >= pa);

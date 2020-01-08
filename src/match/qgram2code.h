@@ -34,7 +34,7 @@ static inline unsigned int qgram2code(GtCodetype *code,
   for (i=(int) (qvalue-1); i>=0; i--)
   {
     a = qgram[i];
-    if (ISSPECIAL(a))
+    if (GT_ISSPECIAL(a))
     {
       return (unsigned int) i;
     }

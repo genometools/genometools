@@ -42,7 +42,7 @@ GtAffineAlignEdge gt_linearalign_affinegapcost_set_edge(GtWord Rdist,
                                                         GtWord Ddist,
                                                         GtWord Idist)
 {
-  GtUword minvalue = MIN3(Rdist, Ddist, Idist);
+  GtUword minvalue = GT_MIN3(Rdist, Ddist, Idist);
 
   if (Rdist == minvalue)
     return Affine_R;
@@ -127,7 +127,7 @@ static void firstAtabRtabcolumn(GtAffinealignDPentry *Atabcolumn,
     ddist = add_safe_max(Atabcolumn[rowindex-1].Dvalue, gap_extension);
     idist = add_safe_max(Atabcolumn[rowindex-1].Dvalue,
                          gap_opening + gap_extension);
-    Atabcolumn[rowindex].Dvalue = MIN3(rdist, ddist, idist);
+    Atabcolumn[rowindex].Dvalue = GT_MIN3(rdist, ddist, idist);
     Atabcolumn[rowindex].Ivalue = GT_WORD_MAX;
 
     Atabcolumn[rowindex].Redge = Affine_X;
@@ -171,7 +171,7 @@ static void nextAtabRtabcolumn(GtAffinealignDPentry *Atabcolumn,
   ddist = add_safe_max(Atabcolumn[0].Dvalue, gap_extension + gap_opening);
   idist = add_safe_max(Atabcolumn[0].Ivalue, gap_extension);
 
-  minvalue = MIN3(rdist, ddist, idist);
+  minvalue = GT_MIN3(rdist, ddist, idist);
   Atabcolumn[0].Ivalue = minvalue;
   Atabcolumn[0].Rvalue = GT_WORD_MAX;
   Atabcolumn[0].Dvalue = GT_WORD_MAX;
@@ -204,7 +204,7 @@ static void nextAtabRtabcolumn(GtAffinealignDPentry *Atabcolumn,
     ddist = add_safe_max(northwestAffinealignDPentry.Dvalue, rcost);
     idist = add_safe_max(northwestAffinealignDPentry.Ivalue, rcost);
 
-    minvalue = MIN3(rdist, ddist, idist);
+    minvalue = GT_MIN3(rdist, ddist, idist);
     Atabcolumn[rowindex].Rvalue = minvalue;
     Atabcolumn[rowindex].Redge = gt_linearalign_affinegapcost_set_edge(rdist,
                                                                        ddist,
@@ -216,7 +216,7 @@ static void nextAtabRtabcolumn(GtAffinealignDPentry *Atabcolumn,
     idist = add_safe_max(Atabcolumn[rowindex-1].Ivalue,
                          gap_extension + gap_opening);
 
-    minvalue = MIN3(rdist, ddist, idist);
+    minvalue = GT_MIN3(rdist, ddist, idist);
     Atabcolumn[rowindex].Dvalue = minvalue;
     Atabcolumn[rowindex].Dedge = gt_linearalign_affinegapcost_set_edge(rdist,
                                                                        ddist,
@@ -228,7 +228,7 @@ static void nextAtabRtabcolumn(GtAffinealignDPentry *Atabcolumn,
                          gap_extension + gap_opening);
     idist = add_safe_max(westAffinealignDPentry.Ivalue, gap_extension);
 
-    minvalue = MIN3(rdist, ddist, idist);
+    minvalue = GT_MIN3(rdist, ddist, idist);
     Atabcolumn[rowindex].Ivalue = minvalue;
     Atabcolumn[rowindex].Iedge = gt_linearalign_affinegapcost_set_edge(rdist,
                                                                        ddist,
@@ -279,7 +279,7 @@ static GtUword evaluateallAtabRtabcolumns(GtAffinealignDPentry *Atabcolumn,
                        colindex);
   }
 
-  return MIN3(Atabcolumn[ulen].Rvalue,
+  return GT_MIN3(Atabcolumn[ulen].Rvalue,
               Atabcolumn[ulen].Dvalue,
               Atabcolumn[ulen].Ivalue);
 }
@@ -848,7 +848,7 @@ static void nextAStabcolumn(GtAffinealignDPentry *Atabcolumn,
   Atabcolumn[0].Rvalue = GT_WORD_MIN;
   Atabcolumn[0].Dvalue = GT_WORD_MIN;
   Atabcolumn[0].Ivalue = (gap_opening + gap_extension);
-  temp = MAX3(Atabcolumn[0].Rvalue,
+  temp = GT_MAX3(Atabcolumn[0].Rvalue,
               Atabcolumn[0].Dvalue,
               Atabcolumn[0].Ivalue);
   Atabcolumn[0].totalvalue = ((temp > 0)? temp : 0);
@@ -893,7 +893,7 @@ static void nextAStabcolumn(GtAffinealignDPentry *Atabcolumn,
     val1 = add_safe_min(Atabcolumn[rowindex-1].Dvalue, gap_extension);
     val2 = add_safe_min(Atabcolumn[rowindex-1].totalvalue,
                        (gap_opening+gap_extension));
-    Atabcolumn[rowindex].Dvalue = MAX(val1,val2);
+    Atabcolumn[rowindex].Dvalue = GT_MAX(val1,val2);
     Starttabcolumn[rowindex].Dstart =
     setStarttabentry(Atabcolumn[rowindex].Dvalue, &Atabcolumn[rowindex-1],
                      &Starttabcolumn[rowindex-1], replacement, gap_opening,
@@ -903,13 +903,13 @@ static void nextAStabcolumn(GtAffinealignDPentry *Atabcolumn,
     val1=(add_safe_min(westAffinealignDPentry.Ivalue,gap_extension));
     val2=(add_safe_min(westAffinealignDPentry.totalvalue,
                               gap_opening+gap_extension));
-    Atabcolumn[rowindex].Ivalue = MAX(val1,val2);
+    Atabcolumn[rowindex].Ivalue = GT_MAX(val1,val2);
     Starttabcolumn[rowindex].Istart =
     setStarttabentry(Atabcolumn[rowindex].Ivalue, &westAffinealignDPentry, &Swe,
                      replacement, gap_opening, gap_extension, Affine_I);
 
     /*calculate totalvalue*/
-    temp = MAX3(Atabcolumn[rowindex].Rvalue,
+    temp = GT_MAX3(Atabcolumn[rowindex].Rvalue,
                 Atabcolumn[rowindex].Dvalue,
                 Atabcolumn[rowindex].Ivalue);
     Atabcolumn[rowindex].totalvalue = temp > 0 ? temp : 0;

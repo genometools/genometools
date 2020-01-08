@@ -295,7 +295,7 @@ static bool gt_seqcorrect_bucketkey_kmersize(GtSeqcorrectArguments *arguments,
   else
   {
     gt_assert(arguments->correction_kmersize > 1U);
-    *kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
+    *kmersize = GT_MIN((unsigned int) GT_UNITSIN2BITENC,
         arguments->correction_kmersize - 1);
   }
   gt_log_log("bucketkey kmersize=%u", *kmersize);

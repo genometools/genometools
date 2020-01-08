@@ -586,7 +586,7 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
               (mismatch_or_deletion && uidx == ufrompos)) {
             (*buffer)[bufidx++] =
               (elem == (GtBitsequence) editscript->del - 1) ?
-              (GtUchar) WILDCARD :
+              (GtUchar) GT_WILDCARD :
               (GtUchar) elem;
             if (bufidx == *bufsize) {
               *bufsize += GT_MULT2(start + utopos - uidx);
@@ -660,7 +660,7 @@ GtUword gt_editscript_get_sub_sequence_v(const GtEditscript *editscript,
           if (vidx >= vfrompos) {
             buffer[bufidx++] =
               (elem == (GtBitsequence) editscript->del - 1) ?
-              (GtUchar) WILDCARD :
+              (GtUchar) GT_WILDCARD :
               (GtUchar) elem;
           }
           vidx++;
@@ -795,7 +795,7 @@ void gt_editscript_show(const GtEditscript *editscript, GtAlphabet *alphabet)
             break;
           }
           elem = (elem == (GtBitsequence) editscript->del - 1) ?
-            (GtBitsequence) WILDCARD :
+            (GtBitsequence) GT_WILDCARD :
             elem;
           printf("%c|", (int) gt_alphabet_pretty_symbol(alphabet,
                                                         (uint32_t) elem));
@@ -817,7 +817,7 @@ void gt_editscript_show(const GtEditscript *editscript, GtAlphabet *alphabet)
           }
           if (elem < (GtBitsequence) editscript->del) {
             elem = (elem == (GtBitsequence) editscript->del - 1) ?
-              (GtBitsequence) WILDCARD :
+              (GtBitsequence) GT_WILDCARD :
               elem;
             printf("%c|", (int) gt_alphabet_pretty_symbol(alphabet,
                                                           (uint32_t) elem));
@@ -881,8 +881,8 @@ void gt_editscript_builder_add_mismatch(GtEditscriptBuilder *es_builder,
   GtEditscript *es;
   gt_assert(es_builder != NULL);
   es = es_builder->es;
-  gt_assert(c <= (GtUchar) es->del || c == (GtUchar) WILDCARD);
-  if (c == (GtUchar) WILDCARD) {
+  gt_assert(c <= (GtUchar) es->del || c == (GtUchar) GT_WILDCARD);
+  if (c == (GtUchar) GT_WILDCARD) {
     c = (GtUchar) es->del - 1;
   }
   if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es)) {
@@ -904,8 +904,8 @@ void gt_editscript_builder_add_insertion(GtEditscriptBuilder *es_builder,
   gt_assert(es_builder);
   es = es_builder->es;
 
-  gt_assert(c < (GtUchar) es->del || c == (GtUchar) WILDCARD);
-  if (c == (GtUchar) WILDCARD) {
+  gt_assert(c < (GtUchar) es->del || c == (GtUchar) GT_WILDCARD);
+  if (c == (GtUchar) GT_WILDCARD) {
     c = (GtUchar) es->del - 1;
   }
   if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_INS_SYM(es)) {

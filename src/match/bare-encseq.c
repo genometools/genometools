@@ -67,7 +67,7 @@ GtBareEncseq *gt_bare_encseq_new(GtUchar *sequence,GtUword len,
   for (readptr = sequence; readptr < sequence + len; readptr++)
   {
     GtUchar cc = *readptr;
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       if (lastspecialrange_length == 0)
       {
@@ -130,7 +130,7 @@ GtBareEncseq *gt_bare_encseq_parse_new(GtUchar *filecontents,size_t numofbytes,
           srptr->start = (GtUword) (writeptr - filecontents);
         }
         lastspecialrange_length++;
-        *writeptr++ = SEPARATOR;
+        *writeptr++ = GT_SEPARATOR;
         bare_encseq->specialcharacters++;
       } else
       {
@@ -148,13 +148,13 @@ GtBareEncseq *gt_bare_encseq_parse_new(GtUchar *filecontents,size_t numofbytes,
         if (!isspace(*readptr))
         {
           GtUchar cc = smap[*readptr];
-          if (cc == UNDEFCHAR)
+          if (cc == GT_UNDEFCHAR)
           {
             gt_error_set(err,"illegal input characters %c\n",*readptr);
             haserr = true;
             break;
           }
-          if (ISSPECIAL(cc))
+          if (GT_ISSPECIAL(cc))
           {
             if (lastspecialrange_length == 0)
             {
@@ -310,7 +310,7 @@ void bare_encseq_convert(GtBareEncseq *bare_encseq,bool forward,bool direct)
          leftptr < bare_encseq->sequence + bare_encseq->totallength;
          leftptr++)
     {
-      if (ISNOTSPECIAL(*leftptr))
+      if (GT_ISNOTSPECIAL(*leftptr))
       {
         *leftptr = GT_COMPLEMENTBASE(*leftptr);
       }
@@ -334,9 +334,9 @@ void bare_encseq_convert(GtBareEncseq *bare_encseq,bool forward,bool direct)
            leftptr <= rightptr; leftptr++, rightptr--)
       {
         GtUchar tmp = *leftptr;
-        *leftptr = ISSPECIAL(*rightptr) ? *rightptr
+        *leftptr = GT_ISSPECIAL(*rightptr) ? *rightptr
                                         : GT_COMPLEMENTBASE(*rightptr);
-        *rightptr = ISSPECIAL(tmp) ? tmp
+        *rightptr = GT_ISSPECIAL(tmp) ? tmp
                                    : GT_COMPLEMENTBASE(tmp);
       }
     }

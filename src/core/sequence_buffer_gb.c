@@ -265,7 +265,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     /* terminators may occur in any line */
     if (!had_err && strcmp(gt_str_get(sbe->keywordbuffer),
                            GB_ENTRY_TERMINATOR) == 0) {
-      pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+      pvt->outbuf[currentoutpos++] = (GtUchar) GT_SEPARATOR;
       currentfileadd++;
       pvt->lastspeciallength++;
       if (!sbe->description_set && pvt->descptr)
@@ -423,7 +423,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     }
     pvt->linenum++;
   }
-  pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+  pvt->nextfree = GT_MIN(currentoutpos, OUTBUFSIZE);
   return had_err;
 }
 

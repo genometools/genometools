@@ -62,7 +62,7 @@ GtUword gt_fmfindtextpos (const Fmindex *fm,GtUword idx)
 
   while ((idx & fm->markdistminus1) != 0)
   {
-    if (idx == fm->longestsuffixpos || ISSPECIAL(cc = ACCESSBWTTEXT(idx)))
+    if (idx == fm->longestsuffixpos || GT_ISSPECIAL(cc = ACCESSBWTTEXT(idx)))
     {
       GtUword smallestgeq
                = searchsmallestgeq(fm->specpos.spaceGtPairBwtidx,

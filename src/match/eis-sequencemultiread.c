@@ -200,7 +200,7 @@ seqReaderSetRead(void *src, void *dest, size_t len)
       /* pos is in backlog */
       GtUword subLen, charsWritten;
 
-      subLen = MIN(elemsLeft, readerSet->backlogStartPos - pos
+      subLen = GT_MIN(elemsLeft, readerSet->backlogStartPos - pos
                               + readerSet->backlogLen);
       gt_assert(state->xltor.translateData == NULL);
       /*
@@ -239,7 +239,7 @@ seqReaderSetFindMinOpenRequestBySet(SeqReaderSet *readerSet, int setSpec)
   gt_assert(readerSet);
   for (i = 0; i < readerSet->numConsumers; ++i)
     if (readerSet->consumers[i].tag & setSpec)
-      min = MIN(min, readerSet->consumers[i].nextReadPos);
+      min = GT_MIN(min, readerSet->consumers[i].nextReadPos);
   return min;
 }
 
@@ -251,7 +251,7 @@ seqReaderSetFindMinOpenRequestByVal(SeqReaderSet *readerSet, int tagVal)
   gt_assert(readerSet);
   for (i = 0; i < readerSet->numConsumers; ++i)
     if (readerSet->consumers[i].tag == tagVal)
-      min = MIN(min, readerSet->consumers[i].nextReadPos);
+      min = GT_MIN(min, readerSet->consumers[i].nextReadPos);
   return min;
 }
 #endif
@@ -265,7 +265,7 @@ seqReaderSetFindMinOpenRequest(SeqReaderSet *readerSet)
   p = readerSet->consumerList;
   while (p)
   {
-    min = MIN(min, seqReaderSetGetConsumerNextPos(p));
+    min = GT_MIN(min, seqReaderSetGetConsumerNextPos(p));
     p = p->next;
   }
   return min;
@@ -310,7 +310,7 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
     readerSet->backlogStartPos = requestMinPos;
   }
   {
-    GtUword copyStartPos = MAX(requestMinPos, requestStart);
+    GtUword copyStartPos = GT_MAX(requestMinPos, requestStart);
     size_t copyLen = requestLen - copyStartPos + requestStart;
     /* 3. extend backlog to also accept all invalidated values still needed */
     if (copyLen)

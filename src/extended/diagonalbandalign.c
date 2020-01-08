@@ -122,8 +122,8 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
   GtUword **EDtabcolumn, distance = GT_UWORD_MAX;
   GtScoreHandler *scorehandler;
 
-   if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+   if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false);
   }
@@ -160,8 +160,8 @@ GtUword gt_diagonalbandalignment_in_square_space_generic(GtLinspaceManagement
 
   gt_assert(align && scorehandler);
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false);
   }
@@ -301,8 +301,8 @@ GT_UNUSED  static void dtab_in_square_space(GtLinspaceManagement *spacemanager,
   GtUword **EDtabcolumn;
   gt_assert(Dtab && scorehandler && spacemanager);
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false);
   }
@@ -338,8 +338,8 @@ static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
 
   distance = GT_UWORD_MAX;
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     return GT_UWORD_MAX;
   }
@@ -509,8 +509,8 @@ static GtUword evaluateallDBtabcolumns(GtLinspaceManagement *spacemanager,
   GtWord diag;
   bool last_row = false;
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false);
   }
@@ -735,7 +735,7 @@ static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
     if (diag + ((GtWord)ulen-(GtWord)vlen) > 0)
     {
       dtemp = Diagcolumn[cpoint];
-      new_left = MAX((GtWord)left_dist-diag+1,
+      new_left = GT_MAX((GtWord)left_dist-diag+1,
                     -((GtWord)ulen-((GtWord)Diagcolumn[cpoint].currentrowindex+1
                     -(GtWord)rowoffset)));
       new_right = 0;
@@ -752,7 +752,7 @@ static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
     else
     {
       new_left = -1;
-      new_right =  MIN((GtWord)right_dist-((GtWord)diag)-1,
+      new_right =  GT_MIN((GtWord)right_dist-((GtWord)diag)-1,
                       ((GtWord)vlen-(GtWord)cpoint-1));
       new_ulen = ulen - (Diagcolumn[cpoint].currentrowindex-rowoffset);
       evaluateDBcrosspoints(spacemanager,Diagcolumn+cpoint+1,scorehandler,
@@ -783,7 +783,7 @@ static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
     else if (Diagcolumn[prevcpoint].last_type == Linear_D)
     {
       new_left = -1;
-      new_right = MIN(right_dist-((GtWord)diag)-1,
+      new_right = GT_MIN(right_dist-((GtWord)diag)-1,
                      (GtWord)prevcpoint-(GtWord)cpoint-1);
       new_ulen = Diagcolumn[prevcpoint].currentrowindex-
                  Diagcolumn[cpoint].currentrowindex-1;
@@ -799,7 +799,7 @@ static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
       dtemp = Diagcolumn[cpoint];
       new_ulen = Diagcolumn[prevcpoint].currentrowindex-
                  Diagcolumn[cpoint].currentrowindex-1;
-      new_left = MAX(left_dist-diag+1,-new_ulen);
+      new_left = GT_MAX(left_dist-diag+1,-new_ulen);
       new_right = 0;
 
       evaluateDBcrosspoints(spacemanager,Diagcolumn+cpoint,scorehandler,
@@ -824,8 +824,8 @@ static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
     if (Diagcolumn[cpoint].last_type == Linear_D)
     {
       new_ulen = Diagcolumn[cpoint].currentrowindex-ustart-1;
-      new_left =  MAX(diag, -new_ulen);
-      new_right = MIN(right_dist, (GtWord)cpoint);
+      new_left =  GT_MAX(diag, -new_ulen);
+      new_right = GT_MIN(right_dist, (GtWord)cpoint);
 
       evaluateDBcrosspoints(spacemanager, Diagcolumn, scorehandler,
                             edge, rowoffset, coloffset,
@@ -836,9 +836,9 @@ static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
     }
     else if (Diagcolumn[cpoint].last_type == Linear_I)
     {
-      new_left = MAX(left_dist,
+      new_left = GT_MAX(left_dist,
                  -((GtWord)Diagcolumn[cpoint].currentrowindex-(GtWord)ustart));
-      new_right = MIN((GtWord)cpoint-1, diag);
+      new_right = GT_MIN((GtWord)cpoint-1, diag);
       evaluateDBcrosspoints(spacemanager, Diagcolumn, scorehandler,
                             edge, rowoffset, coloffset, useq, ustart,
                             Diagcolumn[cpoint].currentrowindex-ustart,
@@ -870,8 +870,8 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
 
   gt_assert(align && spacemanager && scorehandler);
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false); /* no global alignment */
   }
@@ -901,7 +901,7 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
     return;
   }
 
-  gt_linspace_management_check(spacemanager, MIN(right_dist-left_dist,ulen),
+  gt_linspace_management_check(spacemanager, GT_MIN(right_dist-left_dist,ulen),
                                vlen,
                                sizeof (*EDtabcolumn),
                                sizeof (*Rtabcolumn),
@@ -937,8 +937,8 @@ void gt_diagonalbandalign_compute_generic(GtLinspaceManagement *spacemanager,
   gt_assert(useq && vseq && align && spacemanager && scorehandler);
 
   /* set new bounds, if left_dist or right_dist is out of sequence */
-  left_dist = MAX(-(GtWord) ulen, left_dist);
-  right_dist = MIN((GtWord) vlen, right_dist);
+  left_dist = GT_MAX(-(GtWord) ulen, left_dist);
+  right_dist = GT_MIN((GtWord) vlen, right_dist);
 
   gt_alignment_set_seqs(align,useq+ustart, ulen, vseq+vstart, vlen);
   gt_calc_diagonalbandalign(spacemanager, scorehandler, align,

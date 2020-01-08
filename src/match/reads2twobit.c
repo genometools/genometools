@@ -445,8 +445,10 @@ static void gt_reads2twobit_switch_to_varlen_mode(
   gt_assert(next_seppos + state->seqlen == state->current.globalpos);
   gt_reads2twobit_append_seppos(state, state->current.globalpos - 1UL);
   gt_assert(state->current.seppos_nextfree == state->current.nofseqs);
-  state->current.seqlen_max = MAX(state->current.seqlen_first, state->seqlen);
-  state->current.seqlen_min = MIN(state->current.seqlen_first, state->seqlen);
+  state->current.seqlen_max = GT_MAX(state->current.seqlen_first,
+                                     state->seqlen);
+  state->current.seqlen_min = GT_MIN(state->current.seqlen_first,
+                                     state->seqlen);
   state->current.seqlen_first = 0;
 }
 
@@ -2329,6 +2331,6 @@ void gt_reads2twobit_enable_descs(GtReads2Twobit *r2t, bool clipped,
   }
   else
   {
-    r2t->descsfp = gt_xtmpfp_generic(NULL, TMPFP_AUTOREMOVE);
+    r2t->descsfp = gt_xtmpfp_generic(NULL, GT_TMPFP_AUTOREMOVE);
   }
 }

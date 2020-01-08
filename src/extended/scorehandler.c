@@ -110,7 +110,7 @@ GtWord gt_scorehandler_get_replacement(const GtScoreHandler *scorehandler,
   {
     if (scorehandler->mappedsequence)
     {
-      return ISSPECIAL(a) || ISSPECIAL(b) || a != b
+      return GT_ISSPECIAL(a) || GT_ISSPECIAL(b) || a != b
                ? scorehandler->mismatchscore
                : scorehandler->matchscore;
     }
@@ -134,9 +134,9 @@ GtScoreHandler *gt_scorehandler2costhandler(const GtScoreHandler *scorehandler)
   if (scorehandler->scorematrix == NULL)
   {
     GtWord matchscore, mismatchscore, gap_extension, gap_opening,
-           maxscore = MAX(MAX(GT_DIV2(scorehandler->matchscore+1),
+           maxscore = GT_MAX(GT_MAX(GT_DIV2(scorehandler->matchscore+1),
                          GT_DIV2(scorehandler->mismatchscore+1)),
-                     MAX(1 + scorehandler->gap_extension,0));
+                     GT_MAX(1 + scorehandler->gap_extension,0));
 
     matchscore = 2 * maxscore - scorehandler->matchscore;
     mismatchscore = 2 * maxscore - scorehandler->mismatchscore;
@@ -171,7 +171,7 @@ GtScoreHandler *gt_scorehandler2costhandler(const GtScoreHandler *scorehandler)
         }
       }
     }
-    maxscore = MAX(GT_DIV2(maxscore+1), 1 + scorehandler->gap_extension);
+    maxscore = GT_MAX(GT_DIV2(maxscore+1), 1 + scorehandler->gap_extension);
     for (i = 0; i < dim; i++)
     {
       for (j = 0; j < dim; j++)

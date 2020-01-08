@@ -372,12 +372,12 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
               /* store TSD length */
               boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
 
-              max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
-              min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
+              max = GT_MAX(oldleftLTR_5, boundaries->leftLTR_5);
+              min = GT_MIN(oldleftLTR_5, boundaries->leftLTR_5);
               difffromoldboundary1 = max - min;
 
-              max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
-              min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
+              max = GT_MAX(oldrightLTR_3, boundaries->rightLTR_3);
+              min = GT_MIN(oldrightLTR_3, boundaries->rightLTR_3);
               difffromoldboundary2 = max - min;
 
               hitcounter++;
@@ -387,11 +387,11 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
                    difffromnewboundary2;
 
               /* test if hit is nearer to old boundaries than previous hit */
-              max = MAX(oldleftLTR_5, motifpos1 - back);
-              min = MIN(oldleftLTR_5, motifpos1 - back);
+              max = GT_MAX(oldleftLTR_5, motifpos1 - back);
+              min = GT_MIN(oldleftLTR_5, motifpos1 - back);
               difffromnewboundary1 = max - min;
-              max = MAX(oldrightLTR_3, motifpos2 + 1 + forward);
-              min = MIN(oldrightLTR_3, motifpos2 + 1 + forward);
+              max = GT_MAX(oldrightLTR_3, motifpos2 + 1 + forward);
+              min = GT_MIN(oldrightLTR_3, motifpos2 + 1 + forward);
               difffromnewboundary2 = max - min;
 
               if (difffromnewboundary1 + difffromnewboundary2 <
@@ -462,16 +462,16 @@ static void searchformotifonlyborders(const GtLTRharvestStream *lo,
          motifmismatches_frombestmatch = tmp_mm.left;
          boundaries->leftLTR_5 = idx;
          motif1 = true;
-         max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
-         min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
+         max = GT_MAX(oldleftLTR_5, boundaries->leftLTR_5);
+         min = GT_MIN(oldleftLTR_5, boundaries->leftLTR_5);
          difffromoldboundary = max - min;
        } else /* next hit */
        {
          GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         maxval = MAX(oldleftLTR_5, idx);
-         minval = MIN(oldleftLTR_5, idx);
+         maxval = GT_MAX(oldleftLTR_5, idx);
+         minval = GT_MIN(oldleftLTR_5, idx);
          difffromnewboundary = maxval - minval;
 
          if (difffromnewboundary < difffromoldboundary)
@@ -509,16 +509,16 @@ static void searchformotifonlyborders(const GtLTRharvestStream *lo,
          motifmismatches_frombestmatch = tmp_mm.right;
          boundaries->rightLTR_3 = idx;
          motif2 = true;
-         max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
-         min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
+         max = GT_MAX(oldrightLTR_3, boundaries->rightLTR_3);
+         min = GT_MIN(oldrightLTR_3, boundaries->rightLTR_3);
          difffromoldboundary = max - min;
        } else /* next hit */
        {
          GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         maxval = MAX(oldrightLTR_3, idx);
-         minval = MIN(oldrightLTR_3, idx);
+         maxval = GT_MAX(oldrightLTR_3, idx);
+         minval = GT_MIN(oldrightLTR_3, idx);
          difffromnewboundary = maxval - minval;
          if (difffromnewboundary < difffromoldboundary)
          {
@@ -615,16 +615,16 @@ static void searchformotifonlyinside(const GtLTRharvestStream *lo,
          motifmismatches_frombestmatch = tmp_mm.left;
          boundaries->leftLTR_3 = idx;
          motif1 = true;
-         maxval = MAX(oldleftLTR_3, boundaries->leftLTR_3);
-         minval = MIN(oldleftLTR_3, boundaries->leftLTR_3);
+         maxval = GT_MAX(oldleftLTR_3, boundaries->leftLTR_3);
+         minval = GT_MIN(oldleftLTR_3, boundaries->leftLTR_3);
          difffromoldboundary = maxval - minval;
        } else /* next hit */
        {
          GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         maxval = MAX(oldleftLTR_3, idx);
-         minval = MIN(oldleftLTR_3, idx);
+         maxval = GT_MAX(oldleftLTR_3, idx);
+         minval = GT_MIN(oldleftLTR_3, idx);
          difffromnewboundary = maxval - minval;
 
          if (difffromnewboundary < difffromoldboundary)
@@ -663,16 +663,16 @@ static void searchformotifonlyinside(const GtLTRharvestStream *lo,
          motifmismatches_frombestmatch = tmp_mm.right;
          boundaries->rightLTR_5 = idx;
          motif2 = true;
-         maxval = MAX(oldrightLTR_5, boundaries->rightLTR_5);
-         minval = MIN(oldrightLTR_5, boundaries->rightLTR_5);
+         maxval = GT_MAX(oldrightLTR_5, boundaries->rightLTR_5);
+         minval = GT_MIN(oldrightLTR_5, boundaries->rightLTR_5);
          difffromoldboundary = maxval - minval;
        } else /* next hit */
        {
          GtUword maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         maxval = MAX(oldrightLTR_5, idx);
-         minval = MIN(oldrightLTR_5, idx);
+         maxval = GT_MAX(oldrightLTR_5, idx);
+         minval = GT_MIN(oldrightLTR_5, idx);
          difffromnewboundary = maxval - minval;
 
          if (difffromnewboundary < difffromoldboundary)
@@ -1124,7 +1124,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     edist = greedyunitedist(frontresource,sa_useq,sa_vseq);
 
     /* determine similarity */
-    boundaries.similarity = 100.0 * (1.0 - (double) edist/MAX(ulen,vlen));
+    boundaries.similarity = 100.0 * (1.0 - (double) edist/GT_MAX(ulen,vlen));
 
     if (!gt_double_smaller_double(boundaries.similarity,
                                   lo->similaritythreshold))
@@ -1221,7 +1221,7 @@ static void gt_removeoverlapswithlowersimilarity(GtArrayLTRboundaries
       /* due to sortedness of the array, the left border shouldn't change... */
       gt_assert(refrng.start <= boundaries->leftLTR_5);
       /* ...so only update the right border */
-      refrng.end = MAX(boundaries->rightLTR_3, refrng.end);
+      refrng.end = GT_MAX(boundaries->rightLTR_3, refrng.end);
       if (nooverlapallowed) {
         oldboundaries->skipped = true;
         boundaries->skipped = true;
@@ -1760,7 +1760,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                "results may be duplicated");
   }
   max_contiglength = gt_encseq_max_seq_length(ltrh_stream->encseq);
-  ltrh_stream->repeatinfo.dmax = MIN(maxdistance,max_contiglength);
+  ltrh_stream->repeatinfo.dmax = GT_MIN(maxdistance,max_contiglength);
   ltrh_stream->repeatinfo.dmin = mindistance;
   ltrh_stream->repeatinfo.lmin = minltrlength;
   ltrh_stream->repeatinfo.lmax = maxltrlength;

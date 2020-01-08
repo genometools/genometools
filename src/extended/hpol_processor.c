@@ -682,12 +682,12 @@ static bool gt_hpol_processor_adjust_hlen_of_a_segment(GtAlignedSegment *as,
         if (output_stats)
         {
           gt_hpol_processor_output_stats(as, r_hstart, coverage, r_hlen, r_supp,
-              s_hlen, a_hlen, a_supp, c, q_ave, MIN(s_free, hlen_diff),
+              s_hlen, a_hlen, a_supp, c, q_ave, GT_MIN(s_free, hlen_diff),
               outfp_stats);
         }
         gt_aligned_segment_seq_set_edited(as);
         gt_hpol_processor_enlarge_hpol(s, q, left, right,
-            MIN(s_free, hlen_diff), c, (char)(q_sum / s_hlen));
+            GT_MIN(s_free, hlen_diff), c, (char)(q_sum / s_hlen));
         edited = true;
       }
     }
@@ -784,7 +784,7 @@ static void gt_hpol_processor_determine_alternative_consensus(
     s = gt_aligned_segment_seq(as);
     s_hlen = gt_hpol_processor_determine_hlen_forwards(s, NULL, left, right, c,
         NULL, NULL);
-    occ[MIN(s_hlen, s_hlen_max)]++;
+    occ[GT_MIN(s_hlen, s_hlen_max)]++;
   }
   *r_hlen_support = occ[r_hlen];
   *c_s_hlen = 0;

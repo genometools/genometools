@@ -184,31 +184,31 @@ int gt_safearith_unit_test(GtError *err)
   {
     /* This is not always true, e.g. on PPC and ARM!
        cf. http://www.network-theory.co.uk/docs/gccintro/gccintro_71.html
-    gt_ensure(__MIN(char) == -128);
-    gt_ensure(__MAX(char) == 127); */
-    gt_ensure(__MIN(unsigned char) == 0);
-    gt_ensure(__MAX(unsigned char) == 255);
+    gt_ensure(GT_SAFE_MIN(char) == -128);
+    gt_ensure(GT_SAFE_MAX(char) == 127); */
+    gt_ensure(GT_SAFE_MIN(unsigned char) == 0);
+    gt_ensure(GT_SAFE_MAX(unsigned char) == 255);
 
-    gt_ensure(__MIN(short) == SHRT_MIN);
-    gt_ensure(__MAX(short) == SHRT_MAX);
-    gt_ensure(__MIN(unsigned short) == 0);
-    gt_ensure(__MAX(unsigned short) == USHRT_MAX);
+    gt_ensure(GT_SAFE_MIN(short) == SHRT_MIN);
+    gt_ensure(GT_SAFE_MAX(short) == SHRT_MAX);
+    gt_ensure(GT_SAFE_MIN(unsigned short) == 0);
+    gt_ensure(GT_SAFE_MAX(unsigned short) == USHRT_MAX);
 
-    gt_ensure(__MIN(int) == INT_MIN);
-    gt_ensure(__MAX(int) == INT_MAX);
-    gt_ensure(__MIN(unsigned int) == 0);
-    gt_ensure(__MAX(unsigned int) == UINT_MAX);
+    gt_ensure(GT_SAFE_MIN(int) == INT_MIN);
+    gt_ensure(GT_SAFE_MAX(int) == INT_MAX);
+    gt_ensure(GT_SAFE_MIN(unsigned int) == 0);
+    gt_ensure(GT_SAFE_MAX(unsigned int) == UINT_MAX);
 
-    gt_ensure(__MIN(GtWord) == LONG_MIN);
-    gt_ensure(__MAX(GtWord) == LONG_MAX);
-    gt_ensure(__MIN(GtUword) == 0);
-    gt_ensure(__MAX(GtUword) == ULONG_MAX);
+    gt_ensure(GT_SAFE_MIN(GtWord) == LONG_MIN);
+    gt_ensure(GT_SAFE_MAX(GtWord) == LONG_MAX);
+    gt_ensure(GT_SAFE_MIN(GtUword) == 0);
+    gt_ensure(GT_SAFE_MAX(GtUword) == ULONG_MAX);
 
 #ifdef LLONG_MIN
-    gt_ensure(__MIN(GtInt64) == LLONG_MIN);
-    gt_ensure(__MAX(GtInt64) == LLONG_MAX);
-    gt_ensure(__MIN(GtUint64) == 0);
-    gt_ensure(__MAX(GtUint64) == ULLONG_MAX);
+    gt_ensure(GT_SAFE_MIN(GtInt64) == LLONG_MIN);
+    gt_ensure(GT_SAFE_MAX(GtInt64) == LLONG_MAX);
+    gt_ensure(GT_SAFE_MIN(GtUint64) == 0);
+    gt_ensure(GT_SAFE_MAX(GtUint64) == ULLONG_MAX);
 #endif
   }
 
@@ -217,64 +217,68 @@ int gt_safearith_unit_test(GtError *err)
     GtWord slong;
 
     slong = -1;
-    gt_ensure(assign(ulong, slong));
+    gt_ensure(gt_safearith_assign(ulong, slong));
 
     ulong = 0;
     slong = LONG_MAX;
-    gt_ensure(!assign(ulong, slong) && ulong == LONG_MAX);
+    gt_ensure(!gt_safearith_assign(ulong, slong) && ulong == LONG_MAX);
 
     ulong = ULONG_MAX;
-    gt_ensure(assign(slong, ulong));
+    gt_ensure(gt_safearith_assign(slong, ulong));
 
     slong = 0;
     ulong = LONG_MAX;
-    gt_ensure(!assign(slong, ulong) && slong == LONG_MAX);
+    gt_ensure(!gt_safearith_assign(slong, ulong) && slong == LONG_MAX);
   }
 
   {
     int x;
-    gt_ensure(add_of(x, INT_MAX, 1));
-    gt_ensure(add_of(x, INT_MAX, 256));
-    gt_ensure(add_of(x, INT_MAX, INT_MAX));
+    gt_ensure(gt_safearith_add_of(x, INT_MAX, 1));
+    gt_ensure(gt_safearith_add_of(x, INT_MAX, 256));
+    gt_ensure(gt_safearith_add_of(x, INT_MAX, INT_MAX));
 
-    x = 0; gt_ensure(!add_of(x, INT_MAX - 1, 1) && x == INT_MAX);
-    x = 0; gt_ensure(!add_of(x, INT_MAX - 256, 256) && x == INT_MAX);
-    x = 0; gt_ensure(!add_of(x, INT_MAX, 0) && x == INT_MAX);
+    x = 0; gt_ensure(!gt_safearith_add_of(x, INT_MAX - 1, 1) && x == INT_MAX);
+    x = 0; gt_ensure(!gt_safearith_add_of(x,
+                                          INT_MAX - 256, 256) && x == INT_MAX);
+    x = 0; gt_ensure(!gt_safearith_add_of(x, INT_MAX, 0) && x == INT_MAX);
 
-    gt_ensure(add_of(x, 0x100000000ll, 0x100000000ll));
+    gt_ensure(gt_safearith_add_of(x, 0x100000000ll, 0x100000000ll));
     x = INT_MAX;
-    gt_ensure(!add_of(x, 0x100000000ll, -0x100000000ll) && x == 0);
+    gt_ensure(!gt_safearith_add_of(x, 0x100000000ll,
+                                   -0x100000000ll) && x == 0);
 
-    gt_ensure(sub_of(x, INT_MIN, 1));
-    gt_ensure(sub_of(x, INT_MIN, 256));
-    gt_ensure(sub_of(x, INT_MIN, INT_MAX));
+    gt_ensure(gt_safearith_sub_of(x, INT_MIN, 1));
+    gt_ensure(gt_safearith_sub_of(x, INT_MIN, 256));
+    gt_ensure(gt_safearith_sub_of(x, INT_MIN, INT_MAX));
 
-    x = 0; gt_ensure(!sub_of(x, INT_MIN + 1, 1) && x == INT_MIN);
-    x = 0; gt_ensure(!sub_of(x, INT_MIN + 256, 256) && x == INT_MIN);
-    x = 0; gt_ensure(!sub_of(x, INT_MIN, 0) && x == INT_MIN);
+    x = 0; gt_ensure(!gt_safearith_sub_of(x, INT_MIN + 1, 1) && x == INT_MIN);
+    x = 0; gt_ensure(!gt_safearith_sub_of(x, INT_MIN + 256,
+                                          256) && x == INT_MIN);
+    x = 0; gt_ensure(!gt_safearith_sub_of(x, INT_MIN, 0) && x == INT_MIN);
   }
 
   {
     unsigned int x;
-    gt_ensure(add_of(x, UINT_MAX, 1));
-    gt_ensure(add_of(x, UINT_MAX, 256));
-    gt_ensure(add_of(x, UINT_MAX, UINT_MAX));
+    gt_ensure(gt_safearith_add_of(x, UINT_MAX, 1));
+    gt_ensure(gt_safearith_add_of(x, UINT_MAX, 256));
+    gt_ensure(gt_safearith_add_of(x, UINT_MAX, UINT_MAX));
 
-    x = 0; gt_ensure(!add_of(x, UINT_MAX - 1, 1) && x == UINT_MAX);
-    x = 0; gt_ensure(!add_of(x, UINT_MAX - 256, 256) && x == UINT_MAX);
-    x = 0; gt_ensure(!add_of(x, UINT_MAX, 0) && x == UINT_MAX);
+    x = 0; gt_ensure(!gt_safearith_add_of(x, UINT_MAX - 1, 1) && x == UINT_MAX);
+    x = 0; gt_ensure(!gt_safearith_add_of(x, UINT_MAX - 256,
+                                          256) && x == UINT_MAX);
+    x = 0; gt_ensure(!gt_safearith_add_of(x, UINT_MAX, 0) && x == UINT_MAX);
 
-    gt_ensure(add_of(x, 0x100000000ll, 0x100000000ll));
+    gt_ensure(gt_safearith_add_of(x, 0x100000000ll, 0x100000000ll));
     x = UINT_MAX;
-    gt_ensure(!add_of(x, 0x100000000ll, -0x100000000ll) && x == 0);
+    gt_ensure(!gt_safearith_add_of(x, 0x100000000ll, -0x100000000ll) && x == 0);
 
-    gt_ensure(sub_of(x, 0, 1));
-    gt_ensure(sub_of(x, 0, 256));
-    gt_ensure(sub_of(x, 0, UINT_MAX));
+    gt_ensure(gt_safearith_sub_of(x, 0, 1));
+    gt_ensure(gt_safearith_sub_of(x, 0, 256));
+    gt_ensure(gt_safearith_sub_of(x, 0, UINT_MAX));
 
-    x = 0; gt_ensure(!sub_of(x, 1, 1) && x == 0);
-    x = 0; gt_ensure(!sub_of(x, 256, 256) && x == 0);
-    x = 0; gt_ensure(!sub_of(x, 0, 0) && x == 0);
+    x = 0; gt_ensure(!gt_safearith_sub_of(x, 1, 1) && x == 0);
+    x = 0; gt_ensure(!gt_safearith_sub_of(x, 256, 256) && x == 0);
+    x = 0; gt_ensure(!gt_safearith_sub_of(x, 0, 0) && x == 0);
   }
 
   {

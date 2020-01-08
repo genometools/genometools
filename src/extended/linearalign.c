@@ -518,11 +518,11 @@ static GtUword gt_calc_linearedist(bool downcase,
 
   printf("%s(%*.*s,%*.*s)\n",__func__,(int) ulen,(int) ulen,(char *) useq,
                              (int) vlen,(int) vlen,(char *) vseq);
-  dpcolumn = gt_malloc(sizeof *dpcolumn * (MIN(ulen,vlen) + 1));
+  dpcolumn = gt_malloc(sizeof *dpcolumn * (GT_MIN(ulen,vlen) + 1));
   fillDPtable_unitcost(downcase,dpcolumn,
-                       ulen <= vlen ? useq : vseq, MIN(ulen,vlen),
-                       ulen <= vlen ? vseq : useq, MAX(ulen,vlen));
-  edist = dpcolumn[MIN(ulen,vlen)];
+                       ulen <= vlen ? useq : vseq, GT_MIN(ulen,vlen),
+                       ulen <= vlen ? vseq : useq, GT_MAX(ulen,vlen));
+  edist = dpcolumn[GT_MIN(ulen,vlen)];
   gt_free(dpcolumn);
   return edist;
 }

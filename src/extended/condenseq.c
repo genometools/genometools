@@ -793,7 +793,7 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
               unique != NULL ||
               link != NULL);
     if (nextsep != 0 && nextsep == range.start + buffoffset) {
-      buf[buffoffset++] = SEPARATOR;
+      buf[buffoffset++] = GT_SEPARATOR;
       nextsep = condenseq_next_sep(condenseq, range.start + buffoffset);
     }
     else if (unique != NULL &&
@@ -859,7 +859,7 @@ const char *gt_condenseq_extract_decoded_range(GtCondenseq *condenseq,
   }
   buf = condenseq->buffer;
   for (idx = 0; idx < length; ++idx) {
-    if (ubuf[idx] == SEPARATOR) {
+    if (ubuf[idx] == GT_SEPARATOR) {
       buf[idx] = separator;
     }
     else {

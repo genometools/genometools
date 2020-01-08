@@ -121,7 +121,7 @@ const GtUchar *gt_nextEnumpatterniterator(GtUword *patternlen,
   for (j=0; j<*patternlen; j++)
   {
     cc = gt_encseq_reader_next_encoded_char(epi->esr);
-    if (ISSPECIAL(cc))
+    if (GT_ISSPECIAL(cc))
     {
       cc = (GtUchar) (random() % epi->alphasize);
     }

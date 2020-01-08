@@ -59,7 +59,7 @@ gt_bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset,
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
 
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         accum = accum << bits2Read
           | ((currentVal) >> (bitsLeft - bits2Read));
@@ -99,7 +99,7 @@ gt_bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset,
               || (bitsLeft < sizeof (accum)*CHAR_BIT - bitsInAccum)))
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         @AccumType@ mask = ~((~(@AccumType@)0) << bits2Read);
         accum = accum << bits2Read
@@ -187,7 +187,7 @@ gt_bsStoreNonUniform@uTypeTag@Array(
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
 
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         accum = accum << bits2Read
           | ((currentVal) >> (bitsLeft - bits2Read));
@@ -233,7 +233,7 @@ gt_bsStoreNonUniform@uTypeTag@Array(
               || (bitsLeft < sizeof (accum)*CHAR_BIT - bitsInAccum)))
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if ((bits2Read = GT_MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
         @AccumType@ mask = ~((~(@AccumType@)0) << bits2Read);
         accum = accum << bits2Read

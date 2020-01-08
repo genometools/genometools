@@ -43,12 +43,12 @@
 #include "tools/gt_linspace_align.h"
 
 #define LEFT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                            -((1-similarity)*(MAX(ulen,vlen)) +\
-                            MIN(((GtWord)ulen-(GtWord)vlen),0))
+                            -((1-similarity)*(GT_MAX(ulen,vlen)) +\
+                            GT_MIN(((GtWord)ulen-(GtWord)vlen),0))
 
 #define RIGHT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                             ((1-similarity)*(MAX(ulen,vlen)) -\
-                             MAX(((GtWord)ulen-(GtWord)vlen),0))
+                             ((1-similarity)*(GT_MAX(ulen,vlen)) -\
+                             GT_MAX(((GtWord)ulen-(GtWord)vlen),0))
 
 typedef struct{
   GtStr      *outputfile; /*default stdout*/
@@ -375,7 +375,7 @@ static void gt_linspace_print_sequence(const GtUchar *characters,
       cc = seq[idx];
     } else
     {
-      if (ISSPECIAL(seq[idx]))
+      if (GT_ISSPECIAL(seq[idx]))
       {
         cc = wildcardshow;
       } else
@@ -536,13 +536,13 @@ static int gt_all_against_all_alignment_check(bool affine,
             right_dist = RIGHT_DIAGONAL_SHIFT(arguments->similarity, ulen,
                                               vlen);
           }
-          if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-              (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+          if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+              (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
           {
             gt_error_set(err, "ERROR: invalid diagonalband for global "
                               "alignment (ulen: "GT_WU", vlen: "GT_WU")\n"
-                              "left_dist <= MIN(0, vlen-ulen) and "
-                              "right_dist >= MAX(0, vlen-ulen)", ulen, vlen);
+                              "left_dist <= GT_MIN(0, vlen-ulen) and "
+                              "right_dist >= GT_MAX(0, vlen-ulen)", ulen, vlen);
             had_err = 1;
           }
           if (!had_err)

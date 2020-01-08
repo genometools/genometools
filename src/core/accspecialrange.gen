@@ -76,7 +76,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
     if (retval > 0)
     {
-      if (encseq->has_exceptiontable && cc != (GtUchar) SEPARATOR) {
+      if (encseq->has_exceptiontable && cc != (GtUchar) GT_SEPARATOR) {
         if (orig == encseq->maxchars[cc]) {
           if (lastexceptionrangelength > 0) {
             exceptiontable->rangelengths[fillexceptionrangeidx-1]
@@ -112,7 +112,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
                                    (uint32_t) encseq->subsymbolmap[(int) orig]);
         }
       }
-      if (ISNOTSPECIAL(cc))
+      if (GT_ISNOTSPECIAL(cc))
       {
         if (lastwildcardrangelength > 0)
         {
@@ -128,7 +128,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
         }
       } else
       {
-        if (cc == (GtUchar) WILDCARD)
+        if (cc == (GtUchar) GT_WILDCARD)
         {
 #ifndef NDEBUG
           countwildcards++;
@@ -225,7 +225,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
 
     ssptaboutinfo_processanyposition(ssptaboutinfo,currentposition);
     bitwise <<= 2;
-    if (ISNOTSPECIAL(cc))
+    if (GT_ISNOTSPECIAL(cc))
     {
       bitwise |= (GtTwobitencoding) cc;
     } else
@@ -927,7 +927,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
   if (esr->encseq->numofdbsequences > 1UL &&
       GT_APPENDINT(checknextSW)(esr,SWtable_ssptab))
   {
-    cc = (GtUchar) SEPARATOR;
+    cc = (GtUchar) GT_SEPARATOR;
     defined = true;
   }
   if (GT_APPENDINT(esr->encseq->wildcardrangetable.st).numofpositionstostore
@@ -935,7 +935,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
       GT_APPENDINT(checknextSW)(esr,SWtable_wildcardrange))
   {
     gt_assert(!defined);
-    cc = (GtUchar) WILDCARD;
+    cc = (GtUchar) GT_WILDCARD;
     defined = true;
   }
   if (defined)

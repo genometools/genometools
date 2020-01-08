@@ -75,7 +75,7 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
   newFactory->mapTableDBSPath = gt_str_new();
   fp = newFactory->mapTableDiskBackingStore
     = gt_xtmpfp_generic(newFactory->mapTableDBSPath,
-                        TMPFP_AUTOREMOVE | TMPFP_OPENBINARY);
+                        GT_TMPFP_AUTOREMOVE | GT_TMPFP_OPENBINARY);
   {
     off_t backingStoreSize = numMapEntries(seqLen, mapIntervalLog2), i;
     GtUword buf[BLOCK_IO_SIZE];
@@ -141,7 +141,7 @@ gt_BWTSCRFReadAdvance(BWTSeqContextRetrieverFactory *factory,
   gt_assert(factory);
   while (sfxIdxLeft)
   {
-    GtUword len = MIN(BLOCK_IO_SIZE, sfxIdxLeft);
+    GtUword len = GT_MIN(BLOCK_IO_SIZE, sfxIdxLeft);
     if (SDRRead(readSfxIdx, buf, len)
         != len)
     {

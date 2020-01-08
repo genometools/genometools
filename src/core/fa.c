@@ -324,7 +324,7 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
   FILE *fp;
   GtStr *template;
   gt_assert(fa);
-  if (flags & TMPFP_USETEMPLATE)
+  if (flags & GT_TMPFP_USETEMPLATE)
   {
     gt_assert(template_arg);
     template = template_arg;
@@ -358,11 +358,11 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
   }
   {
     int fd = gt_mkstemp(gt_str_get(template));
-    char mode[] = { 'w', '+', flags & TMPFP_OPENBINARY?'b':'\0', '\0' };
+    char mode[] = { 'w', '+', flags & GT_TMPFP_OPENBINARY?'b':'\0', '\0' };
     fp = gt_xfdopen(fd, mode);
   }
   gt_assert(fp);
-  if (flags & TMPFP_AUTOREMOVE)
+  if (flags & GT_TMPFP_AUTOREMOVE)
   {
     gt_xremove(gt_str_get(template));
   }

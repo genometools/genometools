@@ -74,14 +74,14 @@ void gt_showfrontvalues(const GtArrayGtXdropfrontvalue *fronts,
                        GtWord vlen)
 {
   GtUword l, max_l;
-  GtWord i, j, k, d, filled = 0, integermax = MAX(ulen,vlen),
+  GtWord i, j, k, d, filled = 0, integermax = GT_MAX(ulen,vlen),
        integermin = -integermax;
 
   printf("frontvalues:\n");
   printf("        ");
   printf("%-3c ", vseqptr[0]);
   /* print vseq */
-  max_l = MIN(fronts->nextfreeGtXdropfrontvalue,
+  max_l = GT_MIN(fronts->nextfreeGtXdropfrontvalue,
               (GtUword) GT_XDROP_FRONTIDX(distance, distance));
   for (i = 1L; i < vlen; i++)
     printf("%-3c ", vseqptr[i]);
@@ -232,7 +232,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
                vlen = (GtWord) gt_seqabstract_length(vseq),
                end_k =
                  (GtWord) ulen - vlen, /* diagonal of endpoint (ulen, vlen) */
-               integermax = (GtWord) MAX(ulen, vlen),
+               integermax = (GtWord) GT_MAX(ulen, vlen),
                integermin = -integermax,
                dback = GT_XDROP_SETDBACK(xdropbelowscore);
   GtWord idx,
@@ -242,8 +242,9 @@ void gt_evalxdroparbitscoresextend(bool forward,
          k;         /* lbound - 1 <= k <= ubound + 1*/
   /*The following function calculates the maximal allowed number of
     generations with all front values equal minus infinity.*/
-  const int allowedMININFINITYINTgenerations = MAX(MAX(res->arbitdistances.mis,
-                                                       res->arbitdistances.ins),
+  const int allowedMININFINITYINTgenerations = GT_MAX(
+                                               GT_MAX(res->arbitdistances.mis,
+                                                      res->arbitdistances.ins),
                                                    res->arbitdistances.del) - 1;
   int currentMININFINITYINTgeneration = 0;
   GtXdropfrontvalue tmpfront;
@@ -316,7 +317,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
           tmpfront.direction = GT_XDROP_INSERTIONBIT;
         }
       }
-      /* if i = MINUSINFINITYINY or MINUSINFINITYINY + 1 */
+      /* if i = GT_MINUSINFINITYINY or GT_MINUSINFINITYINY + 1 */
       if (i < 0) {
         if (tmpfront.direction == (GtUchar) 0)
           alwaysMININFINITYINT = false;
@@ -337,7 +338,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
         else {
           if (k <= -currd || k >= currd ||
               (gt_xdrop_frontvalue_get(res, currd-1, k) < i &&
-               i <= MIN(ulen, vlen + k))) {
+               i <= GT_MIN(ulen, vlen + k))) {
             if (ulen > i && vlen > j) {
               GtUword lcp;
               gt_assert(forward || (ulen - 1 >= (GtWord) i &&

@@ -279,8 +279,8 @@ static void apme_nextLimdfsstate(const Limdfsconstinfo *mt,
 
   gt_assert(incol->maxleqk != UNDEFMAXLEQK);
   gt_assert(mti->maxintervalwidth > 0 || incol->maxleqk != SUCCESSMAXLEQK);
-  gt_assert(currentchar != (GtUchar) SEPARATOR);
-  if (currentchar != (GtUchar) WILDCARD)
+  gt_assert(currentchar != (GtUchar) GT_SEPARATOR);
+  if (currentchar != (GtUchar) GT_WILDCARD)
   {
     Eq = mti->eqsvector[(GtUword) currentchar];
   }
@@ -361,7 +361,7 @@ static void apme_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
 
   gt_assert(col->maxleqk != UNDEFMAXLEQK);
   gt_assert(mti->maxintervalwidth > 0 || col->maxleqk != SUCCESSMAXLEQK);
-  if (currentchar != (GtUchar) WILDCARD)
+  if (currentchar != (GtUchar) GT_WILDCARD)
   {
     Eq = mti->eqsvector[(GtUword) currentchar];
   }

@@ -84,7 +84,7 @@ void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
                                     uint32_t matchlength)
 {
   gt_assert(trimstat != NULL && trimstat->matchlength_dist != NULL);
-  trimstat->matchlength_dist[MIN(100,matchlength)]++;
+  trimstat->matchlength_dist[GT_MIN(100,matchlength)]++;
 }
 #else
 void gt_ft_trimstat_add(GT_UNUSED GtFtTrimstat *trimstat,

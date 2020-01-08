@@ -26,7 +26,8 @@
 #include "sfx-bltrie.h"
 #include "sfx-suffixgetset.h"
 
-#define GT_BLINDTRIECHAR_ISSPECIAL(X)     ((X) >= (GtBlindtriesymbol) WILDCARD)
+#define GT_BLINDTRIECHAR_GT_ISSPECIAL(X) \
+        ((X) >= (GtBlindtriesymbol) GT_WILDCARD)
 #define GT_BLINDTRIE_REFNULL              0
 #define GT_BLINDTRIE_BITSFORRIGHTSIBLING  31
 #define GT_BLINDTRIE_ROOTIDX              0
@@ -383,7 +384,7 @@ static void blindtrie_makeroot(GtBlindtrie *blindtrie,
                 gt_encseq_get_encoded_char(blindtrie->encseq,
                                            currentstartpos,
                                            blindtrie->readmode);
-    if (GT_BLINDTRIECHAR_ISSPECIAL(firstchar))
+    if (GT_BLINDTRIECHAR_GT_ISSPECIAL(firstchar))
     {
       firstchar = GT_UNIQUEINT(currentstartpos);
     }
@@ -488,7 +489,7 @@ static GtBlindtriesnodeptr blindtrie_findcompanion(
                   gt_encseq_get_encoded_char(blindtrie->encseq,
                                              currentstartpos + headdepth,
                                              blindtrie->readmode);
-        if (GT_BLINDTRIECHAR_ISSPECIAL(newchar))
+        if (GT_BLINDTRIECHAR_GT_ISSPECIAL(newchar))
         {
           newchar = GT_UNIQUEINT(currentstartpos + headdepth);
         }
@@ -610,11 +611,11 @@ static GtUword blindtrie_cmpcharbychar_getlcp(
     {
       cc1 = (GtBlindtriesymbol)
             gt_encseq_reader_next_encoded_char(blindtrie->esr1);
-      if (GT_BLINDTRIECHAR_ISSPECIAL(cc1))
+      if (GT_BLINDTRIECHAR_GT_ISSPECIAL(cc1))
       {
         if (mm_oldsuffixisseparator != NULL)
         {
-          *mm_oldsuffixisseparator = (cc1 == SEPARATOR) ? true : false;
+          *mm_oldsuffixisseparator = (cc1 == GT_SEPARATOR) ? true : false;
         }
         cc1 = GT_UNIQUEINT(leafpos + lcp);
       }
@@ -630,7 +631,7 @@ static GtUword blindtrie_cmpcharbychar_getlcp(
     {
       cc2 = (GtBlindtriesymbol)
             gt_encseq_reader_next_encoded_char(blindtrie->esr2);
-      if (GT_BLINDTRIECHAR_ISSPECIAL(cc2))
+      if (GT_BLINDTRIECHAR_GT_ISSPECIAL(cc2))
       {
         cc2 = GT_UNIQUEINT(currentstartpos + lcp);
       }

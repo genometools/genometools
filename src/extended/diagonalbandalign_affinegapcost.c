@@ -48,8 +48,8 @@ static void diagonalband_fillDPtab_affine(GtAffinealignDPentry **Atabcolumn,
   GtWord rcost, r_dist, d_dist, i_dist, minvalue;
 
   gt_assert(Atabcolumn && scorehandler);
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false);
   }
@@ -93,7 +93,7 @@ static void diagonalband_fillDPtab_affine(GtAffinealignDPentry **Atabcolumn,
     d_dist = add_safe_max(Atabcolumn[i-1][0].Dvalue, gap_extension);
     i_dist = add_safe_max(Atabcolumn[i-1][0].Ivalue,
                          gap_opening + gap_extension);
-    Atabcolumn[i][0].Dvalue = MIN3(r_dist, d_dist, i_dist);
+    Atabcolumn[i][0].Dvalue = GT_MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[i][0].Ivalue = GT_WORD_MAX;
 
     Atabcolumn[i][0].Redge = Affine_X;
@@ -126,7 +126,7 @@ static void diagonalband_fillDPtab_affine(GtAffinealignDPentry **Atabcolumn,
                                gap_extension + gap_opening);
         i_dist = add_safe_max(Atabcolumn[i][j-1].Ivalue,gap_extension);
 
-        minvalue = MIN3(r_dist, d_dist, i_dist);
+        minvalue = GT_MIN3(r_dist, d_dist, i_dist);
         Atabcolumn[i][j].Ivalue = minvalue;
         Atabcolumn[i][j].Rvalue = GT_WORD_MAX;
         Atabcolumn[i][j].Dvalue = GT_WORD_MAX;
@@ -154,7 +154,7 @@ static void diagonalband_fillDPtab_affine(GtAffinealignDPentry **Atabcolumn,
       r_dist=add_safe_max(Atabcolumn[i][j-1].Rvalue,gap_extension+gap_opening);
       d_dist=add_safe_max(Atabcolumn[i][j-1].Dvalue,gap_extension+gap_opening);
       i_dist=add_safe_max(Atabcolumn[i][j-1].Ivalue,gap_extension);
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Ivalue = minvalue;
       Atabcolumn[i][j].Iedge = gt_linearalign_affinegapcost_set_edge(
                                                         r_dist, d_dist, i_dist);
@@ -165,7 +165,7 @@ static void diagonalband_fillDPtab_affine(GtAffinealignDPentry **Atabcolumn,
       r_dist = add_safe_max(Atabcolumn[i-1][j-1].Rvalue, rcost);
       d_dist = add_safe_max(Atabcolumn[i-1][j-1].Dvalue, rcost);
       i_dist = add_safe_max(Atabcolumn[i-1][j-1].Ivalue, rcost);
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Rvalue = minvalue;
       Atabcolumn[i][j].Redge = gt_linearalign_affinegapcost_set_edge(
                                                         r_dist, d_dist, i_dist);
@@ -176,7 +176,7 @@ static void diagonalband_fillDPtab_affine(GtAffinealignDPentry **Atabcolumn,
       d_dist = add_safe_max(Atabcolumn[i-1][j].Dvalue,gap_extension);
       i_dist = add_safe_max(Atabcolumn[i-1][j].Ivalue,
                           gap_extension+gap_opening);
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Dvalue = minvalue;
       Atabcolumn[i][j].Dedge = gt_linearalign_affinegapcost_set_edge(
                                                         r_dist, d_dist, i_dist);
@@ -232,7 +232,7 @@ GtWord gt_diagonalbandalign_affinegapcost_in_square_space_generic(
                                 vlen, left_dist, right_dist,
                                 Affine_X, Affine_X, scorehandler);
 
-  distance = MIN3(Atabcolumn[ulen][vlen].Rvalue,
+  distance = GT_MIN3(Atabcolumn[ulen][vlen].Rvalue,
                   Atabcolumn[ulen][vlen].Dvalue,
                   Atabcolumn[ulen][vlen].Ivalue);
 
@@ -294,8 +294,8 @@ GtWord gt_diagonalbandalign_affinegapcost_square_space_distance_only(
   GtAffinealignDPentry **Atabcolumn;
   gt_assert(scorehandler);
 
-   if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+   if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     return GT_WORD_MAX;
   }
@@ -305,7 +305,7 @@ GtWord gt_diagonalbandalign_affinegapcost_square_space_distance_only(
                                 vlen, left_dist, right_dist,
                                 Affine_X, Affine_X, scorehandler);
 
-  distance = MIN3(Atabcolumn[ulen][vlen].Rvalue,
+  distance = GT_MIN3(Atabcolumn[ulen][vlen].Rvalue,
                   Atabcolumn[ulen][vlen].Dvalue,
                   Atabcolumn[ulen][vlen].Ivalue);
 
@@ -457,8 +457,8 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
   bool last_row = false;
   distance = GT_WORD_MAX;
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false);
   }
@@ -511,7 +511,7 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
     d_dist = add_safe_max(westAffinealignDPentry.Dvalue,
                           gap_extension+gap_opening);
     i_dist = add_safe_max(westAffinealignDPentry.Ivalue,gap_extension);
-    minvalue = MIN3(r_dist, d_dist, i_dist);
+    minvalue = GT_MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[0].Ivalue = minvalue;
     Atabcolumn[0].Rvalue = GT_WORD_MAX;
     Atabcolumn[0].Dvalue = GT_WORD_MAX;
@@ -524,7 +524,7 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
       r_dist = add_safe_max(northwestAffinealignDPentry.Rvalue, rcost);
       d_dist = add_safe_max(northwestAffinealignDPentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAffinealignDPentry.Ivalue, rcost);
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[0].Rvalue = minvalue;
     }
     for (rowindex = low_row + 1; rowindex <= high_row; rowindex++)
@@ -550,7 +550,7 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
                             gap_extension+gap_opening);
       i_dist = add_safe_max(westAffinealignDPentry.Ivalue,gap_extension);
 
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
 
       rcost = gt_scorehandler_get_replacement(scorehandler,
@@ -560,7 +560,7 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
       d_dist = add_safe_max(northwestAffinealignDPentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAffinealignDPentry.Ivalue, rcost);
 
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
 
       r_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Rvalue,
@@ -570,12 +570,12 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
       i_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Ivalue,
                            gap_extension+gap_opening);
 
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Dvalue = minvalue;
     }
   }
 
-  distance = MIN3(Atabcolumn[high_row-low_row].Rvalue,
+  distance = GT_MIN3(Atabcolumn[high_row-low_row].Rvalue,
                   Atabcolumn[high_row-low_row].Dvalue,
                   Atabcolumn[high_row-low_row].Ivalue);
   gt_free(Atabcolumn);
@@ -776,8 +776,8 @@ static GtAffineAlignRnode evaluateallaffineDBcolumns(
   GtAffineAlignRtabentry *Rtabcolumn, northwestRtabentry, westRtabentry = {{0}};
   GtAffineAlignRnode lastcpoint = {GT_UWORD_MAX, Affine_X};
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false);
   }
@@ -834,7 +834,7 @@ static GtAffineAlignRnode evaluateallaffineDBcolumns(
                           gap_extension + gap_opening);
     i_dist = add_safe_max(westAffinealignDPentry.Ivalue, gap_extension);
 
-    minvalue = MIN3(r_dist, d_dist, i_dist);
+    minvalue = GT_MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[0].Ivalue = minvalue;
     Atabcolumn[0].Rvalue = GT_WORD_MAX;
     Atabcolumn[0].Dvalue = GT_WORD_MAX;
@@ -869,7 +869,7 @@ static GtAffineAlignRnode evaluateallaffineDBcolumns(
       d_dist = add_safe_max(northwestAffinealignDPentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAffinealignDPentry.Ivalue, rcost);
 
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[0].Rvalue = minvalue;
 
       if (diag == (GtWord)colindex - (GtWord)low_row)
@@ -919,7 +919,7 @@ static GtAffineAlignRnode evaluateallaffineDBcolumns(
                             gap_extension+gap_opening);
       i_dist = add_safe_max(westAffinealignDPentry.Ivalue,gap_extension);
 
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
@@ -942,7 +942,7 @@ static GtAffineAlignRnode evaluateallaffineDBcolumns(
       r_dist = add_safe_max(northwestAffinealignDPentry.Rvalue, rcost);
       d_dist = add_safe_max(northwestAffinealignDPentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAffinealignDPentry.Ivalue, rcost);
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
 
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
       if (diag == (GtWord)colindex - (GtWord)rowindex)
@@ -967,7 +967,7 @@ static GtAffineAlignRnode evaluateallaffineDBcolumns(
       i_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Ivalue,
                            gap_extension+gap_opening);
 
-      minvalue = MIN3(r_dist, d_dist, i_dist);
+      minvalue = GT_MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Dvalue = minvalue;
 
       if (diag == (GtWord)colindex - (GtWord)rowindex)
@@ -1007,7 +1007,7 @@ static GtAffineAlignRnode evaluateallaffineDBcolumns(
       break;
   }
 
-  minvalue = MIN3(r_dist, d_dist, i_dist);
+  minvalue = GT_MIN3(r_dist, d_dist, i_dist);
   if (minvalue == r_dist)
     lastcpoint = Rtabcolumn[high_row-low_row].val_R;
   else if (minvalue == i_dist)
@@ -1190,7 +1190,7 @@ static GtAffineAlignRnode evaluateaffineDBcrosspoints(
     {
       new_ulen = ulen - (row_start+1-rowoffset);
       new_vlen = vlen-col_start;
-      new_left = MAX((GtWord)left_dist-diag+1,
+      new_left = GT_MAX((GtWord)left_dist-diag+1,
                     -(GtWord)new_ulen);
       new_right = 0;
       temp_entry = Diagcolumn[col_start];
@@ -1212,7 +1212,7 @@ static GtAffineAlignRnode evaluateaffineDBcrosspoints(
       new_ulen = ulen - (row_start - rowoffset);
       new_vlen = vlen-col_start-1;
       new_left = -1;
-      new_right = MIN((GtWord)right_dist-((GtWord)diag)-1,new_vlen);
+      new_right = GT_MIN((GtWord)right_dist-((GtWord)diag)-1,new_vlen);
 
       lastrpoint = evaluateaffineDBcrosspoints(spacemanager,
                             Diagcolumn+col_start+1,scorehandler, Affine_I,
@@ -1259,7 +1259,7 @@ static GtAffineAlignRnode evaluateaffineDBcrosspoints(
       new_ulen = row_end - row_start - 1;
       new_vlen = col_end-col_start-1;
       new_left = -1;
-      new_right = MIN(right_dist-diag-1,new_vlen);
+      new_right = GT_MIN(right_dist-diag-1,new_vlen);
 
       temprpoint = evaluateaffineDBcrosspoints(spacemanager,
                            Diagcolumn+col_start+1, scorehandler,
@@ -1283,7 +1283,7 @@ static GtAffineAlignRnode evaluateaffineDBcrosspoints(
     else if (prevcp_type == Affine_I)
     {
       new_ulen = row_end - row_start-1;
-      new_left = MAX(left_dist-diag+1,
+      new_left = GT_MAX(left_dist-diag+1,
                         -(GtWord)new_ulen);
       new_right = 0;
       temp_entry = Diagcolumn[col_start];
@@ -1316,8 +1316,8 @@ static GtAffineAlignRnode evaluateaffineDBcrosspoints(
       if (row_end == ustart-1)
          gt_assert(false);
        new_ulen = row_end-ustart-1;
-       new_left =  MAX(-new_ulen, diag);
-       new_right = MIN(right_dist, (GtWord)col_end);
+       new_left =  GT_MAX(-new_ulen, diag);
+       new_right = GT_MIN(right_dist, (GtWord)col_end);
 
        rpoint = evaluateaffineDBcrosspoints(spacemanager, Diagcolumn,
                                         scorehandler, edge, from_edge,Affine_D,
@@ -1336,10 +1336,10 @@ static GtAffineAlignRnode evaluateaffineDBcrosspoints(
      case Affine_I:
        new_ulen = row_end-ustart;
        new_vlen = col_end-1;
-       new_left = MAX(left_dist,
+       new_left = GT_MAX(left_dist,
                  -(GtWord)new_ulen);
 
-       new_right = MIN(diag,new_vlen);
+       new_right = GT_MIN(diag,new_vlen);
        rpoint = evaluateaffineDBcrosspoints(spacemanager, Diagcolumn,
                                scorehandler,edge, from_edge, Affine_I,rowoffset,
                                coloffset, useq, ustart, new_ulen, vseq, vstart,
@@ -1381,8 +1381,8 @@ static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
   GtUword idx, gap_extension;
   gt_assert(align && scorehandler);
 
-  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  if ((left_dist > GT_MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < GT_MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
     gt_assert(false); /* no global alignment */
   }
@@ -1415,7 +1415,7 @@ static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
                                                          left_dist, right_dist);
     return;
   }
-  gt_linspace_management_check(spacemanager, MIN(right_dist-left_dist,ulen),
+  gt_linspace_management_check(spacemanager, GT_MIN(right_dist-left_dist,ulen),
                                vlen, sizeof (*Atabcolumn), sizeof (*Rtabcolumn),
                                sizeof (*Diagcolumn));
   Diagcolumn = gt_linspace_management_get_crosspointTabspace(spacemanager);
@@ -1458,8 +1458,8 @@ void gt_diagonalbandalign_affinegapcost_compute_generic(GtLinspaceManagement
   gt_assert(useq  && vseq && spacemanager && scorehandler && align);
 
   /* set new bounds, if left_dist or right_dist is out of sequence */
-  left_dist = MAX(-(GtWord) ulen,left_dist);
-  right_dist = MIN((GtWord) vlen,right_dist);
+  left_dist = GT_MAX(-(GtWord) ulen,left_dist);
+  right_dist = GT_MIN((GtWord) vlen,right_dist);
   gt_alignment_set_seqs(align, useq+ustart, ulen, vseq+vstart, vlen);
   gt_calc_diagonalbandaffinealign(spacemanager, scorehandler, align,
                                              useq, ustart, ulen,

@@ -25,7 +25,7 @@ def gen_compare(a_mode,b_mode,wildcard,complement)
              " " * 10 + "break"
   if wildcard
     return "const GtUchar cu = #{gen_access_raw(a_mode,"useq","u")};\n" +
-           " " * 8 + "if (cu == WILDCARD ||" + splitter + "cu !=" + splitter +
+           " " * 8 + "if (cu == GT_WILDCARD ||" + splitter + "cu !=" + splitter +
            cmp_expr
   else
     return "if (#{gen_access_raw(a_mode,"useq","u")} !=" + splitter +

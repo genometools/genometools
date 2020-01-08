@@ -160,9 +160,9 @@ gt_qsort_r(void *a, size_t n, size_t es, void *data, GtCompareWithData cmp)
     }
 
     pn = (char *)a + n * es;
-    r = MIN(pa - (char *)a, pb - pa);
+    r = GT_MIN(pa - (char *)a, pb - pa);
     vecswap(a, pb - r, r);
-    r = MIN(pd - pc, pn - pd - es);
+    r = GT_MIN(pd - pc, pn - pd - es);
     vecswap(pb, pn - r, r);
     if ((r = pb - pa) > es)
       gt_qsort_r(a, r / es, es, data, cmp);

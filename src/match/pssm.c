@@ -116,7 +116,7 @@ void gt_lookaheadsearchPSSM(const GtEncseq *encseq,
   for (pos=0; pos < totallength; pos++)
   {
     currentchar = gt_encseq_reader_next_encoded_char(esr);
-    if (ISSPECIAL(currentchar))
+    if (GT_ISSPECIAL(currentchar))
     {
       bufsize = firstpos = 0;
     } else

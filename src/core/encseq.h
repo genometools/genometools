@@ -75,7 +75,7 @@ typedef struct
 
 /* Stores the decoded version of the substring from 0-based position <frompos>
    to position <topos> of <encseq>. If the extracted region contains a separator
-   character, it will be represented by non-printable SEPARATOR constant.
+   character, it will be represented by non-printable GT_SEPARATOR constant.
    The caller is responsible to handle this case. The result of the extraction
    is written to the location pointed to by <buffer>, which must be sufficiently
    large to hold the result. The function is identical to
@@ -373,7 +373,7 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 GtUword len);
 
 /* Returns the sequence number from the given <position> for an array of
-  SEPARATOR positions <recordseps>.  */
+  GT_SEPARATOR positions <recordseps>.  */
 GtUword gt_encseq_sep2seqnum(const GtUword *recordseps,
                                    GtUword numofrecords,
                                    GtUword totalwidth,

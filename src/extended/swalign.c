@@ -51,12 +51,12 @@ static void swalign_fill_table(DPentry **dptable,
   for (j = 1; j <= vlen; j++) {
     for (i = 1; i <= ulen; i++) {
       int uval, vval;
-      uval = (int) ((u[i-1] == WILDCARD) ? u_alpha_size - 1 : u[i-1]);
-      vval = (int) ((v[j-1] == WILDCARD) ? v_alpha_size - 1 : v[j-1]);
+      uval = (int) ((u[i-1] == GT_WILDCARD) ? u_alpha_size - 1 : u[i-1]);
+      vval = (int) ((v[j-1] == GT_WILDCARD) ? v_alpha_size - 1 : v[j-1]);
       repscore = dptable[i-1][j-1].score + scores[uval][vval];
       delscore = dptable[i-1][j].score + deletion_score;
       insscore = dptable[i][j-1].score + insertion_score;
-      maxscore = MAX(MAX(MAX(repscore, delscore), insscore), 0);
+      maxscore = GT_MAX(GT_MAX(GT_MAX(repscore, delscore), insscore), 0);
       dptable[i][j].score = maxscore;
       dptable[i][j].max_replacement = (maxscore == repscore) ? true : false;
       dptable[i][j].max_deletion    = (maxscore == delscore) ? true : false;

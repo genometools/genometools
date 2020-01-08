@@ -163,13 +163,15 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
   offset = 0;
   while (qptr <= query + querylen - tyrsearchinfo->mersize)
   {
-    skipvalue = containsspecialbytestring(qptr,offset,tyrsearchinfo->mersize);
+    skipvalue = gt_containsspecialbytestring(qptr,offset,
+                                             tyrsearchinfo->mersize);
     if (skipvalue == tyrsearchinfo->mersize)
     {
       offset = tyrsearchinfo->mersize-1;
       if (tyrsearchinfo->searchstrand & STRAND_FORWARD)
       {
-        result = gt_searchsinglemer(qptr,tyrindex,tyrsearchinfo,tyrbckinfo);
+        result = gt_searchsinglemer(qptr,tyrindex,
+                                    tyrsearchinfo,tyrbckinfo);
         if (result != NULL)
         {
           mermatchoutput(tyrindex,

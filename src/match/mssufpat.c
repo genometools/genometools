@@ -242,7 +242,7 @@ static void pms_nextLimdfsstate(const Limdfsconstinfo *mt,
   const GtMssufpatLimdfsstate *incol =
                                      (const GtMssufpatLimdfsstate *) aliasincol;
 
-  gt_assert(ISNOTSPECIAL(currentchar));
+  gt_assert(GT_ISNOTSPECIAL(currentchar));
   gt_assert(currentdepth > 0);
 
   if (currentdepth > 1UL)
@@ -274,7 +274,7 @@ static void pms_inplacenextLimdfsstate(const Limdfsconstinfo *mt,
   GtMssufpatLimdfsstate *col = (GtMssufpatLimdfsstate *) aliascol;
   GtMssufpatLimdfsconstinfo *mti = (GtMssufpatLimdfsconstinfo*) mt;
 
-  gt_assert(ISNOTSPECIAL(currentchar));
+  gt_assert(GT_ISNOTSPECIAL(currentchar));
 #ifdef SKDEBUG
   tmp = col->prefixofsuffixbits;
 #endif

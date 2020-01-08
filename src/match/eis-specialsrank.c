@@ -124,9 +124,9 @@ gt_newSpecialsRankLookup(const GtEncseq *encseq, GtReadmode readmode,
     {
       while (pos < nextSamplePos)
       {
-        pos = MIN(MAX(pos, range.start), nextSamplePos);
-        sum += MIN(range.end - pos, nextSamplePos - pos);
-        pos = MIN(range.end, nextSamplePos);
+        pos = GT_MIN(GT_MAX(pos, range.start), nextSamplePos);
+        sum += GT_MIN(range.end - pos, nextSamplePos - pos);
+        pos = GT_MIN(range.end, nextSamplePos);
         if (pos < nextSamplePos)
         {
           nextRange(&range, sri, readmode, seqLastPos);
@@ -172,13 +172,13 @@ specialsRankFromSampleTable(const SpecialsRankLookup *ranker, GtUword pos)
     const GtEncseq *encseq = ranker->encseq;
     GtEncseqReader *esr = rankTable->scanState;
     GtReadmode readmode = rankTable->readmode;
-    GtUword encseqQueryMax = MIN(pos, encSeqLen);
+    GtUword encseqQueryMax = GT_MIN(pos, encSeqLen);
     if (samplePos < encseqQueryMax)
     {
       gt_encseq_reader_reinit_with_readmode(esr, encseq, readmode, samplePos);
       do {
         samplePos++;
-        if (ISSPECIAL(gt_encseq_reader_next_encoded_char(esr)))
+        if (GT_ISSPECIAL(gt_encseq_reader_next_encoded_char(esr)))
           ++rankCount;
       } while (samplePos < encseqQueryMax);
     }

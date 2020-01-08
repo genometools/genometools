@@ -213,7 +213,7 @@ locBitsUpperBounds(void *cbState, struct segmentDesc *desc,
       for (i = 0; i < numSegmentDesc; ++i)
       {
         size_t len = desc[i].len;
-        maxSegLen = MAX(len, maxSegLen);
+        maxSegLen = GT_MAX(len, maxSegLen);
         if (state->featureToggles & BWTLocateCount)
           maxBitsTotal += requiredUlongBits(len) * desc[i].repeatCount;
         numSegmentsTotal += desc[i].repeatCount;
@@ -298,7 +298,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
         && locateInterval > 1)
     {
       GtUword stdLocMarks = srcLen / locateInterval,
-        extraLocMarksUpperBound = MIN(srcLen/2, srcLen - stdLocMarks);
+        extraLocMarksUpperBound = GT_MIN(srcLen/2, srcLen - stdLocMarks);
       if (stats)
       {
         GtUword nonValSortSyms = 0;
@@ -309,8 +309,9 @@ initAddLocateInfoState(struct addLocateInfoState *state,
                 alphabet, MRAEncMapSymbol(alphabet, i),
                 SORTMODE_VALUE, (int *)rangeSort))
             nonValSortSyms += stats->symbolDistributionTable[i];
-        extraLocMarksUpperBound = MIN3(extraLocMarksUpperBound, nonValSortSyms,
-                                       srcLen - nonValSortSyms);
+        extraLocMarksUpperBound = GT_MIN3(extraLocMarksUpperBound,
+                                          nonValSortSyms,
+                                          srcLen - nonValSortSyms);
       }
       state->extraLocMarksUpperBound = extraLocMarksUpperBound;
     }
@@ -359,7 +360,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, GtUword seqLen,
 #endif
       accessSequence(origSeqAccess, syms + 1, 0, 1);
     gt_assert(retcode == 1);
-    syms[0] = UNDEFBWTCHAR;
+    syms[0] = GT_UNDEFBWTCHAR;
   }
   else /* pos == seqLen - 1 */
   {
@@ -368,7 +369,7 @@ isSortModeTransition(RandomSeqAccessor origSeqAccess, GtUword seqLen,
 #endif
       accessSequence(origSeqAccess, syms, seqLen - 2, 1);
     gt_assert(retcode == 1);
-    syms[1] = UNDEFBWTCHAR;
+    syms[1] = GT_UNDEFBWTCHAR;
   }
   {
     AlphabetRangeID range[2];
@@ -456,7 +457,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
         if (mapVal != 0)
           accessSequence(state->origSeqAccess, &BWTSym, mapVal - 1, 1);
         else
-          BWTSym = UNDEFBWTCHAR;
+          BWTSym = GT_UNDEFBWTCHAR;
         if (state->rangeSort[MRAEncGetRangeOfSymbol(
                 alphabet, MRAEncMapSymbol(alphabet, BWTSym))]
             == SORTMODE_RANK)

@@ -63,7 +63,7 @@ static GtUchar getfirstedgechar(const Mergertrierep *trierep,
       node->suffixinfo.startpos + prevdepth >=
       gt_encseq_total_length(eri->encseqptr))
   {
-    return (GtUchar) SEPARATOR;
+    return (GtUchar) GT_SEPARATOR;
   }
   return gt_encseq_get_encoded_char(eri->encseqptr, /* Random access */
                         node->suffixinfo.startpos + prevdepth,
@@ -73,9 +73,9 @@ static GtUchar getfirstedgechar(const Mergertrierep *trierep,
 static int mtrie_comparecharacters(GtUchar cc1,unsigned int idx1,
                                    GtUchar cc2,unsigned int idx2)
 {
-  if (ISSPECIAL(cc1))
+  if (GT_ISSPECIAL(cc1))
   {
-    if (ISSPECIAL(cc2))
+    if (GT_ISSPECIAL(cc2))
     {
       if (idx1 <= idx2)
       {
@@ -90,7 +90,7 @@ static int mtrie_comparecharacters(GtUchar cc1,unsigned int idx1,
     }
   } else
   {
-    if (ISSPECIAL(cc2))
+    if (GT_ISSPECIAL(cc2))
     {
       return -1;  /* cc1 < cc2 */
     } else
@@ -142,7 +142,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
               trierep->enseqreadinfo[current->suffixinfo.idx].encseqptr,
               pos,
               trierep->enseqreadinfo[current->suffixinfo.idx].readmode);
-      if (ISSPECIAL(cc))
+      if (GT_ISSPECIAL(cc))
       {
         printf("#\n");
         break;
@@ -151,7 +151,7 @@ static void showmergertrie2(const Mergertrierep *trierep,
     }
     if (MTRIE_ISLEAF(current))
     {
-      if (!ISSPECIAL(cc))
+      if (!GT_ISSPECIAL(cc))
       {
         printf("~\n");
       }
@@ -410,7 +410,7 @@ static Mergertrienode *mtrie_makenewbranch(Mergertrierep *trierep,
   if (suffixinfo->startpos + currentdepth >=
       gt_encseq_total_length(eri->encseqptr))
   {
-    cc2 = (GtUchar) SEPARATOR;
+    cc2 = (GtUchar) GT_SEPARATOR;
   } else
   {
     cc2 = gt_encseq_get_encoded_char(eri->encseqptr,
@@ -444,7 +444,7 @@ static GtUword getlcp(const GtEncseq *encseq1,
   {
     cc1 = gt_encseq_get_encoded_char(/*XXX*/ encseq1,i1,readmode1);
     if (cc1 != gt_encseq_get_encoded_char(/*XXX*/ encseq2,i2,readmode2)
-          || ISSPECIAL(cc1))
+          || GT_ISSPECIAL(cc1))
     {
       break;
     }
@@ -505,7 +505,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
     {
       if (suffixinfo->startpos + currentdepth >= totallength)
       {
-        cc = (GtUchar) SEPARATOR;
+        cc = (GtUchar) GT_SEPARATOR;
       } else
       {
         /* Random access */

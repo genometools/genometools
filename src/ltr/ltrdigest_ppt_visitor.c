@@ -400,7 +400,7 @@ static GtPPTResults* gt_ppt_find(GtLTRdigestPPTVisitor *v,
      -------------------------------- */
   ltrlen = gt_range_length(&rightltrrng);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN((GtUword) v->radius, ltrlen-1);
+  radius = GT_MIN((GtUword) v->radius, ltrlen-1);
   /* encode sequence */
   encoded_seq = gt_malloc(sizeof (unsigned int) * seqlen);
   for (i = 0; i < seqlen; i++) {
@@ -421,7 +421,7 @@ static GtPPTResults* gt_ppt_find(GtLTRdigestPPTVisitor *v,
      -------------------------------- */
   ltrlen = gt_range_length(&leftltrrng);
   /* make sure that we do not cross the LTR boundary */
-  radius = MIN((GtUword) v->radius, ltrlen - 1);
+  radius = GT_MIN((GtUword) v->radius, ltrlen - 1);
   /* encode sequence */
   for (i = 0; i < seqlen; i++) {
     encoded_seq[i] = (unsigned int) gt_alphabet_encode(v->alpha, rev_seq[i]);
