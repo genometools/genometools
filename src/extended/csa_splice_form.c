@@ -21,13 +21,13 @@
 
 struct GtCSASpliceForm {
   GtArray *spliced_alignments;
-  GetGenomicRangeFunc get_genomic_range;
-  GetStrandFunc get_strand;
+  GtGetGenomicRangeFunc get_genomic_range;
+  GtGetStrandFunc get_strand;
 };
 
 GtCSASpliceForm* gt_csa_splice_form_new(void *spliced_alignment,
-                                   GetGenomicRangeFunc get_genomic_range,
-                                   GetStrandFunc get_strand)
+                                   GtGetGenomicRangeFunc get_genomic_range,
+                                   GtGetStrandFunc get_strand)
 {
   GtCSASpliceForm *splice_form;
   gt_assert(spliced_alignment && get_strand);

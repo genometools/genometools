@@ -24,7 +24,7 @@
 typedef struct GtCSASpliceForm GtCSASpliceForm;
 
 GtCSASpliceForm* gt_csa_splice_form_new(void *spliced_alignment,
-                                        GetGenomicRangeFunc, GetStrandFunc);
+                                        GtGetGenomicRangeFunc, GtGetStrandFunc);
 void             gt_csa_splice_form_delete(GtCSASpliceForm*);
 void             gt_csa_splice_form_add_sa(GtCSASpliceForm*,
                                            void *spliced_alignment);

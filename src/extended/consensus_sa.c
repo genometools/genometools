@@ -27,17 +27,17 @@ typedef struct {
   const void *set_of_sas;
   GtUword number_of_sas;
   size_t size_of_sa;
-  GetGenomicRangeFunc get_genomic_range;
-  GetStrandFunc get_strand;
-  GetExonsFunc get_exons;
-  ProcessSpliceFormFunc process_splice_form;
+  GtGetGenomicRangeFunc get_genomic_range;
+  GtGetStrandFunc get_strand;
+  GtGetExonsFunc get_exons;
+  GtProcessSpliceFormFunc process_splice_form;
   void *userdata;
 } ConsensusSA;
 
 #ifndef NDEBUG
 static bool set_of_sas_is_sorted(const void *set_of_sas,
                                  GtUword number_of_sas,
-                                 size_t size_of_sa, GetGenomicRangeFunc
+                                 size_t size_of_sa, GtGetGenomicRangeFunc
                                  get_genomic_range)
 {
   GtRange gt_range_a, gt_range_b;
@@ -564,9 +564,10 @@ static void compute_csas(ConsensusSA *csa)
 }
 
 void gt_consensus_sa(const void *set_of_sas, GtUword number_of_sas,
-                     size_t size_of_sa, GetGenomicRangeFunc get_genomic_range,
-                     GetStrandFunc get_strand, GetExonsFunc get_exons,
-                     ProcessSpliceFormFunc process_splice_form, void *userdata)
+                     size_t size_of_sa, GtGetGenomicRangeFunc get_genomic_range,
+                     GtGetStrandFunc get_strand, GtGetExonsFunc get_exons,
+                     GtProcessSpliceFormFunc process_splice_form,
+                     void *userdata)
 {
   ConsensusSA csa;
   gt_assert(set_of_sas && number_of_sas && size_of_sa);
