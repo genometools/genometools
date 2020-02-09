@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/warning_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport_api.h"
 #include "core/strand_api.h"
@@ -57,14 +58,13 @@ static int gt_ltrdigest_strand_assign_visitor_feature_node(GtNodeVisitor *nv,
       lv->strand = node_strand;
     else {
       if (node_strand != GT_STRAND_UNKNOWN && node_strand != lv->strand) {
-        gt_error_set(err, "inconsistent strands encountered in `%s' feature "
-                        "in file %s, line %u: found %c, expected %c",
-                        gt_feature_node_get_type(curnode),
-                        gt_genome_node_get_filename((GtGenomeNode*) curnode),
-                        gt_genome_node_get_line_number((GtGenomeNode*) curnode),
-                        GT_STRAND_CHARS[node_strand],
-                        GT_STRAND_CHARS[lv->strand]);
-        had_err = -1;
+        gt_warning("inconsistent strands encountered in `%s' feature "
+                   "in file %s, line %u: found %c, expected %c",
+                   gt_feature_node_get_type(curnode),
+                   gt_genome_node_get_filename((GtGenomeNode*) curnode),
+                   gt_genome_node_get_line_number((GtGenomeNode*) curnode),
+                   GT_STRAND_CHARS[node_strand],
+                   GT_STRAND_CHARS[lv->strand]);
       }
     }
   }
