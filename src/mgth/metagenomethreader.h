@@ -221,7 +221,7 @@ typedef struct
 } ParseStruct;
 
 /* specific access mode of queryhash */
-DECLARE_HASHMAP(char *, gt_cstr_nofree, GtUword *, ulp,,)
+DECLARE_HASHMAP(char *, gt_cstr_nofree, GtUword *, ulp, extern,)
 DECLARE_SAFE_DEREF(GtUword *, ulp)
 
 /* Funktion, mit der der Metagenomethreader gestartet wird

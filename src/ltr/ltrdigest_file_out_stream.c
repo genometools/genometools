@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2015 Sascha Steinbiss <sascha@steinbiss.name>
+  Copyright (c) 2008-2020 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2008-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -33,6 +33,7 @@
 #include "core/symbol.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "extended/extract_feature_sequence.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
@@ -416,6 +417,8 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 
     if (!had_err) {
       GtRange rng;
+      int ret = 0;
+
       ls->element.seqid = gt_calloc((size_t) ls->seqnamelen+1, sizeof (char));
       (void) snprintf(ls->element.seqid,
                       GT_MIN((size_t) gt_str_length(sdesc),
@@ -425,11 +428,15 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
       if (gt_str_length(sdesc) > (GtUword) ls->seqnamelen)
         ls->element.seqid[ls->seqnamelen] = '\0';
 
-      (void) gt_ltrelement_format_description(&ls->element,
-                                              ls->seqnamelen,
-                                              desc,
-                                              (size_t) (GT_MAXFASTAHEADER-1));
+      ret = gt_ltrelement_format_description(&ls->element,
+                                             ls->seqnamelen,
+                                             desc,
+                                             (size_t) (GT_MAXFASTAHEADER-1));
+      if (ret < 0) {
+        gt_warning("FASTA header truncated: %s", desc);
+      }
       gt_str_delete(sdesc);
+
 
       /* output basic retrotransposon data */
       lltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftLTR);
