@@ -324,8 +324,10 @@ endif
 ifneq ($(SYSTEM),Windows)
   EXP_CPPFLAGS += -DLUA_DL_DLOPEN
   ifneq ($(SYSTEM),FreeBSD)
+  ifneq ($(SYSTEM),OpenBSD)
     LUA_LDLIB:=-ldl
     EXP_LDLIBS += -ldl
+  endif
   endif
 endif
 
@@ -457,7 +459,9 @@ ifneq ($(with-sqlite),no)
     ifneq ($(SYSTEM),Windows)
       EXP_LDLIBS += -lpthread
       ifneq ($(SYSTEM),FreeBSD)
+      ifneq ($(SYSTEM),OpenBSD)
         EXP_LDLIBS += -ldl
+      endif
       endif
     endif
   endif
