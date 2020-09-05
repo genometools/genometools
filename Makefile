@@ -569,6 +569,13 @@ all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      $(ANNOTATIONSKETCH_EXAMPLES) \
      $(ADDITIONAL_BINARIES)
 
+.PHONY: go gotest
+go:
+	go install -v ./gtgo/...
+
+gotest: go
+	gff3validator_go testdata/encode_known_genes_Mar07.gff3
+
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	$(V_ECHO) "[link $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
