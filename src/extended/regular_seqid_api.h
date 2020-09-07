@@ -20,7 +20,7 @@
 
 #include "core/str_api.h"
 
-/* ResularSeqID module */
+/* RegularSeqID module */
 
 /* Parse ``regular'' sequence ID from <description> and save it in <seqid>. */
 void gt_regular_seqid_save(GtStr *seqid, GtStr *description);
