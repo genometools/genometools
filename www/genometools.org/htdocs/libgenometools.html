@@ -54,11 +54,19 @@ interfaces.
 
   <li><a href="#GtBEDInStream">GtBEDInStream</a>
 
+  <li><a href="#GtBioseq">GtBioseq</a>
+
   <li><a href="#GtBittab">GtBittab</a>
 
   <li><a href="#GtBlock">GtBlock</a>
 
+  <li><a href="#GtBoolMatrix">GtBoolMatrix</a>
+
+  <li><a href="#GtBufferStream">GtBufferStream</a>
+
   <li><a href="#GtCDSStream">GtCDSStream</a>
+
+  <li><a href="#GtCDSVisitor">GtCDSVisitor</a>
 
   <li><a href="#GtCSAStream">GtCSAStream</a>
 
@@ -112,6 +120,8 @@ interfaces.
 
   <li><a href="#GtExtractFeatureStream">GtExtractFeatureStream</a>
 
+  <li><a href="#GtFastaReader">GtFastaReader</a>
+
   <li><a href="#GtFeatureInStream">GtFeatureInStream</a>
 
   <li><a href="#GtFeatureIndex">GtFeatureIndex</a>
@@ -164,6 +174,8 @@ interfaces.
 
   <li><a href="#GtMD5Encoder">GtMD5Encoder</a>
 
+  <li><a href="#GtMD5Tab">GtMD5Tab</a>
+
   <li><a href="#GtMD5ToIDStream">GtMD5ToIDStream</a>
 
   <li><a href="#GtMatch">GtMatch</a>
@@ -206,6 +218,10 @@ interfaces.
 
   <li><a href="#GtQueue">GtQueue</a>
 
+  <li><a href="#GtRBTree">GtRBTree</a>
+
+  <li><a href="#GtRBTreeIter">GtRBTreeIter</a>
+
   <li><a href="#GtRDBMySQL">GtRDBMySQL</a>
 
   <li><a href="#GtRDBSqlite">GtRDBSqlite</a>
@@ -224,11 +240,15 @@ interfaces.
 
   <li><a href="#GtRegionNode">GtRegionNode</a>
 
+  <li><a href="#GtScoreMatrix">GtScoreMatrix</a>
+
   <li><a href="#GtScriptWrapperStream">GtScriptWrapperStream</a>
 
   <li><a href="#GtScriptWrapperVisitor">GtScriptWrapperVisitor</a>
 
   <li><a href="#GtSelectStream">GtSelectStream</a>
+
+  <li><a href="#GtSeq">GtSeq</a>
 
   <li><a href="#GtSeqIterator">GtSeqIterator</a>
 
@@ -236,11 +256,15 @@ interfaces.
 
   <li><a href="#GtSeqIteratorSequenceBuffer">GtSeqIteratorSequenceBuffer</a>
 
+  <li><a href="#GtSeqid2FileInfo">GtSeqid2FileInfo</a>
+
   <li><a href="#GtSequenceNode">GtSequenceNode</a>
 
   <li><a href="#GtSetSourceVisitor">GtSetSourceVisitor</a>
 
   <li><a href="#GtSortStream">GtSortStream</a>
+
+  <li><a href="#GtSpliceSiteInfoStream">GtSpliceSiteInfoStream</a>
 
   <li><a href="#GtSplitter">GtSplitter</a>
 
@@ -249,6 +273,8 @@ interfaces.
   <li><a href="#GtStr">GtStr</a>
 
   <li><a href="#GtStrArray">GtStrArray</a>
+
+  <li><a href="#GtStrCache">GtStrCache</a>
 
   <li><a href="#GtStrand">GtStrand</a>
 
@@ -288,6 +314,10 @@ interfaces.
 
   <li><a href="#Array2dim">Array2dim</a>
 
+  <li><a href="#Array3dim">Array3dim</a>
+
+  <li><a href="#Arraydef">Arraydef</a>
+
   <li><a href="#Assert">Assert</a>
 
   <li><a href="#Bsearch">Bsearch</a>
@@ -296,19 +326,37 @@ interfaces.
 
   <li><a href="#ByteSelect">ByteSelect</a>
 
+  <li><a href="#ClassAlloc">ClassAlloc</a>
+
+  <li><a href="#Compat">Compat</a>
+
+  <li><a href="#ConsensusSplicedAlignment">ConsensusSplicedAlignment</a>
+
   <li><a href="#Countingsort">Countingsort</a>
 
   <li><a href="#Cstr">Cstr</a>
 
+  <li><a href="#CstrArray">CstrArray</a>
+
   <li><a href="#Deprecated">Deprecated</a>
+
+  <li><a href="#Divmodmul">Divmodmul</a>
 
   <li><a href="#Endianess">Endianess</a>
 
+  <li><a href="#Ensure">Ensure</a>
+
   <li><a href="#FASTA">FASTA</a>
+
+  <li><a href="#FileAllocator">FileAllocator</a>
 
   <li><a href="#Fileutils">Fileutils</a>
 
   <li><a href="#FunctionPointer">FunctionPointer</a>
+
+  <li><a href="#GFF3Escaping">GFF3Escaping</a>
+
+  <li><a href="#GlobalChaining">GlobalChaining</a>
 
   <li><a href="#Grep">Grep</a>
 
@@ -318,11 +366,17 @@ interfaces.
 
   <li><a href="#MD5Fingerprint">MD5Fingerprint</a>
 
+  <li><a href="#MD5Seqid">MD5Seqid</a>
+
+  <li><a href="#Mathsupport">Mathsupport</a>
+
   <li><a href="#MemoryAllocation">MemoryAllocation</a>
 
   <li><a href="#Msort">Msort</a>
 
   <li><a href="#Multithread">Multithread</a>
+
+  <li><a href="#ORF">ORF</a>
 
   <li><a href="#POSIX">POSIX</a>
 
@@ -330,7 +384,13 @@ interfaces.
 
   <li><a href="#Qsort">Qsort</a>
 
+  <li><a href="#RegularSeqID">RegularSeqID</a>
+
   <li><a href="#Reverse">Reverse</a>
+
+  <li><a href="#Safearith">Safearith</a>
+
+  <li><a href="#SeqID2File">SeqID2File</a>
 
   <li><a href="#Strcmp">Strcmp</a>
 
@@ -338,18 +398,59 @@ interfaces.
 
   <li><a href="#Threads">Threads</a>
 
+  <li><a href="#Tooldriver">Tooldriver</a>
+
   <li><a href="#Undef">Undef</a>
+
+  <li><a href="#UnitTest">UnitTest</a>
 
   <li><a href="#Unused">Unused</a>
 
   <li><a href="#Version">Version</a>
 
+  <li><a href="#VersionFunc">VersionFunc</a>
+
   <li><a href="#Warning">Warning</a>
 
   <li><a href="#XANSI">XANSI</a>
 
+  <li><a href="#XPOSIX">XPOSIX</a>
+
+  <li><a href="#Yarandom">Yarandom</a>
+
 </ul>
 <h2>Sole functions</h2>
+<a name="GtStrConstructorFunc"></a>
+
+<code>GtStr*  GtStrConstructorFunc(void *str_source, GtUword index)</code>
+<p>
+Function to obtain a <code>GtStr</code> from a <code>str_source</code>, given an <code>index</code>.
+</p>
+<hr>
+<a name="GtGetSeqFunc"></a>
+
+<code>const char*  GtGetSeqFunc(void *seqs, GtUword index)</code>
+<p>
+Function used to retrieve a cleartext sequence for an index number.
+</p>
+<hr>
+<a name="GtGetSeqLenFunc"></a>
+
+<code>GtUword      GtGetSeqLenFunc(void *seqs, GtUword index)</code>
+<p>
+Function used to retrieve a sequence length for an index number.
+</p>
+<hr>
+<a name="gt_output_file_xopen_forcecheck"></a>
+
+<code>GtFile*            gt_output_file_xopen_forcecheck(const char *path,
+                                                  const char *mode, bool force,
+                                                  GtError *err)</code>
+<p>
+Helper function for (rare) tools which do not use the full <code>GtOutputFileInfo</code>
+   (usually if directories are involved).
+</p>
+<hr>
 <a name="gt_feature_index_gfflike_get_all_features"></a>
 
 <code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
@@ -370,15 +471,6 @@ Duplicate internal feature nodes of type <code>source_type</code> as features wi
    <code>dest_type</code>. The duplicated features does not inherit the children.
 </p>
 <hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
-</p>
-<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -388,6 +480,15 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
+</p>
+<hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -928,6 +1029,13 @@ Compare the content of <code>array_a</code> with the content of <code>array_b</c
    <code>gt_array_elem_size()</code>.
 </p>
 <hr>
+<a name="gt_array_prepend_array"></a>
+
+<code>void      gt_array_prepend_array(GtArray *dest, const GtArray *src)</code>
+<p>
+Prepend the items from <code>src</code> to <code>dest</code>.
+</p>
+<hr>
 <a name="gt_array_delete"></a>
 
 <code>void      gt_array_delete(GtArray *array)</code>
@@ -1023,6 +1131,229 @@ Create thick BED features parsed by <code>bed_in_stream</code> with given <code>
 <p>
 Create BED blocks parsed by <code>bed_in_stream</code> with given <code>type</code> (instead of
    the default "BED_block").
+</p>
+<hr>
+<a name="GtBioseq"></a>
+<h2>Class GtBioseq</h2>
+
+<p> <code>GtBioseq</code> represents a simple collection of biosequences. </p>
+
+<hr>
+<a name="gt_bioseq_new"></a>
+
+<code>GtBioseq*    gt_bioseq_new(const char *sequence_file, GtError*)</code>
+<p>
+Construct a new <code>GtBioseq</code> object (and create the bioseq files, if
+   necessary).
+</p>
+<hr>
+<a name="gt_bioseq_new_recreate"></a>
+
+<code>GtBioseq*    gt_bioseq_new_recreate(const char *sequence_file, GtError*)</code>
+<p>
+Construct a new <code>GtBioseq</code> object (and always create the the bioseq
+   files).
+</p>
+<hr>
+<a name="gt_bioseq_new_str"></a>
+
+<code>GtBioseq*    gt_bioseq_new_str(GtStr* sequence_file, GtError*)</code>
+<p>
+Construct a new <code>GtBioseq</code> object (and always create the the bioseq
+   files, if necessary). Filename is given as a <code>GtString</code>.
+</p>
+<hr>
+<a name="gt_bioseq_delete"></a>
+
+<code>void         gt_bioseq_delete(GtBioseq *bioseq)</code>
+<p>
+Delete the <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_delete_indices"></a>
+
+<code>void         gt_bioseq_delete_indices(GtBioseq *bioseq)</code>
+<p>
+Delete the index files belonging to <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_alphabet"></a>
+
+<code>GtAlphabet*  gt_bioseq_get_alphabet(GtBioseq *bioseq)</code>
+<p>
+Return the <code>GtAlphabet</code> associated with <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_seq"></a>
+
+<code>GtSeq*       gt_bioseq_get_seq(GtBioseq *bioseq, GtUword index)</code>
+<p>
+Return sequence with given <code>index</code> as <code>GtSeq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_seq_range"></a>
+
+<code>GtSeq*       gt_bioseq_get_seq_range(GtBioseq*, GtUword index,
+                                    GtUword start, GtUword end)</code>
+<p>
+Return subsequence within the boundaries <code>start</code> and <code>end</code> of the sequence
+   with given <code>index</code> as <code>GtSeq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_description"></a>
+
+<code>const char*  gt_bioseq_get_description(GtBioseq*, GtUword)</code>
+<p>
+Return description of the sequence with given <code>index</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_char"></a>
+
+<code>char         gt_bioseq_get_char(const GtBioseq*, GtUword index,
+                               GtUword position)</code>
+<p>
+Return character at position <code>position</code> of the sequence with given
+   <code>index</code>.
+</p>
+<hr>
+<a name="gt_bioseq_seq_has_wildcards"></a>
+
+<code>bool         gt_bioseq_seq_has_wildcards(const GtBioseq *bioseq,
+                                        GtUword idx)</code>
+<p>
+Return TRUE if sequence with given <code>index</code> contains wildcards.
+</p>
+<hr>
+<a name="gt_bioseq_get_sequence"></a>
+
+<code>char*        gt_bioseq_get_sequence(const GtBioseq *bioseq, GtUword index)</code>
+<p>
+Return sequence with given <code>index</code> (not '\0' terminated).
+</p>
+<hr>
+<a name="gt_bioseq_get_sequence_range"></a>
+
+<code>char*        gt_bioseq_get_sequence_range(const GtBioseq *bioseq, GtUword index,
+                                         GtUword start,
+                                         GtUword end)</code>
+<p>
+Return subsequence within the boundaries <code>start</code> and <code>end</code> of the sequence
+   with given <code>index</code> (not '\0' terminated).
+</p>
+<hr>
+<a name="gt_bioseq_get_encoded_char"></a>
+
+<code>GtUchar      gt_bioseq_get_encoded_char(const GtBioseq *bioseq, GtUword index,
+                                       GtUword position)</code>
+<p>
+Return character at position <code>position</code> of the sequence with given
+   <code>index</code>. Character is encoded according to alphabet.
+</p>
+<hr>
+<a name="gt_bioseq_get_encoded_sequence"></a>
+
+<code>void         gt_bioseq_get_encoded_sequence(const GtBioseq *bioseq,
+                                           GtUchar *out,
+                                           GtUword index)</code>
+<p>
+Writes encoded sequence with given <code>index</code> as to <code>out</code>. The sequence
+   is encoded according to alphabet.
+</p>
+<hr>
+<a name="gt_bioseq_get_encoded_sequence_range"></a>
+
+<code>void         gt_bioseq_get_encoded_sequence_range(const GtBioseq *bioseq,
+                                                 GtUchar *out,
+                                                 GtUword index,
+                                                 GtUword start,
+                                                 GtUword end)</code>
+<p>
+Return subsequence within the boundaries <code>start</code> and <code>end</code> of the sequence
+   with given <code>index</code> (not '\0' terminated). The sequence is encoded according
+   to the alphabet of <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_md5_fingerprint"></a>
+
+<code>const char*  gt_bioseq_get_md5_fingerprint(GtBioseq *bioseq, GtUword index)</code>
+<p>
+Return MD5 fingerprint of sequence with given <code>index</code>.
+</p>
+<hr>
+<a name="gt_bioseq_filename"></a>
+
+<code>const char*  gt_bioseq_filename(const GtBioseq *bioseq)</code>
+<p>
+Return filename of sequence file underlying <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_sequence_length"></a>
+
+<code>GtUword      gt_bioseq_get_sequence_length(const GtBioseq *bioseq,
+                                          GtUword index)</code>
+<p>
+Return length of the sequence with given <code>index</code> in <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_get_total_length"></a>
+
+<code>GtUword      gt_bioseq_get_total_length(const GtBioseq *bioseq)</code>
+<p>
+Return length of all sequences in <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_number_of_sequences"></a>
+
+<code>GtUword      gt_bioseq_number_of_sequences(GtBioseq *bioseq)</code>
+<p>
+Return count of all sequences in <code>bioseq</code>.
+</p>
+<hr>
+<a name="gt_bioseq_md5_to_index"></a>
+
+<code>GtUword      gt_bioseq_md5_to_index(GtBioseq *bioseq, const char *MD5)</code>
+<p>
+Return the index of the (first) sequence with given <code>MD5</code> contained in
+   <code>bioseq</code>, if it exists. Otherwise <code>GT_UNDEF_UWORD</code> is returned.
+</p>
+<hr>
+<a name="gt_bioseq_show_as_fasta"></a>
+
+<code>void         gt_bioseq_show_as_fasta(GtBioseq *bioseq, GtUword width,
+                                    GtFile *outfp)</code>
+<p>
+Shows a <code>bioseq</code> on <code>outfp</code> (in fasta format).
+   If <code>width</code> is != 0 the sequences are formatted accordingly.
+</p>
+<hr>
+<a name="gt_bioseq_show_sequence_as_fasta"></a>
+
+<code>void         gt_bioseq_show_sequence_as_fasta(GtBioseq *bioseq, GtUword seqnum,
+                                             GtUword width, GtFile *outfp)</code>
+<p>
+Shows a sequence with number <code>seqnum</code> from a <code>bioseq</code> on <code>outfp</code> (in fasta
+   format). If <code>width</code> is != 0 the sequences are formatted accordingly.
+</p>
+<hr>
+<a name="gt_bioseq_show_gc_content"></a>
+
+<code>void         gt_bioseq_show_gc_content(GtBioseq*, GtFile *outfp)</code>
+<p>
+Shows GC-content on <code>outfp</code> (for DNA files).
+</p>
+<hr>
+<a name="gt_bioseq_show_stat"></a>
+
+<code>void         gt_bioseq_show_stat(GtBioseq *bioseq, GtFile *outfp)</code>
+<p>
+Shows <code>bioseq</code> statistics (on <code>outfp</code>).
+</p>
+<hr>
+<a name="gt_bioseq_show_seqlengthdistri"></a>
+
+<code>void         gt_bioseq_show_seqlengthdistri(GtBioseq *bioseq, GtFile *outfp)</code>
+<p>
+Shows <code>bioseq</code> sequence length distribution (on <code>outfp</code>).
 </p>
 <hr>
 <a name="GtBittab"></a>
@@ -1333,6 +1664,93 @@ Returns the feature type of the <code>GtBlock</code>.
 Deletes a <code>GtBlock</code>.
 </p>
 <hr>
+<a name="GtBoolMatrix"></a>
+<h2>Class GtBoolMatrix</h2>
+
+<p> <code>GtBoolMatrix</code> implements a two-dimensional matrix containing boolean
+   values. </p>
+
+<hr>
+<a name="gt_bool_matrix_new"></a>
+
+<code>GtBoolMatrix*  gt_bool_matrix_new(void)</code>
+<p>
+Create a new, empty <code>GtBoolMatrix</code>.
+</p>
+<hr>
+<a name="gt_bool_matrix_get"></a>
+
+<code>bool           gt_bool_matrix_get(GtBoolMatrix *bm, GtUword firstdim,
+                                 GtUword seconddim)</code>
+<p>
+Returns the value at position <code>firstdim</code>, <code>seconddim</code> from <code>bm</code>.
+</p>
+<hr>
+<a name="gt_bool_matrix_set"></a>
+
+<code>void           gt_bool_matrix_set(GtBoolMatrix *bm, GtUword firstdim,
+                                 GtUword seconddim, bool b)</code>
+<p>
+Sets the value at position <code>firstdim</code>, <code>seconddim</code> in <code>bm</code> to <code>b</code>.
+</p>
+<hr>
+<a name="gt_bool_matrix_get_first_column"></a>
+
+<code>GtUword        gt_bool_matrix_get_first_column(const GtBoolMatrix *bm,
+                                              GtUword firstdim)</code>
+<p>
+Returns the first value from column position <code>firstdim</code> from <code>bm</code>.
+</p>
+<hr>
+<a name="gt_bool_matrix_get_last_column"></a>
+
+<code>GtUword        gt_bool_matrix_get_last_column(const GtBoolMatrix *bm,
+                                             GtUword firstdim)</code>
+<p>
+Returns the last value from column position <code>firstdim</code> from <code>bm</code>.
+</p>
+<hr>
+<a name="gt_bool_matrix_get_next_column"></a>
+
+<code>GtUword        gt_bool_matrix_get_next_column(const GtBoolMatrix *bm,
+                                             GtUword firstdim,
+                                             GtUword i)</code>
+<p>
+Returns the next value from column position <code>firstdim</code> from <code>bm</code>,
+   with <code>i</code> being the current position.
+</p>
+<hr>
+<a name="gt_bool_matrix_delete"></a>
+
+<code>void           gt_bool_matrix_delete(GtBoolMatrix *bm)</code>
+<p>
+Deletes <code>bm</code>.
+</p>
+<hr>
+<a name="GtBufferStream"></a>
+<h2>Class GtBufferStream</h2>
+
+<p> The <code>GtBufferStream</code> is a <code>GtNodeStream</code> that buffers <code>GtGenomeNode</code>s. </p>
+
+<hr>
+<a name="gt_buffer_stream_new"></a>
+
+<code>GtNodeStream*             gt_buffer_stream_new(GtNodeStream *in_stream)</code>
+<p>
+Create a new <code>GtBufferStream</code>, reading from <code>in_stream</code>. The stream is
+   initially configured to buffer nodes read from the input until
+   <code>gt_buffer_stream_dequeue()</code> switches it to dequeue mode. In this mode,
+   calls to <code>gt_node_stream_next()</code> will deliver the stored nodes in FIFO
+   order.
+</p>
+<hr>
+<a name="gt_buffer_stream_dequeue"></a>
+
+<code>void                      gt_buffer_stream_dequeue(GtBufferStream *bs)</code>
+<p>
+Switch stream <code>bs</code> to dequeue mode.
+</p>
+<hr>
 <a name="GtCDSStream"></a>
 <h2>Class GtCDSStream</h2>
 
@@ -1360,6 +1778,41 @@ Create a <code>GtCDSStream*</code> which determines the coding sequence (CDS) fo
    <code>true</code> the final ORF must end with a stop codon. If <code>generic_start_codons</code>
    equals <code>true</code>, the start codons of the standard translation scheme are used
    as start codons (otherwise the amino acid 'M' is regarded as a start codon).
+</p>
+<hr>
+<a name="GtCDSVisitor"></a>
+<h2>Class GtCDSVisitor</h2>
+
+<p> <code>GtCDSVisitor</code> is a <code>GtNodeVisitor</code> that adds CDS features for the
+   longest ORFs in a <code>GtFeatureNode</code>. </p>
+
+<hr>
+<a name="gt_cds_visitor_new"></a>
+
+<code>GtNodeVisitor*             gt_cds_visitor_new(GtRegionMapping *region_mapping,
+                                             unsigned int minorflen,
+                                             GtStr *source, bool start_codon,
+                                             bool final_stop_codon,
+                                             bool generic_start_codons)</code>
+<p>
+Create a new <code>GtCDSVisitor</code> with the given <code>region_mapping</code> for sequence,
+   <code>minorflen</code> minimum ORF length, <code>source</code> as the source string.
+   If <code>start_codon</code> is <code>true</code> a frame has to start with a start codon,
+   otherwise a frame can start everywhere (i.e., at the first amino acid or
+   after a stop codon). If <code>final_stop_codon</code> is <code>true</code> the last ORF must
+   end with a stop codon, otherwise it can be ``open''.
+   Takes ownership of <code>region_mapping</code>.
+</p>
+<hr>
+<a name="gt_cds_visitor_set_region_mapping"></a>
+
+<code>void                       gt_cds_visitor_set_region_mapping(GtCDSVisitor
+                                                            *cds_visitor,
+                                                            GtRegionMapping
+                                                            *region_mapping)</code>
+<p>
+Sets <code>region_mapping</code> to be the region mapping specifying the sequence for
+   <code>cds_visitor</code>. Does not take ownership of <code>region_mapping</code>.
 </p>
 <hr>
 <a name="GtCSAStream"></a>
@@ -2191,7 +2644,7 @@ Stores the encoded representation of the substring from 0-based position
 <p>
 Stores the decoded version of the substring from 0-based position <code>frompos</code>
    to position <code>topos</code> of <code>encseq</code>. If the extracted region contains a separator
-   character, it will be represented by non-printable SEPARATOR constant.
+   character, it will be represented by non-printable GT_SEPARATOR constant.
    The caller is responsible to handle this case. The result of the extraction
    is written to the location pointed to by <code>buffer</code>, which must be sufficiently
    large to hold the result.
@@ -3268,6 +3721,20 @@ Unset the error <code>err</code>.
 Return the error string stored in <code>err</code> (the error must be set).
 </p>
 <hr>
+<a name="gt_error_set_progname"></a>
+
+<code>void         gt_error_set_progname(GtError *err, const char *progname)</code>
+<p>
+Sets the program name assigned to <code>err</code> to <code>progname</code>.
+</p>
+<hr>
+<a name="gt_error_get_progname"></a>
+
+<code>const char*  gt_error_get_progname(const GtError *err)</code>
+<p>
+Returns the program name assigned to <code>err</code>.
+</p>
+<hr>
 <a name="gt_error_delete"></a>
 
 <code>void         gt_error_delete(GtError *err)</code>
@@ -3300,6 +3767,58 @@ Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding s
    the sequence IDs of the extracted features are added to the FASTA header.
    If <code>target</code> is <code>true</code> the target IDs of the extracted features are added to
    the FASTA header. Takes ownership of <code>region_mapping</code>!
+</p>
+<hr>
+<a name="GtFastaReader"></a>
+<h2>Class GtFastaReader</h2>
+
+<p> <code>GtFastaReader</code> is an interface to iteratively process the sequences in
+   a FASTA file, with multiple implementations. </p>
+
+<hr>
+<a name="GtFastaReaderProcDescription"></a>
+
+<code>int  GtFastaReaderProcDescription(const char *description,
+                                            GtUword length, void *data,
+                                            GtError*)</code>
+<p>
+Gets called for each description (the start of a fasta entry).
+</p>
+<hr>
+<a name="GtFastaReaderProcSequencePart"></a>
+
+<code>int  GtFastaReaderProcSequencePart(const char *seqpart,
+                                             GtUword length, void *data,
+                                             GtError*)</code>
+<p>
+Gets called for each sequence part of a fasta entry.
+</p>
+<hr>
+<a name="GtFastaReaderProcSequenceLength"></a>
+
+<code>int  GtFastaReaderProcSequenceLength(GtUword, void *data,
+                                               GtError*)</code>
+<p>
+Gets called after a fasta entry has been read.
+</p>
+<hr>
+<a name="gt_fasta_reader_run"></a>
+
+<code>int           gt_fasta_reader_run(GtFastaReader *fr,
+                                 GtFastaReaderProcDescription,
+                                 GtFastaReaderProcSequencePart,
+                                 GtFastaReaderProcSequenceLength, void *data,
+                                 GtError*)</code>
+<p>
+Run <code>fr</code> with the given handler functions and <code>data</code> for common storage.
+   A value less than zero is returned on error and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_fasta_reader_delete"></a>
+
+<code>void          gt_fasta_reader_delete(GtFastaReader *fr)</code>
+<p>
+Delete <code>fr</code>.
 </p>
 <hr>
 <a name="GtFeatureInStream"></a>
@@ -3957,7 +4476,7 @@ Create a new <code>GtFeatureStream</code> which writes all passed nodes to
 <hr>
 <a name="gt_file_new"></a>
 
-<code>GtFile*  gt_file_new(const char *path, const char *mode, GtError *err)</code>
+<code>GtFile*      gt_file_new(const char *path, const char *mode, GtError *err)</code>
 <p>
 Return a new <code>GtFile</code> object for the given <code>path</code> and open the underlying
    file handle with given <code>mode</code>. Returns <code>NULL</code> and sets <code>err</code> accordingly, if
@@ -3968,28 +4487,28 @@ Return a new <code>GtFile</code> object for the given <code>path</code> and open
 <hr>
 <a name="gt_file_ref"></a>
 
-<code>GtFile*  gt_file_ref(GtFile *file)</code>
+<code>GtFile*      gt_file_ref(GtFile *file)</code>
 <p>
 Increments the reference count of <code>file</code>.
 </p>
 <hr>
 <a name="gt_file_new_from_fileptr"></a>
 
-<code>GtFile*  gt_file_new_from_fileptr(FILE *fp)</code>
+<code>GtFile*      gt_file_new_from_fileptr(FILE *fp)</code>
 <p>
 Create a new <code>GtFile</code> object from a normal file pointer <code>fp</code>.
 </p>
 <hr>
 <a name="gt_file_xprintf"></a>
 
-<code>void     gt_file_xprintf(GtFile *file, const char *format, ...)</code>
+<code>void         gt_file_xprintf(GtFile *file, const char *format, ...)</code>
 <p>
 <code>printf(3)</code> for generic <code>file</code>.
 </p>
 <hr>
 <a name="gt_file_xfputs"></a>
 
-<code>void     gt_file_xfputs(const char *cstr, GtFile *file)</code>
+<code>void         gt_file_xfputs(const char *cstr, GtFile *file)</code>
 <p>
 Write <code>\0</code>-terminated C string <code>cstr</code> to <code>file</code>. Similar to <code>fputs(3)</code>, but
    terminates on error.
@@ -3997,7 +4516,7 @@ Write <code>\0</code>-terminated C string <code>cstr</code> to <code>file</code>
 <hr>
 <a name="gt_file_xfputc"></a>
 
-<code>void     gt_file_xfputc(int c, GtFile *file)</code>
+<code>void         gt_file_xfputc(int c, GtFile *file)</code>
 <p>
 Write single character <code>c</code> to <code>file</code>. Similar to <code>fputc(3)</code>, but terminates
    on error.
@@ -4005,14 +4524,14 @@ Write single character <code>c</code> to <code>file</code>. Similar to <code>fpu
 <hr>
 <a name="gt_file_xfgetc"></a>
 
-<code>int      gt_file_xfgetc(GtFile *file)</code>
+<code>int          gt_file_xfgetc(GtFile *file)</code>
 <p>
 Return next character from <code>file</code> or <code>EOF</code>, if end-of-file is reached.
 </p>
 <hr>
 <a name="gt_file_xread"></a>
 
-<code>int      gt_file_xread(GtFile *file, void *buf, size_t nbytes)</code>
+<code>int          gt_file_xread(GtFile *file, void *buf, size_t nbytes)</code>
 <p>
 Read up to <code>nbytes</code> from generic <code>file</code> and store result in <code>buf</code>, returns
    bytes read.
@@ -4020,28 +4539,96 @@ Read up to <code>nbytes</code> from generic <code>file</code> and store result i
 <hr>
 <a name="gt_file_xwrite"></a>
 
-<code>void     gt_file_xwrite(GtFile *file, void *buf, size_t nbytes)</code>
+<code>void         gt_file_xwrite(GtFile *file, void *buf, size_t nbytes)</code>
 <p>
 Write <code>nbytes</code> from <code>buf</code> to given generic <code>file</code>.
 </p>
 <hr>
 <a name="gt_file_xrewind"></a>
 
-<code>void     gt_file_xrewind(GtFile *file)</code>
+<code>void         gt_file_xrewind(GtFile *file)</code>
 <p>
 Rewind the generic <code>file</code>.
 </p>
 <hr>
+<a name="gt_file_mode_determine"></a>
+
+<code>GtFileMode   gt_file_mode_determine(const char *path)</code>
+<p>
+Returns <code>GT_FILE_MODE_GZIP</code> if file with <code>path</code> ends with '.gz',
+   <code>GT_FILE_MODE_BZIP2</code> if it ends with '.bz2', and <code>GT_FILE_MODE_UNCOMPRESSED</code>
+   otherwise.
+</p>
+<hr>
+<a name="gt_file_mode_suffix"></a>
+
+<code>const char*  gt_file_mode_suffix(GtFileMode mode)</code>
+<p>
+Returns ".gz" if <code>mode</code> is GFM_GZIP, ".bz2" if <code>mode</code> is GFM_BZIP2, and ""
+   otherwise.
+</p>
+<hr>
+<a name="gt_file_basename_length"></a>
+
+<code>size_t       gt_file_basename_length(const char *path)</code>
+<p>
+Returns the length of the ``basename'' of <code>path</code>. That is, the length of path
+   without '.gz' or '.bz2' suffixes.
+</p>
+<hr>
+<a name="gt_file_open"></a>
+
+<code>GtFile*      gt_file_open(GtFileMode, const char *path, const char *mode,
+                         GtError*)</code>
+<p>
+Create a new GtFile object and open the underlying file handle, returns
+   NULL and sets <code>err</code> if the file <code>path</code> could not be opened.
+</p>
+<hr>
+<a name="gt_file_xopen_file_mode"></a>
+
+<code>GtFile*      gt_file_xopen_file_mode(GtFileMode file_mode, const char *path,
+                                    const char *mode)</code>
+<p>
+Create a new GtFile object and open the underlying file handle, abort if
+   the file <code>path</code> does not exist. The <code>file_mode</code> has to be given
+   explicitly.
+</p>
+<hr>
+<a name="gt_file_xopen"></a>
+
+<code>GtFile*      gt_file_xopen(const char *path, const char *mode)</code>
+<p>
+Create a new GtFile object and open the underlying file handle. Aborts if
+   the file <code>path</code> could not be opened. The GtFileMode is determined
+   automatically via gt_file_mode_determine(path).
+</p>
+<hr>
+<a name="gt_file_mode"></a>
+
+<code>GtFileMode   gt_file_mode(const GtFile *file)</code>
+<p>
+Returns the mode of the given <code>file</code>.
+</p>
+<hr>
+<a name="gt_file_unget_char"></a>
+
+<code>void         gt_file_unget_char(GtFile *file, char c)</code>
+<p>
+Unget character <code>c</code> to <code>file</code> (which obviously cannot be <code>NULL</code>).
+   Can only be used once at a time.
+</p>
+<hr>
 <a name="gt_file_delete"></a>
 
-<code>void     gt_file_delete(GtFile *file)</code>
+<code>void         gt_file_delete(GtFile *file)</code>
 <p>
 Close the underlying file handle and destroy the <code>file</code> object.
 </p>
 <hr>
 <a name="gt_file_delete_without_handle"></a>
 
-<code>void     gt_file_delete_without_handle(GtFile*)</code>
+<code>void         gt_file_delete_without_handle(GtFile*)</code>
 <p>
 Destroy the file handle object, but do not close the underlying handle.
 </p>
@@ -4490,6 +5077,13 @@ Let <code>genome_node</code> accept the <code>node_visitor</code>.
    In the case of an error, -1 is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
+<a name="gt_genome_nodes_show"></a>
+
+<code>void           gt_genome_nodes_show(GtArray *nodes, GtFile *outfp)</code>
+<p>
+Outputs the nodes <code>nodes</code> to the output <code>outfp</code>.
+</p>
+<hr>
 <a name="gt_genome_node_delete"></a>
 
 <code>void           gt_genome_node_delete(GtGenomeNode *genome_node)</code>
@@ -4848,6 +5442,14 @@ Creates a new <code>GtHashmap</code> object of type <code>keyhashtype</code>. If
    strings are identical, regardless of their address in memory
 </p>
 <hr>
+<a name="gt_hashmap_new_no_ma"></a>
+
+<code>GtHashmap*  gt_hashmap_new_no_ma(GtHashType keyhashtype, GtFree keyfree,
+                                GtFree valuefree)</code>
+<p>
+Like <code>gt_hashmap_new()</code>, but without using GenomeTools' memory allocator.
+</p>
+<hr>
 <a name="gt_hashmap_ref"></a>
 
 <code>GtHashmap*  gt_hashmap_ref(GtHashmap *hm)</code>
@@ -4861,6 +5463,13 @@ Increase the reference count of <code>hm</code>.
 <p>
 Return the value stored in <code>hashmap</code> for <code>key</code> or <code>NULL</code> if no such key
    exists.
+</p>
+<hr>
+<a name="gt_hashmap_get_key"></a>
+
+<code>void*       gt_hashmap_get_key(GtHashmap *hm, const void *key)</code>
+<p>
+Returns the key stored in <code>hm</code> for <code>key</code> or NULL if no such key exists.
 </p>
 <hr>
 <a name="gt_hashmap_add"></a>
@@ -5331,6 +5940,85 @@ Discards the current state of <code>enc</code> and resets it to represent the MD
 Deletes <code>enc</code> and frees all associated space.
 </p>
 <hr>
+<a name="GtMD5Tab"></a>
+<h2>Class GtMD5Tab</h2>
+
+<p> <code>GtMd5Tab</code> is a table referencing sequences in a sequence collection. </p>
+
+<hr>
+<a name="gt_md5_tab_new"></a>
+
+<code>GtMD5Tab*      gt_md5_tab_new(const char *sequence_file, void *seqs,
+                             GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
+                             GtUword num_of_seqs, bool use_cache_file,
+                             bool use_file_locking)</code>
+<p>
+Create a new MD5 table object for sequences contained in <code>sequence_file</code>.
+   The sequences have to be stored in <code>seqs</code> (<code>num_of_seqs</code> many) and have to be
+   accessible via the functions <code>get_seq</code> and <code>get_seq_len</code>. If <code>use_cache_file</code>
+   is <code>true</code>, the MD5 sums are read from a cache file (named
+   "<code>sequence_file</code><code>GT_MD5TAB_FILE_SUFFIX</code>"), if it exists or written to it, if
+   it doesn't exist. If <code>use_cache_file</code> is <code>false</code>, no cache file is read or
+   written. If <code>use_file_locking</code> is <code>true</code>, file locking is used to access the
+   cache file (recommended).
+</p>
+<hr>
+<a name="gt_md5_tab_new_from_cache_file"></a>
+
+<code>GtMD5Tab*      gt_md5_tab_new_from_cache_file(const char *cache_file,
+                                             GtUword num_of_seqs,
+                                             bool use_file_locking,
+                                             GtError *err)</code>
+<p>
+Create a new MD5 table object for sequences directly from a <code>cache_file</code>,
+   containing MD5 sums for <code>num_of_seqs</code> many sequences. If <code>use_file_locking</code>
+   is <code>true</code>, file locking is used to access the cache file (recommended).
+   Returns NULL if an error occurred opening the cache file, <code>err</code> is set
+   accordingly.
+</p>
+<hr>
+<a name="gt_md5_tab_ref"></a>
+
+<code>GtMD5Tab*      gt_md5_tab_ref(GtMD5Tab *md5_tab)</code>
+<p>
+Increment reference count for <code>md5_tab</code>.
+</p>
+<hr>
+<a name="gt_md5_tab_disable_file_locking"></a>
+
+<code>void           gt_md5_tab_disable_file_locking(GtMD5Tab *md5_tab)</code>
+<p>
+Do not use file locking for <code>md5_tab</code>.
+</p>
+<hr>
+<a name="gt_md5_tab_get"></a>
+
+<code>const char*    gt_md5_tab_get(const GtMD5Tab*, GtUword index)</code>
+<p>
+Return the MD5 sum for sequence <code>index</code>.
+</p>
+<hr>
+<a name="gt_md5_tab_map"></a>
+
+<code>GtUword        gt_md5_tab_map(GtMD5Tab*, const char *md5)</code>
+<p>
+Map <code>md5</code> back to sequence index.
+</p>
+<hr>
+<a name="gt_md5_tab_size"></a>
+
+<code>GtUword        gt_md5_tab_size(const GtMD5Tab *md5_tab)</code>
+<p>
+Return the size of the <code>md5_tab</code>.
+</p>
+<hr>
+<a name="gt_md5_tab_delete"></a>
+
+<code>void           gt_md5_tab_delete(GtMD5Tab *md5_tab)</code>
+<p>
+Decrement reference count for or delete <code>md5_tab</code>.
+</p>
+<hr>
 <a name="GtMD5ToIDStream"></a>
 <h2>Class GtMD5ToIDStream</h2>
 
@@ -5543,7 +6231,7 @@ Sets <code>similarity</code> to be the match similarity in <code>mb</code>.
 
 <code>void  gt_match_blast_set_mismatches(GtMatchBlast *mb, GtUword mm_num)</code>
 <p>
-Sets <code>num to be the number of mismatches in <mb</code>.
+Sets <code>num</code> to be the number of mismatches in <code>mb</code>.
 </p>
 <hr>
 <a name="gt_match_blast_set_gapopen"></a>
@@ -6887,6 +7575,110 @@ Return the number of elements in <code>queue</code>.
 Delete <code>queue</code>. Elements contained in <code>queue</code> are not freed!
 </p>
 <hr>
+<a name="GtRBTree"></a>
+<h2>Class GtRBTree</h2>
+
+<p> The <code>GtRBTree</code> class. Fast logarithmic data structure. This implementation
+   does not allow storage of duplicates. </p>
+
+<hr>
+<a name="gt_rbtree_new"></a>
+
+<code>GtRBTree*       gt_rbtree_new(GtCompareWithData cmp, GtRBTreeFreeFunc free,
+                             void *info)</code>
+<p>
+Returns a new <code>GtRBTree</code> object. <code>free</code> might be NULL and will be used
+   to free key-object otherwise. <code>info</code> is the data for the <code>cmp</code>-function.
+</p>
+<hr>
+<a name="gt_rbtree_clear"></a>
+
+<code>void            gt_rbtree_clear(GtRBTree *tree)</code>
+<p>
+Deletes all tree elements
+</p>
+<hr>
+<a name="gt_rbtree_find"></a>
+
+<code>void*           gt_rbtree_find(const GtRBTree *tree, void *key)</code>
+<p>
+Returns <code>key</code> if element was found in <code>tree</code> and NULL if not
+</p>
+<hr>
+<a name="gt_rbtree_insert"></a>
+
+<code>void            gt_rbtree_insert(GtRBTree *tree, void *key)</code>
+<p>
+inserts <code>key</code> into <code>tree</code>. If <code>key</code> is already present in <code>tree</code>, it will not
+   be changed.
+</p>
+<hr>
+<a name="gt_rbtree_search"></a>
+
+<code>void*           gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated)</code>
+<p>
+Returns <code>key</code>, if <code>key</code> is not present in <code>tree</code>
+   it will be inserted and <code>nodecreated</code> set accordingly
+</p>
+<hr>
+<a name="gt_rbtree_erase"></a>
+
+<code>int             gt_rbtree_erase(GtRBTree *tree, void *key)</code>
+<p>
+Remove <code>key</code> from <code>tree</code>, returns -1 if no such key exists and 0 on success
+</p>
+<hr>
+<a name="GtRBTreeIter"></a>
+<h2>Class GtRBTreeIter</h2>
+<a name="gt_rbtree_iter_new_from_first"></a>
+
+<code>GtRBTreeIter*   gt_rbtree_iter_new_from_first(const GtRBTree *tree)</code>
+<p>
+Creates an iterator from the first (smallest) element.
+</p>
+<hr>
+<a name="gt_rbtree_iter_new_from_last"></a>
+
+<code>GtRBTreeIter*   gt_rbtree_iter_new_from_last(const GtRBTree *tree)</code>
+<p>
+Creates an iterator from the last (largest) element
+</p>
+<hr>
+<a name="gt_rbtree_iter_reset_from_first"></a>
+
+<code>void            gt_rbtree_iter_reset_from_first(GtRBTreeIter *trav)</code>
+<p>
+Resets the iterator to the first (smallest) element.
+</p>
+<hr>
+<a name="gt_rbtree_iter_reset_from_last"></a>
+
+<code>void            gt_rbtree_iter_reset_from_last(GtRBTreeIter *trav)</code>
+<p>
+Resets the iterator to the last (largest) element.
+</p>
+<hr>
+<a name="gt_rbtree_iter_next"></a>
+
+<code>void*           gt_rbtree_iter_next(GtRBTreeIter *trav)</code>
+<p>
+Return next (larger) key, NULL if iterator reached end.
+</p>
+<hr>
+<a name="gt_rbtree_iter_prev"></a>
+
+<code>void*           gt_rbtree_iter_prev(GtRBTreeIter *trav)</code>
+<p>
+Return previous (smaller) key, NULL if iterator reached end.
+</p>
+<hr>
+<a name="gt_rbtree_iter_delete"></a>
+
+<code>void            gt_rbtree_iter_delete(GtRBTreeIter *trav)</code>
+<p>
+free all memory of <code>trav</code>
+</p>
+<hr>
 <a name="GtRDBMySQL"></a>
 <h2>Class GtRDBMySQL</h2>
 
@@ -7074,6 +7866,132 @@ Transform start and end of <code>range</code> by <code>offset</code> and return 
 <code>GtUword  gt_range_length(const GtRange *range)</code>
 <p>
 Returns the length of the given <code>range</code>.
+</p>
+<hr>
+<a name="gt_range_reorder"></a>
+
+<code>GtRange  gt_range_reorder(GtRange range)</code>
+<p>
+Reorder <code>range</code>.
+</p>
+<hr>
+<a name="gt_ranges_sort"></a>
+
+<code>void     gt_ranges_sort(GtArray *ranges)</code>
+<p>
+Sort an array <code>ranges</code> of ranges.
+</p>
+<hr>
+<a name="gt_ranges_sort_by_length_stable"></a>
+
+<code>void     gt_ranges_sort_by_length_stable(GtArray *ranges)</code>
+<p>
+Sort an array <code>ranges</code> of ranges by length.
+</p>
+<hr>
+<a name="gt_ranges_are_sorted"></a>
+
+<code>bool     gt_ranges_are_sorted(const GtArray *ranges)</code>
+<p>
+RetuUE if the ranges in <code>ranges</code> are sorted.
+</p>
+<hr>
+<a name="gt_ranges_do_not_overlap"></a>
+
+<code>bool     gt_ranges_do_not_overlap(const GtArray *ranges)</code>
+<p>
+Returns TRUE if the ranges in <code>ranges</code> do not overlap.
+</p>
+<hr>
+<a name="gt_ranges_are_sorted_and_do_not_overlap"></a>
+
+<code>bool     gt_ranges_are_sorted_and_do_not_overlap(const GtArray *ranges)</code>
+<p>
+Retuns TRUE if the ranges in <code>ranges</code> are sorted and do not overlap.
+</p>
+<hr>
+<a name="gt_ranges_are_equal"></a>
+
+<code>bool     gt_ranges_are_equal(const GtArray *ranges_a,
+                                  const GtArray *ranges_b)</code>
+<p>
+Returns TRUE if the ranges in <code>ranges_a</code> and <code>ranges_b</code> are equal.
+</p>
+<hr>
+<a name="gt_ranges_uniq"></a>
+
+<code>void     gt_ranges_uniq(GtArray*, const GtArray*)</code>
+<p>
+Takes a sorted array of ranges and runs the equivalent of uniq on it.
+</p>
+<hr>
+<a name="gt_ranges_uniq_in_place"></a>
+
+<code>void     gt_ranges_uniq_in_place(GtArray*)</code>
+<p>
+Similar to the previous function, just in place.
+</p>
+<hr>
+<a name="gt_ranges_uniq_count"></a>
+
+<code>GtArray*  gt_ranges_uniq_count(GtArray*, const GtArray*)</code>
+<p>
+Similar to <code>gt_ranges_uniq()</code>, additionally returns an array which contains the
+   counts of the occurrences of each elem in the original array.
+</p>
+<hr>
+<a name="gt_ranges_uniq_in_place_count"></a>
+
+<code>GtArray*  gt_ranges_uniq_in_place_count(GtArray*)</code>
+<p>
+Similar to the previous function, just in place.S
+</p>
+<hr>
+<a name="gt_ranges_are_consecutive"></a>
+
+<code>bool     gt_ranges_are_consecutive(const GtArray *ranges)</code>
+<p>
+Returns TRUE if the ranges in <code>ranges</code> are consecutive.
+</p>
+<hr>
+<a name="gt_ranges_total_length"></a>
+
+<code>GtUword  gt_ranges_total_length(const GtArray *ranges)</code>
+<p>
+Returns the sum of the length of the ranges in <code>ranges</code>.
+</p>
+<hr>
+<a name="gt_ranges_spanned_length"></a>
+
+<code>GtUword  gt_ranges_spanned_length(const GtArray *ranges)</code>
+<p>
+Returns the length of the boundaries of the ranges in <code>ranges</code>.
+</p>
+<hr>
+<a name="gt_ranges_copy_to_opposite_strand"></a>
+
+<code>void     gt_ranges_copy_to_opposite_strand(GtArray *outranges,
+                                          const GtArray *inranges,
+                                          GtUword gen_total_length,
+                                          GtUword gen_offset)</code>
+<p>
+Copies ranges <code>inranges</code> to the 'opposite' strand, the result being in
+   <code>outranges</code>.
+</p>
+<hr>
+<a name="gt_ranges_borders_are_in_region"></a>
+
+<code>bool     gt_ranges_borders_are_in_region(GtArray *ranges,
+                                        const GtRange *region)</code>
+<p>
+Returns TRUE if all ranges in <code>ranges</code> are within the <code>region</code>.
+</p>
+<hr>
+<a name="gt_ranges_show"></a>
+
+<code>void     gt_ranges_show(GtArray *ranges, GtFile *outfp)</code>
+<p>
+Prints a representation of the ranges <code>ranges</code> to <code>outfp</code>.
 </p>
 <hr>
 <a name="GtReadmode"></a>
@@ -7340,6 +8258,88 @@ Test whether the given genome node is a region node. If so, a pointer to the
    region node is returned. If not, an assertion fails.
 </p>
 <hr>
+<a name="GtScoreMatrix"></a>
+<h2>Class GtScoreMatrix</h2>
+
+<p> <code>GtScoreMatrix</code> represents a matrix of signed integer values, for example
+   for scoring alphabet symbols against each other. </p>
+
+<hr>
+<a name="gt_score_matrix_new"></a>
+
+<code>GtScoreMatrix*  gt_score_matrix_new(GtAlphabet *alphabet)</code>
+<p>
+A score matrix is always defined over a given <code>alphabet</code>.
+</p>
+<hr>
+<a name="gt_score_matrix_clone_empty"></a>
+
+<code>GtScoreMatrix*  gt_score_matrix_clone_empty(const GtScoreMatrix *scorematrix)</code>
+<p>
+Create empty score matrix with same dimension as <code>scorematrix</code>.
+</p>
+<hr>
+<a name="gt_score_matrix_new_read_protein"></a>
+
+<code>GtScoreMatrix*  gt_score_matrix_new_read_protein(const char *path, GtError *err)</code>
+<p>
+Read in a protein score matrix from the given <code>path</code> and return it.
+</p>
+<hr>
+<a name="gt_score_matrix_new_read"></a>
+
+<code>GtScoreMatrix*  gt_score_matrix_new_read(const char *path, GtAlphabet *alphabet,
+                                        GtError *err)</code>
+<p>
+Read in score matrix from <code>path</code> over given <code>alphabet</code> and return it.
+</p>
+<hr>
+<a name="gt_score_matrix_get_dimension"></a>
+
+<code>unsigned int    gt_score_matrix_get_dimension(const GtScoreMatrix *scorematrix)</code>
+<p>
+Return the dimension of <code>scorematrix</code>.
+</p>
+<hr>
+<a name="gt_score_matrix_get_score"></a>
+
+<code>int             gt_score_matrix_get_score(const GtScoreMatrix *scorematrix,
+                                         unsigned int idx1, unsigned int idx2)</code>
+<p>
+Return the score value in <code>scorematrix</code> at positions (<code>idx1</code>,<code>idx2</code>).
+</p>
+<hr>
+<a name="gt_score_matrix_set_score"></a>
+
+<code>void            gt_score_matrix_set_score(GtScoreMatrix *scorematrix,
+                                         unsigned int idx1, unsigned int idx2,
+                                         int score)</code>
+<p>
+Set the score value in <code>scorematrix</code> at positions (<code>idx1</code>,<code>idx2</code>) to
+   <code>score</code>.
+</p>
+<hr>
+<a name="gt_score_matrix_get_scores"></a>
+
+<code>const int**     gt_score_matrix_get_scores(const GtScoreMatrix *scorematrix)</code>
+<p>
+Return the score values in <code>scorematrix</code> as a two-dimensional array.
+</p>
+<hr>
+<a name="gt_score_matrix_show"></a>
+
+<code>void            gt_score_matrix_show(const GtScoreMatrix *scorematrix, FILE *fp)</code>
+<p>
+Print <code>scorematrix</code> to output <code>fp</code>.
+</p>
+<hr>
+<a name="gt_score_matrix_delete"></a>
+
+<code>void            gt_score_matrix_delete(GtScoreMatrix *scorematrix)</code>
+<p>
+Delete <code>scorematrix</code>.
+</p>
+<hr>
 <a name="GtScriptWrapperStream"></a>
 <h2>Class GtScriptWrapperStream</h2>
 
@@ -7448,6 +8448,86 @@ Create a <code>GtSelectStream</code> object which selects genome nodes it retrie
 Sets <code>fp</code> as a handler function to be called for every <code>GtGenomeNode</code> not
    selected by <code>sstr</code>. The void pointer <code>data</code> can be used for arbitrary user
    data.
+</p>
+<hr>
+<a name="GtSeq"></a>
+<h2>Class GtSeq</h2>
+
+<p> <code>GtSeq</code> is a container for a sequence plus metadata. </p>
+
+<hr>
+<a name="gt_seq_new"></a>
+
+<code>GtSeq*             gt_seq_new(const char *seq, GtUword seqlen,
+                             GtAlphabet *seqalpha)</code>
+<p>
+Create and return a new <code>GtSeq</code>, storing the pointer for <code>seq</code>
+   (of length <code>seqlen</code> and with alphabet <code>seqalpha</code>).
+</p>
+<hr>
+<a name="gt_seq_new_own"></a>
+
+<code>GtSeq*             gt_seq_new_own(char *seq, GtUword seqlen,
+                                 GtAlphabet *seqalpha)</code>
+<p>
+Like <code>gt_seq_new()</code>, but tkes ownership of <code>seq</code>.
+</p>
+<hr>
+<a name="gt_seq_set_description"></a>
+
+<code>void               gt_seq_set_description(GtSeq *s, const char *desc)</code>
+<p>
+Associates <code>s</code> with description <code>desc</code>, storing its pointer.
+</p>
+<hr>
+<a name="gt_seq_set_description_own"></a>
+
+<code>void               gt_seq_set_description_own(GtSeq *s, char *desc)</code>
+<p>
+Like <code>gt_seq_set_description()</code>, but takes ownership of <code>desc</code>.
+</p>
+<hr>
+<a name="gt_seq_get_description"></a>
+
+<code>const char*        gt_seq_get_description(GtSeq *s)</code>
+<p>
+Return the description string for <code>s</code>.
+</p>
+<hr>
+<a name="gt_seq_get_orig"></a>
+
+<code>const char*        gt_seq_get_orig(const GtSeq *s)</code>
+<p>
+Return the underlying sequence memory for <code>s</code>, not guaranteed to be '\0'
+   terminated.
+</p>
+<hr>
+<a name="gt_seq_get_encoded"></a>
+
+<code>const GtUchar*     gt_seq_get_encoded(GtSeq *s)</code>
+<p>
+Return the sequence for <code>s</code>, encoded using the defined alphabet.
+</p>
+<hr>
+<a name="gt_seq_get_alphabet"></a>
+
+<code>const GtAlphabet*  gt_seq_get_alphabet(const GtSeq*)</code>
+<p>
+Return the alphabet associated with <code>s</code>.
+</p>
+<hr>
+<a name="gt_seq_length"></a>
+
+<code>GtUword            gt_seq_length(const GtSeq *s)</code>
+<p>
+Return the length of the sequence in <code>s</code>.
+</p>
+<hr>
+<a name="gt_seq_delete"></a>
+
+<code>void               gt_seq_delete(GtSeq *s)</code>
+<p>
+Delete <code>s</code> and free all associated memory.
 </p>
 <hr>
 <a name="GtSeqIterator"></a>
@@ -7568,6 +8648,28 @@ Create a new <code>GtSeqIterator</code> for all sequence files in <code>filename
    the <code>err</code> object for details).
 </p>
 <hr>
+<a name="GtSeqid2FileInfo"></a>
+<h2>Class GtSeqid2FileInfo</h2>
+
+<p> The <code>GtSeqid2FileInfo</code> class represents the state of a sequence source
+   statement as given by the -seqfile, -seqfiles, -matchdesc, -usedesc and
+   -regionmapping options. </p>
+
+<hr>
+<a name="gt_seqid2file_info_new"></a>
+
+<code>GtSeqid2FileInfo*  gt_seqid2file_info_new(void)</code>
+<p>
+Create a new <code>GtSeqid2FileInfo</code> object.
+</p>
+<hr>
+<a name="gt_seqid2file_info_delete"></a>
+
+<code>void               gt_seqid2file_info_delete(GtSeqid2FileInfo *)</code>
+<p>
+Create a new <code>GtSeqid2FileInfo</code> object.
+</p>
+<hr>
 <a name="GtSequenceNode"></a>
 <h2>Class GtSequenceNode</h2>
 
@@ -7657,6 +8759,43 @@ Create a node visitor object which will reset the source value of all
 <p>
 Create a <code>GtSortStream*</code> which sorts the genome nodes it retrieves from
    <code>in_stream</code> and returns them unmodified, but in sorted order.
+</p>
+<hr>
+<a name="GtSpliceSiteInfoStream"></a>
+<h2>Class GtSpliceSiteInfoStream</h2>
+
+<p> The <code>GtSpliceSiteInfoStream</code> is a <code>GtNodeStream</code> that gathers splice
+   site information from <code>GtFeatureNode</code>s. </p>
+
+<hr>
+<a name="gt_splice_site_info_stream_new"></a>
+
+<code>GtNodeStream*  gt_splice_site_info_stream_new(GtNodeStream *in_stream,
+                                             GtRegionMapping *region_mapping)</code>
+<p>
+Create a GtSpliceSiteInfoStream, takes ownership of <code>region_mapping</code>.
+</p>
+<hr>
+<a name="gt_splice_site_info_stream_show"></a>
+
+<code>bool           gt_splice_site_info_stream_show(GtNodeStream *ns, GtFile *outfp)</code>
+<p>
+Prints splice site information gathered in <code>ns</code> to <code>outfp</code>.
+</p>
+<hr>
+<a name="gt_splice_site_info_stream_intron_processed"></a>
+
+<code>bool           gt_splice_site_info_stream_intron_processed(GtNodeStream *ns)</code>
+<p>
+Returns <code>true</code> if an intron has been processed in <code>ns</code>, <code>false</code> otherwise
+</p>
+<hr>
+<a name="gt_splice_site_info_stream_show_canonical"></a>
+
+<code>bool           gt_splice_site_info_stream_show_canonical(GtNodeStream *ns,
+                                                        bool show_gc)</code>
+<p>
+Print information for canonical splice sites as stored in <code>ns</code>.
 </p>
 <hr>
 <a name="GtSplitter"></a>
@@ -7856,7 +8995,7 @@ Append double <code>d</code> to <code>str</code> with given <code>precision</cod
 <hr>
 <a name="gt_str_append_sci_double"></a>
 
-<code>void  gt_str_append_sci_double(GtStr *dest, double d, int precision)</code>
+<code>void     gt_str_append_sci_double(GtStr *dest, double d, int precision)</code>
 <p>
 Append double <code>d</code> to <code>str</code> in scientific notation e.g. 0.52e10,
    with given <code>precision</code>.
@@ -7912,9 +9051,42 @@ Compare <code>str1</code> and <code>str2</code> and return the result (similar t
 Return the length of <code>str</code>. If <code>str</code> is <code>NULL</code>, 0 is returned.
 </p>
 <hr>
+<a name="gt_str_get_mem"></a>
+
+<code>void*   gt_str_get_mem(const GtStr *str)</code>
+<p>
+Return the memory pointed to by *str. Never returns NULL, not always '\0'
+   terminated.
+</p>
+<hr>
+<a name="gt_str_clip_suffix"></a>
+
+<code>void    gt_str_clip_suffix(GtStr *s, char c)</code>
+<p>
+Remove end of <code>s</code> beginning with first occurrence of <code>c</code>
+</p>
+<hr>
+<a name="gt_str_read_next_line"></a>
+
+<code>int     gt_str_read_next_line(GtStr *str, FILE *fpin)</code>
+<p>
+Read the next line from file pointer <code>fpin</code> and store the result in <code>str</code>
+   (without the terminal newline). If the end of file <code>fpin</code> is reached, <code>EOF</code>
+   is returned, otherwise 0. <code>str</code> should be empty, or the next line will be
+   concatenated to its content.
+</p>
+<hr>
+<a name="gt_str_read_next_line_generic"></a>
+
+<code>int     gt_str_read_next_line_generic(GtStr*, GtFile*)</code>
+<p>
+Read the next line via a <code>GtFile</code>-object, but otherwise behave as
+   the previous function.
+</p>
+<hr>
 <a name="gt_str_delete"></a>
 
-<code>void     gt_str_delete(GtStr *str)</code>
+<code>void    gt_str_delete(GtStr *str)</code>
 <p>
 Decrease the reference count for <code>str</code> or delete it, if this was the last
    reference.
@@ -8015,6 +9187,42 @@ Return the number of strings stored in <code>str_array</code>.
 <code>void           gt_str_array_delete(GtStrArray *str_array)</code>
 <p>
 Delete <code>str_array</code>.
+</p>
+<hr>
+<a name="GtStrCache"></a>
+<h2>Class GtStrCache</h2>
+
+<p> <code>GtStrCache</code> is a string cache. That is, the first time a certain string is
+   requested with the method <code>gt_str_cache_get()</code>, a new string object is
+   created via <code>str_constructor</code> and then cached and returned.
+   Subsequent calls to <code>gt_str_cache_get()</code> for the same string return a
+   new reference made from the cached string. </p>
+
+<hr>
+<a name="gt_str_cache_new"></a>
+
+<code>GtStrCache*  gt_str_cache_new(void *str_source,
+                             GtStrConstructorFunc str_constructor,
+                             GtUword num_of_strings)</code>
+<p>
+Create a new string cache object for <code>num_of_strings</code> many strings creatable
+   from <code>str_source</code> with the function <code>str_constructor</code>.
+</p>
+<hr>
+<a name="gt_str_cache_get"></a>
+
+<code>GtStr*       gt_str_cache_get(GtStrCache *str_cache, GtUword index)</code>
+<p>
+Return a new (i.e., the caller is responsible to free it) <code>GtStr*</code> object
+   from <code>str_cache</code> for string with given <code>index</code>. The mechanics of the cache
+   are described in detail in the documentation of <code>GtStrCache</code>.
+</p>
+<hr>
+<a name="gt_str_cache_delete"></a>
+
+<code>void         gt_str_cache_delete(GtStrCache *str_cache)</code>
+<p>
+Delete <code>str_cache</code>.
 </p>
 <hr>
 <a name="GtStrand"></a>
@@ -8787,13 +9995,18 @@ Deletes <code>toolbox</code>.
 <hr>
 <a name="GtTransTable"></a>
 <h2>Class GtTransTable</h2>
+
+<p> The <code>GtTransTable</code> represents a <em>translation table</em>, i.e. a mapping between
+   codons and amino acids, as well as associated metadata. </p>
+
+<hr>
 <a name="gt_trans_table_get_scheme_descriptions"></a>
 
 <code>GtStrArray*    gt_trans_table_get_scheme_descriptions(void)</code>
 <p>
 Returns a <code>GtStrArray</code> of translation scheme descriptions, each of the
-   format "%d: %s" where the number is the translation scheme number (usable in
-   <code>gt_translator_set_translation_scheme()</code> and the string is the scheme
+   format "%d: %s", where the number is the translation scheme number (usable
+   in <code>gt_translator_set_translation_scheme()</code>) and the string is the scheme
    name.
 </p>
 <hr>
@@ -8832,6 +10045,22 @@ Writes the translation for the codon <code>c1</code>,<code>c2</code>,<code>c3</c
    to by <code>amino</code>. The current translation scheme set in <code>translator</code> is used.
    Returns a negative value if an error occurred, see <code>err</code> for details.
    Otherwise, 0 is returned.
+</p>
+<hr>
+<a name="gt_trans_table_is_start_codon"></a>
+
+<code>bool           gt_trans_table_is_start_codon(const GtTransTable *tt,
+                                            char c1, char c2, char c3)</code>
+<p>
+Returns TRUE if the codon <code>c1</code>,<code>c2</code>,<code>c3</code> is a start codon in <code>tt</code>.
+</p>
+<hr>
+<a name="gt_trans_table_is_stop_codon"></a>
+
+<code>bool           gt_trans_table_is_stop_codon(const GtTransTable *tt,
+                                           char c1, char c2, char c3)</code>
+<p>
+Returns TRUE if the codon <code>c1</code>,<code>c2</code>,<code>c3</code> is a stop codon in <code>tt</code>.
 </p>
 <hr>
 <a name="gt_trans_table_delete"></a>
@@ -9141,6 +10370,130 @@ Frees the space allocated for the 2-dimensional array pointed to by
    <code>ARRAY2DIM</code>.
 </p>
 <hr>
+<a name="gt_array2dim_sparse_calloc"></a>
+
+<code>#define gt_array2dim_sparse_calloc(ARRAY2DIM, ROWS, SIZE, ROWINFO)</code>
+<p>
+Allocates a new 2-dimensional sparse array with the given number of <code>ROWS</code>
+   and a total <code>SIZE</code>. Each row starts at the corresponding offset given in
+   <code>ROWINFO</code> and has the corresponding length. It assigns a pointer to the newly
+   allocated space to <code>ARRAY2DIM</code>. The size of each element is determined
+   automatically from the type of the <code>ARRAY2DIM</code> pointer.
+</p>
+<hr>
+<a name="Array3dim"></a>
+<h2>Module Array3dim</h2>
+<a name="gt_array3dim_malloc"></a>
+
+<code>#define gt_array3dim_malloc(ARRAY3DIM, X_SIZE, Y_SIZE, Z_SIZE)</code>
+<p>
+Allocates a new 3-dimensional array with dimensions <code>X_SIZE</code> x <code>Y_SIZE</code> x
+   <code>Z_SIZE</code> and assigns a pointer to the newly allocated space to <code>ARRAY3DIM</code>.
+   The size of each element is determined automatically from the type of the
+   <code>ARRAY3DIM</code> pointer.
+</p>
+<hr>
+<a name="gt_array3dim_calloc"></a>
+
+<code>#define gt_array3dim_calloc(ARRAY3DIM, X_SIZE, Y_SIZE, Z_SIZE)</code>
+<p>
+Allocates a new 3-dimensional array with dimensions <code>X_SIZE</code> x <code>Y_SIZE</code> and
+   assigns a pointer to the newly allocated space to <code>ARRAY3DIM</code>.
+   The allocated space is initialized to be filled with zeroes.
+   The size of each element is determined automatically from the type of the
+   <code>ARRAY3DIM</code> pointer.
+</p>
+<hr>
+<a name="gt_array3dim_example"></a>
+
+<code>int      gt_array3dim_example(GtError*)</code>
+<p>
+An example for usage of the <code>Array3dim</code> module.
+</p>
+<hr>
+<a name="gt_array3dim_delete"></a>
+
+<code>#define gt_array3dim_delete(ARRAY3DIM)</code>
+<p>
+Frees the space allocated for the 3-dimensional array pointed to by
+   <code>ARRAY3DIM</code>.
+</p>
+<hr>
+<a name="Arraydef"></a>
+<h2>Module Arraydef</h2>
+<a name="GT_DECLAREARRAYSTRUCT"></a>
+
+<code>#define GT_DECLAREARRAYSTRUCT(TYPE)</code>
+<p>
+GT_DECLAREARRAYSTRUCT expands to a corresponding type definition over
+   some given type.
+</p>
+<hr>
+<a name="GT_INITARRAY"></a>
+
+<code>#define GT_INITARRAY(A,TYPE)</code>
+<p>
+GT_INITARRAY initializes an empty array.
+</p>
+<hr>
+<a name="GT_COPYARRAY"></a>
+
+<code>#define GT_COPYARRAY(A,B)</code>
+<p>
+GT_COPYARRAY copies an array.
+</p>
+<hr>
+<a name="GT_CHECKARRAYSPACE_GENERIC"></a>
+
+<code>#define GT_CHECKARRAYSPACE_GENERIC(A,TYPE,L,ADD)</code>
+<p>
+GT_CHECKARRAYSPACE checks if the next (L) cells in the array have
+  been allocated. If this is not the case, then the number of cells
+  allocated is incremented by ADD, which must not be smaller than (L). The
+  contents of the previously filled array elements is of course.
+</p>
+<hr>
+<a name="GT_CHECKARRAYSPACE"></a>
+
+<code>#define GT_CHECKARRAYSPACE(A,TYPE,L)</code>
+<p>
+GT_CHECKARRAYSPACE checks if the integer nextfree##T
+  points to an index for which the space is not allocated yet. If this is
+  the case, the number of cells allocated is incremented by L. The
+  contents of the previously filled array elements is of course maintained.
+</p>
+<hr>
+<a name="GT_CHECKARRAYSPACEMULTI"></a>
+
+<code>#define GT_CHECKARRAYSPACEMULTI(A,TYPE,L)</code>
+<p>
+The next macro is a variation of GT_CHECKARRAYSPACE, which checks if the next
+  L cells have been allocated. If not, then this is done.
+</p>
+<hr>
+<a name="GT_GETNEXTFREEINARRAY"></a>
+
+<code>#define GT_GETNEXTFREEINARRAY(P,A,TYPE,L)</code>
+<p>
+This macro checks the space and delivers a pointer P
+  to the next free element in the array.
+</p>
+<hr>
+<a name="GT_STOREINARRAY"></a>
+
+<code>#define GT_STOREINARRAY(A,TYPE,L,VAL)</code>
+<p>
+This macro checks the space and stores V in the
+  nextfree-component of the array. nextfree is incremented.
+</p>
+<hr>
+<a name="GT_FREEARRAY"></a>
+
+<code>#define GT_FREEARRAY(A,TYPE)</code>
+<p>
+This macro frees the space for an array if it is not NULL.
+</p>
+<hr>
 <a name="Assert"></a>
 <h2>Module Assert</h2>
 <a name="gt_assert"></a>
@@ -9202,6 +10555,93 @@ Lookup table containing the popcount (number of set bits). Entry at <code>i</cod
 Contains 256 * 8 select values, Entry at index 256 * <code>j</code> + <code>i</code> equals the
    position of the (<code>j</code> + 1)-th set bit in byte <code>i</code>. Positions lie in the range
    [0..7]. Returns 8 if byte <code>i</code> contains less than <code>j</code> set bits.
+</p>
+<hr>
+<a name="ClassAlloc"></a>
+<h2>Module ClassAlloc</h2>
+<a name="gt_class_alloc"></a>
+
+<code>void*  gt_class_alloc(size_t size)</code>
+<p>
+Allocates space for a class with size <code>size</code>.
+</p>
+<hr>
+<a name="gt_class_alloc_clean"></a>
+
+<code>void   gt_class_alloc_clean(void)</code>
+<p>
+Frees static memory allocated for classes.
+</p>
+<hr>
+<a name="Compat"></a>
+<h2>Module Compat</h2>
+<a name="gt_mkstemp"></a>
+
+<code>int      gt_mkstemp(char *templ)</code>
+<p>
+Return (read-write) handle of temporary file, with template <code>templ</code>.
+</p>
+<hr>
+<a name="gt_pagesize"></a>
+
+<code>GtUword  gt_pagesize(void)</code>
+<p>
+Returns the page size of the current platform.
+</p>
+<hr>
+<a name="ConsensusSplicedAlignment"></a>
+<h2>Module ConsensusSplicedAlignment</h2>
+<a name="GtGetGenomicRangeFunc"></a>
+
+<code>GtRange   GtGetGenomicRangeFunc(const void *sa)</code>
+<p>
+Function to obtain the genomic range from spliced alignment <code>sa</code>.
+</p>
+<hr>
+<a name="GtGetStrandFunc"></a>
+
+<code>GtStrand  GtGetStrandFunc(const void *sa)</code>
+<p>
+Function to obtain the strand from spliced alignment <code>sa</code>.
+</p>
+<hr>
+<a name="GtGetExonsFunc"></a>
+
+<code>void    GtGetExonsFunc(GtArray *exon_ranges, const void *sa)</code>
+<p>
+Function to obtain exon ranges from spliced alignment <code>sa</code>.
+</p>
+<hr>
+<a name="GtProcessSpliceFormFunc"></a>
+
+<code>void    GtProcessSpliceFormFunc(GtArray *spliced_alignments_in_form,
+                                        const void *set_of_sas,
+                                        GtUword number_of_sas,
+                                        size_t size_of_sa,
+                                        void *userdata)</code>
+<p>
+Function to process the generated from the consensus spliced alignment
+   process.
+</p>
+<hr>
+<a name="gt_consensus_sa"></a>
+
+<code>void  gt_consensus_sa(const void *set_of_sas, GtUword number_of_sas,
+                     size_t size_of_sa, GtGetGenomicRangeFunc, GtGetStrandFunc,
+                     GtGetExonsFunc, GtProcessSpliceFormFunc, void *userdata)</code>
+<p>
+Construct consensus spliced alignments according to:
+
+  B.J. Haas, A.L. Delcher, S.M. Mount, J.R. Wortman, R.K. Smith Jr,
+  L.I. Hannick, R. Maiti, C.M. Ronning, D.B. Rusch, C.D. Town, S.L. Salzberg,
+  and O. White. Improving the Arabidopsis genome annotation using maximal
+  transcript alignment assemblies. Nucleic Acids Res., 31(19):5654-5666, 2003.
+
+  following the description on page 972 and 973 of the paper:
+
+  G. Gremme, V. Brendel, M.E. Sparks, and S. Kurtz. Engineering a Software Tool
+  for Gene Structure Prediction in Higher Organisms. Information and Software
+  Technology, 47(15):965-978, 2005.
 </p>
 <hr>
 <a name="Countingsort"></a>
@@ -9292,6 +10732,57 @@ Returns the length of the prefix of <code>cstr</code> ending just before <code>c
 Removes all occurrences of <code>remove</code> from the right end of <code>cstr</code>.
 </p>
 <hr>
+<a name="CstrArray"></a>
+<h2>Module CstrArray</h2>
+<a name="gt_cstr_array_dup"></a>
+
+<code>char**   gt_cstr_array_dup(const char **cstr_array)</code>
+<p>
+Return copy of <code>cstr_array</code>.
+</p>
+<hr>
+<a name="gt_cstr_array_prefix_first"></a>
+
+<code>char**   gt_cstr_array_prefix_first(const char **cstr_array, const char *p)</code>
+<p>
+Use <code>p</code> and a blank as prefix for <code>cstr_array[0]</code> and return the result.
+</p>
+<hr>
+<a name="gt_cstr_array_preprend"></a>
+
+<code>char**   gt_cstr_array_preprend(const char **cstr_array, const char *p)</code>
+<p>
+Use p as prefix for <code>cstr_array[0]</code> and return the result.
+</p>
+<hr>
+<a name="gt_cstr_array_show"></a>
+
+<code>void     gt_cstr_array_show(char **cstr_array, FILE *fp)</code>
+<p>
+Print <code>cstr_array</code> to <code>fp</code>, separated b newlines.
+</p>
+<hr>
+<a name="gt_cstr_array_show_genfile"></a>
+
+<code>void     gt_cstr_array_show_genfile(const char **cstr_array, GtFile *fp)</code>
+<p>
+Print <code>cstr_array</code> to <code>fp</code>, separated b newlines.
+</p>
+<hr>
+<a name="gt_cstr_array_size"></a>
+
+<code>GtUword  gt_cstr_array_size(const char **cstr_array)</code>
+<p>
+Return the count of strings in <code>cstr_array</code>. O(n).
+</p>
+<hr>
+<a name="gt_cstr_array_delete"></a>
+
+<code>void     gt_cstr_array_delete(char **cstr_array)</code>
+<p>
+Delete <code>cstr_array</code>.
+</p>
+<hr>
 <a name="Deprecated"></a>
 <h2>Module Deprecated</h2>
 <a name="GT_DEPRECATED"></a>
@@ -9303,6 +10794,148 @@ Deprecated functions, typedefs and structs in API headers should be annotated
    <code>msg</code> should inform about an alternative API.
 </p>
 <hr>
+<a name="Divmodmul"></a>
+<h2>Module Divmodmul</h2>
+<a name="GT_DIV2"></a>
+
+<code>#define GT_DIV2(N)</code>
+<p>
+Division by 2.
+</p>
+<hr>
+<a name="GT_DIV4"></a>
+
+<code>#define GT_DIV4(N)</code>
+<p>
+Division by 4.
+</p>
+<hr>
+<a name="GT_DIV8"></a>
+
+<code>#define GT_DIV8(N)</code>
+<p>
+Division by 8.
+</p>
+<hr>
+<a name="GT_DIV16"></a>
+
+<code>#define GT_DIV16(N)</code>
+<p>
+Division by 16.
+</p>
+<hr>
+<a name="GT_DIV32"></a>
+
+<code>#define GT_DIV32(N)</code>
+<p>
+Division by 32.
+</p>
+<hr>
+<a name="GT_DIV64"></a>
+
+<code>#define GT_DIV64(N)</code>
+<p>
+Division by 64.
+</p>
+<hr>
+<a name="GT_MOD2"></a>
+
+<code>#define GT_MOD2(N)</code>
+<p>
+Modulo 2.
+</p>
+<hr>
+<a name="GT_MOD4"></a>
+
+<code>#define GT_MOD4(N)</code>
+<p>
+Modulo 4.
+</p>
+<hr>
+<a name="GT_MOD8"></a>
+
+<code>#define GT_MOD8(N)</code>
+<p>
+Modulo 8.
+</p>
+<hr>
+<a name="GT_MOD16"></a>
+
+<code>#define GT_MOD16(N)</code>
+<p>
+Modulo 16.
+</p>
+<hr>
+<a name="GT_MOD32"></a>
+
+<code>#define GT_MOD32(N)</code>
+<p>
+Modulo 32.
+</p>
+<hr>
+<a name="GT_MOD64"></a>
+
+<code>#define GT_MOD64(N)</code>
+<p>
+Modulo 64.
+</p>
+<hr>
+<a name="GT_MULT2"></a>
+
+<code>#define GT_MULT2(N)</code>
+<p>
+Multiplication by 2.
+</p>
+<hr>
+<a name="GT_MULT4"></a>
+
+<code>#define GT_MULT4(N)</code>
+<p>
+Multiplication by 4.
+</p>
+<hr>
+<a name="GT_MULT8"></a>
+
+<code>#define GT_MULT8(N)</code>
+<p>
+Multiplication by 8.
+</p>
+<hr>
+<a name="GT_MULT16"></a>
+
+<code>#define GT_MULT16(N)</code>
+<p>
+Multiplication by 16.
+</p>
+<hr>
+<a name="GT_MULT32"></a>
+
+<code>#define GT_MULT32(N)</code>
+<p>
+Multiplication by 32.
+</p>
+<hr>
+<a name="GT_MULT64"></a>
+
+<code>#define GT_MULT64(N)</code>
+<p>
+Multiplication by 64.
+</p>
+<hr>
+<a name="GT_POW2"></a>
+
+<code>#define GT_POW2(N)</code>
+<p>
+Power of 2 to the N-th.
+</p>
+<hr>
+<a name="GT_LOG2"></a>
+
+<code>#define GT_LOG2(v)</code>
+<p>
+Binary logarithm of <code>v</code>.
+</p>
+<hr>
 <a name="Endianess"></a>
 <h2>Module Endianess</h2>
 <a name="gt_is_little_endian"></a>
@@ -9310,6 +10943,17 @@ Deprecated functions, typedefs and structs in API headers should be annotated
 <code>bool  gt_is_little_endian(void)</code>
 <p>
 Returns <code>true</code> if host CPU is little-endian, <code>false</code> otherwise.
+</p>
+<hr>
+<a name="Ensure"></a>
+<h2>Module Ensure</h2>
+<a name="gt_ensure"></a>
+
+<code>#define gt_ensure(expr)</code>
+<p>
+The ensure macro used for unit tests. If the expression <code>expr</code> evaluates
+   to FALSE, the <code>GtError</code> <code>err</code> will be set and <code>had_err</code> will be set to -1.
+   These variables are expected to exist when using this macro.
 </p>
 <hr>
 <a name="FASTA"></a>
@@ -9360,6 +11004,334 @@ Print a fasta entry with optional <code>description</code> and mandatory <code>s
    Will print at most <code>sequence_length</code> characters from <code>sequence</code> if no
    '\0'-byte is encountered. <code>description</code> and <code>description_length</code> are handled
    accordingly if present.
+</p>
+<hr>
+<a name="gt_fasta_show_entry_with_suffix"></a>
+
+<code>void  gt_fasta_show_entry_with_suffix(const char *description,
+                                     const char *sequence,
+                                     GtUword sequence_length,
+                                     const char *suffix, GtUword width,
+                                     GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and <code>suffix</code> plus mandatory
+   <code>sequence</code> to <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted
+   accordingly.
+</p>
+<hr>
+<a name="gt_fasta_show_entry_nt_with_suffix"></a>
+
+<code>void  gt_fasta_show_entry_nt_with_suffix(const char *description,
+                                        GtUword description_length,
+                                        const char *sequence,
+                                        GtUword sequence_length,
+                                        const char *suffix,
+                                        GtUword width,
+                                        GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and <code>suffix</code> plus mandatory
+   <code>sequence</code> to <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted
+   accordingly.
+   Will print at most <code>sequence_length</code> characters from <code>sequence</code> and at most
+   <code>description_length</code> characters from <code>description</code> if present.
+</p>
+<hr>
+<a name="gt_fasta_show_entry_with_suffix_str"></a>
+
+<code>void  gt_fasta_show_entry_with_suffix_str(const char *description,
+                                         const char *sequence,
+                                         GtUword sequence_length,
+                                         const char *suffix, GtUword width,
+                                         GtStr *outstr)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and <code>suffix</code> plus mandatory
+   <code>sequence</code> to <code>outstr</code>. If <code>width</code> is != 0 the sequence is formatted
+   accordingly.
+</p>
+<hr>
+<a name="gt_fasta_show_entry_nt_with_suffix_str"></a>
+
+<code>void  gt_fasta_show_entry_nt_with_suffix_str(const char *description,
+                                            GtUword description_length,
+                                            const char *sequence,
+                                            GtUword sequence_length,
+                                            const char *suffix,
+                                            GtUword width,
+                                            GtStr *outstr)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and <code>suffix</code> plus mandatory
+   <code>sequence</code> to <code>outstr</code>. If <code>width</code> is != 0 the sequence is formatted
+   accordingly.
+   Will print at most <code>sequence_length</code> characters from <code>sequence</code> and at most
+   <code>description_length</code> characters from <code>description</code> if present.
+</p>
+<hr>
+<a name="FileAllocator"></a>
+<h2>Module FileAllocator</h2>
+<a name="gt_fa_init"></a>
+
+<code>void     gt_fa_init(void)</code>
+<p>
+Initialize file allocator. Only needs to be called once per process.
+</p>
+<hr>
+<a name="gt_fa_fopen"></a>
+
+<code>#define gt_fa_fopen(path, mode, err)</code>
+<p>
+Returns a FILE pointer after opening the file at <code>path</code> with <code>mode</code>.
+   If an error occurs, NULL is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_fa_xfopen"></a>
+
+<code>#define gt_fa_xfopen(path, mode)</code>
+<p>
+Returns a FILE pointer after opening the file at <code>path</code> with <code>mode</code>.
+   If an error occurs, the program is terminated.
+</p>
+<hr>
+<a name="gt_fa_fopen_with_suffix"></a>
+
+<code>#define gt_fa_fopen_with_suffix(path, suffix, mode, err)</code>
+<p>
+Returns a FILE pointer after opening the file at <code>path</code> with suffix
+   <code>suffix</code> and mode <code>mode</code>. If an error occurs, NULL is returned and <code>err</code>
+   is set accordingly.
+</p>
+<hr>
+<a name="gt_fa_fclose"></a>
+
+<code>void     gt_fa_fclose(FILE *stream)</code>
+<p>
+Closes the file <code>stream</code>.
+</p>
+<hr>
+<a name="gt_fa_xfclose"></a>
+
+<code>void     gt_fa_xfclose(FILE *stream)</code>
+<p>
+Closes the file <code>stream</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_fa_lock_shared"></a>
+
+<code>void     gt_fa_lock_shared(FILE *stream)</code>
+<p>
+Obtain a shared lock on <code>stream</code>.
+</p>
+<hr>
+<a name="gt_fa_lock_exclusive"></a>
+
+<code>void     gt_fa_lock_exclusive(FILE *stream)</code>
+<p>
+Obtain an exclusive lock on <code>stream</code>.
+</p>
+<hr>
+<a name="gt_fa_unlock"></a>
+
+<code>void     gt_fa_unlock(FILE *stream)</code>
+<p>
+Unlock <code>stream</code>.
+</p>
+<hr>
+<a name="gt_fa_gzopen"></a>
+
+<code>#define gt_fa_gzopen(path, mode, err)</code>
+<p>
+Returns a FILE pointer after opening the gzipped file at <code>path</code> with <code>mode</code>.
+   If an error occurs, NULL is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_fa_xgzopen"></a>
+
+<code>#define gt_fa_xgzopen(path, mode)</code>
+<p>
+Returns a FILE pointer after opening the gzipped file at <code>path</code> with <code>mode</code>.
+   If an error occurs, the program is terminated.
+</p>
+<hr>
+<a name="gt_fa_gzclose"></a>
+
+<code>void     gt_fa_gzclose(gzFile stream)</code>
+<p>
+Closes the gzipped file <code>stream</code>.
+</p>
+<hr>
+<a name="gt_fa_xgzclose"></a>
+
+<code>void     gt_fa_xgzclose(gzFile stream)</code>
+<p>
+Closes the gzipped file <code>stream</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_fa_bzopen"></a>
+
+<code>#define gt_fa_bzopen(path, mode, err)</code>
+<p>
+Returns a FILE pointer after opening the bzipped file at <code>path</code> with <code>mode</code>.
+   If an error occurs, NULL is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_fa_xbzopen"></a>
+
+<code>#define gt_fa_xbzopen(path, mode)</code>
+<p>
+Returns a FILE pointer after opening the bzipped file at <code>path</code> with <code>mode</code>.
+   If an error occurs, the program is terminated.
+</p>
+<hr>
+<a name="gt_fa_bzclose"></a>
+
+<code>void     gt_fa_bzclose(BZFILE *stream)</code>
+<p>
+Closes the bzipped file <code>stream</code>.
+</p>
+<hr>
+<a name="gt_fa_xbzclose"></a>
+
+<code>void     gt_fa_xbzclose(BZFILE *stream)</code>
+<p>
+Closes the bzipped file <code>stream</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xtmpfp_generic"></a>
+
+<code>#define gt_xtmpfp_generic(template_code, flags)</code>
+<p>
+Create a temp file optionally using template analogous to mkstemp(3).
+</p>
+<hr>
+<a name="gt_xtmpfp"></a>
+
+<code>#define gt_xtmpfp(template_code)</code>
+<p>
+Create a temp file optionally using template analogous to mkstemp(3), with
+   default flags.
+</p>
+<hr>
+<a name="gt_fa_mmap_read"></a>
+
+<code>#define gt_fa_mmap_read(path, len, err)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> into memory for reading and returns a
+   pointer to the mapped region. <code>err</code> is set on error.
+</p>
+<hr>
+<a name="gt_fa_mmap_read_range"></a>
+
+<code>#define gt_fa_mmap_read_range(path, len, offset, err)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> starting from <code>offset</code> into memory for
+   reading and returns a pointer to the mapped region. <code>err</code> is set on
+   error.
+</p>
+<hr>
+<a name="gt_fa_mmap_write"></a>
+
+<code>#define gt_fa_mmap_write(path, len, err)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> into memory for writing and returns a
+   pointer to the mapped region. <code>err</code> is set on error.
+</p>
+<hr>
+<a name="gt_fa_mmap_write_range"></a>
+
+<code>#define gt_fa_mmap_write_range(path, len, offset, err)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> starting from <code>offset</code> into memory for
+   writing and returns a pointer to the mapped region. <code>err</code> is set on
+   error.
+</p>
+<hr>
+<a name="gt_fa_xmmap_read"></a>
+
+<code>#define gt_fa_xmmap_read(path, len)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> into memory for reading and returns a
+   pointer to the mapped region. Terminates on error.
+</p>
+<hr>
+<a name="gt_fa_xmmap_read_range"></a>
+
+<code>#define gt_fa_xmmap_read_range(path, len, offset)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> starting from <code>offset</code> into memory for
+   reading and returns a pointer to the mapped region. Terminates on
+   error.
+</p>
+<hr>
+<a name="gt_fa_xmmap_write"></a>
+
+<code>#define gt_fa_xmmap_write(path, len)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> into memory for writing and returns a
+   pointer to the mapped region. Terminates on error.
+</p>
+<hr>
+<a name="gt_fa_xmmap_write_range"></a>
+
+<code>#define gt_fa_xmmap_write_range(path, len, offset)</code>
+<p>
+Map file <code>path</code> with len <code>len</code> starting from <code>offset</code> into memory for
+   writing and returns a pointer to the mapped region. Terminates on
+   error.
+</p>
+<hr>
+<a name="gt_fa_xmunmap"></a>
+
+<code>void     gt_fa_xmunmap(void *addr)</code>
+<p>
+Unmap mmapped file at address <code>addr</code>.
+</p>
+<hr>
+<a name="gt_fa_check_fptr_leak"></a>
+
+<code>int      gt_fa_check_fptr_leak(void)</code>
+<p>
+Check if all allocated file pointer have been released, prints to stderr.
+</p>
+<hr>
+<a name="gt_fa_check_mmap_leak"></a>
+
+<code>int      gt_fa_check_mmap_leak(void)</code>
+<p>
+Check if all allocated memory maps have been freed, prints to stderr.
+</p>
+<hr>
+<a name="gt_fa_enable_global_spacepeak"></a>
+
+<code>void     gt_fa_enable_global_spacepeak(void)</code>
+<p>
+Enable bookkeeping for global space peak.
+</p>
+<hr>
+<a name="gt_fa_get_space_peak"></a>
+
+<code>GtUword  gt_fa_get_space_peak(void)</code>
+<p>
+Return current global space peak, in bytes.
+</p>
+<hr>
+<a name="gt_fa_get_space_current"></a>
+
+<code>GtUword  gt_fa_get_space_current(void)</code>
+<p>
+Return current space usage, in bytes.
+</p>
+<hr>
+<a name="gt_fa_show_space_peak"></a>
+
+<code>void     gt_fa_show_space_peak(FILE *fp)</code>
+<p>
+Print statistics about current space peak to <code>fp</code>.
+</p>
+<hr>
+<a name="gt_fa_clean"></a>
+
+<code>void     gt_fa_clean(void)</code>
+<p>
+Finalize and free static data held by file allocator.
 </p>
 <hr>
 <a name="Fileutils"></a>
@@ -9484,6 +11456,21 @@ Returns the size of the file whose name is composed of the
   concatenation of <code>path</code> and <code>suffix</code>. <code>file</code> must exist.
 </p>
 <hr>
+<a name="gt_file_exists_and_is_dir"></a>
+
+<code>bool         gt_file_exists_and_is_dir(const char *path)</code>
+<p>
+Returns true if the file with the given <code>path</code> exists and is a directory,
+   false otherwise.
+</p>
+<hr>
+<a name="gt_xfile_cmp"></a>
+
+<code>void         gt_xfile_cmp(const char *file1, const char *file2)</code>
+<p>
+Compare two files bytewise, fails hard with exit(1) if files differ.
+</p>
+<hr>
 <a name="FunctionPointer"></a>
 <h2>Module FunctionPointer</h2>
 <a name="GtCompare"></a>
@@ -9509,6 +11496,71 @@ Similar to <code>GtCompare</code>, but with an additional <code>data</code> poin
 <code>void  GtFree(void*)</code>
 <p>
 The generic free function pointer type.
+</p>
+<hr>
+<a name="GFF3Escaping"></a>
+<h2>Module GFF3Escaping</h2>
+<a name="gt_gff3_escape"></a>
+
+<code>void  gt_gff3_escape(GtStr *escaped_seq, const char *unescaped_seq,
+                    GtUword length)</code>
+<p>
+Escape <code>unescaped_seq</code> of given <code>length</code> for GFF3 format and append the
+   result to <code>escaped_seq</code>.
+</p>
+<hr>
+<a name="gt_gff3_unescape"></a>
+
+<code>int   gt_gff3_unescape(GtStr *unescaped_seq, const char *escaped_seq,
+                      GtUword length, GtError *err)</code>
+<p>
+Unescape GFF3 format <code>escaped_seq</code> of given <code>length</code> and append the result to
+   <code>unescaped_seq</code>. Returns a value less than zero on error. <code>err</code> is set
+   accordingly.
+</p>
+<hr>
+<a name="GlobalChaining"></a>
+<h2>Module GlobalChaining</h2>
+<a name="GtChainProc"></a>
+
+<code>void  GtChainProc(GtChain *c, GtFragment *frags,
+                            GtUword num_of_fragments,
+                            GtUword max_gap_width, void *cpinfo)</code>
+<p>
+Function to process a chain. <code>frags</code> is an array of <code>GtFragment</code>s,
+   of size <code>num_of_fragments</code>. <code>max_gap_width</code> and <code>cpinfo</code> are passed from
+   the <code>gt_globalchaining_*()</code> calls.
+</p>
+<hr>
+<a name="gt_globalchaining_max"></a>
+
+<code>void  gt_globalchaining_max(GtFragment *fragments,
+                           GtUword num_of_fragments,
+                           GtUword max_gap_width, GtChainProc,
+                           void *cpinfo)</code>
+<p>
+Perform global chaining with overlaps of <code>num_of_fragments</code> many <code>fragments</code>
+   in quadratic time w.r.t. <code>num_of_fragments</code>.
+   Two fragments can maximally be <code>max_gap_width</code> many bases away.
+   For all global chains of maximal score, the GtChainProc function is called.
+   Thereby, GtChainProc does not get the ownership of the GtChain.
+</p>
+<hr>
+<a name="gt_globalchaining_coverage"></a>
+
+<code>void  gt_globalchaining_coverage(GtFragment *fragments,
+                                GtUword num_of_fragments,
+                                GtUword max_gap_width,
+                                GtUword seqlen1, double mincoverage,
+                                GtChainProc, void *cpinfo)</code>
+<p>
+Perform global chaining with overlaps of <code>num_of_fragments</code> many <code>fragments</code>
+   in quadratic time w.r.t. <code>num_of_fragments</code>.
+   Two fragments can maximally be <code>max_gap_width</code> many bases away.
+   For all non-overlapping global chains with a coverage of more then
+   <code>mincoverage</code> of the sequence in dimension 1 (with length <code>seqlen1</code>), the
+   GtChainProc function is called. Thereby, GtChainProc does not get the
+   ownership of the GtChain.
 </p>
 <hr>
 <a name="Grep"></a>
@@ -9615,8 +11667,216 @@ Returns an MD5 fingerprint of <code>sequence</code> with length <code>seqlen</co
    It is the responsibility of the caller to free the returned string.
 </p>
 <hr>
+<a name="MD5Seqid"></a>
+<h2>Module MD5Seqid</h2>
+<a name="gt_md5_seqid_has_prefix"></a>
+
+<code>bool  gt_md5_seqid_has_prefix(const char *seqid)</code>
+<p>
+Returns <code>true</code> if <code>seqid</code> has the prefix used to denote MD5 sequence IDs,
+   <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_md5_seqid_cmp_seqids"></a>
+
+<code>int   gt_md5_seqid_cmp_seqids(const char *id_a, const char *id_b)</code>
+<p>
+Compares \0-terminated seqid strings <code>id_a</code> and <code>id_b</code> (similarly to
+   strcmp(3)), but is aware of MD5 prefixes. That is, if both seqids have MD5
+   prefixes, only the MD5 prefixes will be compared. If at least one seqid has
+   no MD5 prefix, the sequd without the prefix will sort before the other
+   one.
+</p>
+<hr>
+<a name="Mathsupport"></a>
+<h2>Module Mathsupport</h2>
+<a name="gt_logsum"></a>
+
+<code>double        gt_logsum(double p1, double p2)</code>
+<p>
+Returns the log of the sum of two log probabilities.
+</p>
+<hr>
+<a name="gt_double_equals_one"></a>
+
+<code>bool          gt_double_equals_one(double)</code>
+<p>
+Returns TRUE if the passed double value equals 1.
+</p>
+<hr>
+<a name="gt_double_equals_double"></a>
+
+<code>bool          gt_double_equals_double(double, double)</code>
+<p>
+Returns TRUE if <code>d1</code> equals <code>d2</code>.
+</p>
+<hr>
+<a name="gt_double_compare"></a>
+
+<code>int           gt_double_compare(double d1, double d2)</code>
+<p>
+Compares two doubles with standard comparator semantics.
+</p>
+<hr>
+<a name="gt_double_smaller_double"></a>
+
+<code>bool          gt_double_smaller_double(double d1, double d2)</code>
+<p>
+Returns TRUE if <code>d1</code> is smaller than <code>d2</code>.
+</p>
+<hr>
+<a name="gt_double_larger_double"></a>
+
+<code>bool          gt_double_larger_double(double d1, double d2)</code>
+<p>
+Returns TRUE if <code>d1</code> is larger than <code>d2</code>.
+</p>
+<hr>
+<a name="gt_rand_max"></a>
+
+<code>GtUword       gt_rand_max(GtUword maximal_value)</code>
+<p>
+Returns a random number between 0 and maximal_value.
+</p>
+<hr>
+<a name="gt_rand_max_double"></a>
+
+<code>double        gt_rand_max_double(double maximal_value)</code>
+<p>
+Returns a random double between 0.0 and maximal_value.
+</p>
+<hr>
+<a name="gt_rand_0_to_1"></a>
+
+<code>double        gt_rand_0_to_1(void)</code>
+<p>
+Returns a random double between 0.0 and 1.0.
+</p>
+<hr>
+<a name="gt_rand_char"></a>
+
+<code>char          gt_rand_char(void)</code>
+<p>
+Returns a random character from 'a' to 'z'.
+</p>
+<hr>
+<a name="gt_determinebitspervalue"></a>
+
+<code>unsigned int  gt_determinebitspervalue(GtUword maxvalue)</code>
+<p>
+Retuns the log base 2 of an integer <code>maxvalue</code> in
+   <em>O(wordsize)</em> operations
+</p>
+<hr>
+<a name="gt_power_for_small_exponents"></a>
+
+<code>GtUword       gt_power_for_small_exponents(unsigned int base,
+                                          unsigned int exponent)</code>
+<p>
+Determine pow(base,exponent) for small values of exponent
+</p>
+<hr>
+<a name="gt_round_to_long"></a>
+
+<code>GtWord        gt_round_to_long(double x)</code>
+<p>
+Return <code>x</code> rounded to the nearest long integer, similar to
+   <code>lrint()</code> which may not be available on older glibc versions.
+</p>
+<hr>
+<a name="gt_gcd_uint"></a>
+
+<code>unsigned int  gt_gcd_uint(unsigned int m, unsigned int n)</code>
+<p>
+Compute the greatest common divisor of two unsigned integers
+</p>
+<hr>
+<a name="gt_lcm_uint"></a>
+
+<code>unsigned int  gt_lcm_uint(unsigned int m, unsigned int n)</code>
+<p>
+Compute the least common multiplier of two unsigned integers
+</p>
+<hr>
+<a name="gt_log_base"></a>
+
+<code>double        gt_log_base(double x, double b)</code>
+<p>
+Compute the logarithm of <code>x</code> to the base <code>b</code>
+</p>
+<hr>
 <a name="MemoryAllocation"></a>
 <h2>Module MemoryAllocation</h2>
+<a name="gt_ma_init"></a>
+
+<code>void     gt_ma_init(bool bookkeeping)</code>
+<p>
+Initialize the memory allocator. Only needs to be done once per process.
+</p>
+<hr>
+<a name="gt_ma_enable_global_spacepeak"></a>
+
+<code>void     gt_ma_enable_global_spacepeak(void)</code>
+<p>
+Enable bookkeeping for global space peak.
+</p>
+<hr>
+<a name="gt_ma_disable_global_spacepeak"></a>
+
+<code>void     gt_ma_disable_global_spacepeak(void)</code>
+<p>
+Disable bookkeeping for global space peak.
+</p>
+<hr>
+<a name="gt_ma_get_space_peak"></a>
+
+<code>GtUword  gt_ma_get_space_peak(void)</code>
+<p>
+Return current global space peak, in bytes.
+</p>
+<hr>
+<a name="gt_ma_get_space_current"></a>
+
+<code>GtUword  gt_ma_get_space_current(void)</code>
+<p>
+Return current space usage, in bytes.
+</p>
+<hr>
+<a name="gt_ma_show_space_peak"></a>
+
+<code>void     gt_ma_show_space_peak(FILE *fp)</code>
+<p>
+Print statistics about current space peak to <code>fp</code>.
+</p>
+<hr>
+<a name="gt_ma_show_allocations"></a>
+
+<code>void     gt_ma_show_allocations(FILE *fp)</code>
+<p>
+Print statistics about allocations to <code>fp</code>.
+</p>
+<hr>
+<a name="gt_ma_bookkeeping_enabled"></a>
+
+<code>bool     gt_ma_bookkeeping_enabled(void)</code>
+<p>
+Returns TRUE if any bookeeping is enabled.
+</p>
+<hr>
+<a name="gt_ma_check_space_leak"></a>
+
+<code>int      gt_ma_check_space_leak(void)</code>
+<p>
+Check if all allocated memory has been freed, prints result to stderr.
+</p>
+<hr>
+<a name="gt_ma_clean"></a>
+
+<code>void     gt_ma_clean(void)</code>
+<p>
+Finalize and free static data held by memory allocator.
+</p>
+<hr>
 <a name="gt_malloc"></a>
 
 <code>#define gt_malloc(size)</code>
@@ -9690,6 +11950,36 @@ Execute <code>function</code> (with <code>data</code> passed to it) in <code>gt_
    many times sequentially. <code>gt_jobs</code> is a global <code>unsigned int</code> variable.
 </p>
 <hr>
+<a name="ORF"></a>
+<h2>Module ORF</h2>
+<a name="GtORFProcessor"></a>
+
+<code>void  GtORFProcessor(void *data, GtRange *orf, GtUword framenum,
+                               const char *frame, bool ends_with_stop_codon)</code>
+<p>
+Function to handle ORFs produced by <code>gt_determine_ORFs()</code>.
+</p>
+<hr>
+<a name="gt_determine_ORFs"></a>
+
+<code>void  gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
+                       unsigned int framenum, const char *frame,
+                       GtUword framelen, bool start_codon,
+                       bool final_stop_codon, bool framepos,
+                       const char *start_codons)</code>
+<p>
+Determine all ORFs in the given <code>frame</code> of length <code>framelength</code> and frame
+   number <code>framenum</code> (0, 1, or 2). If <code>start_codon</code> is <code>true</code> a frame has to
+   start with a start codon, otherwise a frame can start everywhere (i.e., at
+   the first amino acid or after a stop codon). If <code>final_stop_codon</code> is <code>true</code>
+   the last ORF must end with a stop codon, otherwise it can be ``open''. For
+   each ORF the <code>orf_processor</code> function is called and <code>data</code>, <code>framenum</code> and
+   <code>frame</code> is passed along. If <code>framepos</code> is true, the ORF range is reported in
+   the coordinate system of the frame (i.e., the amino acids). Otherwise the
+   coordinate system of the original sequence is used (i.e., the nucleotides).
+   The correct <code>framenum</code> is needed for the conversion.
+</p>
+<hr>
 <a name="POSIX"></a>
 <h2>Module POSIX</h2>
 <a name="gt_basename"></a>
@@ -9740,12 +12030,29 @@ Parse unsigned integer from <code>nptr</code> and store result in <code>out</cod
    Returns 0 upon success and -1 upon failure.
 </p>
 <hr>
+<a name="gt_parse_long"></a>
+
+<code>int  gt_parse_long(GtWord *out, const char *nptr)</code>
+<p>
+Parse long from <code>nptr</code> and store result in <code>out</code>.
+   Returns 0 upon success and -1 upon failure.
+</p>
+<hr>
 <a name="gt_parse_word"></a>
 
 <code>int  gt_parse_word(GtWord *out, const char *nptr)</code>
 <p>
 Parse GtWord from <code>nptr</code> and store result in <code>out</code>.
    Returns 0 upon success and -1 upon failure.
+</p>
+<hr>
+<a name="gt_parse_ulong"></a>
+
+<code>int  gt_parse_ulong(GtUword *out, const char *nptr)</code>
+<p>
+Parse ulong from <code>nptr</code> and store result in <code>out</code>.
+   Returns 0 upon success and -1 upon failure. Deprecated, use
+   <code>gt_parse_uword()</code> instead.
 </p>
 <hr>
 <a name="gt_parse_uword"></a>
@@ -9775,6 +12082,16 @@ Parse a range given by <code>start</code> and <code>end</code>, writing the resu
    failure.
 </p>
 <hr>
+<a name="gt_parse_description_range"></a>
+
+<code>int  gt_parse_description_range(const char *description, GtRange *range)</code>
+<p>
+Parse the range description in the given <code>description</code> and store it in
+   <code>range</code>. Range descriptions have the folowing format: III:1000001..2000000
+   That is, the part between ':' and '..' denotes the range start and the part
+   after '..' the end. Returns 0 upon success and -1 upon failure.
+</p>
+<hr>
 <a name="gt_parse_range_tidy"></a>
 
 <code>int  gt_parse_range_tidy(GtRange *rng, const char *start, const char *end,
@@ -9797,6 +12114,15 @@ Like <code>qsort(3)</code>, but allows an additional <code>data</code> pointer p
    <code>GtCompareWithData</code> comparison function <code>cmp</code>.
 </p>
 <hr>
+<a name="RegularSeqID"></a>
+<h2>Module RegularSeqID</h2>
+<a name="gt_regular_seqid_save"></a>
+
+<code>void  gt_regular_seqid_save(GtStr *seqid, GtStr *description)</code>
+<p>
+Parse ``regular'' sequence ID from <code>description</code> and save it in <code>seqid</code>.
+</p>
+<hr>
 <a name="Reverse"></a>
 <h2>Module Reverse</h2>
 <a name="gt_reverse_complement"></a>
@@ -9804,6 +12130,166 @@ Like <code>qsort(3)</code>, but allows an additional <code>data</code> pointer p
 <code>int  gt_reverse_complement(char *dna_seq, GtUword seqlen, GtError*)</code>
 <p>
 Reverse <code>dna_seq</code> of length <code>seqlen</code> in place.
+</p>
+<hr>
+<a name="Safearith"></a>
+<h2>Module Safearith</h2>
+<code>void  (GtOverflowHandlerFunc)(const char *src_file, int src_line,
+                                      void *data)</code>
+<p>
+ Function called when an integer overflow occurs. 
+</p>
+<hr>
+<a name="gt_safearith_assign"></a>
+
+<code>#define gt_safearith_assign(dest, src)</code>
+<p>
+Safely assign <code>src</code> to <code>dest</code>, returns false on success, true otherwise.
+</p>
+<hr>
+<a name="gt_safearith_add_of"></a>
+
+<code>#define gt_safearith_add_of(c, a, b)</code>
+<p>
+Safely add <code>a</code> to <code>b</code> and assign the result to <code>c</code>,
+   returns false on success, true otherwise.
+</p>
+<hr>
+<a name="gt_safearith_sub_of"></a>
+
+<code>#define gt_safearith_sub_of(c, a, b)</code>
+<p>
+Safely subtract <code>b</code> from <code>a</code> and assign the result to <code>c</code>,
+   returns false on success, true otherwise.
+</p>
+<hr>
+<a name="gt_safe_assign"></a>
+
+<code>#define gt_safe_assign(dest, src)</code>
+<p>
+Assign <code>src</code> to <code>dest</code> or exit upon overflow.
+</p>
+<hr>
+<a name="gt_safe_add"></a>
+
+<code>#define gt_safe_add(c, a, b)</code>
+<p>
+Add <code>a</code> to <code>b</code> and assign the result to <code>c</code> or exit upon overflow.
+</p>
+<hr>
+<a name="gt_safe_sub"></a>
+
+<code>#define gt_safe_sub(c, a, b)</code>
+<p>
+Subtract <code>b</code> from <code>a</code> and assign the result to <code>c</code> or exit upon overflow.
+   Warning: this will result in an overflow if c is signed and a and b are
+   unsigned values, as integer promotion will garble the tests.
+</p>
+<hr>
+<a name="gt_safe_abs"></a>
+
+<code>#define gt_safe_abs(j)</code>
+<p>
+Overflow-safe version of <code>abs()</code>.
+</p>
+<hr>
+<a name="gt_safe_labs"></a>
+
+<code>#define gt_safe_labs(j)</code>
+<p>
+Overflow-safe version of <code>labs()</code>.
+</p>
+<hr>
+<a name="gt_safe_llabs"></a>
+
+<code>#define gt_safe_llabs(j)</code>
+<p>
+Overflow-safe version of <code>llabs()</code>.
+</p>
+<hr>
+<a name="gt_safe_mult_u32"></a>
+
+<code>#define gt_safe_mult_u32(i, j)</code>
+<p>
+Overflow-safe multiplication of two unsigned 32-bit integers.
+</p>
+<hr>
+<a name="gt_safe_mult_u64"></a>
+
+<code>#define gt_safe_mult_u64(i, j)</code>
+<p>
+Overflow-safe multiplication of two unsigned 64-bit integers.
+</p>
+<hr>
+<a name="gt_safe_mult_ulong"></a>
+
+<code>#define gt_safe_mult_ulong(i, j)</code>
+<p>
+Overflow-safe multiplication of two ulong integers.
+</p>
+<hr>
+<a name="gt_safe_cast2long"></a>
+
+<code>#define gt_safe_cast2long(j)</code>
+<p>
+Overflow-safe typecast to long.
+</p>
+<hr>
+<a name="gt_safe_cast2ulong"></a>
+
+<code>#define gt_safe_cast2ulong(j)</code>
+<p>
+Overflow-safe typecast to unsigned long.
+</p>
+<hr>
+<a name="gt_safe_cast2ulong_64"></a>
+
+<code>#define gt_safe_cast2ulong_64(j)</code>
+<p>
+Overflow-safe typecast to ulong64.
+</p>
+<hr>
+<a name="SeqID2File"></a>
+<h2>Module SeqID2File</h2>
+<a name="gt_seqid2file_register_options"></a>
+
+<code>void               gt_seqid2file_register_options(GtOptionParser *option_parser,
+                                                 GtSeqid2FileInfo *s2fi)</code>
+<p>
+Add the options -seqfile, -seqfiles, -matchdesc, -usedesc and
+   -regionmapping to the given <code>option_parser</code>.
+</p>
+<hr>
+<a name="gt_seqid2file_register_options_ext"></a>
+
+<code>void               gt_seqid2file_register_options_ext(GtOptionParser
+                                                     *option_parser,
+                                                     GtSeqid2FileInfo *s2fi,
+                                                     bool mandatory,
+                                                     bool debug)</code>
+<p>
+Add the options -seqfile, -seqfiles, -matchdesc, -usedesc and
+   -regionmapping to the given <code>option_parser</code>. If <code>mandatory</code> is set,
+   either option -seqfile, -seqfiles or -regionmapping is mandatory.
+   If <code>debug</code> is set, then the options are marked as development options.
+</p>
+<hr>
+<a name="gt_seqid2file_option_used"></a>
+
+<code>bool               gt_seqid2file_option_used(GtSeqid2FileInfo *s2fi)</code>
+<p>
+Returns TRUE if any of the options -seqfile, -seqfiles, -matchdesc,
+   -usedesc or -regionmapping stored in <code>s2fi</code> has been specified and
+   given a parameter.
+</p>
+<hr>
+<a name="gt_seqid2file_region_mapping_new"></a>
+
+<code>GtRegionMapping*   gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
+                                                   GtError *err)</code>
+<p>
+Returns a <code>GtRegionMapping</code> based on the <code>s2fi</code>. <code>NULL</code> will be returned
+   on error, and <code>err</code> will be set accordingly.
 </p>
 <hr>
 <a name="Strcmp"></a>
@@ -9838,6 +12324,65 @@ Return a symbol (a canonical representation) for <code>cstr</code>. An advantage
 <code>extern unsigned int  gt_jobs</code>
 <p>
 Number of parallel threads to be used.
+</p>
+<hr>
+<a name="Tooldriver"></a>
+<h2>Module Tooldriver</h2>
+<a name="GtToolFunc"></a>
+
+<code>int  GtToolFunc(int argc, const char **argv, GtError *err)</code>
+<p>
+The prototype of a tool function.
+</p>
+<hr>
+<a name="GtLicenseConstructor"></a>
+
+<code>GtLicense*  GtLicenseConstructor(const char *argv0)</code>
+<p>
+Create a <code>GtLicense</code> from a string.
+</p>
+<hr>
+<a name="GtLicenseDestructor"></a>
+
+<code>void        GtLicenseDestructor(GtLicense*)</code>
+<p>
+Delete a <code>GtLicense</code>.
+</p>
+<hr>
+<a name="gt_tooldriver"></a>
+
+<code>int  gt_tooldriver(GtToolFunc tool, int argc, char *argv[])</code>
+<p>
+The tool driver module allows one to compile a tool into a separate binary.
+   This is mostly useful for stand-alone applications like GenomeThreader.
+   The tool driver creates an GtError object, calls <code>tool</code>, and reports errors.
+</p>
+<hr>
+<a name="gt_tooldriver_with_license"></a>
+
+<code>int  gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
+                               GtLicense **license_out,
+                               GtLicenseConstructor, GtLicenseDestructor)</code>
+<p>
+Like <code>gt_tooldriver()</code>, with license support.
+</p>
+<hr>
+<a name="gt_toolobjdriver"></a>
+
+<code>int  gt_toolobjdriver(GtToolConstructor, GtShowVersionFunc version_func,
+                     int argc, char *argv[])</code>
+<p>
+Optional <code>version_func</code> to override the default one.
+</p>
+<hr>
+<a name="gt_toolobjdriver_with_license"></a>
+
+<code>int  gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
+                                  GtShowVersionFunc version_func, int argc,
+                                  char *argv[], GtLicense **license_out,
+                                  GtLicenseConstructor, GtLicenseDestructor)</code>
+<p>
+Optional <code>version_func</code> to override the default one.
 </p>
 <hr>
 <a name="Undef"></a>
@@ -9919,6 +12464,25 @@ The undefined <code>GtUword</code> value.
 The undefined <code>unsigned long</code> value. deprecated
 </p>
 <hr>
+<a name="UnitTest"></a>
+<h2>Module UnitTest</h2>
+<a name="GtUnitTestFunc"></a>
+
+<code>int  GtUnitTestFunc(GtError*)</code>
+<p>
+A unit test function. It is assumed to return 0 on successful test
+   completion, otherwise <code>err</code> should be set accordingly.
+</p>
+<hr>
+<a name="gt_unit_test_run"></a>
+
+<code>int  gt_unit_test_run(void *key, void *value, void *data, GtError *err)</code>
+<p>
+Run unit test. <code>key</code> is expected to be a C string, <code>value</code> a
+   <code>GtUnitTestFunc</code>. <code>data</code> is assumed to be a pointer to an int,
+   containing the test return code. <code>err</code> should not be touched.
+</p>
+<hr>
 <a name="Unused"></a>
 <h2>Module Unused</h2>
 <a name="GT_UNUSED"></a>
@@ -9952,6 +12516,24 @@ Check that the <em>GenomeTools</em> library in use is compatible with the given
 <code>const char*  gt_version(void)</code>
 <p>
 Return the version of the <em>GenomeTools</em> library in use as a string.
+</p>
+<hr>
+<a name="VersionFunc"></a>
+<h2>Module VersionFunc</h2>
+<a name="gt_versionfunc"></a>
+
+<code>void  gt_versionfunc(const char *progname)</code>
+<p>
+Prints the GenomeTools version header with <code>progname</code> being the name of the
+   tool where it is called from.
+</p>
+<hr>
+<a name="gt_showshortversion"></a>
+
+<code>void  gt_showshortversion(const char *progname)</code>
+<p>
+Prints the short GenomeTools version header with <code>progname</code> being the name
+   of the tool where it is called from.
 </p>
 <hr>
 <a name="Warning"></a>
@@ -10161,14 +12743,220 @@ Similar to <code>vfprintf(3)</code>, terminates on error.
 Similar to <code>vsnprintf(3)</code>, terminates on error.
 </p>
 <hr>
+<a name="XPOSIX"></a>
+<h2>Module XPOSIX</h2>
+<a name="gt_xclose"></a>
+
+<code>void    gt_xclose(int d)</code>
+<p>
+Wrapper around <code>close()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xfdopen"></a>
+
+<code>FILE*   gt_xfdopen(int filedes, const char *mode)</code>
+<p>
+Wrapper around <code>fdopen()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xfstat"></a>
+
+<code>void    gt_xfstat(int fd, struct stat *sb)</code>
+<p>
+Wrapper around <code>fstat()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xgetrusage"></a>
+
+<code>void    gt_xgetrusage(int who, struct rusage *rusage)</code>
+<p>
+Wrapper around <code>getrusage()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xglob"></a>
+
+<code>void    gt_xglob(const char *pattern, int flags,
+                int (*errfunc)</code>
+<p>
+Wrapper around <code>glob()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xopen"></a>
+
+<code>int     gt_xopen(const char *path, int flags, mode_t mode)</code>
+<p>
+Wrapper around <code>open()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xmkdir"></a>
+
+<code>void    gt_xmkdir(const char *path)</code>
+<p>
+Wrapper around <code>mkdir()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xmkstemp"></a>
+
+<code>int     gt_xmkstemp(char *temp)</code>
+<p>
+Wrapper around <code>mkstemp()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xmmap"></a>
+
+<code>void*   gt_xmmap(void *addr, size_t len, int prot, int flags, int fd,
+                off_t offset)</code>
+<p>
+Low-level wrapper for the <code>mmap()</code> routine, terminating on error.
+</p>
+<hr>
+<a name="gt_xmunmap"></a>
+
+<code>void    gt_xmunmap(void *addr, size_t len)</code>
+<p>
+Generic unmapping routine, terminating on error.
+</p>
+<hr>
+<a name="gt_xraise"></a>
+
+<code>void    gt_xraise(int sig)</code>
+<p>
+Wrapper around <code>raise()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xstat"></a>
+
+<code>void    gt_xstat(const char *path, struct stat *sb)</code>
+<p>
+Wrapper around <code>stat()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xtime"></a>
+
+<code>time_t  gt_xtime(time_t *tloc)</code>
+<p>
+Wrapper around <code>time()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xunlink"></a>
+
+<code>void    gt_xunlink(const char *path)</code>
+<p>
+Wrapper around <code>unlink()</code>, terminating on error.
+</p>
+<hr>
+<a name="gt_xwrite"></a>
+
+<code>void    gt_xwrite(int d, const void *buf, size_t nbytes)</code>
+<p>
+Wrapper around <code>write()</code>, terminating on error.
+</p>
+<hr>
+<a name="Yarandom"></a>
+<h2>Module Yarandom</h2>
+<a name="gt_ya_random"></a>
+
+<code>unsigned int  gt_ya_random(void)</code>
+<p>
+Return a random number.
+</p>
+<hr>
+<a name="gt_ya_rand_init"></a>
+
+<code>unsigned int  gt_ya_rand_init(unsigned int)</code>
+<p>
+Initialize random number generator using given seed.
+</p>
+<hr>
+<a name="gt_ya_rand_clean"></a>
+
+<code>void          gt_ya_rand_clean(void)</code>
+<p>
+Clean up static data for random number generator.
+</p>
+<hr>
+<a name="GT_RAND_MAX"></a>
+
+<code>#define GT_RAND_MAX</code>
+<p>
+Maximum random number (2147483647)
+</p>
+<hr>
+<a name="random()"></a>
+
+<code>#define random()</code>
+<p>
+Return random number up to RAND_MAX.
+</p>
+<hr>
 <a name="Index"></a>
 <h2>Index</h2>
 
+  <a href="#GT_CHECKARRAYSPACE"><code>GT_CHECKARRAYSPACE</code></a><br>
+
+  <a href="#GT_CHECKARRAYSPACEMULTI"><code>GT_CHECKARRAYSPACEMULTI</code></a><br>
+
+  <a href="#GT_CHECKARRAYSPACE_GENERIC"><code>GT_CHECKARRAYSPACE_GENERIC</code></a><br>
+
+  <a href="#GT_COPYARRAY"><code>GT_COPYARRAY</code></a><br>
+
+  <a href="#GT_DECLAREARRAYSTRUCT"><code>GT_DECLAREARRAYSTRUCT</code></a><br>
+
   <a href="#GT_DEPRECATED"><code>GT_DEPRECATED</code></a><br>
+
+  <a href="#GT_DIV16"><code>GT_DIV16</code></a><br>
+
+  <a href="#GT_DIV2"><code>GT_DIV2</code></a><br>
+
+  <a href="#GT_DIV32"><code>GT_DIV32</code></a><br>
+
+  <a href="#GT_DIV4"><code>GT_DIV4</code></a><br>
+
+  <a href="#GT_DIV64"><code>GT_DIV64</code></a><br>
+
+  <a href="#GT_DIV8"><code>GT_DIV8</code></a><br>
+
+  <a href="#GT_FREEARRAY"><code>GT_FREEARRAY</code></a><br>
+
+  <a href="#GT_GETNEXTFREEINARRAY"><code>GT_GETNEXTFREEINARRAY</code></a><br>
+
+  <a href="#GT_INITARRAY"><code>GT_INITARRAY</code></a><br>
+
+  <a href="#GT_LOG2"><code>GT_LOG2</code></a><br>
+
+  <a href="#GT_MOD16"><code>GT_MOD16</code></a><br>
+
+  <a href="#GT_MOD2"><code>GT_MOD2</code></a><br>
+
+  <a href="#GT_MOD32"><code>GT_MOD32</code></a><br>
+
+  <a href="#GT_MOD4"><code>GT_MOD4</code></a><br>
+
+  <a href="#GT_MOD64"><code>GT_MOD64</code></a><br>
+
+  <a href="#GT_MOD8"><code>GT_MOD8</code></a><br>
+
+  <a href="#GT_MULT16"><code>GT_MULT16</code></a><br>
+
+  <a href="#GT_MULT2"><code>GT_MULT2</code></a><br>
+
+  <a href="#GT_MULT32"><code>GT_MULT32</code></a><br>
+
+  <a href="#GT_MULT4"><code>GT_MULT4</code></a><br>
+
+  <a href="#GT_MULT64"><code>GT_MULT64</code></a><br>
+
+  <a href="#GT_MULT8"><code>GT_MULT8</code></a><br>
 
   <a href="#GT_OPTION_PARSER_TERMINAL_WIDTH"><code>GT_OPTION_PARSER_TERMINAL_WIDTH</code></a><br>
 
   <a href="#GT_PHASE_CHARS"><code>GT_PHASE_CHARS</code></a><br>
+
+  <a href="#GT_POW2"><code>GT_POW2</code></a><br>
+
+  <a href="#GT_RAND_MAX"><code>GT_RAND_MAX</code></a><br>
+
+  <a href="#GT_STOREINARRAY"><code>GT_STOREINARRAY</code></a><br>
 
   <a href="#GT_STRAND_CHARS"><code>GT_STRAND_CHARS</code></a><br>
 
@@ -10196,21 +12984,49 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#GT_UNUSED"><code>GT_UNUSED</code></a><br>
 
+  <a href="#GtChainProc"><code>GtChainProc</code></a><br>
+
   <a href="#GtCompare"><code>GtCompare</code></a><br>
 
   <a href="#GtCompareWithData"><code>GtCompareWithData</code></a><br>
 
   <a href="#GtDiscDistriIterFunc"><code>GtDiscDistriIterFunc</code></a><br>
 
+  <a href="#GtFastaReaderProcDescription"><code>GtFastaReaderProcDescription</code></a><br>
+
+  <a href="#GtFastaReaderProcSequenceLength"><code>GtFastaReaderProcSequenceLength</code></a><br>
+
+  <a href="#GtFastaReaderProcSequencePart"><code>GtFastaReaderProcSequencePart</code></a><br>
+
   <a href="#GtFeatureNodeAttributeIterFunc"><code>GtFeatureNodeAttributeIterFunc</code></a><br>
 
   <a href="#GtFree"><code>GtFree</code></a><br>
 
+  <a href="#GtGetExonsFunc"><code>GtGetExonsFunc</code></a><br>
+
+  <a href="#GtGetGenomicRangeFunc"><code>GtGetGenomicRangeFunc</code></a><br>
+
+  <a href="#GtGetSeqFunc"><code>GtGetSeqFunc</code></a><br>
+
+  <a href="#GtGetSeqLenFunc"><code>GtGetSeqLenFunc</code></a><br>
+
+  <a href="#GtGetStrandFunc"><code>GtGetStrandFunc</code></a><br>
+
   <a href="#GtHashmapVisitFunc"><code>GtHashmapVisitFunc</code></a><br>
+
+  <a href="#GtLicenseConstructor"><code>GtLicenseConstructor</code></a><br>
+
+  <a href="#GtLicenseDestructor"><code>GtLicenseDestructor</code></a><br>
 
   <a href="#GtNodeStreamFreeFunc"><code>GtNodeStreamFreeFunc</code></a><br>
 
   <a href="#GtNodeStreamNextFunc"><code>GtNodeStreamNextFunc</code></a><br>
+
+  <a href="#GtORFProcessor"><code>GtORFProcessor</code></a><br>
+
+  <a href="#GtProcessSpliceFormFunc"><code>GtProcessSpliceFormFunc</code></a><br>
+
+  <a href="#GtStrConstructorFunc"><code>GtStrConstructorFunc</code></a><br>
 
   <a href="#GtTagValueMapIteratorFunc"><code>GtTagValueMapIteratorFunc</code></a><br>
 
@@ -10224,6 +13040,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#GtToolConstructor"><code>GtToolConstructor</code></a><br>
 
+  <a href="#GtToolFunc"><code>GtToolFunc</code></a><br>
+
   <a href="#GtToolOptionParserNew"><code>GtToolOptionParserNew</code></a><br>
 
   <a href="#GtToolRunner"><code>GtToolRunner</code></a><br>
@@ -10231,6 +13049,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#GtTrackOrderingFunc"><code>GtTrackOrderingFunc</code></a><br>
 
   <a href="#GtTrackSelectorFunc"><code>GtTrackSelectorFunc</code></a><br>
+
+  <a href="#GtUnitTestFunc"><code>GtUnitTestFunc</code></a><br>
 
   <a href="#GtWarningHandler"><code>GtWarningHandler</code></a><br>
 
@@ -10318,6 +13138,16 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_array2dim_malloc"><code>gt_array2dim_malloc</code></a><br>
 
+  <a href="#gt_array2dim_sparse_calloc"><code>gt_array2dim_sparse_calloc</code></a><br>
+
+  <a href="#gt_array3dim_calloc"><code>gt_array3dim_calloc</code></a><br>
+
+  <a href="#gt_array3dim_delete"><code>gt_array3dim_delete</code></a><br>
+
+  <a href="#gt_array3dim_example"><code>gt_array3dim_example</code></a><br>
+
+  <a href="#gt_array3dim_malloc"><code>gt_array3dim_malloc</code></a><br>
+
   <a href="#gt_array_add"><code>gt_array_add</code></a><br>
 
   <a href="#gt_array_add_array"><code>gt_array_add_array</code></a><br>
@@ -10349,6 +13179,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_array_out_stream_new"><code>gt_array_out_stream_new</code></a><br>
 
   <a href="#gt_array_pop"><code>gt_array_pop</code></a><br>
+
+  <a href="#gt_array_prepend_array"><code>gt_array_prepend_array</code></a><br>
 
   <a href="#gt_array_ref"><code>gt_array_ref</code></a><br>
 
@@ -10383,6 +13215,60 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_bed_in_stream_set_feature_type"><code>gt_bed_in_stream_set_feature_type</code></a><br>
 
   <a href="#gt_bed_in_stream_set_thick_feature_type"><code>gt_bed_in_stream_set_thick_feature_type</code></a><br>
+
+  <a href="#gt_bioseq_delete"><code>gt_bioseq_delete</code></a><br>
+
+  <a href="#gt_bioseq_delete_indices"><code>gt_bioseq_delete_indices</code></a><br>
+
+  <a href="#gt_bioseq_filename"><code>gt_bioseq_filename</code></a><br>
+
+  <a href="#gt_bioseq_get_alphabet"><code>gt_bioseq_get_alphabet</code></a><br>
+
+  <a href="#gt_bioseq_get_char"><code>gt_bioseq_get_char</code></a><br>
+
+  <a href="#gt_bioseq_get_description"><code>gt_bioseq_get_description</code></a><br>
+
+  <a href="#gt_bioseq_get_encoded_char"><code>gt_bioseq_get_encoded_char</code></a><br>
+
+  <a href="#gt_bioseq_get_encoded_sequence"><code>gt_bioseq_get_encoded_sequence</code></a><br>
+
+  <a href="#gt_bioseq_get_encoded_sequence_range"><code>gt_bioseq_get_encoded_sequence_range</code></a><br>
+
+  <a href="#gt_bioseq_get_md5_fingerprint"><code>gt_bioseq_get_md5_fingerprint</code></a><br>
+
+  <a href="#gt_bioseq_get_seq"><code>gt_bioseq_get_seq</code></a><br>
+
+  <a href="#gt_bioseq_get_seq_range"><code>gt_bioseq_get_seq_range</code></a><br>
+
+  <a href="#gt_bioseq_get_sequence"><code>gt_bioseq_get_sequence</code></a><br>
+
+  <a href="#gt_bioseq_get_sequence_length"><code>gt_bioseq_get_sequence_length</code></a><br>
+
+  <a href="#gt_bioseq_get_sequence_range"><code>gt_bioseq_get_sequence_range</code></a><br>
+
+  <a href="#gt_bioseq_get_total_length"><code>gt_bioseq_get_total_length</code></a><br>
+
+  <a href="#gt_bioseq_md5_to_index"><code>gt_bioseq_md5_to_index</code></a><br>
+
+  <a href="#gt_bioseq_new"><code>gt_bioseq_new</code></a><br>
+
+  <a href="#gt_bioseq_new_recreate"><code>gt_bioseq_new_recreate</code></a><br>
+
+  <a href="#gt_bioseq_new_str"><code>gt_bioseq_new_str</code></a><br>
+
+  <a href="#gt_bioseq_number_of_sequences"><code>gt_bioseq_number_of_sequences</code></a><br>
+
+  <a href="#gt_bioseq_seq_has_wildcards"><code>gt_bioseq_seq_has_wildcards</code></a><br>
+
+  <a href="#gt_bioseq_show_as_fasta"><code>gt_bioseq_show_as_fasta</code></a><br>
+
+  <a href="#gt_bioseq_show_gc_content"><code>gt_bioseq_show_gc_content</code></a><br>
+
+  <a href="#gt_bioseq_show_seqlengthdistri"><code>gt_bioseq_show_seqlengthdistri</code></a><br>
+
+  <a href="#gt_bioseq_show_sequence_as_fasta"><code>gt_bioseq_show_sequence_as_fasta</code></a><br>
+
+  <a href="#gt_bioseq_show_stat"><code>gt_bioseq_show_stat</code></a><br>
 
   <a href="#gt_bittab_and"><code>gt_bittab_and</code></a><br>
 
@@ -10466,11 +13352,29 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_block_set_strand"><code>gt_block_set_strand</code></a><br>
 
+  <a href="#gt_bool_matrix_delete"><code>gt_bool_matrix_delete</code></a><br>
+
+  <a href="#gt_bool_matrix_get"><code>gt_bool_matrix_get</code></a><br>
+
+  <a href="#gt_bool_matrix_get_first_column"><code>gt_bool_matrix_get_first_column</code></a><br>
+
+  <a href="#gt_bool_matrix_get_last_column"><code>gt_bool_matrix_get_last_column</code></a><br>
+
+  <a href="#gt_bool_matrix_get_next_column"><code>gt_bool_matrix_get_next_column</code></a><br>
+
+  <a href="#gt_bool_matrix_new"><code>gt_bool_matrix_new</code></a><br>
+
+  <a href="#gt_bool_matrix_set"><code>gt_bool_matrix_set</code></a><br>
+
   <a href="#gt_bsearch_all"><code>gt_bsearch_all</code></a><br>
 
   <a href="#gt_bsearch_all_mark"><code>gt_bsearch_all_mark</code></a><br>
 
   <a href="#gt_bsearch_data"><code>gt_bsearch_data</code></a><br>
+
+  <a href="#gt_buffer_stream_dequeue"><code>gt_buffer_stream_dequeue</code></a><br>
+
+  <a href="#gt_buffer_stream_new"><code>gt_buffer_stream_new</code></a><br>
 
   <a href="#gt_byte_popcount[256]"><code>gt_byte_popcount[256]</code></a><br>
 
@@ -10492,7 +13396,15 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_cds_stream_new"><code>gt_cds_stream_new</code></a><br>
 
+  <a href="#gt_cds_visitor_new"><code>gt_cds_visitor_new</code></a><br>
+
+  <a href="#gt_cds_visitor_set_region_mapping"><code>gt_cds_visitor_set_region_mapping</code></a><br>
+
   <a href="#gt_check_boundaries_visitor_new"><code>gt_check_boundaries_visitor_new</code></a><br>
+
+  <a href="#gt_class_alloc"><code>gt_class_alloc</code></a><br>
+
+  <a href="#gt_class_alloc_clean"><code>gt_class_alloc_clean</code></a><br>
 
   <a href="#gt_codon_iterator_current_position"><code>gt_codon_iterator_current_position</code></a><br>
 
@@ -10526,11 +13438,27 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_comment_node_try_cast"><code>gt_comment_node_try_cast</code></a><br>
 
+  <a href="#gt_consensus_sa"><code>gt_consensus_sa</code></a><br>
+
   <a href="#gt_countingsort"><code>gt_countingsort</code></a><br>
 
   <a href="#gt_countingsort_get_max"><code>gt_countingsort_get_max</code></a><br>
 
   <a href="#gt_csa_stream_new"><code>gt_csa_stream_new</code></a><br>
+
+  <a href="#gt_cstr_array_delete"><code>gt_cstr_array_delete</code></a><br>
+
+  <a href="#gt_cstr_array_dup"><code>gt_cstr_array_dup</code></a><br>
+
+  <a href="#gt_cstr_array_prefix_first"><code>gt_cstr_array_prefix_first</code></a><br>
+
+  <a href="#gt_cstr_array_preprend"><code>gt_cstr_array_preprend</code></a><br>
+
+  <a href="#gt_cstr_array_show"><code>gt_cstr_array_show</code></a><br>
+
+  <a href="#gt_cstr_array_show_genfile"><code>gt_cstr_array_show_genfile</code></a><br>
+
+  <a href="#gt_cstr_array_size"><code>gt_cstr_array_size</code></a><br>
 
   <a href="#gt_cstr_dup"><code>gt_cstr_dup</code></a><br>
 
@@ -10567,6 +13495,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_custom_track_ref"><code>gt_custom_track_ref</code></a><br>
 
   <a href="#gt_custom_track_script_wrapper_new"><code>gt_custom_track_script_wrapper_new</code></a><br>
+
+  <a href="#gt_determine_ORFs"><code>gt_determine_ORFs</code></a><br>
+
+  <a href="#gt_determinebitspervalue"><code>gt_determinebitspervalue</code></a><br>
 
   <a href="#gt_diagram_add_custom_track"><code>gt_diagram_add_custom_track</code></a><br>
 
@@ -10621,6 +13553,16 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_dlistelem_next"><code>gt_dlistelem_next</code></a><br>
 
   <a href="#gt_dlistelem_previous"><code>gt_dlistelem_previous</code></a><br>
+
+  <a href="#gt_double_compare"><code>gt_double_compare</code></a><br>
+
+  <a href="#gt_double_equals_double"><code>gt_double_equals_double</code></a><br>
+
+  <a href="#gt_double_equals_one"><code>gt_double_equals_one</code></a><br>
+
+  <a href="#gt_double_larger_double"><code>gt_double_larger_double</code></a><br>
+
+  <a href="#gt_double_smaller_double"><code>gt_double_smaller_double</code></a><br>
 
   <a href="#gt_dup_feature_stream_new"><code>gt_dup_feature_stream_new</code></a><br>
 
@@ -10864,6 +13806,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_version"><code>gt_encseq_version</code></a><br>
 
+  <a href="#gt_ensure"><code>gt_ensure</code></a><br>
+
   <a href="#gt_eof_node_new"><code>gt_eof_node_new</code></a><br>
 
   <a href="#gt_eof_node_try_cast"><code>gt_eof_node_try_cast</code></a><br>
@@ -10874,6 +13818,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_error_get"><code>gt_error_get</code></a><br>
 
+  <a href="#gt_error_get_progname"><code>gt_error_get_progname</code></a><br>
+
   <a href="#gt_error_is_set"><code>gt_error_is_set</code></a><br>
 
   <a href="#gt_error_new"><code>gt_error_new</code></a><br>
@@ -10882,11 +13828,83 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_error_set_nonvariadic"><code>gt_error_set_nonvariadic</code></a><br>
 
+  <a href="#gt_error_set_progname"><code>gt_error_set_progname</code></a><br>
+
   <a href="#gt_error_unset"><code>gt_error_unset</code></a><br>
 
   <a href="#gt_error_vset"><code>gt_error_vset</code></a><br>
 
   <a href="#gt_extract_feature_stream_new"><code>gt_extract_feature_stream_new</code></a><br>
+
+  <a href="#gt_fa_bzclose"><code>gt_fa_bzclose</code></a><br>
+
+  <a href="#gt_fa_bzopen"><code>gt_fa_bzopen</code></a><br>
+
+  <a href="#gt_fa_check_fptr_leak"><code>gt_fa_check_fptr_leak</code></a><br>
+
+  <a href="#gt_fa_check_mmap_leak"><code>gt_fa_check_mmap_leak</code></a><br>
+
+  <a href="#gt_fa_clean"><code>gt_fa_clean</code></a><br>
+
+  <a href="#gt_fa_enable_global_spacepeak"><code>gt_fa_enable_global_spacepeak</code></a><br>
+
+  <a href="#gt_fa_fclose"><code>gt_fa_fclose</code></a><br>
+
+  <a href="#gt_fa_fopen"><code>gt_fa_fopen</code></a><br>
+
+  <a href="#gt_fa_fopen_with_suffix"><code>gt_fa_fopen_with_suffix</code></a><br>
+
+  <a href="#gt_fa_get_space_current"><code>gt_fa_get_space_current</code></a><br>
+
+  <a href="#gt_fa_get_space_peak"><code>gt_fa_get_space_peak</code></a><br>
+
+  <a href="#gt_fa_gzclose"><code>gt_fa_gzclose</code></a><br>
+
+  <a href="#gt_fa_gzopen"><code>gt_fa_gzopen</code></a><br>
+
+  <a href="#gt_fa_init"><code>gt_fa_init</code></a><br>
+
+  <a href="#gt_fa_lock_exclusive"><code>gt_fa_lock_exclusive</code></a><br>
+
+  <a href="#gt_fa_lock_shared"><code>gt_fa_lock_shared</code></a><br>
+
+  <a href="#gt_fa_mmap_read"><code>gt_fa_mmap_read</code></a><br>
+
+  <a href="#gt_fa_mmap_read_range"><code>gt_fa_mmap_read_range</code></a><br>
+
+  <a href="#gt_fa_mmap_write"><code>gt_fa_mmap_write</code></a><br>
+
+  <a href="#gt_fa_mmap_write_range"><code>gt_fa_mmap_write_range</code></a><br>
+
+  <a href="#gt_fa_show_space_peak"><code>gt_fa_show_space_peak</code></a><br>
+
+  <a href="#gt_fa_unlock"><code>gt_fa_unlock</code></a><br>
+
+  <a href="#gt_fa_xbzclose"><code>gt_fa_xbzclose</code></a><br>
+
+  <a href="#gt_fa_xbzopen"><code>gt_fa_xbzopen</code></a><br>
+
+  <a href="#gt_fa_xfclose"><code>gt_fa_xfclose</code></a><br>
+
+  <a href="#gt_fa_xfopen"><code>gt_fa_xfopen</code></a><br>
+
+  <a href="#gt_fa_xgzclose"><code>gt_fa_xgzclose</code></a><br>
+
+  <a href="#gt_fa_xgzopen"><code>gt_fa_xgzopen</code></a><br>
+
+  <a href="#gt_fa_xmmap_read"><code>gt_fa_xmmap_read</code></a><br>
+
+  <a href="#gt_fa_xmmap_read_range"><code>gt_fa_xmmap_read_range</code></a><br>
+
+  <a href="#gt_fa_xmmap_write"><code>gt_fa_xmmap_write</code></a><br>
+
+  <a href="#gt_fa_xmmap_write_range"><code>gt_fa_xmmap_write_range</code></a><br>
+
+  <a href="#gt_fa_xmunmap"><code>gt_fa_xmunmap</code></a><br>
+
+  <a href="#gt_fasta_reader_delete"><code>gt_fasta_reader_delete</code></a><br>
+
+  <a href="#gt_fasta_reader_run"><code>gt_fasta_reader_run</code></a><br>
 
   <a href="#gt_fasta_show_entry"><code>gt_fasta_show_entry</code></a><br>
 
@@ -10894,7 +13912,15 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_fasta_show_entry_nt_str"><code>gt_fasta_show_entry_nt_str</code></a><br>
 
+  <a href="#gt_fasta_show_entry_nt_with_suffix"><code>gt_fasta_show_entry_nt_with_suffix</code></a><br>
+
+  <a href="#gt_fasta_show_entry_nt_with_suffix_str"><code>gt_fasta_show_entry_nt_with_suffix_str</code></a><br>
+
   <a href="#gt_fasta_show_entry_str"><code>gt_fasta_show_entry_str</code></a><br>
+
+  <a href="#gt_fasta_show_entry_with_suffix"><code>gt_fasta_show_entry_with_suffix</code></a><br>
+
+  <a href="#gt_fasta_show_entry_with_suffix_str"><code>gt_fasta_show_entry_with_suffix_str</code></a><br>
 
   <a href="#gt_feature_in_stream_new"><code>gt_feature_in_stream_new</code></a><br>
 
@@ -11026,6 +14052,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_stream_new"><code>gt_feature_stream_new</code></a><br>
 
+  <a href="#gt_file_basename_length"><code>gt_file_basename_length</code></a><br>
+
   <a href="#gt_file_delete"><code>gt_file_delete</code></a><br>
 
   <a href="#gt_file_delete_without_handle"><code>gt_file_delete_without_handle</code></a><br>
@@ -11035,6 +14063,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_file_estimate_size"><code>gt_file_estimate_size</code></a><br>
 
   <a href="#gt_file_exists"><code>gt_file_exists</code></a><br>
+
+  <a href="#gt_file_exists_and_is_dir"><code>gt_file_exists_and_is_dir</code></a><br>
 
   <a href="#gt_file_exists_with_suffix"><code>gt_file_exists_with_suffix</code></a><br>
 
@@ -11046,11 +14076,19 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_file_is_newer"><code>gt_file_is_newer</code></a><br>
 
+  <a href="#gt_file_mode"><code>gt_file_mode</code></a><br>
+
+  <a href="#gt_file_mode_determine"><code>gt_file_mode_determine</code></a><br>
+
+  <a href="#gt_file_mode_suffix"><code>gt_file_mode_suffix</code></a><br>
+
   <a href="#gt_file_new"><code>gt_file_new</code></a><br>
 
   <a href="#gt_file_new_from_fileptr"><code>gt_file_new_from_fileptr</code></a><br>
 
   <a href="#gt_file_number_of_lines"><code>gt_file_number_of_lines</code></a><br>
+
+  <a href="#gt_file_open"><code>gt_file_open</code></a><br>
 
   <a href="#gt_file_ref"><code>gt_file_ref</code></a><br>
 
@@ -11060,11 +14098,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_file_suffix"><code>gt_file_suffix</code></a><br>
 
+  <a href="#gt_file_unget_char"><code>gt_file_unget_char</code></a><br>
+
   <a href="#gt_file_xfgetc"><code>gt_file_xfgetc</code></a><br>
 
   <a href="#gt_file_xfputc"><code>gt_file_xfputc</code></a><br>
 
   <a href="#gt_file_xfputs"><code>gt_file_xfputs</code></a><br>
+
+  <a href="#gt_file_xopen"><code>gt_file_xopen</code></a><br>
+
+  <a href="#gt_file_xopen_file_mode"><code>gt_file_xopen_file_mode</code></a><br>
 
   <a href="#gt_file_xprintf"><code>gt_file_xprintf</code></a><br>
 
@@ -11081,6 +14125,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_free"><code>gt_free</code></a><br>
 
   <a href="#gt_free_func"><code>gt_free_func</code></a><br>
+
+  <a href="#gt_gcd_uint"><code>gt_gcd_uint</code></a><br>
 
   <a href="#gt_genome_node_accept"><code>gt_genome_node_accept</code></a><br>
 
@@ -11112,9 +14158,13 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_genome_node_set_range"><code>gt_genome_node_set_range</code></a><br>
 
+  <a href="#gt_genome_nodes_show"><code>gt_genome_nodes_show</code></a><br>
+
   <a href="#gt_genome_nodes_sort"><code>gt_genome_nodes_sort</code></a><br>
 
   <a href="#gt_genome_nodes_sort_stable"><code>gt_genome_nodes_sort_stable</code></a><br>
+
+  <a href="#gt_gff3_escape"><code>gt_gff3_escape</code></a><br>
 
   <a href="#gt_gff3_in_stream_check_id_attributes"><code>gt_gff3_in_stream_check_id_attributes</code></a><br>
 
@@ -11160,11 +14210,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_gff3_parser_set_xrf_checker"><code>gt_gff3_parser_set_xrf_checker</code></a><br>
 
+  <a href="#gt_gff3_unescape"><code>gt_gff3_unescape</code></a><br>
+
   <a href="#gt_gff3_visitor_new"><code>gt_gff3_visitor_new</code></a><br>
 
   <a href="#gt_gff3_visitor_retain_id_attributes"><code>gt_gff3_visitor_retain_id_attributes</code></a><br>
 
   <a href="#gt_gff3_visitor_set_fasta_width"><code>gt_gff3_visitor_set_fasta_width</code></a><br>
+
+  <a href="#gt_globalchaining_coverage"><code>gt_globalchaining_coverage</code></a><br>
+
+  <a href="#gt_globalchaining_max"><code>gt_globalchaining_max</code></a><br>
 
   <a href="#gt_graphics_cairo_draw_curve_data"><code>gt_graphics_cairo_draw_curve_data</code></a><br>
 
@@ -11246,7 +14302,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_hashmap_get"><code>gt_hashmap_get</code></a><br>
 
+  <a href="#gt_hashmap_get_key"><code>gt_hashmap_get_key</code></a><br>
+
   <a href="#gt_hashmap_new"><code>gt_hashmap_new</code></a><br>
+
+  <a href="#gt_hashmap_new_no_ma"><code>gt_hashmap_new_no_ma</code></a><br>
 
   <a href="#gt_hashmap_ref"><code>gt_hashmap_ref</code></a><br>
 
@@ -11306,11 +14366,15 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_layout_sketch"><code>gt_layout_sketch</code></a><br>
 
+  <a href="#gt_lcm_uint"><code>gt_lcm_uint</code></a><br>
+
   <a href="#gt_lib_clean"><code>gt_lib_clean</code></a><br>
 
   <a href="#gt_lib_init"><code>gt_lib_init</code></a><br>
 
   <a href="#gt_lib_reg_atexit_func"><code>gt_lib_reg_atexit_func</code></a><br>
+
+  <a href="#gt_log_base"><code>gt_log_base</code></a><br>
 
   <a href="#gt_log_enable"><code>gt_log_enable</code></a><br>
 
@@ -11345,6 +14409,28 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_logger_set_target"><code>gt_logger_set_target</code></a><br>
 
   <a href="#gt_logger_target"><code>gt_logger_target</code></a><br>
+
+  <a href="#gt_logsum"><code>gt_logsum</code></a><br>
+
+  <a href="#gt_ma_bookkeeping_enabled"><code>gt_ma_bookkeeping_enabled</code></a><br>
+
+  <a href="#gt_ma_check_space_leak"><code>gt_ma_check_space_leak</code></a><br>
+
+  <a href="#gt_ma_clean"><code>gt_ma_clean</code></a><br>
+
+  <a href="#gt_ma_disable_global_spacepeak"><code>gt_ma_disable_global_spacepeak</code></a><br>
+
+  <a href="#gt_ma_enable_global_spacepeak"><code>gt_ma_enable_global_spacepeak</code></a><br>
+
+  <a href="#gt_ma_get_space_current"><code>gt_ma_get_space_current</code></a><br>
+
+  <a href="#gt_ma_get_space_peak"><code>gt_ma_get_space_peak</code></a><br>
+
+  <a href="#gt_ma_init"><code>gt_ma_init</code></a><br>
+
+  <a href="#gt_ma_show_allocations"><code>gt_ma_show_allocations</code></a><br>
+
+  <a href="#gt_ma_show_space_peak"><code>gt_ma_show_space_peak</code></a><br>
 
   <a href="#gt_malloc"><code>gt_malloc</code></a><br>
 
@@ -11446,6 +14532,26 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_md5_fingerprint"><code>gt_md5_fingerprint</code></a><br>
 
+  <a href="#gt_md5_seqid_cmp_seqids"><code>gt_md5_seqid_cmp_seqids</code></a><br>
+
+  <a href="#gt_md5_seqid_has_prefix"><code>gt_md5_seqid_has_prefix</code></a><br>
+
+  <a href="#gt_md5_tab_delete"><code>gt_md5_tab_delete</code></a><br>
+
+  <a href="#gt_md5_tab_disable_file_locking"><code>gt_md5_tab_disable_file_locking</code></a><br>
+
+  <a href="#gt_md5_tab_get"><code>gt_md5_tab_get</code></a><br>
+
+  <a href="#gt_md5_tab_map"><code>gt_md5_tab_map</code></a><br>
+
+  <a href="#gt_md5_tab_new"><code>gt_md5_tab_new</code></a><br>
+
+  <a href="#gt_md5_tab_new_from_cache_file"><code>gt_md5_tab_new_from_cache_file</code></a><br>
+
+  <a href="#gt_md5_tab_ref"><code>gt_md5_tab_ref</code></a><br>
+
+  <a href="#gt_md5_tab_size"><code>gt_md5_tab_size</code></a><br>
+
   <a href="#gt_md5_to_id_stream_new"><code>gt_md5_to_id_stream_new</code></a><br>
 
   <a href="#gt_merge_feature_stream_new"><code>gt_merge_feature_stream_new</code></a><br>
@@ -11461,6 +14567,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_meta_node_new"><code>gt_meta_node_new</code></a><br>
 
   <a href="#gt_meta_node_try_cast"><code>gt_meta_node_try_cast</code></a><br>
+
+  <a href="#gt_mkstemp"><code>gt_mkstemp</code></a><br>
 
   <a href="#gt_msort"><code>gt_msort</code></a><br>
 
@@ -11640,9 +14748,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_output_file_info_register_options"><code>gt_output_file_info_register_options</code></a><br>
 
+  <a href="#gt_output_file_xopen_forcecheck"><code>gt_output_file_xopen_forcecheck</code></a><br>
+
+  <a href="#gt_pagesize"><code>gt_pagesize</code></a><br>
+
+  <a href="#gt_parse_description_range"><code>gt_parse_description_range</code></a><br>
+
   <a href="#gt_parse_double"><code>gt_parse_double</code></a><br>
 
   <a href="#gt_parse_int"><code>gt_parse_int</code></a><br>
+
+  <a href="#gt_parse_long"><code>gt_parse_long</code></a><br>
 
   <a href="#gt_parse_range"><code>gt_parse_range</code></a><br>
 
@@ -11650,11 +14766,15 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_parse_uint"><code>gt_parse_uint</code></a><br>
 
+  <a href="#gt_parse_ulong"><code>gt_parse_ulong</code></a><br>
+
   <a href="#gt_parse_uword"><code>gt_parse_uword</code></a><br>
 
   <a href="#gt_parse_word"><code>gt_parse_word</code></a><br>
 
   <a href="#gt_phase_get"><code>gt_phase_get</code></a><br>
+
+  <a href="#gt_power_for_small_exponents"><code>gt_power_for_small_exponents</code></a><br>
 
   <a href="#gt_qsort_r"><code>gt_qsort_r</code></a><br>
 
@@ -11672,6 +14792,14 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_queue_size"><code>gt_queue_size</code></a><br>
 
+  <a href="#gt_rand_0_to_1"><code>gt_rand_0_to_1</code></a><br>
+
+  <a href="#gt_rand_char"><code>gt_rand_char</code></a><br>
+
+  <a href="#gt_rand_max"><code>gt_rand_max</code></a><br>
+
+  <a href="#gt_rand_max_double"><code>gt_rand_max_double</code></a><br>
+
   <a href="#gt_range_compare"><code>gt_range_compare</code></a><br>
 
   <a href="#gt_range_compare_with_delta"><code>gt_range_compare_with_delta</code></a><br>
@@ -11688,7 +14816,67 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_range_overlap_delta"><code>gt_range_overlap_delta</code></a><br>
 
+  <a href="#gt_range_reorder"><code>gt_range_reorder</code></a><br>
+
   <a href="#gt_range_within"><code>gt_range_within</code></a><br>
+
+  <a href="#gt_ranges_are_consecutive"><code>gt_ranges_are_consecutive</code></a><br>
+
+  <a href="#gt_ranges_are_equal"><code>gt_ranges_are_equal</code></a><br>
+
+  <a href="#gt_ranges_are_sorted"><code>gt_ranges_are_sorted</code></a><br>
+
+  <a href="#gt_ranges_are_sorted_and_do_not_overlap"><code>gt_ranges_are_sorted_and_do_not_overlap</code></a><br>
+
+  <a href="#gt_ranges_borders_are_in_region"><code>gt_ranges_borders_are_in_region</code></a><br>
+
+  <a href="#gt_ranges_copy_to_opposite_strand"><code>gt_ranges_copy_to_opposite_strand</code></a><br>
+
+  <a href="#gt_ranges_do_not_overlap"><code>gt_ranges_do_not_overlap</code></a><br>
+
+  <a href="#gt_ranges_show"><code>gt_ranges_show</code></a><br>
+
+  <a href="#gt_ranges_sort"><code>gt_ranges_sort</code></a><br>
+
+  <a href="#gt_ranges_sort_by_length_stable"><code>gt_ranges_sort_by_length_stable</code></a><br>
+
+  <a href="#gt_ranges_spanned_length"><code>gt_ranges_spanned_length</code></a><br>
+
+  <a href="#gt_ranges_total_length"><code>gt_ranges_total_length</code></a><br>
+
+  <a href="#gt_ranges_uniq"><code>gt_ranges_uniq</code></a><br>
+
+  <a href="#gt_ranges_uniq_count"><code>gt_ranges_uniq_count</code></a><br>
+
+  <a href="#gt_ranges_uniq_in_place"><code>gt_ranges_uniq_in_place</code></a><br>
+
+  <a href="#gt_ranges_uniq_in_place_count"><code>gt_ranges_uniq_in_place_count</code></a><br>
+
+  <a href="#gt_rbtree_clear"><code>gt_rbtree_clear</code></a><br>
+
+  <a href="#gt_rbtree_erase"><code>gt_rbtree_erase</code></a><br>
+
+  <a href="#gt_rbtree_find"><code>gt_rbtree_find</code></a><br>
+
+  <a href="#gt_rbtree_insert"><code>gt_rbtree_insert</code></a><br>
+
+  <a href="#gt_rbtree_iter_delete"><code>gt_rbtree_iter_delete</code></a><br>
+
+  <a href="#gt_rbtree_iter_new_from_first"><code>gt_rbtree_iter_new_from_first</code></a><br>
+
+  <a href="#gt_rbtree_iter_new_from_last"><code>gt_rbtree_iter_new_from_last</code></a><br>
+
+  <a href="#gt_rbtree_iter_next"><code>gt_rbtree_iter_next</code></a><br>
+
+  <a href="#gt_rbtree_iter_prev"><code>gt_rbtree_iter_prev</code></a><br>
+
+  <a href="#gt_rbtree_iter_reset_from_first"><code>gt_rbtree_iter_reset_from_first</code></a><br>
+
+  <a href="#gt_rbtree_iter_reset_from_last"><code>gt_rbtree_iter_reset_from_last</code></a><br>
+
+  <a href="#gt_rbtree_new"><code>gt_rbtree_new</code></a><br>
+
+  <a href="#gt_rbtree_search"><code>gt_rbtree_search</code></a><br>
 
   <a href="#gt_rdb_mysql_new"><code>gt_rdb_mysql_new</code></a><br>
 
@@ -11752,7 +14940,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_region_node_try_cast"><code>gt_region_node_try_cast</code></a><br>
 
+  <a href="#gt_regular_seqid_save"><code>gt_regular_seqid_save</code></a><br>
+
   <a href="#gt_reverse_complement"><code>gt_reverse_complement</code></a><br>
+
+  <a href="#gt_round_to_long"><code>gt_round_to_long</code></a><br>
 
   <a href="#gt_rwlock_delete"><code>gt_rwlock_delete</code></a><br>
 
@@ -11764,6 +14956,56 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_rwlock_wrlock"><code>gt_rwlock_wrlock</code></a><br>
 
+  <a href="#gt_safe_abs"><code>gt_safe_abs</code></a><br>
+
+  <a href="#gt_safe_add"><code>gt_safe_add</code></a><br>
+
+  <a href="#gt_safe_assign"><code>gt_safe_assign</code></a><br>
+
+  <a href="#gt_safe_cast2long"><code>gt_safe_cast2long</code></a><br>
+
+  <a href="#gt_safe_cast2ulong"><code>gt_safe_cast2ulong</code></a><br>
+
+  <a href="#gt_safe_cast2ulong_64"><code>gt_safe_cast2ulong_64</code></a><br>
+
+  <a href="#gt_safe_labs"><code>gt_safe_labs</code></a><br>
+
+  <a href="#gt_safe_llabs"><code>gt_safe_llabs</code></a><br>
+
+  <a href="#gt_safe_mult_u32"><code>gt_safe_mult_u32</code></a><br>
+
+  <a href="#gt_safe_mult_u64"><code>gt_safe_mult_u64</code></a><br>
+
+  <a href="#gt_safe_mult_ulong"><code>gt_safe_mult_ulong</code></a><br>
+
+  <a href="#gt_safe_sub"><code>gt_safe_sub</code></a><br>
+
+  <a href="#gt_safearith_add_of"><code>gt_safearith_add_of</code></a><br>
+
+  <a href="#gt_safearith_assign"><code>gt_safearith_assign</code></a><br>
+
+  <a href="#gt_safearith_sub_of"><code>gt_safearith_sub_of</code></a><br>
+
+  <a href="#gt_score_matrix_clone_empty"><code>gt_score_matrix_clone_empty</code></a><br>
+
+  <a href="#gt_score_matrix_delete"><code>gt_score_matrix_delete</code></a><br>
+
+  <a href="#gt_score_matrix_get_dimension"><code>gt_score_matrix_get_dimension</code></a><br>
+
+  <a href="#gt_score_matrix_get_score"><code>gt_score_matrix_get_score</code></a><br>
+
+  <a href="#gt_score_matrix_get_scores"><code>gt_score_matrix_get_scores</code></a><br>
+
+  <a href="#gt_score_matrix_new"><code>gt_score_matrix_new</code></a><br>
+
+  <a href="#gt_score_matrix_new_read"><code>gt_score_matrix_new_read</code></a><br>
+
+  <a href="#gt_score_matrix_new_read_protein"><code>gt_score_matrix_new_read_protein</code></a><br>
+
+  <a href="#gt_score_matrix_set_score"><code>gt_score_matrix_set_score</code></a><br>
+
+  <a href="#gt_score_matrix_show"><code>gt_score_matrix_show</code></a><br>
+
   <a href="#gt_script_wrapper_stream_new"><code>gt_script_wrapper_stream_new</code></a><br>
 
   <a href="#gt_script_wrapper_visitor_new"><code>gt_script_wrapper_visitor_new</code></a><br>
@@ -11771,6 +15013,16 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_select_stream_new"><code>gt_select_stream_new</code></a><br>
 
   <a href="#gt_select_stream_set_drophandler"><code>gt_select_stream_set_drophandler</code></a><br>
+
+  <a href="#gt_seq_delete"><code>gt_seq_delete</code></a><br>
+
+  <a href="#gt_seq_get_alphabet"><code>gt_seq_get_alphabet</code></a><br>
+
+  <a href="#gt_seq_get_description"><code>gt_seq_get_description</code></a><br>
+
+  <a href="#gt_seq_get_encoded"><code>gt_seq_get_encoded</code></a><br>
+
+  <a href="#gt_seq_get_orig"><code>gt_seq_get_orig</code></a><br>
 
   <a href="#gt_seq_iterator_delete"><code>gt_seq_iterator_delete</code></a><br>
 
@@ -11796,6 +15048,28 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_seq_iterator_set_symbolmap"><code>gt_seq_iterator_set_symbolmap</code></a><br>
 
+  <a href="#gt_seq_length"><code>gt_seq_length</code></a><br>
+
+  <a href="#gt_seq_new"><code>gt_seq_new</code></a><br>
+
+  <a href="#gt_seq_new_own"><code>gt_seq_new_own</code></a><br>
+
+  <a href="#gt_seq_set_description"><code>gt_seq_set_description</code></a><br>
+
+  <a href="#gt_seq_set_description_own"><code>gt_seq_set_description_own</code></a><br>
+
+  <a href="#gt_seqid2file_info_delete"><code>gt_seqid2file_info_delete</code></a><br>
+
+  <a href="#gt_seqid2file_info_new"><code>gt_seqid2file_info_new</code></a><br>
+
+  <a href="#gt_seqid2file_option_used"><code>gt_seqid2file_option_used</code></a><br>
+
+  <a href="#gt_seqid2file_region_mapping_new"><code>gt_seqid2file_region_mapping_new</code></a><br>
+
+  <a href="#gt_seqid2file_register_options"><code>gt_seqid2file_register_options</code></a><br>
+
+  <a href="#gt_seqid2file_register_options_ext"><code>gt_seqid2file_register_options_ext</code></a><br>
+
   <a href="#gt_sequence_node_cast"><code>gt_sequence_node_cast</code></a><br>
 
   <a href="#gt_sequence_node_get_description"><code>gt_sequence_node_get_description</code></a><br>
@@ -11810,7 +15084,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_set_source_visitor_new"><code>gt_set_source_visitor_new</code></a><br>
 
+  <a href="#gt_showshortversion"><code>gt_showshortversion</code></a><br>
+
   <a href="#gt_sort_stream_new"><code>gt_sort_stream_new</code></a><br>
+
+  <a href="#gt_splice_site_info_stream_intron_processed"><code>gt_splice_site_info_stream_intron_processed</code></a><br>
+
+  <a href="#gt_splice_site_info_stream_new"><code>gt_splice_site_info_stream_new</code></a><br>
+
+  <a href="#gt_splice_site_info_stream_show"><code>gt_splice_site_info_stream_show</code></a><br>
+
+  <a href="#gt_splice_site_info_stream_show_canonical"><code>gt_splice_site_info_stream_show_canonical</code></a><br>
 
   <a href="#gt_splitter_delete"><code>gt_splitter_delete</code></a><br>
 
@@ -11874,6 +15158,14 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_str_array_size"><code>gt_str_array_size</code></a><br>
 
+  <a href="#gt_str_cache_delete"><code>gt_str_cache_delete</code></a><br>
+
+  <a href="#gt_str_cache_get"><code>gt_str_cache_get</code></a><br>
+
+  <a href="#gt_str_cache_new"><code>gt_str_cache_new</code></a><br>
+
+  <a href="#gt_str_clip_suffix"><code>gt_str_clip_suffix</code></a><br>
+
   <a href="#gt_str_clone"><code>gt_str_clone</code></a><br>
 
   <a href="#gt_str_cmp"><code>gt_str_cmp</code></a><br>
@@ -11882,11 +15174,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_str_get"><code>gt_str_get</code></a><br>
 
+  <a href="#gt_str_get_mem"><code>gt_str_get_mem</code></a><br>
+
   <a href="#gt_str_length"><code>gt_str_length</code></a><br>
 
   <a href="#gt_str_new"><code>gt_str_new</code></a><br>
 
   <a href="#gt_str_new_cstr"><code>gt_str_new_cstr</code></a><br>
+
+  <a href="#gt_str_read_next_line"><code>gt_str_read_next_line</code></a><br>
+
+  <a href="#gt_str_read_next_line_generic"><code>gt_str_read_next_line_generic</code></a><br>
 
   <a href="#gt_str_ref"><code>gt_str_ref</code></a><br>
 
@@ -12030,11 +15328,23 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_toolbox_show"><code>gt_toolbox_show</code></a><br>
 
+  <a href="#gt_tooldriver"><code>gt_tooldriver</code></a><br>
+
+  <a href="#gt_tooldriver_with_license"><code>gt_tooldriver_with_license</code></a><br>
+
+  <a href="#gt_toolobjdriver"><code>gt_toolobjdriver</code></a><br>
+
+  <a href="#gt_toolobjdriver_with_license"><code>gt_toolobjdriver_with_license</code></a><br>
+
   <a href="#gt_trans_table_delete"><code>gt_trans_table_delete</code></a><br>
 
   <a href="#gt_trans_table_description"><code>gt_trans_table_description</code></a><br>
 
   <a href="#gt_trans_table_get_scheme_descriptions"><code>gt_trans_table_get_scheme_descriptions</code></a><br>
+
+  <a href="#gt_trans_table_is_start_codon"><code>gt_trans_table_is_start_codon</code></a><br>
+
+  <a href="#gt_trans_table_is_stop_codon"><code>gt_trans_table_is_stop_codon</code></a><br>
 
   <a href="#gt_trans_table_new"><code>gt_trans_table_new</code></a><br>
 
@@ -12076,9 +15386,13 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_uniq_stream_new"><code>gt_uniq_stream_new</code></a><br>
 
+  <a href="#gt_unit_test_run"><code>gt_unit_test_run</code></a><br>
+
   <a href="#gt_version"><code>gt_version</code></a><br>
 
   <a href="#gt_version_check"><code>gt_version_check</code></a><br>
+
+  <a href="#gt_versionfunc"><code>gt_versionfunc</code></a><br>
 
   <a href="#gt_visitor_stream_new"><code>gt_visitor_stream_new</code></a><br>
 
@@ -12096,7 +15410,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_xatexit"><code>gt_xatexit</code></a><br>
 
+  <a href="#gt_xclose"><code>gt_xclose</code></a><br>
+
   <a href="#gt_xfclose"><code>gt_xfclose</code></a><br>
+
+  <a href="#gt_xfdopen"><code>gt_xfdopen</code></a><br>
 
   <a href="#gt_xfflush"><code>gt_xfflush</code></a><br>
 
@@ -12105,6 +15423,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_xfgetpos"><code>gt_xfgetpos</code></a><br>
 
   <a href="#gt_xfgets"><code>gt_xfgets</code></a><br>
+
+  <a href="#gt_xfile_cmp"><code>gt_xfile_cmp</code></a><br>
 
   <a href="#gt_xfopen"><code>gt_xfopen</code></a><br>
 
@@ -12120,13 +15440,31 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_xfsetpos"><code>gt_xfsetpos</code></a><br>
 
+  <a href="#gt_xfstat"><code>gt_xfstat</code></a><br>
+
   <a href="#gt_xfwrite"><code>gt_xfwrite</code></a><br>
 
   <a href="#gt_xfwrite_one"><code>gt_xfwrite_one</code></a><br>
 
+  <a href="#gt_xgetrusage"><code>gt_xgetrusage</code></a><br>
+
+  <a href="#gt_xglob"><code>gt_xglob</code></a><br>
+
+  <a href="#gt_xmkdir"><code>gt_xmkdir</code></a><br>
+
+  <a href="#gt_xmkstemp"><code>gt_xmkstemp</code></a><br>
+
+  <a href="#gt_xmmap"><code>gt_xmmap</code></a><br>
+
+  <a href="#gt_xmunmap"><code>gt_xmunmap</code></a><br>
+
+  <a href="#gt_xopen"><code>gt_xopen</code></a><br>
+
   <a href="#gt_xputchar"><code>gt_xputchar</code></a><br>
 
   <a href="#gt_xputs"><code>gt_xputs</code></a><br>
+
+  <a href="#gt_xraise"><code>gt_xraise</code></a><br>
 
   <a href="#gt_xremove"><code>gt_xremove</code></a><br>
 
@@ -12138,29 +15476,37 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_xrf_checker_ref"><code>gt_xrf_checker_ref</code></a><br>
 
+  <a href="#gt_xstat"><code>gt_xstat</code></a><br>
+
+  <a href="#gt_xtime"><code>gt_xtime</code></a><br>
+
+  <a href="#gt_xtmpfp"><code>gt_xtmpfp</code></a><br>
+
+  <a href="#gt_xtmpfp_generic"><code>gt_xtmpfp_generic</code></a><br>
+
   <a href="#gt_xungetc"><code>gt_xungetc</code></a><br>
+
+  <a href="#gt_xunlink"><code>gt_xunlink</code></a><br>
 
   <a href="#gt_xvfprintf"><code>gt_xvfprintf</code></a><br>
 
   <a href="#gt_xvsnprintf"><code>gt_xvsnprintf</code></a><br>
 
+  <a href="#gt_xwrite"><code>gt_xwrite</code></a><br>
+
+  <a href="#gt_ya_rand_clean"><code>gt_ya_rand_clean</code></a><br>
+
+  <a href="#gt_ya_rand_init"><code>gt_ya_rand_init</code></a><br>
+
+  <a href="#gt_ya_random"><code>gt_ya_random</code></a><br>
+
+  <a href="#random()"><code>random()</code></a><br>
+
 <div id="footer">
 Copyright &copy; 2008-2016
 The <i>GenomeTools</i> authors.
-Last update: 2017-08-03
+Last update: 2020-09-07
 </div>
 </div>
-<!-- Piwik -->
-<script type="text/javascript">
-var pkBaseURL = "https://zenlicensemanager.com/piwik/";
-document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
-</script><script type="text/javascript">
-try {
-var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
-piwikTracker.trackPageView();
-piwikTracker.enableLinkTracking();
-} catch( err ) {}
-</script><noscript><p><img src="https://zenlicensemanager.com/piwik/piwik.php?idsite=5" style="border:0" alt="" /></p></noscript>
-<!-- End Piwik Tracking Tag -->
 </body>
 </html>
