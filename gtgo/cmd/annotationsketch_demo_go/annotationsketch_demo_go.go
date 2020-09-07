@@ -28,7 +28,7 @@ func sketch(filename, styleFile string) error {
 	if err != nil {
 		return err
 	}
-	for _, seqID = range seqIDs {
+	for _, seqID := range seqIDs {
 		fmt.Println(seqID)
 	}
 	style, err := gt.StyleNew()
@@ -36,6 +36,10 @@ func sketch(filename, styleFile string) error {
 		return err
 	}
 	if err := style.LoadFile(styleFile); err != nil {
+		return err
+	}
+	_, err = gt.DiagramNew(fi, seqID, *r, style)
+	if err != nil {
 		return err
 	}
 
