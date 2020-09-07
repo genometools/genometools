@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/genometools/genometools/gtgo"
+	gt "github.com/genometools/genometools/gtgo"
 )
 
 func validate(filename string) error {

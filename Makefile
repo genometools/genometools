@@ -574,6 +574,10 @@ go:
 	go install -v ./gtgo/...
 
 gotest: go
+	goimports -l -w gtgo
+	gofmt -l -w -s gtgo
+	golint gtgo
+	go vet github.com/genometools/genometools/gtgo
 	gff3validator_go testdata/encode_known_genes_Mar07.gff3
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)

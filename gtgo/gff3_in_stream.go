@@ -9,6 +9,11 @@ import (
 	"unsafe"
 )
 
+// GFF3InStreamNew returns a new GFF3 input stream which subsequently reads
+// the GFF3 file denoted by filename.
+// If sorted is true, the GFF3 file has to be sorted.
+// If the GFF3 file is sorted the memory footprint is O(1) on average.
+// Otherwise the memory footprint is O(file size) in the worst-case.
 func GFF3InStreamNew(filename string, sorted bool) *NodeStream {
 	var (
 		ns        *C.GtNodeStream

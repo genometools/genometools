@@ -26,7 +26,7 @@ func (sa *StrArray) Get(strnum uint) string {
 	return C.GoString(C.gt_str_array_get(sa.sa, C.ulong(strnum)))
 }
 
-// Sisze returns the number of strings stored in sa.
+// Size returns the number of strings stored in sa.
 func (sa *StrArray) Size() uint {
 	return uint(C.gt_str_array_size(sa.sa))
 }
