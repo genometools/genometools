@@ -78,6 +78,7 @@ ifneq ($(cairo),no)
 	            $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags-only-I pangocairo) \
 	            $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags-only-I glib-2.0)
   endif
+  GOTAGS:=-tags cairo
 endif
 
 ifneq ($(fpic),no)
@@ -570,8 +571,8 @@ all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      $(ADDITIONAL_BINARIES)
 
 .PHONY: go gotest
-go:
-	go install -v ./gtgo/...
+go: all
+	go install $(GOTAGS) -v ./gtgo/...
 
 gotest: go
 	goimports -l -w gtgo
@@ -579,7 +580,9 @@ gotest: go
 	golint gtgo
 	go vet github.com/genometools/genometools/gtgo
 	gff3validator_go testdata/encode_known_genes_Mar07.gff3
+ifneq ($(cairo),no)
 	annotationsketch_demo_go testdata/encode_known_genes_Mar07.gff3 testdata/encode_known_genes_Mar07.png
+endif
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	$(V_ECHO) "[link $(@F)]"

@@ -2,9 +2,8 @@
 package gt
 
 /*
-#cgo pkg-config: cairo pango
 #cgo CFLAGS: -I./../src -I./../obj
-#cgo LDFLAGS: -L./../lib -lgenometools
+#cgo LDFLAGS: -L./../lib -lgenometools -lm -ldl
 
 #include "genometools.h"
 */

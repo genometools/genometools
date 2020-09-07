@@ -1,3 +1,5 @@
+// +build cairo
+
 package main
 
 import (
