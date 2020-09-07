@@ -86,3 +86,4 @@ tags
 testdata/genomediff
 gtpython/build
 *.kmer
+testdata/encode_known_genes_Mar07.png

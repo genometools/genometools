@@ -8,28 +8,18 @@ import (
 	gt "github.com/genometools/genometools/gtgo"
 )
 
-func sketch(filename, styleFile string, width uint) error {
+func sketch(gff3file, pngfile, styleFile string, width uint) error {
 	fi := gt.FeatureIndexMemoryNew()
-	if err := fi.AddGFF3File(filename); err != nil {
+	if err := fi.AddGFF3File(gff3file); err != nil {
 		return err
 	}
 	seqID, err := fi.GetFirstSeqID()
 	if err != nil {
 		return err
 	}
-	fmt.Println(seqID)
 	r, err := fi.GetRangeForSeqID(seqID)
 	if err != nil {
 		return err
-	}
-	fmt.Printf("%d, %d\n", r.Start, r.End)
-
-	seqIDs, err := fi.GetSeqIDs()
-	if err != nil {
-		return err
-	}
-	for _, seqID := range seqIDs {
-		fmt.Println(seqID)
 	}
 	style, err := gt.StyleNew()
 	if err != nil {
@@ -42,13 +32,24 @@ func sketch(filename, styleFile string, width uint) error {
 	if err != nil {
 		return err
 	}
-	_, err = gt.LayoutNew(diagram, width, style)
+	layout, err := gt.LayoutNew(diagram, width, style)
 	if err != nil {
 		return err
 	}
-
-	// TODO
-
+	height, err := layout.GetHeight()
+	if err != nil {
+		return err
+	}
+	canvas, err := gt.CanvasCairoFileNew(style, width, height)
+	if err != nil {
+		return err
+	}
+	if err := layout.Sketch(canvas.Canvas()); err != nil {
+		return err
+	}
+	if err := canvas.Write(pngfile); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -58,22 +59,18 @@ func fatal(err error) {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s GFF3_file\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "Usage: %s GFF3_file PNG_file\n", os.Args[0])
 	os.Exit(2)
 }
 
 func main() {
-	// TODO flags:
-	// - sequence region
-	// - range
-	// - image width
 	styleFile := flag.String("style", "gtdata/sketch/default.style", "Default style file")
 	width := flag.Uint("width", 800, "Image width")
 	flag.Parse()
-	if flag.NArg() != 1 {
+	if flag.NArg() != 2 {
 		usage()
 	}
-	if err := sketch(flag.Arg(0), *styleFile, *width); err != nil {
+	if err := sketch(flag.Arg(0), flag.Arg(1), *styleFile, *width); err != nil {
 		fatal(err)
 	}
 }

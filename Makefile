@@ -579,7 +579,7 @@ gotest: go
 	golint gtgo
 	go vet github.com/genometools/genometools/gtgo
 	gff3validator_go testdata/encode_known_genes_Mar07.gff3
-	annotationsketch_demo_go testdata/encode_known_genes_Mar07.gff3
+	annotationsketch_demo_go testdata/encode_known_genes_Mar07.gff3 testdata/encode_known_genes_Mar07.png
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	$(V_ECHO) "[link $(@F)]"
