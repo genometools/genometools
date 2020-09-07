@@ -8,7 +8,7 @@ import (
 	gt "github.com/genometools/genometools/gtgo"
 )
 
-func sketch(filename, styleFile string) error {
+func sketch(filename, styleFile string, width uint) error {
 	fi := gt.FeatureIndexMemoryNew()
 	if err := fi.AddGFF3File(filename); err != nil {
 		return err
@@ -38,7 +38,11 @@ func sketch(filename, styleFile string) error {
 	if err := style.LoadFile(styleFile); err != nil {
 		return err
 	}
-	_, err = gt.DiagramNew(fi, seqID, *r, style)
+	diagram, err := gt.DiagramNew(fi, seqID, *r, style)
+	if err != nil {
+		return err
+	}
+	_, err = gt.LayoutNew(diagram, width, style)
 	if err != nil {
 		return err
 	}
@@ -64,11 +68,12 @@ func main() {
 	// - range
 	// - image width
 	styleFile := flag.String("style", "gtdata/sketch/default.style", "Default style file")
+	width := flag.Uint("width", 800, "Image width")
 	flag.Parse()
 	if flag.NArg() != 1 {
 		usage()
 	}
-	if err := sketch(flag.Arg(0), *styleFile); err != nil {
+	if err := sketch(flag.Arg(0), *styleFile, *width); err != nil {
 		fatal(err)
 	}
 }
