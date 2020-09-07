@@ -18,6 +18,19 @@ func sketch(filename string) error {
 		return err
 	}
 	fmt.Println(seqID)
+	r, err := fi.GetRangeForSeqID(seqID)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%d, %d\n", r.Start, r.End)
+
+	seqIDs, err := fi.GetSeqIDs()
+	if err != nil {
+		return err
+	}
+	for _, seqID = range seqIDs {
+		fmt.Println(seqID)
+	}
 
 	// TODO
 
