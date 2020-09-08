@@ -9,6 +9,7 @@ import (
 	"runtime"
 )
 
+// GenomeNode interface.
 type GenomeNode struct {
 	gn *C.GtGenomeNode
 }
