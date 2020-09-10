@@ -3,7 +3,7 @@ package gt
 
 /*
 #cgo CFLAGS: -I./../src -I./../obj
-#cgo LDFLAGS: -L./../lib -lgenometools -lm -ldl
+#cgo LDFLAGS: -L./../lib -lgenometools -lm
 
 #include "genometools.h"
 */

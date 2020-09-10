@@ -3,6 +3,6 @@
 package gt
 
 /*
-#cgo pkg-config: cairo pango
+#cgo pkg-config: cairo pango pangocairo
 */
 import "C"
