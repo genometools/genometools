@@ -23,6 +23,7 @@
 #include "core/filelengthvalues.h"
 #include "core/desc_buffer.h"
 #include "core/str_array.h"
+#include "core/sequence_buffer_dust.h"
 
 /* A <GtSequenceBuffer> represents a group of sequence files of a certain type.
    These files are parsed on-the-fly and the sequences and descriptions
@@ -54,7 +55,15 @@ int           gt_sequence_buffer_next(GtSequenceBuffer*, GtUchar*, GtError*);
    reading position, regardless of symbol mappings that may apply.
    Returns 1 if a new character could be read, 0 if all files are exhausted, or
    -1 on error (see the <GtError> object for details). */
+
+int           gt_sequence_buffer_next_with_original_raw(GtSequenceBuffer*,
+                                                    GtUchar *val, char *orig,
+                                                    GtError*);
+
+/* Wrapper-function. Calls  gt_sequence_buffer_next_with_original_raw() if
+   dm is NULL, gt_dustmasker_next_with_original() otherwise. */
 int           gt_sequence_buffer_next_with_original(GtSequenceBuffer*,
+                                                    GtDustMasker *dm,
                                                     GtUchar *val, char *orig,
                                                     GtError*);
 

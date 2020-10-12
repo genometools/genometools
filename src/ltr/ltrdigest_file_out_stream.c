@@ -437,7 +437,6 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
       }
       gt_str_delete(sdesc);
 
-
       /* output basic retrotransposon data */
       lltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.leftLTR);
       rltr_rng = gt_genome_node_get_range((GtGenomeNode*) ls->element.rightLTR);

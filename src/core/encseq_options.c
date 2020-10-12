@@ -50,7 +50,12 @@ struct GtEncseqOptions {
            *optionprotein,
            *optionsmap,
            *optionmirrored,
-           *optionclip_desc;
+           *optionclip_desc,
+           *optiondust,
+           *optiondust_echo,
+           *optiondust_windowsize,
+           *optiondust_threshold,
+           *optiondust_linker;
   GtStrArray *db;
   bool des,
        ssp,
@@ -64,7 +69,12 @@ struct GtEncseqOptions {
        mirrored,
        withdb,
        withindexname,
-       clip_desc;
+       clip_desc,
+       dust,
+       dust_echo;
+  GtUword dust_windowsize,
+          dust_linker;
+  double dust_threshold;
 };
 
 static GtEncseqOptions* gt_encseq_options_new(void)
@@ -84,6 +94,11 @@ static GtEncseqOptions* gt_encseq_options_new(void)
   oi->protein = false;
   oi->plain = false;
   oi->mirrored = false;
+  oi->dust = false;
+  oi->dust_echo = false;
+  oi->dust_windowsize = 64;
+  oi->dust_threshold = 2.0;
+  oi->dust_linker = 1;
   oi->optiondb = NULL;
   oi->optionindexname = NULL;
   oi->optionsat = NULL;
@@ -98,6 +113,11 @@ static GtEncseqOptions* gt_encseq_options_new(void)
   oi->optionprotein = NULL;
   oi->optionsmap = NULL;
   oi->optionmirrored = NULL;
+  oi->optiondust = NULL;
+  oi->optiondust_echo = NULL;
+  oi->optiondust_windowsize = NULL;
+  oi->optiondust_threshold = NULL;
+  oi->optiondust_linker = NULL;
   oi->withdb = false;
   oi->withindexname = false;
   return oi;
@@ -244,6 +264,37 @@ gt_encseq_options_register_generic(GtOptionParser *op,
     gt_option_parser_add_option(op, oi->optionplain);
     gt_option_is_extended_option(oi->optionplain);
 
+    oi->optiondust = gt_option_new_bool("dust","mask low-complexity regions "
+                                               "using the dust algorithm",
+                                         &oi->dust, false);
+    gt_option_parser_add_option(op, oi->optiondust);
+
+    oi->optiondust_echo = gt_option_new_bool("dustecho","echo the masked "
+                                                       "sequence",
+                                         &oi->dust_echo, false);
+    gt_option_parser_add_option(op, oi->optiondust_echo);
+    gt_option_imply(oi->optiondust_echo, oi->optiondust);
+    gt_option_is_development_option(oi->optiondust_echo);
+
+    oi->optiondust_windowsize = gt_option_new_ulong_min_max("dustwindow",
+                                      "windowsize for the dust algorithm",
+                                      &oi->dust_windowsize, 64, 3, 16777216);
+    gt_option_parser_add_option(op, oi->optiondust_windowsize);
+    gt_option_imply(oi->optiondust_windowsize, oi->optiondust);
+
+    oi->optiondust_threshold = gt_option_new_double("dustthreshold","threshold "
+                                                    "for the dust algorithm",
+                                         &oi->dust_threshold, 2.0);
+    gt_option_parser_add_option(op, oi->optiondust_threshold);
+    gt_option_imply(oi->optiondust_threshold, oi->optiondust);
+
+    oi->optiondust_linker = gt_option_new_ulong_min_max("dustlink","Max. "
+                                              "distance between regions masked "
+                                              "by dust before merging.",
+                                         &oi->dust_linker, 1, 0, 16777216);
+    gt_option_parser_add_option(op, oi->optiondust_linker);
+    gt_option_imply(oi->optiondust_linker, oi->optiondust);
+
     oi->optiondb = gt_option_new_filename_array("db","specify database files",
                                                 oi->db);
 
@@ -291,6 +342,10 @@ gt_encseq_options_register_generic(GtOptionParser *op,
                                             &oi->lossless,
                                             false);
     gt_option_parser_add_option(op, oi->optionlossless);
+  }
+  if (oi->optionlossless && oi->optiondust)
+  {
+    gt_option_exclude(oi->optionlossless, oi->optiondust);
   }
 
   gt_option_parser_register_hook(op, gt_encseq_options_check, oi);
@@ -367,6 +422,11 @@ GT_ENCSEQ_OPTS_GETTER_DEF(smap, GtStr*);
 GT_ENCSEQ_OPTS_GETTER_DEF(ssp, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(tis, bool);
 GT_ENCSEQ_OPTS_GETTER_DEF(clip_desc, bool);
+GT_ENCSEQ_OPTS_GETTER_DEF(dust, bool);
+GT_ENCSEQ_OPTS_GETTER_DEF(dust_echo, bool);
+GT_ENCSEQ_OPTS_GETTER_DEF(dust_windowsize, GtUword);
+GT_ENCSEQ_OPTS_GETTER_DEF(dust_threshold, double);
+GT_ENCSEQ_OPTS_GETTER_DEF(dust_linker, GtUword);
 GT_ENCSEQ_OPTS_GETTER_DEF_OPT(dir);
 
 void gt_encseq_options_delete(GtEncseqOptions *oi)

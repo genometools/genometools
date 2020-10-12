@@ -22,6 +22,9 @@
 #include <stdlib.h>
 #include "core/assert_api.h"
 #include "core/divmodmul_api.h"
+#include "core/ma_api.h"
+#include "core/minmax_api.h"
+#include "core/types_api.h"
 
 typedef struct
 {
@@ -157,6 +160,26 @@ static inline GtInl_Queueelem gt_inl_queue_get(GtInl_Queue *q)
                                             one elem */
   }
   return value;
+}
+
+/*
+  The following function returns the n'th element \texttt{elem} from the queue.
+*/
+
+static inline GtInl_Queueelem gt_inl_queue_get_at_index(GtInl_Queue *q,
+                                                        GtUword n)
+{
+  GtUword idx;
+  gt_assert(q != NULL && q->noofelements > 0 && n < q->noofelements);
+
+  if (n <= q->dequeueindex)
+  {
+    idx = q->dequeueindex - n;
+  } else
+  {
+    idx= q->queuesize + q->dequeueindex - n;
+  }
+  return q->queuespace[idx];
 }
 
 /*@unused@*/ static inline GtInl_Queueelem *gt_inl_queue_head(

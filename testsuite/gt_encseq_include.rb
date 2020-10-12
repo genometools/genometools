@@ -54,6 +54,38 @@ Test do
   grep(last_stderr, /cannot open file.*ois/)
 end
 
+Name "gt encseq encode with dust masking"
+Keywords "encseq gt_encseq_encode dust"
+Test do
+  run "#{$bin}gt encseq encode -dust #{$testdata}dust.fna"
+  run "#{$bin}gt encseq decode dust.fna"
+  run "diff #{last_stdout} #{$testdata}dust.out"
+end
+
+Name "gt encseq encode with dust masking and linking"
+Keywords "encseq gt_encseq_encode dust"
+Test do
+  run "#{$bin}gt encseq encode -dust -dustlink 5 #{$testdata}dust.fna"
+  run "#{$bin}gt encseq decode dust.fna"
+  run "diff #{last_stdout} #{$testdata}dust.link5.out"
+end
+
+Name "gt encseq encode with dust masking and different threshold"
+Keywords "encseq gt_encseq_encode dust"
+Test do
+  run "#{$bin}gt encseq encode -dust -dustthreshold 3 #{$testdata}dust.fna"
+  run "#{$bin}gt encseq decode dust.fna"
+  run "diff #{last_stdout} #{$testdata}dust.threshold3.out"
+end
+
+Name "gt encseq encode with dust masking and different windowsize"
+Keywords "encseq gt_encseq_encode dust"
+Test do
+  run "#{$bin}gt encseq encode -dust -dustwindow 32 #{$testdata}dust.fna"
+  run "#{$bin}gt encseq decode dust.fna"
+  run "diff #{last_stdout} #{$testdata}dust.window32.out"
+end
+
 STDREADMODES  = ["fwd", "rev"]
 DNAREADMODES  = STDREADMODES + ["cpl", "rcl"]
 DNATESTSEQS   = ["#{$testdata}foobar.fas",
