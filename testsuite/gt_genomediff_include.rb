@@ -313,7 +313,7 @@ def check_shulen_for_list_pairwise(list)
                 esa_out << line.split
               end
             end
-            if numoffiles == NIL or
+            if numoffiles == nil or
               numoffiles != pck_out.length
               failtest("can't parse output esa #{file1} #{file2}")
             end
@@ -370,7 +370,7 @@ Test do
         esa_out << line.split
       end
     end
-    if numoffiles == NIL or
+    if numoffiles == nil or
       numoffiles != pck_out.length
       failtest("can't parse output or wrong line numbers")
     end
