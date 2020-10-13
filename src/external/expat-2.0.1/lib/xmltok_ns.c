@@ -72,7 +72,9 @@ static const ENCODING *
 NS(findEncoding)(const ENCODING *enc, const char *ptr, const char *end)
 {
 #define ENCODING_MAX 128
-  char buf[ENCODING_MAX];
+  char buf[ENCODING_MAX] = {0}; /* to satisfy gcc-10 on Linux, which
+                                   reported
+        error: ‘buf’ may be used uninitialized [-Werror=maybe-uninitialized] */
   char *p = buf;
   int i;
   XmlUtf8Convert(enc, &ptr, end, &p, p + ENCODING_MAX - 1);
