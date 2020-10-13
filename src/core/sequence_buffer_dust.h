@@ -25,17 +25,17 @@
 typedef struct GtDustMasker GtDustMasker;
 typedef struct GtSequenceBuffer GtSequenceBuffer;
 
-GtDustMasker*           gt_dustmasker_new(bool echo, GtUword windowsize,
+GtDustMasker*           gt_dust_masker_new(bool echo, GtUword windowsize,
                                           double threshold, GtUword linker);
 
-void                    gt_dustmasker_delete(GtDustMasker *dm);
+void                    gt_dust_masker_delete(GtDustMasker *dust_masker);
 
 /* Fetches next character from <GtSequenceBuffer>.
    This method also always delivers the original character at the current
    reading position, regardless of symbol mappings that may apply.
    Returns 1 if a new character could be read, 0 if all files are exhausted, or
    -1 on error (see the <GtError> object for details). */
-int           gt_dustmasker_next_with_original(GtDustMasker* dm,
+int           gt_dust_masker_next_with_original(GtDustMasker* dust_masker,
                                                GtSequenceBuffer* sb,
                                                GtUchar *val, char *orig,
                                                GtError* err);

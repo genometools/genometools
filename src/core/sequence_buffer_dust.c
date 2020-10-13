@@ -88,56 +88,58 @@ struct GtDustMasker {
   double threshold;
 };
 
-GtDustMasker* gt_dustmasker_new(bool echo, GtUword windowsize, double threshold,
-                                GtUword linker)
+GtDustMasker* gt_dust_masker_new(bool echo, GtUword windowsize,
+                                 double threshold,
+                                 GtUword linker)
 {
-  GtDustMasker *dm = gt_calloc(1, sizeof *dm);
-  dm->echo = echo;
-  dm->windowsize = windowsize;
-  dm->threshold = threshold;
-  dm->linker = linker;
+  GtDustMasker *dust_masker = gt_calloc(1, sizeof *dust_masker);
+  dust_masker->echo = echo;
+  dust_masker->windowsize = windowsize;
+  dust_masker->threshold = threshold;
+  dust_masker->linker = linker;
 
-  dm->buf_size = windowsize + linker;
-  dm->buf = gt_calloc(dm->buf_size, sizeof *(dm->buf));
-  dm->buf_initialized = false;
-  dm->buf_readpos = 0;
-  dm->buf_insertpos = 0;
-  dm->buf_remaining = 0;
+  dust_masker->buf_size = windowsize + linker;
+  dust_masker->buf = gt_calloc(dust_masker->buf_size,
+                               sizeof *(dust_masker->buf));
+  dust_masker->buf_initialized = false;
+  dust_masker->buf_readpos = 0;
+  dust_masker->buf_insertpos = 0;
+  dust_masker->buf_remaining = 0;
 
-  dm->nuc_val1 = 0;
-  dm->nuc_val2 = 0;
+  dust_masker->nuc_val1 = 0;
+  dust_masker->nuc_val2 = 0;
 
-  dm->rv = 0;
-  dm->rw = 0;
-  dm->L_param = 0;
-  dm->w_queue = gt_inl_queue_new(windowsize);
+  dust_masker->rv = 0;
+  dust_masker->rw = 0;
+  dust_masker->L_param = 0;
+  dust_masker->w_queue = gt_inl_queue_new(windowsize);
 
-  dm->total_length = 0;
-  dm->current_length = 0;
-  dm->current_pos_total = 0;
-  dm->current_pos_local = 0;
+  dust_masker->total_length = 0;
+  dust_masker->current_length = 0;
+  dust_masker->current_pos_total = 0;
+  dust_masker->current_pos_local = 0;
 
-  dm->last_seq_start = 0;
+  dust_masker->last_seq_start = 0;
 
-  GT_INITARRAY(&dm->masked_regions,GtDustRange);
-  dm->mask_length = 0;
-  dm->next_mask = 0;
-  dm->current_is_masked = false;
-  dm->current_region_index = 0;
+  GT_INITARRAY(&dust_masker->masked_regions,GtDustRange);
+  dust_masker->mask_length = 0;
+  dust_masker->next_mask = 0;
+  dust_masker->current_is_masked = false;
+  dust_masker->current_region_index = 0;
 
-  dm->masking_done = false;
+  dust_masker->masking_done = false;
 
-  return dm;
+  return dust_masker;
 }
 
-void gt_dustmasker_delete(GtDustMasker *dm)
+void gt_dust_masker_delete(GtDustMasker *dust_masker)
 {
-  if (dm)
+  if (dust_masker)
   {
-    gt_free(dm->buf);
-    gt_inl_queue_delete(dm->w_queue);
-    GT_FREEARRAY(&dm->masked_regions,GtDustRange);
-    gt_free(dm);
+    gt_free(dust_masker->buf);
+    gt_inl_queue_delete(dust_masker->w_queue);
+    GT_FREEARRAY(&dust_masker->masked_regions,GtDustRange);
+    gt_free(dust_masker);
   }
 }
 
@@ -146,7 +148,9 @@ void gt_dustmasker_delete(GtDustMasker *dm)
 static inline void wrap_value_once(GtUword *val, GtUword limit)
 {
   if (*val >= limit)
+  {
     *val -= limit;
+  }
 }
 
 static inline unsigned char nucleotide_value(char c)
@@ -184,65 +188,75 @@ static inline void rem_triplet_info(unsigned int *r, unsigned int *c,
   *r = *r - c[t];
 }
 
-static inline void find_perfect(GtDustMasker *dm)
+static inline void find_perfect(GtDustMasker *dust_masker)
 {
-  unsigned int r = dm->rv;
+  unsigned int r = dust_masker->rv;
   GtUword linker_offset = 0;
   float new_score, max_score = 0.0, score_to_beat = 0.0;
   GtUword idx, best_idx, window_idx, buf_idx, length, step, readpos;
   bool found=false;
 
-  memcpy(dm->ctmp, dm->cv, (MAXTRIPLETVALUE + 1) * sizeof *(dm->ctmp));
+  memcpy(dust_masker->ctmp, dust_masker->cv,
+         (MAXTRIPLETVALUE + 1) * sizeof *(dust_masker->ctmp));
 
-  if (dm->current_length > dm->windowsize)
-    linker_offset = GT_MIN(dm->linker, dm->current_length - dm->windowsize);
+  if (dust_masker->current_length > dust_masker->windowsize)
+  {
+    linker_offset = GT_MIN(dust_masker->linker,
+                           dust_masker->current_length
+                             - dust_masker->windowsize);
+  }
 
-  readpos = dm->buf_readpos;
-  if (dm->current_length < dm->buf_size)
-    readpos = dm->last_seq_start;
-
-  length = dm->w_queue->noofelements - dm->L_param - 1;
+  readpos = dust_masker->buf_readpos;
+  if (dust_masker->current_length < dust_masker->buf_size)
+  {
+    readpos = dust_masker->last_seq_start;
+  }
+  length = dust_masker->w_queue->noofelements - dust_masker->L_param - 1;
   for (step = 0; step <= length; step++)
   {
+    unsigned char t;
     idx = length - step;
     window_idx = (readpos + idx + linker_offset);
-    wrap_value_once(&window_idx, dm->buf_size);
-    score_to_beat = GT_MAX(score_to_beat, dm->buf[window_idx].max_score);
-    unsigned char t = gt_inl_queue_get_at_index(dm->w_queue, idx);
-    add_triplet_info(&r, dm->ctmp, t);
-    new_score = (float)r / (float)(dm->w_queue->noofelements - idx - 1);
-    if (new_score > dm->threshold && new_score >= max_score &&
+    wrap_value_once(&window_idx, dust_masker->buf_size);
+    score_to_beat = GT_MAX(score_to_beat,
+                           dust_masker->buf[window_idx].max_score);
+    t = gt_inl_queue_get_at_index(dust_masker->w_queue, idx);
+    add_triplet_info(&r, dust_masker->ctmp, t);
+    new_score = (float) r/(float)(dust_masker->w_queue->noofelements - idx - 1);
+    if (new_score > dust_masker->threshold && new_score >= max_score &&
         new_score >= score_to_beat)
     {
       found = true;
       max_score = new_score;
       best_idx = idx;
-      dm->buf[window_idx].max_score = max_score;
+      dust_masker->buf[window_idx].max_score = max_score;
     }
   }
 
   if (found)
   {
     buf_idx = (readpos + best_idx + linker_offset);
-    wrap_value_once(&buf_idx, dm->buf_size);
-    dm->buf[buf_idx].mask_length
-      = GT_MAX(dm->w_queue->noofelements + 2 - best_idx,
-               dm->buf[buf_idx].mask_length);
+    wrap_value_once(&buf_idx, dust_masker->buf_size);
+    dust_masker->buf[buf_idx].mask_length
+      = GT_MAX(dust_masker->w_queue->noofelements + 2 - best_idx,
+               dust_masker->buf[buf_idx].mask_length);
 
-    if (dm->linker > 1)
+    if (dust_masker->linker > 1)
     {
-      GtUword link_length = GT_MIN(best_idx + linker_offset, dm->linker);
-      link_length = GT_MIN(link_length, dm->current_length-1);
+      GtUword link_length = GT_MIN(best_idx + linker_offset,
+                                   dust_masker->linker);
+      link_length = GT_MIN(link_length, dust_masker->current_length-1);
       GtUword link_idx = readpos + best_idx + linker_offset - link_length;
-      wrap_value_once(&link_idx, dm->buf_size);
-      dm->buf[link_idx].next_mask = GT_MAX(dm->buf[link_idx].next_mask,
-                                           link_length);
+      wrap_value_once(&link_idx, dust_masker->buf_size);
+      dust_masker->buf[link_idx].next_mask
+        = GT_MAX(dust_masker->buf[link_idx].next_mask,link_length);
     }
   }
 }
 
-static int gt_dustmasker_shift_window(GtDustMasker* dm, GtSequenceBuffer* sb,
-                                      GtError* err)
+static int gt_dust_masker_shift_window(GtDustMasker* dust_masker,
+                                       GtSequenceBuffer* sb,
+                                       GtError* err)
 {
   int retval;
   GtUchar t_val=0;
@@ -253,198 +267,244 @@ static int gt_dustmasker_shift_window(GtDustMasker* dm, GtSequenceBuffer* sb,
   /* read next character into buffer */
   retval = gt_sequence_buffer_next_with_original_raw(sb, &t_val, &t_orig, err);
   if (retval == -1)
+  {
     return -1;
-  else if (retval == 0)
-    return 0;
+  } else
+  {
+    if (retval == 0)
+    {
+      return 0;
+    }
+  }
+  dust_masker->buf_remaining++;
+  dust_masker->current_length++;
+  dust_masker->total_length++;
+  dust_masker->buf[dust_masker->buf_insertpos].val = t_val;
+  dust_masker->buf[dust_masker->buf_insertpos].orig = t_orig;
+  dust_masker->buf[dust_masker->buf_insertpos].max_score = 0.0;
+  dust_masker->buf[dust_masker->buf_insertpos].mask_length = 0;
+  dust_masker->buf[dust_masker->buf_insertpos].next_mask = 0;
+  dust_masker->buf_insertpos++;
+  wrap_value_once(&dust_masker->buf_insertpos, dust_masker->buf_size);
 
-  dm->buf_remaining++;
-  dm->current_length++;
-  dm->total_length++;
-  dm->buf[dm->buf_insertpos].val = t_val;
-  dm->buf[dm->buf_insertpos].orig = t_orig;
-  dm->buf[dm->buf_insertpos].max_score = 0.0;
-  dm->buf[dm->buf_insertpos].mask_length = 0;
-  dm->buf[dm->buf_insertpos].next_mask = 0;
-  dm->buf_insertpos++;
-  wrap_value_once(&dm->buf_insertpos, dm->buf_size);
-
-  if (!dm->masking_done)
+  if (!dust_masker->masking_done)
   {
     if (t_val != GT_SEPARATOR)
     {
       nuc_val = nucleotide_value(t_orig);
-      triplet_val = dm->nuc_val1 * 16 + dm->nuc_val2 * 4 + nuc_val;
-      dm->nuc_val1 = dm->nuc_val2;
-      dm->nuc_val2 = nuc_val;
+      triplet_val = dust_masker->nuc_val1 * 16 +
+                    dust_masker->nuc_val2 * 4 + nuc_val;
+      dust_masker->nuc_val1 = dust_masker->nuc_val2;
+      dust_masker->nuc_val2 = nuc_val;
 
-      if (dm->current_length <= 2)
+      if (dust_masker->current_length <= 2)
+      {
         return 1;
+      }
 
       /* next part according to SHIFT_WINDOW-procedure in Morgulis et al 2006 */
-      if (dm->w_queue->noofelements >= dm->windowsize - 2)
+      if (dust_masker->w_queue->noofelements >= dust_masker->windowsize - 2)
       {
-        s = (char)gt_inl_queue_get(dm->w_queue);
-        rem_triplet_info(&dm->rw, dm->cw, s);
-        if (dm->L_param > dm->w_queue->noofelements)
+        s = (char) gt_inl_queue_get(dust_masker->w_queue);
+        rem_triplet_info(&dust_masker->rw, dust_masker->cw, s);
+        if (dust_masker->L_param > dust_masker->w_queue->noofelements)
         {
-          dm->L_param--;
-          rem_triplet_info(&dm->rv, dm->cv, s);
+          dust_masker->L_param--;
+          rem_triplet_info(&dust_masker->rv, dust_masker->cv, s);
         }
       }
-      gt_inl_queue_add(dm->w_queue, triplet_val, false);
-      dm->L_param++;
-      add_triplet_info(&dm->rw, dm->cw, triplet_val);
-      add_triplet_info(&dm->rv, dm->cv, triplet_val);
-      if (dm->cv[triplet_val] > (2 * dm->threshold))
+      gt_inl_queue_add(dust_masker->w_queue, triplet_val, false);
+      dust_masker->L_param++;
+      add_triplet_info(&dust_masker->rw, dust_masker->cw, triplet_val);
+      add_triplet_info(&dust_masker->rv, dust_masker->cv, triplet_val);
+      if (dust_masker->cv[triplet_val] > (2 * dust_masker->threshold))
       {
         do {
-          s = gt_inl_queue_get_at_index(dm->w_queue,
-                                      dm->w_queue->noofelements - dm->L_param);
-          rem_triplet_info(&dm->rv, dm->cv, s);
-          dm->L_param--;
+          s = gt_inl_queue_get_at_index(dust_masker->w_queue,
+                                        dust_masker->w_queue->noofelements
+                                          - dust_masker->L_param);
+          rem_triplet_info(&dust_masker->rv, dust_masker->cv, s);
+          dust_masker->L_param--;
         } while (s != triplet_val);
       }
-      if (dm->rw > (float)dm->L_param * dm->threshold)
-        find_perfect(dm);
-    }
-    else {
+      if (dust_masker->rw > (float) dust_masker->L_param
+                                    * dust_masker->threshold)
+      {
+        find_perfect(dust_masker);
+      }
+    } else
+    {
       /* Reset variables for next sequence in multiseq fasta file. */
-      dm->last_seq_start = dm->buf_insertpos;
-      dm->nuc_val1 = 0;
-      dm->nuc_val2 = 0;
-      dm->rv = 0;
-      dm->rw = 0;
-      dm->L_param = 0;
-      dm->current_length = 0;
-      memset(dm->cv, 0, sizeof *(dm->cv) * (MAXTRIPLETVALUE + 1));
-      memset(dm->cw, 0, sizeof *(dm->cw) * (MAXTRIPLETVALUE + 1));
-      gt_inl_queue_delete(dm->w_queue);
-      dm->w_queue = gt_inl_queue_new(dm->windowsize);
+      dust_masker->last_seq_start = dust_masker->buf_insertpos;
+      dust_masker->nuc_val1 = 0;
+      dust_masker->nuc_val2 = 0;
+      dust_masker->rv = 0;
+      dust_masker->rw = 0;
+      dust_masker->L_param = 0;
+      dust_masker->current_length = 0;
+      memset(dust_masker->cv, 0,
+             sizeof *(dust_masker->cv) * (MAXTRIPLETVALUE + 1));
+      memset(dust_masker->cw, 0,
+             sizeof *(dust_masker->cw) * (MAXTRIPLETVALUE + 1));
+      gt_inl_queue_delete(dust_masker->w_queue);
+      dust_masker->w_queue = gt_inl_queue_new(dust_masker->windowsize);
     }
   }
   return 1;
 }
 
-int gt_dustmasker_next_with_original(GtDustMasker *dm, GtSequenceBuffer* sb,
-                                     GtUchar *val, char *orig, GtError* err)
+int gt_dust_masker_next_with_original(GtDustMasker *dust_masker,
+                                      GtSequenceBuffer* sb,
+                                      GtUchar *val, char *orig, GtError* err)
 {
   int retval;
-  if (dm->masking_done)
+
+  if (dust_masker->masking_done)
   {
     retval = gt_sequence_buffer_next_with_original_raw(sb, val, orig, err);
     if (retval == -1)
     {
       return -1;
-    } else if (retval == 0)
+    }
+    if (retval == 0)
     {
-      if (dm->echo)
-        if (dm->current_pos_local % 60 != 0)
+      if (dust_masker->echo)
+      {
+        if (dust_masker->current_pos_local % 60 != 0)
+        {
           printf("\n");
+        }
+      }
 
-      dm->current_region_index = 0;
-      dm->current_pos_total = 0;
-      dm->current_pos_local = 0;
+      dust_masker->current_region_index = 0;
+      dust_masker->current_pos_total = 0;
+      dust_masker->current_pos_local = 0;
       return 0;
     }
-    else if (dm->current_region_index < dm->masked_regions.nextfreeGtDustRange)
+    if (dust_masker->current_region_index <
+        dust_masker->masked_regions.nextfreeGtDustRange)
     {
       GtDustRange range;
-      range = dm->masked_regions.spaceGtDustRange[dm->current_region_index];
-      if (dm->current_pos_total >= range.begin)
+      range = dust_masker->masked_regions.spaceGtDustRange[
+                         dust_masker->current_region_index];
+      if (dust_masker->current_pos_total >= range.begin)
       {
-        if (dm->current_pos_total <= range.end && *val != GT_SEPARATOR)
+        if (dust_masker->current_pos_total <= range.end &&
+            *val != GT_SEPARATOR)
         {
           if (*orig >= 'A' && *orig <= 'Z')
+          {
             *orig += 32;
+          }
           *val = GT_WILDCARD;
         } else
         {
-          dm->current_region_index++;
+          dust_masker->current_region_index++;
         }
       }
     }
-    dm->current_pos_total++;
-    dm->current_pos_local++;
-    if (dm->echo)
+    dust_masker->current_pos_total++;
+    dust_masker->current_pos_local++;
+    if (dust_masker->echo)
     {
       if (*val == GT_SEPARATOR)
       {
-        if (dm->current_pos_local % 60 != 1)
+        if (dust_masker->current_pos_local % 60 != 1)
+        {
           printf("\n");
-        dm->current_pos_local = 0;
+        }
+        dust_masker->current_pos_local = 0;
       } else
       {
         printf("%c",*orig);
-        if (dm->current_pos_local % 60 == 0)
+        if (dust_masker->current_pos_local % 60 == 0)
+        {
           printf("\n");
+        }
       }
     }
   } else
   {
-    if (!dm->buf_initialized)
+    if (!dust_masker->buf_initialized)
     {
       GtUword idx;
-      for (idx = 0; idx < dm->buf_size; idx++)
+      for (idx = 0; idx < dust_masker->buf_size; idx++)
       {
-        retval = gt_dustmasker_shift_window(dm, sb, err);
+        retval = gt_dust_masker_shift_window(dust_masker, sb, err);
         if (retval == -1)
+        {
           return -1;
-        else if (retval == 0)
-          break;
+        } else
+        {
+          if (retval == 0)
+          {
+            break;
+          }
+        }
       }
-      dm->buf_initialized = true;
+      dust_masker->buf_initialized = true;
     }
-    if (dm->buf_remaining > 0)
+    if (dust_masker->buf_remaining > 0)
     {
-      dm->buf_remaining--;
-      dm->mask_length = GT_MAX(dm->mask_length,
-                               dm->buf[dm->buf_readpos].mask_length);
+      dust_masker->buf_remaining--;
+      dust_masker->mask_length
+        = GT_MAX(dust_masker->mask_length,
+                 dust_masker->buf[dust_masker->buf_readpos].mask_length);
 
-      if (dm->linker > 1)
+      if (dust_masker->linker > 1)
       {
-        dm->next_mask = GT_MAX(dm->next_mask,
-                               dm->buf[dm->buf_readpos].next_mask);
-        if (dm->mask_length > 0)
-          dm->mask_length = GT_MAX(dm->mask_length, dm->next_mask);
-        if (dm->next_mask > 0)
-          dm->next_mask--;
+        dust_masker->next_mask
+          = GT_MAX(dust_masker->next_mask,
+                   dust_masker->buf[dust_masker->buf_readpos].next_mask);
+        if (dust_masker->mask_length > 0)
+        {
+          dust_masker->mask_length = GT_MAX(dust_masker->mask_length,
+                                            dust_masker->next_mask);
+        }
+        if (dust_masker->next_mask > 0)
+        {
+          dust_masker->next_mask--;
+        }
       }
 
-      *val = dm->buf[dm->buf_readpos].val;
-      *orig = dm->buf[dm->buf_readpos].orig;
-      if (dm->mask_length > 0 && *val != GT_SEPARATOR)
+      *val = dust_masker->buf[dust_masker->buf_readpos].val;
+      *orig = dust_masker->buf[dust_masker->buf_readpos].orig;
+      if (dust_masker->mask_length > 0 && *val != GT_SEPARATOR)
       {
         if (*orig >= 'A' && *orig <= 'Z')
+        {
           *orig += 32;
+        }
         *val = GT_WILDCARD;
       }
 
       /* Insert into masked_regions */
-      if (dm->mask_length > 0)
+      if (dust_masker->mask_length > 0)
       {
-        if (dm->current_is_masked == false)
+        if (dust_masker->current_is_masked == false)
         {
-          GT_GETNEXTFREEINARRAY(dm->current_region, &dm->masked_regions,
+          GT_GETNEXTFREEINARRAY(dust_masker->current_region,
+                                &dust_masker->masked_regions,
                                 GtDustRange, ARRAYEXTENDSIZE);
-          dm->current_region->begin = dm->current_pos_total;
+          dust_masker->current_region->begin = dust_masker->current_pos_total;
         }
-        dm->current_region->end = dm->current_pos_total;
-        dm->current_is_masked = true;
-        dm->mask_length--;
+        dust_masker->current_region->end = dust_masker->current_pos_total;
+        dust_masker->current_is_masked = true;
+        dust_masker->mask_length--;
       } else
       {
-        dm->current_is_masked = false;
+        dust_masker->current_is_masked = false;
       }
-      dm->buf_readpos++;
-      wrap_value_once(&dm->buf_readpos, dm->buf_size);
+      dust_masker->buf_readpos++;
+      wrap_value_once(&dust_masker->buf_readpos, dust_masker->buf_size);
     } else
     {
-      dm->masking_done = true;
-      dm->current_pos_total = 0;
+      dust_masker->masking_done = true;
+      dust_masker->current_pos_total = 0;
       return 0;
     }
-    dm->current_pos_total++;
-    retval = gt_dustmasker_shift_window(dm, sb, err);
+    dust_masker->current_pos_total++;
+    retval = gt_dust_masker_shift_window(dust_masker, sb, err);
     if (retval == -1)
     {
       return -1;

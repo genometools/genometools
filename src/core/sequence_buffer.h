@@ -61,9 +61,9 @@ int           gt_sequence_buffer_next_with_original_raw(GtSequenceBuffer*,
                                                     GtError*);
 
 /* Wrapper-function. Calls  gt_sequence_buffer_next_with_original_raw() if
-   dm is NULL, gt_dustmasker_next_with_original() otherwise. */
+   dust_masker is NULL, gt_dust_masker_next_with_original() otherwise. */
 int           gt_sequence_buffer_next_with_original(GtSequenceBuffer*,
-                                                    GtDustMasker *dm,
+                                                    GtDustMasker *dust_masker,
                                                     GtUchar *val, char *orig,
                                                     GtError*);
 

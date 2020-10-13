@@ -212,13 +212,13 @@ int gt_sequence_buffer_next_with_original_raw(GtSequenceBuffer *sb,
 }
 
 int gt_sequence_buffer_next_with_original(GtSequenceBuffer *sb,
-                                          GtDustMasker *dm,
+                                          GtDustMasker *dust_masker,
                                           GtUchar *val, char *orig,
                                           GtError *err)
 {
-  if (dm != NULL)
+  if (dust_masker != NULL)
   {
-    return gt_dustmasker_next_with_original(dm, sb, val, orig, err);
+    return gt_dust_masker_next_with_original(dust_masker, sb, val, orig, err);
   }
   else
   {

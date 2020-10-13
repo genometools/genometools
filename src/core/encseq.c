@@ -2161,7 +2161,7 @@ static GtUchar seqdelivercharnospecial2bitenc(GtEncseqReader *esr)
 /* GT_ACCESS_TYPE_DIRECTACCESS */
 
 static int fillViadirectaccess(GtEncseq *encseq,
-                               GtDustMasker *dm, /* NULL if not used */
+                               GtDustMasker *dust_masker, /* NULL if not used */
                                Gtssptaboutinfo *ssptaboutinfo,
                                GtSequenceBuffer *fb,
                                GtError *err)
@@ -2198,7 +2198,8 @@ static int fillViadirectaccess(GtEncseq *encseq,
                                encseq->totallength);
   encseq->hasplainseqptr = false;
   for (currentposition=0; /* Nothing */; currentposition++) {
-    retval = gt_sequence_buffer_next_with_original(fb, dm, &cc, &orig, err);
+    retval = gt_sequence_buffer_next_with_original(fb, dust_masker, &cc,
+                                                   &orig, err);
     if (retval == 1) {
       if (encseq->has_exceptiontable && cc != (GtUchar) GT_SEPARATOR) {
         if (orig == encseq->maxchars[cc]) {
@@ -2324,17 +2325,17 @@ static bool issinglepositionseparatorViadirectaccess(const GtEncseq *encseq,
 /* GT_ACCESS_TYPE_BYTECOMPRESS */
 
 static int fillViabytecompress(GtEncseq *encseq,
-                               GtDustMasker *dm, /* NULL if not used */
+                               GtDustMasker *dust_masker, /* NULL if not used */
                                Gtssptaboutinfo *ssptaboutinfo,
                                GtSequenceBuffer *fb,
                                GtError *err)
 {
   GtUword currentposition,
-                fillexceptionrangeidx = 0,
-                mapposition = 0,
-                nextcheckpos = GT_UNDEF_UWORD,
-                pagenumber = 0,
-                lastexceptionrangelength = 0;
+          fillexceptionrangeidx = 0,
+          mapposition = 0,
+          nextcheckpos = GT_UNDEF_UWORD,
+          pagenumber = 0,
+          lastexceptionrangelength = 0;
   int retval;
   unsigned int numofchars;
   GtUchar cc;
@@ -2361,7 +2362,8 @@ static int fillViabytecompress(GtEncseq *encseq,
     = bitpackarray_new(gt_alphabet_bits_per_symbol(encseq->alpha),
                        (BitOffset) encseq->totallength, true);
   for (currentposition=0; /* Nothing */; currentposition++) {
-    retval = gt_sequence_buffer_next_with_original(fb, dm, &cc, &orig, err);
+    retval = gt_sequence_buffer_next_with_original(fb, dust_masker, &cc,
+                                                   &orig, err);
     if (retval == 1) {
       if (encseq->has_exceptiontable && cc != (GtUchar) GT_SEPARATOR) {
         if (orig == encseq->maxchars[cc]) {
@@ -2522,7 +2524,7 @@ static bool issinglepositionseparatorViabytecompress(const GtEncseq *encseq,
 /* GT_ACCESS_TYPE_EQUALLENGTH */
 
 static int fillViaequallength(GtEncseq *encseq,
-                              GtDustMasker *dm, /* NULL if not used */
+                              GtDustMasker *dust_masker, /* NULL if not used */
                               GT_UNUSED Gtssptaboutinfo *ssptaboutinfo,
                               GtSequenceBuffer *fb,
                               GtError *err)
@@ -2530,11 +2532,11 @@ static int fillViaequallength(GtEncseq *encseq,
   GtUchar cc;
   char orig;
   GtUword pos,
-                fillexceptionrangeidx = 0,
-                mapposition = 0,
-                nextcheckpos = GT_UNDEF_UWORD,
-                pagenumber = 0,
-                lastexceptionrangelength = 0;
+          fillexceptionrangeidx = 0,
+          mapposition = 0,
+          nextcheckpos = GT_UNDEF_UWORD,
+          pagenumber = 0,
+          lastexceptionrangelength = 0;
   int retval;
   GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViaequallength */
@@ -2557,7 +2559,8 @@ static int fillViaequallength(GtEncseq *encseq,
   }
   gt_assert(encseq->equallength.defined);
   for (pos=0; /* Nothing */; pos++) {
-    retval = gt_sequence_buffer_next_with_original(fb, dm, &cc, &orig, err);
+    retval = gt_sequence_buffer_next_with_original(fb, dust_masker, &cc,
+                                                   &orig, err);
     if (retval == 1) {
       if (encseq->has_exceptiontable && cc != (GtUchar) GT_SEPARATOR) {
         if (orig == encseq->maxchars[cc]) {
@@ -2740,7 +2743,7 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
 /* GT_ACCESS_TYPE_BITACCESS */
 
 static int fillViabitaccess(GtEncseq *encseq,
-                            GtDustMasker *dm, /* NULL if not used */
+                            GtDustMasker *dust_masker, /* NULL if not used */
                             Gtssptaboutinfo *ssptaboutinfo,
                             GtSequenceBuffer *fb, GtError *err)
 {
@@ -2780,7 +2783,8 @@ static int fillViabitaccess(GtEncseq *encseq,
     GT_SETIBIT(encseq->specialbits, currentposition);
   }
   for (currentposition=0; /* Nothing */; currentposition++) {
-    retval = gt_sequence_buffer_next_with_original(fb, dm, &cc, &orig, err);
+    retval = gt_sequence_buffer_next_with_original(fb, dust_masker, &cc, &orig,
+                                                   err);
     if (retval == 1) {
       if (encseq->has_exceptiontable && cc != (GtUchar) GT_SEPARATOR) {
         if (orig == encseq->maxchars[cc]) {
@@ -4554,7 +4558,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                                        GtUword wildcardranges,
                                        GtUword minseqlength,
                                        GtUword maxseqlength,
-                                       GtDustMasker *dustmasker,
+                                       GtDustMasker *dust_masker,
                                        GtLogger *logger,
                                        GtError *err)
 {
@@ -4634,7 +4638,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                            true);
     }
     gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alphabet));
-    if (encodedseqfunctab[(int) sat].fillposition.function(encseq,dustmasker,
+    if (encodedseqfunctab[(int) sat].fillposition.function(encseq,dust_masker,
                                                            ssptaboutinfo,
                                                            fb, err) != 0)
       haserr = true;
@@ -5452,7 +5456,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            GtUword *minseqlen,
                                            GtUword *maxseqlen,
                                            bool clip_desc,
-                                           GtDustMasker *dustmasker,
+                                           GtDustMasker *dust_masker,
                                            GtLogger *logger,
                                            GtError *err)
 {
@@ -5540,7 +5544,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
         break;
       }
 #endif
-      retval = gt_sequence_buffer_next_with_original(fb, dustmasker, &charcode,
+      retval = gt_sequence_buffer_next_with_original(fb, dust_masker, &charcode,
                                                      &cc, err);
       if (retval > 0) {
 #define WITHEQUALLENGTH_DES_SSP
@@ -7557,13 +7561,13 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
   char *allchars = NULL,
        *maxchars = NULL;
-  GtDustMasker *dustmasker = NULL;
+  GtDustMasker *dust_masker = NULL;
 
   gt_error_check(err);
   filenametab = gt_str_array_ref(filenametab);
   if (dust)
   {
-    dustmasker = gt_dustmasker_new(dust_echo, dust_windowsize, dust_threshold,
+    dust_masker = gt_dust_masker_new(dust_echo, dust_windowsize, dust_threshold,
                                    dust_linker);
   }
   if (gt_str_length(str_sat) > 0) {
@@ -7625,7 +7629,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                         &minseqlen,
                                         &maxseqlen,
                                         clip_desc,
-                                        dustmasker,
+                                        dust_masker,
                                         logger,
                                         err) != 0) {
       char buf[BUFSIZ];
@@ -7690,7 +7694,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                    wildcardranges,
                                    minseqlen,
                                    maxseqlen,
-                                   dustmasker,
+                                   dust_masker,
                                    logger,
                                    err);
     if (encseq == NULL)
@@ -7732,7 +7736,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
     if (alphabet != NULL && !alphabetisbound)
       gt_alphabet_delete((GtAlphabet*) alphabet);
   }
-  gt_dustmasker_delete(dustmasker);
+  gt_dust_masker_delete(dust_masker);
   return haserr ? NULL : encseq;
 }
 
