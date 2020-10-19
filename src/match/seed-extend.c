@@ -1322,7 +1322,7 @@ static void gt_rf_seed_extend_prettyprint(bool forxdrop,void *info)
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtUword userdefinedleastlength, errorpercentage;
-  double evalue, bit_score, evalue_threshold;
+  double evalue = 0.0, bit_score = 0.0, evalue_threshold = 0.0;
 
   gt_assert(info_querymatch != NULL);
   if (forxdrop)

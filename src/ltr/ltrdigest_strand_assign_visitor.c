@@ -40,7 +40,7 @@ const GtNodeVisitorClass* gt_ltrdigest_strand_assign_visitor_class(void);
 
 static int gt_ltrdigest_strand_assign_visitor_feature_node(GtNodeVisitor *nv,
                                                  GtFeatureNode *fn,
-                                                 GtError *err)
+                                                 GT_UNUSED GtError *err)
 {
   GtLTRdigestStrandAssignVisitor *lv;
   GtFeatureNodeIterator *fni;
