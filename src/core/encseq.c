@@ -4638,7 +4638,7 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
                            true);
     }
     gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alphabet));
-    if (encodedseqfunctab[(int) sat].fillposition.function(encseq,dust_masker,
+    if (encodedseqfunctab[(int) sat].fillposition.function(encseq, dust_masker,
                                                            ssptaboutinfo,
                                                            fb, err) != 0)
       haserr = true;
@@ -8234,8 +8234,7 @@ GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
     gt_encseq_encoder_enable_md5_support(ee);
   if (gt_encseq_options_clip_desc_value(opts))
     gt_encseq_encoder_clip_desc(ee);
-  if (gt_encseq_options_dust_value(opts))
-  {
+  if (gt_encseq_options_dust_value(opts)) {
     gt_encseq_encoder_enable_dust(ee,
                                 gt_encseq_options_dust_echo_value(opts),
                                 gt_encseq_options_dust_windowsize_value(opts),
