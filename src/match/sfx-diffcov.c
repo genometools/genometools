@@ -52,9 +52,11 @@
   indexes in the sorted array of suffixes.
 
 */
-
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include "core/types_api.h"
 #include "core/arraydef_api.h"
 #include "core/assert_api.h"
 #include "core/error_api.h"
@@ -91,7 +93,7 @@ typedef unsigned short Diffvalue;
 typedef struct
 {
   GtUword key,
-                suffixstart;
+          suffixstart;
 } GtDcItventry;
 
 typedef struct
@@ -102,9 +104,143 @@ typedef struct
 
 GT_DECLAREARRAYSTRUCT(GtDcPairsuffixptr);
 
-typedef GtDcPairsuffixptr GtInl_Queueelem;
+typedef GtDcPairsuffixptr GtInlDCQueueelem;
 
-#include "queue-inline.h"
+typedef struct
+{
+ GtInlDCQueueelem *queuespace;  /* the space to store the queue elements */
+ GtUword enqueueindex, /* entry into which element is to be enqued */
+         dequeueindex, /* last element of queue */
+         queuesize,    /* size of the queue */
+         noofelements; /* no ofelements between enqueueindex+1
+                          and dequeindex */
+} GtInlDCQueue;
+
+typedef int (*GtInlDCQueueprocessor)(GtInlDCQueueelem *,void *info);
+
+/*
+  The following function delivers an empty queue with a reservoir of
+  \texttt{size} elements to be stored in the queue. The
+  reservoir can, if necessary, be enlarged.
+*/
+
+static GtInlDCQueue *gt_inl_dc_queue_new(GtUword queuesize)
+{
+  GtInlDCQueue *q;
+
+  q = gt_malloc(sizeof (*q));
+  gt_assert(queuesize > 0);
+  q->queuespace = gt_malloc(sizeof (*q->queuespace) * queuesize);
+  q->noofelements = 0;
+  q->queuesize = queuesize;
+  q->dequeueindex = q->enqueueindex = queuesize - 1;
+  return q;
+}
+
+/*
+  The following function frees the space required for the queue.
+*/
+
+static void gt_inl_dc_queue_delete(GtInlDCQueue *q)
+{
+  if (q != NULL)
+  {
+    gt_free(q->queuespace);
+    gt_free(q);
+  }
+}
+
+/*
+  The following function returns true iff the queue is empty.
+*/
+
+static bool gt_inl_dc_queue_isempty(const GtInlDCQueue *q)
+{
+  gt_assert(q != NULL);
+  return (q->noofelements == 0) ? true : false;
+}
+
+/*
+  The following function resizes the queue by doubling the
+  space reservoir.
+*/
+
+static void gt_inl_dc_queue_extend(GtInlDCQueue *q,bool doublesize)
+{
+  GtUword addconst, idx, newsize;
+
+  gt_assert(q != NULL);
+  if (doublesize)
+  {
+    addconst = q->queuesize;
+  } else
+  {
+    addconst = GT_MIN(1024UL,q->queuesize);
+  }
+  newsize = q->queuesize + addconst;
+  q->queuespace = gt_realloc(q->queuespace,sizeof (*q->queuespace) * newsize);
+  gt_assert(q->enqueueindex == q->dequeueindex);
+  gt_assert(addconst > 0);
+  for (idx=q->queuesize-1; idx>q->enqueueindex; idx--)
+  {
+    q->queuespace[idx+addconst] = q->queuespace[idx];
+  }
+  q->enqueueindex += addconst;
+  /*
+  printf("from queue of size "GT_WU" to queue of size "GT_WU"\n",q->queuesize,
+         newsize);
+  printf("now enqueindex="GT_WU",dequeuindex="GT_WU"\n",
+         q->enqueueindex,q->dequeueindex);
+  */
+  q->queuesize = newsize;
+}
+
+/*
+  The following function adds an element \texttt{elem} to the end of
+  the queue.
+*/
+
+static void gt_inl_dc_queue_add(GtInlDCQueue *q, GtInlDCQueueelem elem,
+                                    bool doublesize)
+{
+  gt_assert(q != NULL);
+  if (q->noofelements == q->queuesize)
+  {
+    gt_inl_dc_queue_extend(q,doublesize);
+  }
+  q->noofelements++;
+  q->queuespace[q->enqueueindex] = elem;
+  if (q->enqueueindex > 0)
+  {
+    q->enqueueindex--;
+  } else
+  {
+    q->enqueueindex = q->queuesize - 1; /* dequeuindex < queuesize-1 */
+  }
+}
+
+/*
+  The following function removes the element \texttt{elem} from the
+  start of the queue.
+*/
+
+static GtInlDCQueueelem gt_inl_dc_queue_get(GtInlDCQueue *q)
+{
+  GtInlDCQueueelem value;
+
+  gt_assert(q != NULL && q->noofelements > 0);
+  q->noofelements--;
+  value = q->queuespace[q->dequeueindex];
+  if (q->dequeueindex > 0)
+  {
+    q->dequeueindex--;
+  } else
+  {
+    q->dequeueindex = q->queuesize - 1;  /* != enqueueindex, since at least
+                                            one elem */
+  }
+  return value;
+}
 
 typedef struct
 {
@@ -156,7 +292,7 @@ struct GtDifferencecover
                 currentdepth;
   GtCodetype maxcode;
   GtDcFirstwithnewdepth firstwithnewdepth;
-  GtInl_Queue *rangestobesorted;
+  GtInlDCQueue *rangestobesorted;
   GtDcItventry *itvinfo;
   GtArrayGtDcPairsuffixptr firstgeneration;
   GtLcpvalues *samplelcpvalues;
@@ -812,7 +948,7 @@ static void dc_processunsortedrange(GtDifferencecover *dcov,
   }
   pairelem.blisbl = blisbl;
   pairelem.width = width;
-  gt_inl_queue_add(dcov->rangestobesorted,pairelem,false);
+  gt_inl_dc_queue_add(dcov->rangestobesorted,pairelem,false);
   dcov->currentqueuesize++;
   if (dcov->maxqueuesize < dcov->currentqueuesize)
   {
@@ -1020,10 +1156,10 @@ static void dc_sortremainingsamples(GtDifferencecover *dcov)
     dc_sortsuffixesonthislevel(dcov,pairptr->blisbl, pairptr->width);
   }
   GT_FREEARRAY(&dcov->firstgeneration,GtDcPairsuffixptr);
-  while (!gt_inl_queue_isempty(dcov->rangestobesorted))
+  while (!gt_inl_dc_queue_isempty(dcov->rangestobesorted))
   {
     GtDcPairsuffixptr thispair;
-    thispair = gt_inl_queue_get(dcov->rangestobesorted);
+    thispair = gt_inl_dc_queue_get(dcov->rangestobesorted);
     gt_assert(dcov->currentqueuesize > 0);
     dcov->currentqueuesize--;
     dc_sortsuffixesonthislevel(dcov,thispair.blisbl,thispair.width);
@@ -1031,7 +1167,7 @@ static void dc_sortremainingsamples(GtDifferencecover *dcov)
   gt_logger_log(dcov->logger,"maxqueuesize="GT_WU"",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);
   dcov->itvinfo = NULL;
-  gt_inl_queue_delete(dcov->rangestobesorted);
+  gt_inl_dc_queue_delete(dcov->rangestobesorted);
   dcov->rangestobesorted = NULL;
 }
 
@@ -1194,7 +1330,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   esr1 = gt_encseq_create_reader_with_readmode(dcov->encseq,dcov->readmode,0);
-  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,
+  dcov->rangestobesorted = gt_inl_dc_queue_new(GT_MAX(16UL,
                                                    GT_DIV2(dcov->maxcode)));
   dcov->filltable = gt_filllargestchartable(dcov->numofchars,
                                             dcov->prefixlength);
@@ -1481,7 +1617,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
   dcov->bcktab = NULL;
   dcov->multimappower = NULL;
   dcov->maxcode = 0;
-  dcov->rangestobesorted = gt_inl_queue_new(GT_MAX(16UL,
+  dcov->rangestobesorted = gt_inl_dc_queue_new(GT_MAX(16UL,
                                             GT_DIV2(dcov->maxcode)));
   dcov->filltable = NULL;
   dcov->leftborder = NULL;
