@@ -958,7 +958,8 @@ static int gt_seed_extend_runner(int argc,
   {
     if (arguments->maxmat == 1)
     {
-      arguments->dbs_seedlength = GT_MIN(maxseedlength, arguments->se_alignlength);
+      arguments->dbs_seedlength = GT_MIN(maxseedlength,
+                                         arguments->se_alignlength);
     } else
     {
       unsigned int local_seedlength, log_avg_totallength;
@@ -980,7 +981,8 @@ static int gt_seed_extend_runner(int argc,
                                       GT_SPACED_SEED_FIRST_SPAN);
     }
   }
-  if (!had_err && arguments->dbs_seedlength > GT_MIN(maxseedlength, maxseqlength))
+  if (!had_err && arguments->dbs_seedlength >
+                  GT_MIN(maxseedlength, maxseqlength))
   {
     if (maxseedlength <= maxseqlength) {
       gt_error_set(err, "maximum seedlength for alphabet of size %u is %u "

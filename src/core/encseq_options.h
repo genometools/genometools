@@ -79,6 +79,11 @@ GT_ENCSEQ_OPTS_GETTER_DECL(smap, GtStr*);
 GT_ENCSEQ_OPTS_GETTER_DECL(ssp, bool);
 GT_ENCSEQ_OPTS_GETTER_DECL(tis, bool);
 GT_ENCSEQ_OPTS_GETTER_DECL(clip_desc, bool);
+GT_ENCSEQ_OPTS_GETTER_DECL(dust, bool);
+GT_ENCSEQ_OPTS_GETTER_DECL(dust_echo, bool);
+GT_ENCSEQ_OPTS_GETTER_DECL(dust_windowsize, GtUword);
+GT_ENCSEQ_OPTS_GETTER_DECL(dust_threshold, double);
+GT_ENCSEQ_OPTS_GETTER_DECL(dust_linker, GtUword);
 GT_ENCSEQ_OPTS_GETTER_DECL_OPT(dir);
 
 #endif

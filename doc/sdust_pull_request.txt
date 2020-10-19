@@ -1,0 +1,70 @@
+This PR introduces the the optional masking of sequences using the sdust
+algorithm, published in
+
+@article{MOR:GER:SCHAEF:AGA:2006,
+  title = {A fast and symmetric {DUST} implementation to mask low-complexity 
+           DNA sequences},
+  author = {Morgulis, Aleksandr and Gertz, E Michael and Sch{\"a}ffer, Alejandro A and Agarwala, Richa},
+  journal = {Journal of Computational Biology},
+  volume = {13},
+  number = {5},
+  pages = {1028--1040},
+  year = {2006},
+}
+
+That is, before encoding a sequence using gt encseq encode, the sequences
+can optionally be masked by applying the sdust algorithm. Our implementation
+ist independent of the original implementation in the dustmasker program,
+https://www.ncbi.nlm.nih.gov/IEB/ToolBox/CPP_DOC/lxr/source/src/app/dustmasker/
+
+Tests: we have applied
+
+bin/gt encseq encode -dust -dustecho -dustlink 5 -dustthreshold 1.5 -dustwindow 32
+
+to all 115 files delivered by
+
+./scripts/findfasta.rb --no-fastq --no-gzip --excludelist RandomN.fna
+
+unified the input files using
+
+egrep -v '^>' ${filename} | sed -e 's/[^ACGTacgt]//g' | tr acgt ACGT
+
+and verified successfully that the results are identical to the 
+call of dustmasker with the following option
+
+-linker 5 -outfmt fasta -level 15 -window 32 -out 
+
+This comparison is implemented in scripts/compare_dust.sh which however
+requires to install dustmasker.
+
+Runtime comparison to dustmasker:
+
+on a Intel CPU, 2.6 Ghz  running macOS dustmasker with the option
+above required 53 second, while bin/gt encseq encode with the options
+above required 36 seconds (including the encoding of the sequence).
+
+Runtime overhead of -dust:
+Here is a comparison applying bin/gt encseq encode to the
+entire human genome (HG19) on a Intel CPU, 2.6 Ghz  running macOS:
+
+time bin/gt encseq encode -indexname hg19_dusted -dust  ~/hg19/hg19_all.fa 
+# space peak in megabytes: 826.01 (in 46849 events)
+# mmap space peak in megabytes: 0.00
+# combined space peak in megabytes: 826.01
+
+real	6m37.915s
+user	6m31.060s
+sys	0m5.154s
+
+time bin/gt encseq encode -indexname hg19  ~/hg19/hg19_all.fa 
+# space peak in megabytes: 738.15 (in 898 events)
+# mmap space peak in megabytes: 0.00
+# combined space peak in megabytes: 738.15
+
+real	1m33.008s
+user	1m28.023s
+sys	0m3.512so
+
+so -dust adds considerable overhead regards space and time.
+The implementation of sdust is not yet optimized. Several sources
+of optimization remain.

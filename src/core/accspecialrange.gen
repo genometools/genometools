@@ -27,6 +27,8 @@ static void GT_APPENDINT(allocSWtables)(GT_APPENDINT(GtSWtable) *swtable)
 }
 
 static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
+                                     GtDustMasker *dust_masker,
+                                     /* NULL if not used */
                                      Gtssptaboutinfo *ssptaboutinfo,
                                      GtSequenceBuffer *fb,
                                      GtError *err)
@@ -73,7 +75,8 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   wildcardnextcheckpos = wildcardrangetable->maxrangevalue;
   for (currentposition=0; /* Nothing */; currentposition++)
   {
-    retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
+    retval = gt_sequence_buffer_next_with_original(fb,dust_masker,&cc,
+                                                   &orig,err);
     if (retval > 0)
     {
       if (encseq->has_exceptiontable && cc != (GtUchar) GT_SEPARATOR) {

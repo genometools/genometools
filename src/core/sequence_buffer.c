@@ -181,9 +181,9 @@ int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val,
   return 1;
 }
 
-int gt_sequence_buffer_next_with_original(GtSequenceBuffer *sb,
-                                          GtUchar *val, char *orig,
-                                          GtError *err)
+int gt_sequence_buffer_next_with_original_raw(GtSequenceBuffer *sb,
+                                              GtUchar *val, char *orig,
+                                              GtError *err)
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
@@ -209,6 +209,21 @@ int gt_sequence_buffer_next_with_original(GtSequenceBuffer *sb,
   *orig = pvt->outbuforig[pvt->nextread];
   pvt->nextread++;
   return 1;
+}
+
+int gt_sequence_buffer_next_with_original(GtSequenceBuffer *sb,
+                                          GtDustMasker *dust_masker,
+                                          GtUchar *val, char *orig,
+                                          GtError *err)
+{
+  if (dust_masker != NULL)
+  {
+    return gt_dust_masker_next_with_original(dust_masker, sb, val, orig, err);
+  }
+  else
+  {
+    return gt_sequence_buffer_next_with_original_raw(sb, val, orig, err);
+  }
 }
 
 int gt_sequence_buffer_unit_test(GtError *err)

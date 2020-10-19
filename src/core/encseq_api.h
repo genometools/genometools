@@ -341,6 +341,11 @@ bool              gt_encseq_encoder_is_input_protein(GtEncseqEncoder *ee);
 void              gt_encseq_encoder_clip_desc(GtEncseqEncoder *ee);
 /* Returns <true> if <ee> clips all descriptions after the first whitespace. */
 bool              gt_encseq_encoder_are_descs_clipped(GtEncseqEncoder *ee);
+
+/* Enables masking of low-complexity regions according to the dust algorithm. */
+void              gt_encseq_encoder_enable_dust(GtEncseqEncoder *ee, bool echo,
+                                                GtUword ws, double thresh,
+                                                GtUword linker);
 /* Encodes the sequence files given in <seqfiles> using the settings in <ee>
    and <indexname> as the prefix for the index tables. Returns 0 on success, or
    a negative value on error (<err> is set accordingly). */
