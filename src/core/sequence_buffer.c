@@ -159,21 +159,17 @@ int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val,
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
-  if (pvt->nextread >= pvt->nextfree)
-  {
-    if (pvt->complete)
-    {
+  if (pvt->nextread >= pvt->nextfree) {
+    if (pvt->complete) {
       return 0;
     }
     if (pvt->descptr && pvt->nextread > 0)
       gt_desc_buffer_reset(pvt->descptr);
-    if (gt_sequence_buffer_advance(sb, err) != 0)
-    {
+    if (gt_sequence_buffer_advance(sb, err) != 0) {
       return -1;
     }
     pvt->nextread = 0;
-    if (pvt->nextfree == 0)
-    {
+    if (pvt->nextfree == 0) {
       return 0;
     }
   }
@@ -187,21 +183,17 @@ int gt_sequence_buffer_next_with_original_raw(GtSequenceBuffer *sb,
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
-  if (pvt->nextread >= pvt->nextfree)
-  {
-    if (pvt->complete)
-    {
+  if (pvt->nextread >= pvt->nextfree) {
+    if (pvt->complete) {
       return 0;
     }
     if (pvt->descptr && pvt->nextread > 0)
       gt_desc_buffer_reset(pvt->descptr);
-    if (gt_sequence_buffer_advance(sb, err) != 0)
-    {
+    if (gt_sequence_buffer_advance(sb, err) != 0) {
       return -1;
     }
     pvt->nextread = 0;
-    if (pvt->nextfree == 0)
-    {
+    if (pvt->nextfree == 0) {
       return 0;
     }
   }
@@ -216,12 +208,9 @@ int gt_sequence_buffer_next_with_original(GtSequenceBuffer *sb,
                                           GtUchar *val, char *orig,
                                           GtError *err)
 {
-  if (dust_masker != NULL)
-  {
+  if (dust_masker != NULL) {
     return gt_dust_masker_next_with_original(dust_masker, sb, val, orig, err);
-  }
-  else
-  {
+  } else {
     return gt_sequence_buffer_next_with_original_raw(sb, val, orig, err);
   }
 }
