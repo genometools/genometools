@@ -420,13 +420,6 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="GtStrConstructorFunc"></a>
-
-<code>GtStr*  GtStrConstructorFunc(void *str_source, GtUword index)</code>
-<p>
-Function to obtain a <code>GtStr</code> from a <code>str_source</code>, given an <code>index</code>.
-</p>
-<hr>
 <a name="GtGetSeqFunc"></a>
 
 <code>const char*  GtGetSeqFunc(void *seqs, GtUword index)</code>
@@ -462,13 +455,13 @@ Retrieves all features contained in <code>gfi</code> into <code>results</code>. 
    accordingly.
 </p>
 <hr>
-<a name="gt_dup_feature_stream_new"></a>
+<a name="GtTrackSelectorFunc"></a>
 
-<code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
-                                        const char *source_type)</code>
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
 <p>
-Duplicate internal feature nodes of type <code>source_type</code> as features with type
-   <code>dest_type</code>. The duplicated features does not inherit the children.
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
 </p>
 <hr>
 <a name="GtTrackOrderingFunc"></a>
@@ -480,15 +473,6 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
-</p>
-<hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -3349,6 +3333,15 @@ Makes <code>ee</code> ignore all description suffixes after the first whitespace
 <code>bool               gt_encseq_encoder_are_descs_clipped(GtEncseqEncoder *ee)</code>
 <p>
 Returns <code>true</code> if <code>ee</code> clips all descriptions after the first whitespace.
+</p>
+<hr>
+<a name="gt_encseq_encoder_enable_dust"></a>
+
+<code>void               gt_encseq_encoder_enable_dust(GtEncseqEncoder *ee, bool echo,
+                                                GtUword ws, double thresh,
+                                                GtUword linker)</code>
+<p>
+Enables masking of low-complexity regions according to the dust algorithm.
 </p>
 <hr>
 <a name="gt_encseq_encoder_encode"></a>
@@ -9092,6 +9085,13 @@ Decrease the reference count for <code>str</code> or delete it, if this was the 
    reference.
 </p>
 <hr>
+<a name="GtStrConstructorFunc"></a>
+
+<code>GtStr*  GtStrConstructorFunc(void *str_source, GtUword index)</code>
+<p>
+Function to obtain a <code>GtStr</code> from a <code>str_source</code>, given an <code>index</code>.
+</p>
+<hr>
 <a name="GtStrArray"></a>
 <h2>Class GtStrArray</h2>
 
@@ -11563,6 +11563,15 @@ Perform global chaining with overlaps of <code>num_of_fragments</code> many <cod
    ownership of the GtChain.
 </p>
 <hr>
+<a name="gt_dup_feature_stream_new"></a>
+
+<code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
+                                        const char *source_type)</code>
+<p>
+Duplicate internal feature nodes of type <code>source_type</code> as features with type
+   <code>dest_type</code>. The duplicated features does not inherit the children.
+</p>
+<hr>
 <a name="Grep"></a>
 <h2>Module Grep</h2>
 <a name="gt_grep"></a>
@@ -12335,20 +12344,6 @@ Number of parallel threads to be used.
 The prototype of a tool function.
 </p>
 <hr>
-<a name="GtLicenseConstructor"></a>
-
-<code>GtLicense*  GtLicenseConstructor(const char *argv0)</code>
-<p>
-Create a <code>GtLicense</code> from a string.
-</p>
-<hr>
-<a name="GtLicenseDestructor"></a>
-
-<code>void        GtLicenseDestructor(GtLicense*)</code>
-<p>
-Delete a <code>GtLicense</code>.
-</p>
-<hr>
 <a name="gt_tooldriver"></a>
 
 <code>int  gt_tooldriver(GtToolFunc tool, int argc, char *argv[])</code>
@@ -12358,29 +12353,10 @@ The tool driver module allows one to compile a tool into a separate binary.
    The tool driver creates an GtError object, calls <code>tool</code>, and reports errors.
 </p>
 <hr>
-<a name="gt_tooldriver_with_license"></a>
-
-<code>int  gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
-                               GtLicense **license_out,
-                               GtLicenseConstructor, GtLicenseDestructor)</code>
-<p>
-Like <code>gt_tooldriver()</code>, with license support.
-</p>
-<hr>
 <a name="gt_toolobjdriver"></a>
 
 <code>int  gt_toolobjdriver(GtToolConstructor, GtShowVersionFunc version_func,
                      int argc, char *argv[])</code>
-<p>
-Optional <code>version_func</code> to override the default one.
-</p>
-<hr>
-<a name="gt_toolobjdriver_with_license"></a>
-
-<code>int  gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
-                                  GtShowVersionFunc version_func, int argc,
-                                  char *argv[], GtLicense **license_out,
-                                  GtLicenseConstructor, GtLicenseDestructor)</code>
 <p>
 Optional <code>version_func</code> to override the default one.
 </p>
@@ -13013,10 +12989,6 @@ Return random number up to RAND_MAX.
   <a href="#GtGetStrandFunc"><code>GtGetStrandFunc</code></a><br>
 
   <a href="#GtHashmapVisitFunc"><code>GtHashmapVisitFunc</code></a><br>
-
-  <a href="#GtLicenseConstructor"><code>GtLicenseConstructor</code></a><br>
-
-  <a href="#GtLicenseDestructor"><code>GtLicenseDestructor</code></a><br>
 
   <a href="#GtNodeStreamFreeFunc"><code>GtNodeStreamFreeFunc</code></a><br>
 
@@ -13653,6 +13625,8 @@ Return random number up to RAND_MAX.
   <a href="#gt_encseq_encoder_do_not_create_ssp_tab"><code>gt_encseq_encoder_do_not_create_ssp_tab</code></a><br>
 
   <a href="#gt_encseq_encoder_enable_description_support"><code>gt_encseq_encoder_enable_description_support</code></a><br>
+
+  <a href="#gt_encseq_encoder_enable_dust"><code>gt_encseq_encoder_enable_dust</code></a><br>
 
   <a href="#gt_encseq_encoder_enable_lossless_support"><code>gt_encseq_encoder_enable_lossless_support</code></a><br>
 
@@ -15330,11 +15304,7 @@ Return random number up to RAND_MAX.
 
   <a href="#gt_tooldriver"><code>gt_tooldriver</code></a><br>
 
-  <a href="#gt_tooldriver_with_license"><code>gt_tooldriver_with_license</code></a><br>
-
   <a href="#gt_toolobjdriver"><code>gt_toolobjdriver</code></a><br>
-
-  <a href="#gt_toolobjdriver_with_license"><code>gt_toolobjdriver_with_license</code></a><br>
 
   <a href="#gt_trans_table_delete"><code>gt_trans_table_delete</code></a><br>
 
@@ -15505,7 +15475,7 @@ Return random number up to RAND_MAX.
 <div id="footer">
 Copyright &copy; 2008-2016
 The <i>GenomeTools</i> authors.
-Last update: 2020-09-07
+Last update: 2020-12-07
 </div>
 </div>
 </body>

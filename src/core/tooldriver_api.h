@@ -28,30 +28,14 @@ typedef struct GtLicense GtLicense;
 /* The prototype of a tool function. */
 typedef int (*GtToolFunc)(int argc, const char **argv, GtError *err);
 
-/* Create a <GtLicense> from a string. */
-typedef GtLicense* (*GtLicenseConstructor)(const char *argv0);
-/* Delete a <GtLicense>. */
-typedef void       (*GtLicenseDestructor)(GtLicense*);
-
 /* The tool driver module allows one to compile a tool into a separate binary.
    This is mostly useful for stand-alone applications like GenomeThreader.
    The tool driver creates an GtError object, calls <tool>, and reports errors.
 */
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[]);
 
-/* Like <gt_tooldriver()>, with license support. */
-int gt_tooldriver_with_license(GtToolFunc tool, int argc, char *argv[],
-                               GtLicense **license_out,
-                               GtLicenseConstructor, GtLicenseDestructor);
-
 /* Optional <version_func> to override the default one. */
 int gt_toolobjdriver(GtToolConstructor, GtShowVersionFunc version_func,
                      int argc, char *argv[]);
-
-/* Optional <version_func> to override the default one. */
-int gt_toolobjdriver_with_license(GtToolConstructor tool_constructor,
-                                  GtShowVersionFunc version_func, int argc,
-                                  char *argv[], GtLicense **license_out,
-                                  GtLicenseConstructor, GtLicenseDestructor);
 
 #endif
