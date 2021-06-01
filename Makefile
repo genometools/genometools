@@ -438,7 +438,7 @@ else
                     src/gtlua/layout_lua.c
 endif
 
-ifeq ($(threads),yes)
+ifneq ($(threads),no)
   EXP_CPPFLAGS += -DGT_THREADS_ENABLED
   EXP_LDLIBS += -lpthread
   GTSHAREDLIB_LIBDEP += -lpthread
