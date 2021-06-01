@@ -159,6 +159,12 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data,
   return thread;
 }
 
+void gt_thread_join(GT_UNUSED GtThread *thread)
+{
+  /* nop */
+}
+
+
 GtRWLock* gt_rwlock_new(void)
 {
   return NULL;
