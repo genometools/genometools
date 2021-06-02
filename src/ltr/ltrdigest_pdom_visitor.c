@@ -789,7 +789,6 @@ static void gt_ltrdigest_checkdup(int fd)
     exit(EXIT_FAILURE);
   }
 }
-#endif
 
 typedef struct {
   int *pc, *cp, had_err;
@@ -840,6 +839,7 @@ static void* gt_ltrdigest_hmmscan_recv_thread(void *data) {
   gt_hmmer_parse_status_delete(pstatus);
   return NULL;
 }
+#endif
 
 static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                                                   GtFeatureNode *fn,
