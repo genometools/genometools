@@ -789,6 +789,56 @@ static void gt_ltrdigest_checkdup(int fd)
     exit(EXIT_FAILURE);
   }
 }
+
+typedef struct {
+  int *pc, *cp, had_err;
+  GtLTRdigestPdomVisitor *lv;
+  GtError *err;
+} GtLTRdigestHMMscanThreadData;
+
+static void* gt_ltrdigest_hmmscan_send_thread(void *data) {
+  GtUword i;
+  GtLTRdigestHMMscanThreadData *d = (GtLTRdigestHMMscanThreadData*) data;
+  for (i = 0UL; i < 3UL; i++) {
+    char buf[5];
+    GT_UNUSED ssize_t written;
+    (void) sprintf(buf, ">"GT_WU"%c\n", i, '+');
+    written = write(d->pc[1], buf, 4 * sizeof (char));
+    written = write(d->pc[1], gt_str_get(d->lv->fwd[i]),
+                   (size_t) gt_str_length(d->lv->fwd[i]) * sizeof (char));
+    written = write(d->pc[1], "\n", 1 * sizeof (char));
+    (void) sprintf(buf, ">"GT_WU"%c\n", i, '-');
+    written = write(d->pc[1], buf, 4 * sizeof (char));
+    written = write(d->pc[1], gt_str_get(d->lv->rev[i]),
+                   (size_t) gt_str_length(d->lv->rev[i]) * sizeof (char));
+  }
+  (void) close(d->pc[0]);
+  (void) close(d->pc[1]);
+  (void) close(d->cp[1]);
+  return NULL;
+}
+
+static void* gt_ltrdigest_hmmscan_recv_thread(void *data) {
+  GtHMMERParseStatus *pstatus;
+  int rstatus;
+  FILE *instream;
+  GtLTRdigestHMMscanThreadData *d = (GtLTRdigestHMMscanThreadData*) data;
+  instream = fdopen(d->cp[0], "r");
+  pstatus = gt_hmmer_parse_status_new();
+  d->had_err = gt_ltrdigest_pdom_visitor_parse_output(d->lv, pstatus,
+                                                      instream, d->err);
+  (void) fclose(instream);
+  wait(&rstatus);
+  if (WEXITSTATUS(rstatus) != 0) {
+    d->had_err = -1;
+    gt_error_set(d->err, "HMMER child process terminated with error");
+  }
+  if (!d->had_err)
+    d->had_err = gt_ltrdigest_pdom_visitor_process_hits(d->lv, pstatus,
+                                                        d->err);
+  gt_hmmer_parse_status_delete(pstatus);
+  return NULL;
+}
 #endif
 
 static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
@@ -821,9 +871,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
     GtUword seqlen;
     char translated, *rev_seq;
 #ifndef _WIN32
-    FILE *instream;
-    GtHMMERParseStatus *pstatus;
-    int pid, pc[2], cp[2], rstatus = 0;
+    int pid, pc[2], cp[2];
 #endif
     unsigned int frame;
     GtStr *seq;
@@ -884,6 +932,10 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
         had_err = gt_ltrdigest_checkpipe(cp,err);
       }
       if (!had_err) {
+        GtLTRdigestHMMscanThreadData td = {
+              pc, cp, 0,
+              lv, err
+            };
         switch ((pid = (int) fork())) {
           case -1:
             gt_error_set(err, "can't fork new HMMER process");
@@ -904,37 +956,16 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
             perror("couldn't execute hmmscan");
             exit(EXIT_FAILURE);
           default:    /* parent */
-            for (i = 0UL; i < 3UL; i++) {
-              char buf[5];
-              GT_UNUSED ssize_t written;
-              (void) sprintf(buf, ">"GT_WU"%c\n", i, '+');
-              written = write(pc[1], buf, 4 * sizeof (char));
-              written = write(pc[1], gt_str_get(lv->fwd[i]),
-                            (size_t) gt_str_length(lv->fwd[i]) * sizeof (char));
-              written = write(pc[1], "\n", 1 * sizeof (char));
-              (void) sprintf(buf, ">"GT_WU"%c\n", i, '-');
-              written = write(pc[1], buf, 4 * sizeof (char));
-              written = write(pc[1], gt_str_get(lv->rev[i]),
-                            (size_t) gt_str_length(lv->rev[i]) * sizeof (char));
-              written = write(pc[1], "\n", 1 * sizeof (char));
-            }
-            (void) close(pc[0]);
-            (void) close(pc[1]);
-            (void) close(cp[1]);
-            instream = fdopen(cp[0], "r");
-            pstatus = gt_hmmer_parse_status_new();
-            had_err = gt_ltrdigest_pdom_visitor_parse_output(lv, pstatus,
-                                                             instream, err);
-            (void) fclose(instream);
-            wait(&rstatus);
-            if (WEXITSTATUS(rstatus) != 0) {
-              had_err = -1;
-              gt_error_set(err, "HMMER child process terminated with error");
-            }
-            if (!had_err)
-              had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus,
-                                                               err);
-            gt_hmmer_parse_status_delete(pstatus);
+          {
+            GtThread *st, *rt;
+            st = gt_thread_new(gt_ltrdigest_hmmscan_send_thread, &td, err);
+            rt = gt_thread_new(gt_ltrdigest_hmmscan_recv_thread, &td, err);
+            gt_thread_join(rt);
+            gt_thread_join(st);
+            gt_thread_delete(rt);
+            gt_thread_delete(st);
+            had_err = td.had_err;
+          }
         }
   #else
         /* XXX */
