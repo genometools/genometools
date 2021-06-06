@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
-# Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2009, 2021 Sascha Steinbiss <sascha@steinbiss.name>
 # Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -132,6 +132,15 @@ class FeatureNode(GenomeNode):
     def unset_score(self):
         gtlib.gt_feature_node_unset_score(self.gn)
 
+    def number_of_children(self):
+        return gtlib.gt_feature_node_number_of_children(self.gn)
+
+    def remove_leaf(self, leaf):
+        nofc = leaf.number_of_children()
+        if nofc > 0:
+            gterror("%s is not a leaf, it has %d children" % (leaf, nofc))
+        gtlib.gt_feature_node_remove_leaf(self, leaf)
+
     score = cachedproperty(get_score, set_score, unset_score)
 
     def get_attribute(self, attrib):
@@ -203,6 +212,11 @@ class FeatureNode(GenomeNode):
         gtlib.gt_feature_node_set_type.argtypes = [c_void_p, c_char_p]
         gtlib.gt_feature_node_unset_score.restype = None
         gtlib.gt_feature_node_unset_score.argtypes = [c_void_p]
+        gtlib.gt_feature_node_remove_leaf.restype = None
+        gtlib.gt_feature_node_remove_leaf.argtypes = [c_void_p,
+                                                      FeatureNode]
+        gtlib.gt_feature_node_number_of_children.restype = c_ulong
+        gtlib.gt_feature_node_number_of_children.argtypes = [c_void_p]
 
     register = classmethod(register)
 
