@@ -202,7 +202,7 @@ static int get_caption_display_status(GtDiagram *d, const char *gft,
         default:
           gt_assert(tmp != GT_UNDEF_DOUBLE);
           threshold = tmp;
-          gt_assert(tmp != GT_UNDEF_UWORD);
+          gt_assert(((GtUword) tmp) != GT_UNDEF_UWORD);
           *status = (gt_range_length(&d->range) <= threshold);
           break;
       }
