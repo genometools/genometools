@@ -1,0 +1,100 @@
+name: ci.yaml
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  linux:
+    name: ${{ matrix.container }} (${{ matrix.options}}, ${{ matrix.compiler}})
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      CC: ${{ matrix.compiler}}
+      BUILDOPTS: $${{ matrix.options }}
+    strategy:
+      matrix:
+        compiler:
+          - gcc
+          - clang
+        container:
+          - debian:stable
+          - debian:testing
+          - ubuntu:latest
+        options:
+          - assert=no
+          - opt=no cairo=no
+          - amalgamation=yes
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.container }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install deps
+        run: |
+             apt update
+             apt -yq install build-essential libpango1.0-dev libcairo2-dev \
+                             ncbi-blast+ ruby clang
+      - name: Set up user
+        run: |
+             useradd -m -g users testuser
+             chown -R testuser:users .
+      - name: Build with ${{ matrix.options }}
+        run: |
+             su -c "make ${{ matrix.options }}" testuser
+      - name: Run tests
+        run: |
+             su -c "scripts/citest.rb" testuser
+  macos-latest:
+    name: macOS-latest (${{ matrix.options}})
+    strategy:
+      matrix:
+        options:
+          - assert=no
+          - opt=no cairo=no
+          - amalgamation=yes
+    runs-on: macos-latest
+    env:
+      PKG_CONFIG_PATH: /usr/local/opt/libffi/lib/pkgconfig
+      BUILDOPTS: $${{ matrix.options }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install deps
+        run: |
+         brew install pango cairo libffi pkg-config blast
+      - name: Build with ${{ matrix.options }}
+        run: |
+             make ${{ matrix.options }}
+      - name: Run tests
+        run: |
+             scripts/citest.rb
+  windows-cross:
+    name: mingw-w64 (fpic=no cairo=no sharedlib=no, ${{ matrix.mingw-arch }})
+    strategy:
+      matrix:
+        mingw-arch:
+          - i686
+          - x86_64
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      CC: ${{ matrix.mingw-arch }}-w64-mingw32-gcc
+      SYSTEM: Windows
+      MACHINE: ${{ matrix.mingw-arch }}
+      AR: ${{ matrix.mingw-arch }}-w64-mingw32-ar
+      CFLAGS: -Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize
+      BUILDOPTS: fpic=no cairo=no sharedlib=no
+    runs-on: ubuntu-latest
+    container: debian:buster
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install deps
+        run: |
+             apt update
+             apt -yq install build-essential ncbi-blast+ ruby \
+                     binutils-mingw-w64-i686 gcc-mingw-w64-i686 \
+                     binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64
+      - name: Build
+        run: |
+             make fpic=no cairo=no sharedlib=no
