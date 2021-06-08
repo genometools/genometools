@@ -139,7 +139,7 @@ class FeatureNode(GenomeNode):
         nofc = leaf.number_of_children()
         if nofc > 0:
             gterror("%s is not a leaf, it has %d children" % (leaf, nofc))
-        gtlib.gt_feature_node_remove_leaf(self, leaf)
+        gtlib.gt_feature_node_remove_leaf(self.gn, leaf._as_parameter_)
 
     score = cachedproperty(get_score, set_score, unset_score)
 
@@ -214,7 +214,7 @@ class FeatureNode(GenomeNode):
         gtlib.gt_feature_node_unset_score.argtypes = [c_void_p]
         gtlib.gt_feature_node_remove_leaf.restype = None
         gtlib.gt_feature_node_remove_leaf.argtypes = [c_void_p,
-                                                      FeatureNode]
+                                                      c_void_p]
         gtlib.gt_feature_node_number_of_children.restype = c_ulong
         gtlib.gt_feature_node_number_of_children.argtypes = [c_void_p]
 
