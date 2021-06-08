@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from gt import FeatureNode, FeatureNodeIteratorDepthFirst, GenomeNode
+from gt import FeatureNode, FeatureNodeIteratorDepthFirst, FeatureNodeIteratorDirect, GenomeNode, GTError
 
 
 class FeatureNodeTestCase(unittest.TestCase):
@@ -171,6 +171,38 @@ class TestFeatureNodeProperties(unittest.TestCase):
 
         f2 = FeatureNode.create_from_ptr(g.gn, True)
         self.assertEqual((100, 500), f2.range)
+
+
+class TestFeatureNodeRemoveLeaf(unittest.TestCase):
+
+    def setUp(self):
+        seqid = "foo"
+        self.gene = FeatureNode.create_new(seqid, "gene", 100, 900, "+")
+        exon = FeatureNode.create_new(seqid, "exon", 100, 200, "+")
+        self.gene.add_child(exon)
+        intron = FeatureNode.create_new(seqid, "intron", 201, 799, "+")
+        self.gene.add_child(intron)
+        exon = FeatureNode.create_new(seqid, "exon", 800, 900, "+")
+        self.gene.add_child(exon)
+
+    def test_remove_leaf(self):
+        fin = FeatureNodeIteratorDirect(self.gene)
+        while True:
+            fn = fin.next()
+            if not fn:
+                break
+            if fn.get_type() == "intron":
+                self.gene.remove_leaf(fn)
+        while True:
+            fn = fin.next()
+            if not fn:
+                break
+            if fn.get_type()!= "intron":
+                self.fail()
+
+    def test_remove_leaf_fail(self):
+        self.assertRaises(AttributeError, self.gene.remove_leaf, 1)
+        self.assertRaises(GTError, self.gene.remove_leaf, self.gene)
 
 
 if __name__ == "__main__":
