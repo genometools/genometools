@@ -372,8 +372,10 @@ endif
 
 ifeq ($(findstring clang,$(CC)),clang)
   # do not complain about unnecessary options
-  GT_CFLAGS += -Qunused-arguments -Wno-parentheses
-  GT_CPPFLAGS += -Qunused-arguments -Wno-parentheses
+  GT_CFLAGS += -Qunused-arguments -Wno-parentheses -Wno-unknown-warning-option
+  GT_CPPFLAGS += -Qunused-arguments -Wno-parentheses -Wno-unknown-warning-option
+  # do not complain about indentation in 3rdparty code
+  GT_CFLAGS += -Wno-misleading-indentation
 endif
 
 # check whether version scripts can be used
@@ -815,7 +817,7 @@ obj/$(TRE_DIR)/%.o: $(TRE_DIR)/%.c
 	$(V_ECHO) "[compile $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
 	$(V_DO)$(CC) -c $< -o $@ $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(TRE_CPPFLAGS) $(GT_CFLAGS) $(FPIC)
+	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(TRE_CPPFLAGS) $(GT_CFLAGS) -Wno-int-in-bool-context $(FPIC)
 	$(V_DO)$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) \
 	  $(GT_CPPFLAGS)  $(TRE_CPPFLAGS) -MM -MP -MT $@ $(FPIC)
 
