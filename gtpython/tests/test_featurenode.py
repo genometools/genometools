@@ -193,11 +193,12 @@ class TestFeatureNodeRemoveLeaf(unittest.TestCase):
                 break
             if fn.get_type() == "intron":
                 self.gene.remove_leaf(fn)
+        fin = FeatureNodeIteratorDirect(self.gene)
         while True:
             fn = fin.next()
             if not fn:
                 break
-            if fn.get_type()!= "intron":
+            if fn.get_type()== "intron":
                 self.fail()
 
     def test_remove_leaf_fail(self):
