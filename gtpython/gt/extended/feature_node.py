@@ -158,6 +158,13 @@ class FeatureNode(GenomeNode):
                                             str(attrib).encode("UTF-8"),
                                             str(value).encode("UTF-8"))
 
+    def set_attribute(self, attrib, value):
+        if attrib == "" or value == "":
+            gterror("attribute keys or values must not be empty!")
+        gtlib.gt_feature_node_set_attribute(self.gn,
+                                            str(attrib).encode("UTF-8"),
+                                            str(value).encode("UTF-8"))
+
     def each_attribute(self):
         attribs = self.update_attrs()
         for (tag, val) in list(attribs.items()):
@@ -173,6 +180,9 @@ class FeatureNode(GenomeNode):
             c_ulong, c_float
         gtlib.gt_feature_node_add_attribute.restype = None
         gtlib.gt_feature_node_add_attribute.argtypes = [c_void_p, c_char_p,
+                                                        c_char_p]
+        gtlib.gt_feature_node_set_attribute.restype = None
+        gtlib.gt_feature_node_set_attribute.argtypes = [c_void_p, c_char_p,
                                                         c_char_p]
         gtlib.gt_feature_node_add_child.restype = None
         gtlib.gt_feature_node_add_child.argtypes = [c_void_p,

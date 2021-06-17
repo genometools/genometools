@@ -31,6 +31,9 @@ class Range(Structure):
             gterror("range error: start > end!")
         super(Range, self).__init__(start, end)
 
+    def __str__(self):
+        return "Range(%d,%d)" % (self._get_start(), self._get_end())
+
     def _get_start(self):
         return self.w_start
 
