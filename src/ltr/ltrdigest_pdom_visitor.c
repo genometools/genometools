@@ -57,7 +57,7 @@
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_pdom_visitor.h"
 
-#define GT_HMMER_BUF_LEN  122
+#define GT_HMMER_BUF_LEN  64000
 
 struct GtLTRdigestPdomVisitor {
   const GtNodeVisitor parent_instance;
