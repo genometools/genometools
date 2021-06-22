@@ -1,3 +1,15 @@
+changes in version 1.6.2 (2021-06-21)
+
+- use concurrent communication with hmmscan process
+- make 'threads=yes' a default make option`
+- extend line buffer for hmmscan output parsing in LTRdigest
+- migrate CI to GitHub Actions
+- remove unused license manager code
+- various fixes to support newer compilers
+- add Go bindings
+- only warn when strand annotations conflict in LTRdigest
+
+
 changes in version 1.6.1 (2020-01-08)
 
 - Further extension of the C API.
