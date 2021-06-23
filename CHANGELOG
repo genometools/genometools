@@ -1,4 +1,4 @@
-changes in version 1.6.2 (2021-06-21)
+changes in version 1.6.2 (2021-06-23)
 
 - use concurrent communication with hmmscan process
 - make 'threads=yes' a default make option`
@@ -8,6 +8,8 @@ changes in version 1.6.2 (2021-06-21)
 - various fixes to support newer compilers
 - add Go bindings
 - only warn when strand annotations conflict in LTRdigest
+- add `feature_node.set_attribute()` and `genome_node.set_range()` to
+  Python bindings
 
 
 changes in version 1.6.1 (2020-01-08)
