@@ -22,6 +22,7 @@ from gt.dlload import gtlib
 from gt.core.error import Error, gterror
 from gt.extended.node_visitor import NodeVisitor
 from gt.core.gtstr import Str
+from gt.core.gtrange import Range
 from gt.props import cachedproperty
 
 
@@ -73,6 +74,11 @@ class GenomeNode(object):
     def get_range(self):
         return (gtlib.gt_genome_node_get_start(self.gn), gtlib.gt_genome_node_get_end(self.gn))
 
+    def set_range(self, rng):
+        del self.start
+        del self.end
+        gtlib.gt_genome_node_set_range(self.gn, rng)
+
     range = property(get_range)
 
     def get_seqid(self):
@@ -90,7 +96,10 @@ class GenomeNode(object):
         else:
             return None
 
-    start = cachedproperty(get_start)
+    def del_start(self):
+        pass
+
+    start = cachedproperty(get_start, fdel=del_start)
 
     def get_end(self):
         if not self.__class__.__name__ == "EOFNode":
@@ -98,7 +107,10 @@ class GenomeNode(object):
         else:
             return None
 
-    end = cachedproperty(get_end)
+    def del_end(self):
+        pass
+
+    end = cachedproperty(get_end, fdel=del_end)
 
     def get_filename(self):
         return gtlib.gt_genome_node_get_filename(self.gn)
@@ -118,13 +130,15 @@ class GenomeNode(object):
             gterror(err)
 
     def register(cls, gtlib):
-        from ctypes import c_char_p, c_ulong, c_int, c_void_p, c_uint
+        from ctypes import c_char_p, c_ulong, c_int, c_void_p, c_uint, POINTER
         gtlib.gt_genome_node_get_filename.restype = c_char_p
         gtlib.gt_genome_node_get_filename.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_start.restype = c_ulong
         gtlib.gt_genome_node_get_start.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_end.restype = c_ulong
         gtlib.gt_genome_node_get_end.argtypes = [c_void_p]
+        gtlib.gt_genome_node_set_range.restype = c_void_p
+        gtlib.gt_genome_node_set_range.argtypes = [c_void_p, POINTER(Range)]
         gtlib.gt_genome_node_get_seqid.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_seqid.restype = c_void_p
         gtlib.gt_genome_node_get_filename.argtypes = [c_void_p]
