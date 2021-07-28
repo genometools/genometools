@@ -563,6 +563,7 @@ static int process_id_attr(const char *id, GtFeatureNode *feature_node,
                                                 parser->feature_info);
             replace_node(fn, pseudo_node, genome_nodes);
             gt_feature_node_add_child(pseudo_node, feature_node);
+            update_pseudo_node_range(pseudo_node, feature_node);
             *is_child = true;
           }
         }
