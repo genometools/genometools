@@ -21,7 +21,6 @@ Possible arguments:
 - amalgamation=yes to compile as an amalgamation
 - cairo=no         to disable AnnotationSketch, dropping Cairo/Pango deps
 - errorcheck=no    to disable the handling of compiler warnings as errors
-- universal=yes    to build a universal binary
 - useshared=yes    to use the system's shared libraries
 - verbose=yes      to make the build more verbose
 
@@ -48,7 +47,7 @@ AnnotationSketch support is not required, GenomeTools can be built without
 graphics support by invoking make as above with the argument `cairo=no'.
 
 
-Building GenomeTools on Mac OS X (>= 10.6):
+Building GenomeTools on macOS:
 -------------------------------------------
 
 Make sure the command line developer tools are installed:
@@ -60,22 +59,10 @@ AnnotationSketch support (cairo=no). To build GenomeTools with AnnotationSketch,
 you can use Homebrew (http://brew.sh) to install the necessary dependencies
 required for building:
 
-$ brew install caskroom/cask/brew-cask
-$ brew cask install xquartz
-$ brew install cairo
-$ brew install pango
+$ brew install pango cairo libffi pkg-config
 
-To start the build process, invoke make as stated above.
-
-
-Building GenomeTools as a Universal Binary (on PPC systems with Mac OS X < v10.6):
-----------------------------------------------------------------------------------
-
-Invoke make as above with the argument universal=yes.
-Note that on later Mac OS X systems (those with an Intel CPU) the universal=yes
-option is not required. Also, do not use it on Mac OS X 10.6 (Snow Leopard) or
-later as PowerPC support has since been discontinued. Thus trying to build a
-universal binary may lead to problems.
+To start the build process, invoke make as stated above. You might need to set
+the PKG_CONFIG_PATH environment variable to /usr/local/opt/libffi/lib/pkgconfig.
 
 
 Building GenomeTools on Windows (using Cygwin):
