@@ -1,4 +1,5 @@
-# GenomeTools [![Build Status](https://travis-ci.org/genometools/genometools.png)](https://travis-ci.org/genometools/genometools)
+# GenomeTools
+[![Build Status](https://img.shields.io/github/workflow/status/genometools/genometools/ci.yaml)](https://github.com/genometools/genometools/actions/workflows/build.yaml) [![DebianSBadge](https://badges.debian.net/badges/debian/stable/genometools/version.svg)](https://packages.debian.org/stable/genometools) [![DebianTBadge](https://badges.debian.net/badges/debian/testing/genometools/version.svg)](https://packages.debian.org/testing/genometools) ![Ubuntu package](https://img.shields.io/ubuntu/v/genometools) ![homebrew version](https://img.shields.io/homebrew/v/genometools) ![Conda](https://img.shields.io/conda/v/bioconda/genometools) ![AUR version](https://img.shields.io/aur/version/genometools)
 
 The GenomeTools genome analysis system is a free collection of bioinformatics
 tools (in the realm of genome informatics) combined into a single binary named
