@@ -2,7 +2,7 @@
 
 cd testsuite
 
-if test "${TMPDIR}" == ""
+if test "${TMPDIR}" = ""
 then
   TMPDIR="."
 fi
