@@ -719,6 +719,22 @@ static void join_roots(GtArray *roots, GtFeatureInfo *feature_info,
   }
 }
 
+static void dedup_roots(GtArray *roots)
+{
+  GtUword i = 0,
+          j = 0;
+  gt_assert(roots);
+  for (i = 0; i < gt_array_size(roots); i++) {
+    for (j = i+1; j < gt_array_size(roots); j++) {
+      if (*(GtGenomeNode**) gt_array_get(roots, i)
+            == *(GtGenomeNode**) gt_array_get(roots, j)) {
+        gt_array_rem(roots, j);
+        j--;
+      }
+    }
+  }
+}
+
 static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
                          GtFeatureInfo *feature_info, bool strict,
                          unsigned int last_terminator,
@@ -799,6 +815,7 @@ static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
     /* make sure all (valid) parents have the same (pseudo-)root */
     if (gt_str_array_size(valid_parents) >= 2) {
       GtArray *roots = find_roots(valid_parents, feature_info);
+      dedup_roots(roots);
       if (roots_differ(roots))
         join_roots(roots, feature_info, genome_nodes);
       gt_array_delete(roots);
