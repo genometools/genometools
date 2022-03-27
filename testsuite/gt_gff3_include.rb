@@ -1481,8 +1481,6 @@ Test do
   run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 1", :retval => 1
   run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}gt_gff3_linesort.in.gff3 > 2"
   run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
-  run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
-  run "diff 1 3"
 end
 
 Name "gt gff3 -sortlines (multiple sequences)"
@@ -1511,8 +1509,6 @@ Test do
   run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 1", :retval => 1
   run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}standard_fasta_example.gff3 > 2"
   run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
-  run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
-  run "diff 1 3"
 end
 
 Name "gt gff3 -sortlines (spaces)"

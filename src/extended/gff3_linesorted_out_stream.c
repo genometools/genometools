@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2014-2015 Genome Research Ltd.
+  Copyright (c) 2022 Sascha Steinbiss <sascha@steinbiss.name>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,13 +25,13 @@
 #include "core/ma_api.h"
 #include "core/minmax_api.h"
 #include "core/parseutils_api.h"
-#include "core/queue.h"
 #include "core/qsort_r_api.h"
 #include "core/splitter_api.h"
 #include "core/symbol_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
+#include "extended/feature_node_iterator_api.h"
 #include "extended/feature_type_api.h"
 #include "extended/gff3_defines.h"
 #include "extended/gff3_linesorted_out_stream.h"
@@ -42,12 +43,11 @@ struct GtGFF3LinesortedOutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtArray *cur_node_set;
-  GtRange cur_node_range;
-  GtQueue *outqueue;
   GtFile *outfp;
   GtStr *buf;
   GtSplitter *splitter;
   GtNodeVisitor *gff3vis;
+  GtStr *last_seqid;
   char **outstrings;
   GtUword outstrings_length;
 };
@@ -156,13 +156,14 @@ static int gff3_linesorted_out_stream_process_current_cluster(
   /* do not waste time on empty clusters */
   if (nof_nodes == 0) return had_err;
 
-  /* collect output */
+  /* collect and free output */
   gt_str_reset(lsos->buf);
   for (i = 0; !had_err && i < nof_nodes; i++) {
     GtGenomeNode *n = *(GtGenomeNode**) gt_array_get(lsos->cur_node_set, i);
     had_err = gt_genome_node_accept(n, lsos->gff3vis, err);
-    gt_queue_add(lsos->outqueue, n);
+    gt_genome_node_delete(n);
   }
+  gt_array_reset(lsos->cur_node_set);
 
   /* split buffered lines */
   gt_splitter_split(lsos->splitter, gt_str_get(lsos->buf),
@@ -189,7 +190,6 @@ static int gff3_linesorted_out_stream_process_current_cluster(
 
   /* cleanup */
   gt_splitter_reset(lsos->splitter);
-  gt_array_reset(lsos->cur_node_set);
   return had_err;
 }
 
@@ -198,80 +198,53 @@ static int gff3_linesorted_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 {
   GtGFF3LinesortedOutStream *lsos;
   int had_err = 0;
-  bool complete_cluster = false;
-  GtGenomeNode *mygn = NULL;
+  GtGenomeNode *node;
   GtFeatureNode *fn = NULL;
   gt_error_check(err);
   lsos = gt_gff3_linesorted_out_stream_cast(ns);
 
-  /* if there are still nodes left in the buffer, output them */
-  if (gt_queue_size(lsos->outqueue) > 0) {
-    *gn = (GtGenomeNode*) gt_queue_get(lsos->outqueue);
-    return had_err;
-  } else complete_cluster = false;
+  /* we do not need to pass on any nodes, this is an output stream */
+  *gn = NULL;
 
-  while (!had_err && !complete_cluster) {
-    had_err = gt_node_stream_next(lsos->in_stream, &mygn, err);
-
-    /* stop if stream is at the end */
-    if (had_err || !mygn) {
-      /* do not forget to finish last cluster */
-      if (!had_err) {
-        had_err = gff3_linesorted_out_stream_process_current_cluster(lsos, err);
-      }
-      break;
-    }
-
-    /* process all feature nodes */
-    if ((fn = gt_feature_node_try_cast(mygn))) {
-      GtGenomeNode *addgn;
-      GtRange new_rng = gt_genome_node_get_range(mygn);
-      if (gt_array_size(lsos->cur_node_set) == 0UL) {
-        /* new overlapping node cluster */
-        addgn = gt_genome_node_ref(mygn);
-        gt_array_add(lsos->cur_node_set, addgn);
-        lsos->cur_node_range = gt_genome_node_get_range(mygn);
-      } else {
-        if (gt_range_overlap(&new_rng, &lsos->cur_node_range)) {
-          /* node overlaps with current one, add to cluster */
-          addgn = gt_genome_node_ref(mygn);
-          gt_array_add(lsos->cur_node_set, addgn);
-          lsos->cur_node_range = gt_range_join(&lsos->cur_node_range, &new_rng);
-        } else {
-          /* finish current cluster and start a new one */
-          had_err = gff3_linesorted_out_stream_process_current_cluster(lsos,
-                                                                       err);
-          if (!had_err) {
-            gt_assert(gt_array_size(lsos->cur_node_set) == 0);
-            addgn = gt_genome_node_ref(mygn);
-            gt_array_add(lsos->cur_node_set, addgn);
-            lsos->cur_node_range = gt_genome_node_get_range(mygn);
-          }
-          if (gt_queue_size(lsos->outqueue) > 0) {
-            *gn = (GtGenomeNode*) gt_queue_get(lsos->outqueue);
-            complete_cluster = true;
-          }
-        }
-      }
-      /* from now on, nodes are kept in clusters only */
-      gt_genome_node_delete(mygn);
-    } else {
-      /* other nodes */
-      had_err = gff3_linesorted_out_stream_process_current_cluster(lsos, err);
-      if (!had_err) {
+  while (!(had_err = gt_node_stream_next(lsos->in_stream, &node,
+                                          err))) {
+     if (node == NULL) {
+       /* do not forget to finish last cluster */
+       if (!had_err) {
+         had_err = gff3_linesorted_out_stream_process_current_cluster(lsos, err);
+       }
+       break;
+     }
+     if ((fn = gt_feature_node_try_cast(node))) {
+       if (lsos->last_seqid == NULL) {
+         lsos->last_seqid = gt_str_clone(gt_genome_node_get_seqid(node));
+       }
+       if (gt_str_cmp(lsos->last_seqid, gt_genome_node_get_seqid(node)) != 0) {
+         /* new sequence reached, finish old cluster and update current seqid;
+            we can do this as GenomeTools enforces all features within a CC to
+            share the same seqid */
+         had_err = gff3_linesorted_out_stream_process_current_cluster(lsos, err);
+         if (had_err) {
+           return had_err;
+         }
+         gt_str_reset(lsos->last_seqid);
+         gt_str_append_str(lsos->last_seqid, gt_genome_node_get_seqid(node));
+       }
+       gt_array_add(lsos->cur_node_set, fn);
+     } else {
+       if (!had_err) {
         gt_str_reset(lsos->buf);
-        had_err = gt_genome_node_accept(mygn, lsos->gff3vis, err);
+        had_err = gt_genome_node_accept(node, lsos->gff3vis, err);
       }
       if (!had_err) {
         gt_file_xprintf(lsos->outfp, "%s", gt_str_get(lsos->buf));
-        gt_queue_add(lsos->outqueue, mygn);
-      }
-      if (gt_queue_size(lsos->outqueue) > 0) {
-        *gn = (GtGenomeNode*) gt_queue_get(lsos->outqueue);
-        complete_cluster = true;
+        gt_genome_node_delete(node);
+      } else {
+        return had_err;
       }
     }
   }
+
   return had_err;
 }
 
@@ -281,16 +254,13 @@ static void gff3_linesorted_out_stream_free(GtNodeStream *ns)
   GtGFF3LinesortedOutStream *lsos;
   if (!ns) return;
   lsos = gt_gff3_linesorted_out_stream_cast(ns);
-  while (gt_queue_size(lsos->outqueue) > 0) {
-    gt_genome_node_delete((GtGenomeNode*) gt_queue_get(lsos->outqueue));
-  }
-  gt_queue_delete(lsos->outqueue);
   for (i = 0; i < gt_array_size(lsos->cur_node_set); i++) {
     gt_genome_node_delete(*(GtGenomeNode**)
                                            gt_array_get(lsos->cur_node_set, i));
   }
   gt_node_stream_delete(lsos->in_stream);
   gt_str_delete(lsos->buf);
+  gt_str_delete(lsos->last_seqid);
   gt_node_visitor_delete(lsos->gff3vis);
   gt_splitter_delete(lsos->splitter);
   gt_array_delete(lsos->cur_node_set);
@@ -319,11 +289,10 @@ GtNodeStream* gt_gff3_linesorted_out_stream_new(GtNodeStream *in_stream,
   lsos = gt_gff3_linesorted_out_stream_cast(ns);
   lsos->cur_node_set = gt_array_new(sizeof (GtFeatureNode*));
   lsos->in_stream = gt_node_stream_ref(in_stream);
-  lsos->cur_node_range.start = lsos->cur_node_range.end = GT_UNDEF_UWORD;
-  lsos->outqueue = gt_queue_new();
   lsos->outfp = outfp;
   lsos->outstrings = NULL;
   lsos->outstrings_length = 0;
+  lsos->last_seqid = NULL;
   lsos->splitter = gt_splitter_new();
   lsos->buf = gt_str_new();
   lsos->gff3vis = gt_gff3_visitor_new_to_str(lsos->buf);
