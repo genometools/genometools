@@ -19,6 +19,7 @@
 #include "core/ma_api.h"
 #include "core/assert_api.h"
 #include "core/codetype.h"
+#include "core/unused_api.h"
 #include "match/dbs_spaced_seeds.h"
 
 int gt_spaced_seed_span(GtCodetype spaced_seed)
@@ -294,7 +295,7 @@ GtSpacedSeedSpec *gt_spaced_seed_spec_new(GtCodetype spacedseed)
 {
   uint8_t blocks_length[32] = {0}, shiftleft = 0, shiftright = 0;
   int span = 1, weight = 1;
-  GtCodetype ss_copy, last = (GtCodetype) 1, from_blocks = 0;
+  GtCodetype ss_copy, last = (GtCodetype) 1, GT_UNUSED from_blocks = 0;
   GtUword idx, block_num = 0, spec_counter = 0;
   GtSpacedSeedSpec *seed_spec;
 

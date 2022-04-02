@@ -28,7 +28,7 @@ GtUword *gt_encseqtable2sequenceoffsets(
 {
   unsigned int idx;
   GtUchar lastofprevious, firstofcurrent;
-  GtUword tmplength, numofsequences = 0, *sequenceoffsettable;
+  GtUword tmplength, GT_UNUSED numofsequences = 0, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
            tmpwildcards,
            tmpspecialranges,

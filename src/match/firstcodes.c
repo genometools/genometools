@@ -316,7 +316,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                 next = GT_UNDEF_UWORD,
                 idx,
                 width,
-                sumwidth = 0,
+                GT_UNUSED sumwidth = 0,
                 previoussuffix = 0;
   GtShortreadsortresult srsresult;
   bool previousdefined = false, haserr = false;
@@ -526,7 +526,7 @@ static int gt_firstcodes_thread_sortremaining(
                                        GtError *err)
 {
   unsigned int t;
-  GtUword sum = 0, *endindexes;
+  GtUword GT_UNUSED sum = 0, *endindexes;
   GtSortRemainingThreadinfo *threadinfo;
   bool haserr = false;
 

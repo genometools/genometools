@@ -208,7 +208,7 @@ locBitsUpperBounds(void *cbState, struct segmentDesc *desc,
     {
       size_t i, maxSegLen = 0;
       BitOffset maxBitsTotal = 0;
-      GtUword numSegmentsTotal = 0;
+      GT_UNUSED GtUword numSegmentsTotal = 0;
       unsigned bitsPerOrigRank = state->bitsPerOrigRank;
       for (i = 0; i < numSegmentDesc; ++i)
       {

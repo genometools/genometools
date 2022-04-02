@@ -132,7 +132,7 @@ static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
   if (suftabparts->numofparts > 0)
   {
     unsigned int destpart, srcpart;
-    GtUword sumwidth = 0;
+    GtUword GT_UNUSED sumwidth = 0;
 
     for (destpart = 0, srcpart = 0; srcpart < suftabparts->numofparts;
          srcpart++)
