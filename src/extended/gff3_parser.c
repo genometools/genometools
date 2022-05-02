@@ -753,7 +753,28 @@ static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
     parent_gf = (GtGenomeNode*) gt_feature_info_get(feature_info,
                                                     parent);
     gt_assert(parent_gf);
-    if (gt_genome_node_get_line_number(parent_gf) < last_terminator) {
+    if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
+                        gt_genome_node_get_seqid(child))) {
+      gt_error_set(err, "child on line %u in file \"%s\" has different "
+                   "sequence id than its parent on line %u ('%s' vs. '%s')",
+                   gt_genome_node_get_line_number(child),
+                   gt_genome_node_get_filename(child),
+                   gt_genome_node_get_line_number(parent_gf),
+                   gt_str_get(gt_genome_node_get_seqid(child)),
+                   gt_str_get(gt_genome_node_get_seqid(parent_gf)));
+      gt_genome_node_delete(child);
+      had_err = -1;
+    }
+    if (!had_err && parent_gf == child) {
+      gt_error_set(err, "feature on line %u in file \"%s\" is "
+                   "self-referential (%s and %s are the same)",
+                   gt_genome_node_get_line_number(child),
+                   gt_genome_node_get_filename(child),
+                   GT_GFF_PARENT, GT_GFF_ID);
+      gt_genome_node_delete(child);
+      had_err = -1;
+    }
+    if (!had_err && gt_genome_node_get_line_number(parent_gf) < last_terminator) {
       gt_error_set(err, "the child with %s \"%s\" on line %u in file "
                    "\"%s\" is separated from its corresponding %s on line %u "
                    "by terminator %s on line %u", GT_GFF_PARENT, parent,
@@ -867,23 +888,6 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
              gt_orphanage_is_orphan(parser->orphanage, parent)) {
       /* children of orphaned parents are orphans themselves */
       orphaned_parent = true;
-    }
-    else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
-                        gt_genome_node_get_seqid(feature_node))) {
-      gt_error_set(err, "child on line %u in file \"%s\" has different "
-                   "sequence id than its parent on line %u ('%s' vs. '%s')",
-                   gt_genome_node_get_line_number(feature_node), filename,
-                   gt_genome_node_get_line_number(parent_gf),
-                   gt_str_get(gt_genome_node_get_seqid(feature_node)),
-                   gt_str_get(gt_genome_node_get_seqid(parent_gf)));
-      had_err = -1;
-    }
-    else if (parent_gf == feature_node) {
-      gt_error_set(err, "feature on line %u in file \"%s\" is "
-                   "self-referential (%s and %s are the same)",
-                   gt_genome_node_get_line_number(feature_node), filename,
-                   GT_GFF_PARENT, GT_GFF_ID);
-      had_err = -1;
     }
   }
 
