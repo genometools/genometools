@@ -887,104 +887,107 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                                           lv->root_type,
                                           false, NULL, NULL, lv->rmap, err);
 
-    if (!had_err && gt_str_length(seq) >= (GtUword) (3*GT_CODON_LENGTH)) {
-      for (i = 0UL; i < 3UL; i++) {
-        gt_str_reset(lv->fwd[i]);
-        gt_str_reset(lv->rev[i]);
-      }
+    if (!had_err) {
+      if (gt_str_length(seq) >= (GtUword) (3*GT_CODON_LENGTH)) {
+        for (i = 0UL; i < 3UL; i++) {
+          gt_str_reset(lv->fwd[i]);
+          gt_str_reset(lv->rev[i]);
+        }
 
-      /* create translations */
-      ci = gt_codon_iterator_simple_new(gt_str_get(seq), seqlen, NULL);
-      gt_assert(ci);
-      tr = gt_translator_new(ci);
-      status = gt_translator_next(tr, &translated, &frame, err);
-      while (status == GT_TRANSLATOR_OK && translated) {
-        gt_str_append_char(lv->fwd[frame], translated);
-        status = gt_translator_next(tr, &translated, &frame, NULL);
-      }
-      if (status == GT_TRANSLATOR_ERROR)
-        had_err = -1;
-      if (!had_err) {
-        rev_seq = gt_malloc((size_t) seqlen * sizeof (char));
-        strncpy(rev_seq, gt_str_get(seq), (size_t) seqlen * sizeof (char));
-        (void) gt_reverse_complement(rev_seq, seqlen, NULL);
-        gt_codon_iterator_delete(ci);
-        ci = gt_codon_iterator_simple_new(rev_seq, seqlen, NULL);
-        gt_translator_set_codon_iterator(tr, ci);
+        /* create translations */
+        ci = gt_codon_iterator_simple_new(gt_str_get(seq), seqlen, NULL);
+        gt_assert(ci);
+        tr = gt_translator_new(ci);
         status = gt_translator_next(tr, &translated, &frame, err);
         while (status == GT_TRANSLATOR_OK && translated) {
-          gt_str_append_char(lv->rev[frame], translated);
+          gt_str_append_char(lv->fwd[frame], translated);
           status = gt_translator_next(tr, &translated, &frame, NULL);
         }
         if (status == GT_TRANSLATOR_ERROR)
           had_err = -1;
-        gt_free(rev_seq);
-      }
-      gt_codon_iterator_delete(ci);
-      gt_translator_delete(tr);
-
-      /* run HMMER and handle results */
-      if (!had_err) {
-  #ifndef _WIN32
-        had_err = gt_ltrdigest_checkpipe(pc, err);
-      }
-      if (!had_err) {
-        had_err = gt_ltrdigest_checkpipe(cp,err);
-      }
-      if (!had_err) {
-        GtLTRdigestHMMscanThreadData td = {
-              pc, cp, 0,
-              lv, err
-            };
-        switch ((pid = (int) fork())) {
-          case -1:
-            gt_error_set(err, "can't fork new HMMER process");
-            had_err = -1;
-            break;
-          case 0:    /* child */
-            (void) close(1);    /* close current stdout. */
-            gt_ltrdigest_checkdup(cp[1]);  /* make stdout go to
-                                                   write end of pipe. */
-            (void) close(0);    /* close current stdin. */
-            gt_ltrdigest_checkdup(pc[0]);  /* make stdin come from
-                                                   read end of pipe. */
-            (void) close(pc[0]);
-            (void) close(pc[1]);
-            (void) close(cp[0]);
-            (void) close(cp[1]);
-            (void) execvp("hmmscan", lv->args); /* XXX: read path from env */
-            perror("couldn't execute hmmscan");
-            exit(EXIT_FAILURE);
-          default:    /* parent */
-          {
-            GtThread *st, *rt;
-            st = gt_thread_new(gt_ltrdigest_hmmscan_send_thread, &td, err);
-            rt = gt_thread_new(gt_ltrdigest_hmmscan_recv_thread, &td, err);
-            gt_thread_join(rt);
-            gt_thread_join(st);
-            gt_thread_delete(rt);
-            gt_thread_delete(st);
-            had_err = td.had_err;
+        if (!had_err) {
+          rev_seq = gt_malloc((size_t) seqlen * sizeof (char));
+          strncpy(rev_seq, gt_str_get(seq), (size_t) seqlen * sizeof (char));
+          (void) gt_reverse_complement(rev_seq, seqlen, NULL);
+          gt_codon_iterator_delete(ci);
+          ci = gt_codon_iterator_simple_new(rev_seq, seqlen, NULL);
+          gt_translator_set_codon_iterator(tr, ci);
+          status = gt_translator_next(tr, &translated, &frame, err);
+          while (status == GT_TRANSLATOR_OK && translated) {
+            gt_str_append_char(lv->rev[frame], translated);
+            status = gt_translator_next(tr, &translated, &frame, NULL);
           }
+          if (status == GT_TRANSLATOR_ERROR)
+            had_err = -1;
+          gt_free(rev_seq);
         }
-  #else
-        /* XXX */
-        gt_error_set(err, "HMMER call not implemented on Windows\n");
-        had_err = -1;
-  #endif
+        gt_codon_iterator_delete(ci);
+        gt_translator_delete(tr);
+
+        /* run HMMER and handle results */
+        if (!had_err) {
+    #ifndef _WIN32
+          had_err = gt_ltrdigest_checkpipe(pc, err);
+        }
+        if (!had_err) {
+          had_err = gt_ltrdigest_checkpipe(cp,err);
+        }
+        if (!had_err) {
+          GtLTRdigestHMMscanThreadData td = {
+                pc, cp, 0,
+                lv, err
+              };
+          switch ((pid = (int) fork())) {
+            case -1:
+              gt_error_set(err, "can't fork new HMMER process");
+              had_err = -1;
+              break;
+            case 0:    /* child */
+              (void) close(1);    /* close current stdout. */
+              gt_ltrdigest_checkdup(cp[1]);  /* make stdout go to
+                                                    write end of pipe. */
+              (void) close(0);    /* close current stdin. */
+              gt_ltrdigest_checkdup(pc[0]);  /* make stdin come from
+                                                    read end of pipe. */
+              (void) close(pc[0]);
+              (void) close(pc[1]);
+              (void) close(cp[0]);
+              (void) close(cp[1]);
+              (void) execvp("hmmscan", lv->args); /* XXX: read path from env */
+              perror("couldn't execute hmmscan");
+              exit(EXIT_FAILURE);
+            default:    /* parent */
+            {
+              GtThread *st, *rt;
+              st = gt_thread_new(gt_ltrdigest_hmmscan_send_thread, &td, err);
+              rt = gt_thread_new(gt_ltrdigest_hmmscan_recv_thread, &td, err);
+              gt_thread_join(rt);
+              gt_thread_join(st);
+              gt_thread_delete(rt);
+              gt_thread_delete(st);
+              had_err = td.had_err;
+            }
+          }
+    #else
+          /* XXX */
+          gt_error_set(err, "HMMER call not implemented on Windows\n");
+          had_err = -1;
+    #endif
+        }
+      } else {
+        gt_warning("%s (%s, line %u) is too short to be "
+                  "translated (" GT_WU " nt), skipped domain search",
+              gt_feature_node_get_type(lv->ltr_retrotrans),
+              gt_genome_node_get_filename((GtGenomeNode*) lv->ltr_retrotrans),
+              gt_genome_node_get_line_number((GtGenomeNode*)
+                                                            lv->ltr_retrotrans),
+              gt_str_length(seq));
       }
-    } else {
-      gt_warning("%s (%s, line %u) is too short to be "
-                 "translated (" GT_WU " nt), skipped domain search",
-            gt_feature_node_get_type(lv->ltr_retrotrans),
-            gt_genome_node_get_filename((GtGenomeNode*) lv->ltr_retrotrans),
-            gt_genome_node_get_line_number((GtGenomeNode*) lv->ltr_retrotrans),
-            gt_str_length(seq));
+      gt_str_delete(seq);
+      if (!had_err)
+        had_err = gt_ltrdigest_pdom_visitor_choose_strand(lv);
     }
-    gt_str_delete(seq);
   }
-  if (!had_err)
-    had_err = gt_ltrdigest_pdom_visitor_choose_strand(lv);
   return had_err;
 }
 
