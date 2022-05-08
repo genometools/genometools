@@ -1,3 +1,14 @@
+changes in version 1.6.3 (2022-05-09)
+
+- bugfixes
+  - `gt gff3 --sortlines`: address issues with pseudo-features and
+    annotations unsorted in a specific way that broke sorting
+  - deduplicate pseudo node roots
+  - ensure validity checks are done for orphan (out of order) nodes
+  - fix failing assertion in `repeat_region`s without `LTR_retrotransposon`s
+- various fixes to support newer compilers
+
+
 changes in version 1.6.2 (2021-06-23)
 
 - use concurrent communication with hmmscan process
