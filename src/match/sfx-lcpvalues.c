@@ -511,7 +511,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
 {
   GT_UNUSED int cmp;
   GtUword idx, reallcp, startpos1, startpos2, currentlcp,
-                totalcmpmissing = 0;
+                GT_UNUSED totalcmpmissing = 0;
 
   if (effectivesamplesize == 0)
   {

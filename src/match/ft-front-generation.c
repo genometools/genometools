@@ -540,7 +540,8 @@ static void gt_front_trace_backtracepath2eoplist(GtEoplist *eoplist,
                                                 GT_UNUSED GtUword ulen,
                                                 GT_UNUSED GtUword vlen)
 {
-  GtUword idx, deletions = 0, insertions = 0, mismatches = 0, matches = 0;
+  GtUword idx, GT_UNUSED deletions = 0, GT_UNUSED insertions = 0, 
+          GT_UNUSED mismatches = 0, GT_UNUSED matches = 0;
 
   if (lastlcs > 0)
   {
