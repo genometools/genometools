@@ -523,12 +523,6 @@ ifneq ($(useshared),yes)
                         $(ZLIB_DEP)
 endif
 
-ifneq ($(with-sqlite),no)
-  ifneq ($(useshared),yes)
-    LIBGENOMETOOLS_OBJ += lib/libsqlite.a
-  endif
-endif
-
 ifeq ($(wrapmemcpy),yes)
   GT_LDFLAGS += -Wl,--wrap=memcpy
   LIBGENOMETOOLS_OBJ += obj/src/memcpy.o
@@ -589,7 +583,7 @@ endif
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	$(V_ECHO) "[link $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
-	$(V_DO)$(AR) ru $@ $(LIBEXPAT_OBJ)
+	$(V_DO)$(AR) q $@ $(LIBEXPAT_OBJ)
 ifdef RANLIB
 	$(V_DO)$(RANLIB) $@
 endif
@@ -597,7 +591,7 @@ endif
 lib/libtre.a: $(LIBTRE_OBJ)
 	$(V_ECHO) "[link $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
-	$(V_DO)$(AR) ru $@ $(LIBTRE_OBJ)
+	$(V_DO)$(AR) q $@ $(LIBTRE_OBJ)
 ifdef RANLIB
 	$(V_DO)$(RANLIB) $@
 endif
@@ -605,7 +599,7 @@ endif
 lib/libsqlite.a: $(SQLITE3_OBJ)
 	$(V_ECHO) "[link $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
-	$(V_DO)$(AR) ru $@ $(SQLITE3_OBJ)
+	$(V_DO)$(AR) q $@ $(SQLITE3_OBJ)
 ifdef RANLIB
 	$(V_DO)$(RANLIB) $@
 endif
@@ -613,7 +607,7 @@ endif
 lib/libbz2.a: $(LIBBZ2_OBJ)
 	$(V_ECHO) "[link $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
-	$(V_DO)$(AR) ru $@ $(LIBBZ2_OBJ)
+	$(V_DO)$(AR) q $@ $(LIBBZ2_OBJ)
 ifdef RANLIB
 	$(V_DO)$(RANLIB) $@
 endif
@@ -621,7 +615,7 @@ endif
 lib/libz.a: $(ZLIB_OBJ)
 	$(V_ECHO) "[link $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
-	$(V_DO)$(AR) ru $@ $(ZLIB_OBJ)
+	$(V_DO)$(AR) q $@ $(ZLIB_OBJ)
 ifdef RANLIB
 	$(V_DO)$(RANLIB) $@
 endif
@@ -644,6 +638,7 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
                                           $(LIBGENOMETOOLS_OBJ) \
                                           $(ADDITIONAL_SO_DEPS) \
                                           $(ADDITIONAL_ZLIBS) \
+                                          $(OVERRIDELIBS) \
                                           $(VERSION_SCRIPT)
 	$(V_ECHO) "[link $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
@@ -652,7 +647,7 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
 	  -o $@ $(GTSHAREDLIB_LIBDEP)
 
 define PROGRAM_template
-$(1): $(2)
+$(1): $(2) $(OVERRIDELIBS)
 	$(V_ECHO) "[link $$(@F)]"
 	$(V_DO)test -d $$(@D) || mkdir -p $$(@D)
 	$(V_DO)$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
@@ -666,7 +661,7 @@ $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
 
 $(eval $(call PROGRAM_template, bin/examples/custom_stream, \
                                 obj/src/examples/custom_stream.o \
-                                lib/libgenometools.a\
+                                lib/libgenometools.a \
                                 $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/gff3sort, \
