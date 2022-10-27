@@ -338,7 +338,10 @@ static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
     }
     if (!had_err) {
       start = gt_genome_node_get_start((GtGenomeNode*) fn) + block_start;
-      end = start + block_size - 1;
+      end = start + block_size;
+      if (block_size > 0) {
+        end -= 1;
+      }
       block = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*) fn),
                                   bed_parser->block_type
                                   ? bed_parser->block_type
