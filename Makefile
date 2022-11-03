@@ -22,7 +22,7 @@ ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
   HAS_PKGCONFIG:=yes
   # Fix for Mac OS X manual building with Homebrew
   OLD_PKG_CONFIG_PATH:=$(PKG_CONFIG_PATH)
-  OVERRIDE_PC_PATH:=PKG_CONFIG_PATH=$(OLD_PKG_CONFIG_PATH):/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig
+  OVERRIDE_PC_PATH:=PKG_CONFIG_PATH=$(OLD_PKG_CONFIG_PATH):/opt/homebrew/lib/pkgconfig:/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig
 else
   HAS_PKGCONFIG:=no
 endif
