@@ -96,7 +96,8 @@ void
 gt_qsort_r(void *a, size_t n, size_t es, void *data, GtCompareWithData cmp)
 {
   char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
-  int d, r, swaptype, swap_cnt;
+  int swaptype, swap_cnt;
+  long d, r;
 
   while (1)
   {
