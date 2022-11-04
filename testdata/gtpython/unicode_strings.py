@@ -29,6 +29,11 @@ if __name__ == "__main__":
                          " style_file PNG_file\n")
         sys.exit(1)
 
+    # Strings in Python3 are always unicode and unicode() does not exist
+    # so there's no need to test this
+    if sys.version_info >= (3, 0):
+        sys.exit(0)
+
     nodes = []
 
     # construct a gene on the forward strand with two exons

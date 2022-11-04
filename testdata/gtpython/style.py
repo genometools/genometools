@@ -89,7 +89,7 @@ if __name__ == "__main__":
     style.set_cstr("exon", "style", "line")
     string = style.get_cstr("exon", "style")
     if string != "line":
-        raise TestFailedException
+        raise TestFailedException(string)
 
   # unset string
 

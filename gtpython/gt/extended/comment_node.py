@@ -17,6 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.extended.genome_node import GenomeNode
 
@@ -28,7 +29,7 @@ class CommentNode(GenomeNode):
 
     @classmethod
     def create_new(cls, comment):
-        fn = gtlib.gt_comment_node_new(str(comment).encode("UTF-8"))
+        fn = gtlib.gt_comment_node_new(gtbytes(comment))
         n = cls.create_from_ptr(fn, True)
         return n
 

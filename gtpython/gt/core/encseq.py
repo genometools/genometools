@@ -17,6 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.core.alphabet import Alphabet
 from gt.core.error import Error, gterror
@@ -59,13 +60,9 @@ class EncseqEncoder:
 
     from_param = classmethod(from_param)
 
-    def set_representation_type(self, sat):
-        gtlib.gt_encseq_encoder_set_access_type(
-            self.ee, str(sat.encode("utf-8")))
-
     def set_symbolmap_file(self, fn):
         gtlib.gt_encseq_encoder_use_symbolmap_file(
-            self.ee, str(fn.encode("utf-8")))
+            self.ee, gtbytes(fn))
 
     def enable_description_support(self):
         gtlib.gt_encseq_encoder_enable_description_support(self.ee)
@@ -115,7 +112,7 @@ class EncseqEncoder:
             sa.add(str(f))
         err = Error()
         esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa.strarr,
-                                               str(indexname).encode("UTF-8"),
+                                               gtbytes(indexname),
                                                err.error)
         if esptr != 0:
             gterror(err)
@@ -224,7 +221,7 @@ class EncseqLoader:
             raise IOError("file not found: %s" % indexname + ".sds")
         err = Error()
         esptr = gtlib.gt_encseq_loader_load(self.el,
-                                            str(indexname).encode("UTF-8"),
+                                            gtbytes(indexname),
                                             err.error)
         if not esptr:
             gterror(err)
@@ -290,8 +287,8 @@ class EncseqBuilder:
 
     def add_string(self, string, desc=''):
         string = str(string)
-        gtlib.gt_encseq_builder_add_cstr(self.eb, string.encode('UTF-8'),
-                                         len(string), desc.encode('UTF-8'))
+        gtlib.gt_encseq_builder_add_cstr(self.eb, gtbytes(string),
+                                         len(string), gtbytes(desc))
 
     def build(self):
         err = Error()

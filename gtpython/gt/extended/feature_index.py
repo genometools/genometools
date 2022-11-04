@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.core.array import Array
 from gt.core.error import Error, gterror
@@ -49,7 +50,7 @@ class FeatureIndex:
         err = Error()
         result = []
         rval = gtlib.gt_feature_index_get_features_for_seqid(self.fi,
-                                                             seqid.encode('UTF-8'), err)
+                                                             gtbytes(seqid), err)
         if rval:
             a = Array(rval, True)
             for i in range(a.size()):
@@ -63,7 +64,7 @@ class FeatureIndex:
     def add_gff3file(self, filename):
         err = Error()
         rval = gtlib.gt_feature_index_add_gff3file(self.fi,
-                                                   filename.encode('UTF-8'), err)
+                                                   gtbytes(filename), err)
         if rval != 0:
             gterror(err)
 
@@ -72,7 +73,7 @@ class FeatureIndex:
         val = c_int()
         err = Error()
         ret = gtlib.gt_feature_index_has_seqid(self.fi, byref(val),
-                                               seqid.encode('UTF-8'), err._as_parameter_)
+                                               gtbytes(seqid), err._as_parameter_)
         if ret != 0:
             gterror(err)
         else:
@@ -105,7 +106,7 @@ class FeatureIndex:
             gterror("feature_index does not contain seqid")
         range = Range()
         rval = gtlib.gt_feature_index_get_range_for_seqid(self.fi, byref(range),
-                                                          seqid.encode('UTF-8'), err)
+                                                          gtbytes(seqid), err)
         if rval != 0:
             gterror(err)
         return range
@@ -116,9 +117,10 @@ class FeatureIndex:
         err = Error()
         rng = Range(start, end)
         rval = gtlib.gt_feature_index_get_features_for_range(self.fi,
-                                                             a._as_parameter_, seqid.encode(
-                                                                 'UTF-8'),
-                                                             byref(rng), err._as_parameter_)
+                                                             a._as_parameter_,
+                                                             gtbytes(seqid),
+                                                             byref(rng),
+                                                             err._as_parameter_)
         if rval != 0:
             gterror(err)
         result = []

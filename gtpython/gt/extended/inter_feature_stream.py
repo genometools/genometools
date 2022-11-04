@@ -17,6 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.extended.genome_stream import GenomeStream
 
@@ -25,9 +26,8 @@ class InterFeatureStream(GenomeStream):
 
     def __init__(self, genome_stream, surround_type, new_type):
         self.gs = gtlib.gt_inter_feature_stream_new(genome_stream._as_parameter_,
-                                                    str(surround_type).encode(
-                                                        'UTF-8'),
-                                                    str(new_type).encode('UTF-8'))
+                                                    gtbytes(surround_type),
+                                                    gtbytes(new_type))
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):

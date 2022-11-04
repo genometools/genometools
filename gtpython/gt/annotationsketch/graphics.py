@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.annotationsketch.color import Color
 from gt.core.array import Array
@@ -58,19 +59,19 @@ class Graphics:
     from_param = classmethod(from_param)
 
     def draw_text(self, x, y, text):
-        gtlib.gt_graphics_draw_text(self.g, x, y, str(text).encode("utf-8"))
+        gtlib.gt_graphics_draw_text(self.g, x, y, gtbytes(text))
 
     def draw_text_centered(self, x, y, text):
         gtlib.gt_graphics_draw_text_centered(
-            self.g, x, y, str(text).encode("utf-8"))
+            self.g, x, y, gtbytes(text))
 
     def draw_text_right(self, x, y, text):
         gtlib.gt_graphics_draw_text_right(
-            self.g, x, y, str(text).encode("utf-8"))
+            self.g, x, y, gtbytes(text))
 
     def draw_colored_text(self, x, y, color, text):
         gtlib.gt_graphics_draw_colored_text(
-            self.g, x, y, color, str(text).encode("utf-8"))
+            self.g, x, y, color, gtbytes(text))
 
     def get_image_height(self):
         return gtlib.gt_graphics_get_image_height(self.g)
@@ -82,7 +83,7 @@ class Graphics:
         return gtlib.gt_graphics_get_text_height(self.g)
 
     def get_text_width(self, text):
-        return gtlib.gt_graphics_get_text_width(self.g, str(text).encode("utf-8"))
+        return gtlib.gt_graphics_get_text_width(self.g, gtbytes(text))
 
     def set_margins(self, xmargs, ymargs):
         gtlib.gt_graphics_set_margins(self.g, xmargs, ymargs)
@@ -229,8 +230,7 @@ class Graphics:
 
     def to_file(self, filename):
         err = Error()
-        if gtlib.gt_graphics_save_to_file(self.g,
-                                          str(filename).encode("utf-8"), err) < 0:
+        if gtlib.gt_graphics_save_to_file(self.g, gtbytes(filename), err) < 0:
             gterror(err)
 
     def to_stream(self):
@@ -243,7 +243,7 @@ class Graphics:
         return gtlib.gt_graphics_get_text_height(self.g)
 
     def get_text_width(self, text):
-        return gtlib.gt_graphics_get_text_width(self.g, str(text).encode("utf-8"))
+        return gtlib.gt_graphics_get_text_width(self.g, gtbytes(text))
 
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p, c_int, POINTER, c_double, \
