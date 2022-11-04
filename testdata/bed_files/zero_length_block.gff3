@@ -1,0 +1,10 @@
+##gff-version 3
+##sequence-region   QQQ 3683817 3931765
+QQQ	.	BED_feature	3683817	3931765	1	+	.	ID=BED_feature1;Name=TEST
+QQQ	.	BED_block	3683817	3683824	1	+	.	Parent=BED_feature1;Name=TEST
+QQQ	.	BED_thick_feature	3683817	3931765	1	+	.	Parent=BED_feature1;Name=TEST
+QQQ	.	BED_block	3703449	3703449	1	+	.	Parent=BED_feature1;Name=TEST
+QQQ	.	BED_block	3825301	3825307	1	+	.	Parent=BED_feature1;Name=TEST
+QQQ	.	BED_block	3826850	3826857	1	+	.	Parent=BED_feature1;Name=TEST
+QQQ	.	BED_block	3931175	3931765	1	+	.	Parent=BED_feature1;Name=TEST
+###

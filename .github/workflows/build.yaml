@@ -55,7 +55,6 @@ jobs:
           - amalgamation=yes
     runs-on: macos-latest
     env:
-      PKG_CONFIG_PATH: /usr/local/opt/libffi/lib/pkgconfig
       BUILDOPTS: $${{ matrix.options }}
     steps:
       - name: Check out repository code

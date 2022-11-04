@@ -114,7 +114,7 @@ static int cmp(const void *a_ptr, const void *b_ptr, GT_UNUSED void *unused)
 int gt_bsearch_unit_test(GtError *err)
 {
   GtArray *elements, *members;
-  int key, element, *member_ptr;
+  int key = 0, element, *member_ptr;
   GtBittab *b;
   int had_err = 0;
 
