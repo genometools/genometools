@@ -357,7 +357,7 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
   GtUword filenum, seqnum;
   int had_err;
   gt_error_check(err);
-  GT_UNUSED GtRange range;
+  GT_UNUSED GtRange range = {0,0};
   gt_assert(rm && seqid);
   if (rm->userawseq) {
     return rm->rawlength;

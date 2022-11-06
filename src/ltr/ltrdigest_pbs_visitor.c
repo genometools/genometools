@@ -377,8 +377,9 @@ static void pbs_attach_results_to_gff3(GtLTRdigestPBSVisitor *lv,
     /* find best-scoring PBS on the given canonical strand */
     while (hit->strand != *canonical_strand
              && i < gt_pbs_results_get_number_of_hits(results)) {
+      const char *msg = gt_feature_node_get_attribute(mainnode, "ID");
       gt_log_log("dropping PBS because of nonconsistent strand: %s\n",
-                 gt_feature_node_get_attribute(mainnode, "ID"));
+                 msg == NULL ? "undefined" : msg);
       hit = gt_pbs_results_get_ranked_hit(results, i++);
     }
     /* if there is none, do not report a PBS */
