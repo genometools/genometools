@@ -1,4 +1,4 @@
-name: ci.yaml
+name: Build and test
 
 on:
   - push
