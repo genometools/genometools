@@ -19,6 +19,7 @@
 #
 
 from ctypes import CFUNCTYPE, c_char_p, c_void_p, c_int
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.annotationsketch.block import Block
 from gt.annotationsketch.canvas import Canvas
@@ -60,7 +61,7 @@ class Diagram:
         if rng.start > rng.end:
             gterror("range.start > range.end")
         diagram = gtlib.gt_diagram_new(feature_index,
-                                       str(seqid).encode('UTF-8'), byref(rng),
+                                       gtbytes(seqid), byref(rng),
                                        style, err)
         if err.is_set():
             gterror(err)

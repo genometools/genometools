@@ -18,7 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.core.gtstr import Str
 from gt.extended.genome_node import GenomeNode
@@ -31,8 +31,8 @@ class SequenceNode(GenomeNode):
 
     @classmethod
     def create_new(cls, description, sequence):
-        seq_str = Str(sequence.encode('UTF-8'))
-        description = description.encode('UTF-8')
+        seq_str = Str(gtbytes(sequence))
+        description = gtbytes(description)
         fn = gtlib.gt_sequence_node_new(description, seq_str._as_parameter_)
         n = cls.create_from_ptr(fn, True)
         return n

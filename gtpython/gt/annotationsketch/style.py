@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib, CollectFunc
 from gt.annotationsketch.color import Color
 from gt.core.error import Error, gterror
@@ -61,13 +62,13 @@ class Style:
     def load_file(self, filename):
         err = Error()
         rval = gtlib.gt_style_load_file(self.style,
-                                        str(filename).encode('UTF-8'), err)
+                                        gtbytes(filename), err)
         if rval != 0:
             gterror(err)
 
     def load_str(self, string):
         err = Error()
-        strg = Str(str(string).encode("utf-8"))
+        strg = Str(gtbytes(string))
         rval = gtlib.gt_style_load_str(self.style, strg, err)
         if rval != 0:
             gterror(err)
@@ -95,7 +96,8 @@ class Style:
         gnp = None
         if gn:
             gnp = gn._as_parameter_
-        rval = gtlib.gt_style_get_color(self.style, section, key, byref(color),
+        rval = gtlib.gt_style_get_color(self.style, gtbytes(section),
+                                        gtbytes(key), byref(color),
                                         gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return color
@@ -106,7 +108,8 @@ class Style:
 
     def set_color(self, section, key, color):
         from ctypes import byref
-        gtlib.gt_style_set_color(self.style, section, key, byref(color))
+        gtlib.gt_style_set_color(self.style, gtbytes(section),
+                                 gtbytes(key), byref(color))
 
     def get_cstr(self, section, key, gn=None):
         string = Str()
@@ -114,7 +117,8 @@ class Style:
         gnp = None
         if gn:
             gnp = gn._as_parameter_
-        rval = gtlib.gt_style_get_str(self.style, section, key,
+        rval = gtlib.gt_style_get_str(self.style, gtbytes(section),
+                                      gtbytes(key),
                                       string._as_parameter_, gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return str(string)
@@ -124,8 +128,9 @@ class Style:
             gterror(err)
 
     def set_cstr(self, section, key, value):
-        string = Str(str(value.encode("utf-8")))
-        gtlib.gt_style_set_str(self.style, section, key, string._as_parameter_)
+        string = Str(gtbytes(value))
+        gtlib.gt_style_set_str(self.style, gtbytes(section), 
+                               gtbytes(key), string._as_parameter_)
 
     def get_num(self, section, key, gn=None):
         from ctypes import c_double, byref
@@ -134,7 +139,8 @@ class Style:
         gnp = None
         if gn:
             gnp = gn._as_parameter_
-        rval = gtlib.gt_style_get_num(self.style, section, key, byref(double),
+        rval = gtlib.gt_style_get_num(self.style, gtbytes(section),
+                                      gtbytes(key), byref(double),
                                       gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return double.value
@@ -146,7 +152,8 @@ class Style:
     def set_num(self, section, key, number):
         from ctypes import c_double
         num = c_double(number)
-        gtlib.gt_style_set_num(self.style, section, key, num)
+        gtlib.gt_style_set_num(self.style, gtbytes(section),
+                               gtbytes(key), num)
 
     def get_bool(self, section, key, gn=None):
         from ctypes import byref, c_int
@@ -155,7 +162,8 @@ class Style:
         gnp = None
         if gn:
             gnp = gn._as_parameter_
-        rval = gtlib.gt_style_get_bool(self.style, section, key, byref(bool),
+        rval = gtlib.gt_style_get_bool(self.style, gtbytes(section),
+                                       gtbytes(key), byref(bool),
                                        gnp, err._as_parameter_)
         if rval == STYLE_OK:
             if bool.value == 1:
@@ -169,12 +177,12 @@ class Style:
 
     def set_bool(self, section, key, val):
         if val == True:
-            gtlib.gt_style_set_bool(self.style, section, key, 1)
+            gtlib.gt_style_set_bool(self.style, gtbytes(section), gtbytes(key), 1)
         else:
-            gtlib.gt_style_set_bool(self.style, section, key, 0)
+            gtlib.gt_style_set_bool(self.style, gtbytes(section), gtbytes(key), 0)
 
     def unset(self, section, key):
-        gtlib.gt_style_unset(self.style, section, key)
+        gtlib.gt_style_unset(self.style, gtbytes(section), gtbytes(key))
 
     def register(cls, gtlib):
         from ctypes import c_char_p, c_double, c_float, c_void_p, \

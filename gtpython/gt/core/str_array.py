@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 
 
@@ -57,7 +58,7 @@ class StrArray:
         return gtlib.gt_str_array_get(self.strarr, i).decode("UTF-8")
 
     def add(self, s):
-        gtlib.gt_str_array_add_cstr(self.strarr, str(s).encode('UTF-8'))
+        gtlib.gt_str_array_add_cstr(self.strarr, gtbytes(s))
 
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p, c_ulong

@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 
 
@@ -28,7 +29,7 @@ class Str:
             self.strg = gtlib.gt_str_new()
             self.own = True
         elif isinstance(s, str):
-            self.strg = gtlib.gt_str_new_cstr(str(s).encode('UTF-8'))
+            self.strg = gtlib.gt_str_new_cstr(gtbytes(s))
             self.own = True
         elif isinstance(s, bytes):
             self.strg = gtlib.gt_str_new_cstr(s)
@@ -62,7 +63,7 @@ class Str:
     from_param = classmethod(from_param)
 
     def append_cstr(self, string):
-        gtlib.gt_str_append_cstr(self.strg, str(string).encode('UTF-8'))
+        gtlib.gt_str_append_cstr(self.strg, gtbytes(string))
 
     def length(self):
         return gtlib.gt_str_length(self.strg)

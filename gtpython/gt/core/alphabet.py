@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
@@ -49,7 +50,7 @@ class Alphabet:
             raise IOError("file not found: %s" % (indexname + ".al1"))
         e = Error()
         a_ptr = gtlib.gt_alphabet_new_from_file(
-            str(indexname).encode("UTF-8"), e._as_parameter_)
+            gtbytes(indexname), e._as_parameter_)
         a = Alphabet(a_ptr, True)
         if a == None:
             gterror(e)

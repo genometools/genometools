@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 from gt.core.error import gterror
 from gt.core.str_array import StrArray
@@ -33,8 +34,7 @@ class GFF3InStream(GenomeStream):
             p.close()
         except:
             gterror("File " + filename + " not readable!")
-        filename = filename.encode('UTF-8')
-        self.gs = gtlib.gt_gff3_in_stream_new_sorted(filename)
+        self.gs = gtlib.gt_gff3_in_stream_new_sorted(gtbytes(filename))
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):

@@ -18,6 +18,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from gt.bytes import gtbytes
 from gt.dlload import gtlib
 
 
@@ -58,8 +59,7 @@ class Error(Exception):
             return "undefined error -- please report this as a bug!"
 
     def set(self, errmsg):
-        return gtlib.gt_error_set_nonvariadic(self.error,
-                                              str(errmsg).encode('UTF-8'))
+        return gtlib.gt_error_set_nonvariadic(self.error, gtbytes(errmsg))
 
     def is_set(self):
         return gtlib.gt_error_is_set(self.error) == 1

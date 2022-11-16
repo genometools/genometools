@@ -130,7 +130,6 @@ if not $arguments["nocairo"] then
   end
 end
 
-
 Name "gtpython: unittests"
 Keywords "gt_python unittests"
 Test do
