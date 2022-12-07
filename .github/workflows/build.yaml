@@ -73,16 +73,17 @@ jobs:
     strategy:
       matrix:
         mingw-arch:
-          - i686
-          - x86_64
+          - machine: i686
+            buildopts: fpic=no cairo=no sharedlib=no 64bit=no
+          - machine: x86_64
+            buildopts: fpic=no cairo=no sharedlib=no
     env:
       DEBIAN_FRONTEND: noninteractive
-      CC: ${{ matrix.mingw-arch }}-w64-mingw32-gcc
+      CC: ${{ matrix.mingw-arch.machine }}-w64-mingw32-gcc
       SYSTEM: Windows
-      MACHINE: ${{ matrix.mingw-arch }}
-      AR: ${{ matrix.mingw-arch }}-w64-mingw32-ar
+      MACHINE: ${{ matrix.mingw-arch.machine }}
+      AR: ${{ matrix.mingw-arch.machine }}-w64-mingw32-ar
       CFLAGS: -Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize
-      BUILDOPTS: fpic=no cairo=no sharedlib=no
     runs-on: ubuntu-latest
     container: debian:buster
     steps:
@@ -96,4 +97,4 @@ jobs:
                      binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64
       - name: Build
         run: |
-             make fpic=no cairo=no sharedlib=no
+             make ${{ matrix.mingw-arch.buildopts }}
