@@ -710,6 +710,8 @@ static int feature_node_lua_remove_leaf(lua_State *L)
   luaL_argcheck(L, pf, 1, "not a feature node");
   lf = gt_feature_node_try_cast(*leaf);
   luaL_argcheck(L, lf, 2, "not a feature node");
+  luaL_argcheck(L, gt_feature_node_number_of_children(lf) == 0, 2,
+                "must be a leaf");
   gt_feature_node_remove_leaf(pf, lf);
   return 0;
 }
