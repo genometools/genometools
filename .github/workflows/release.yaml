@@ -1,0 +1,176 @@
+name: Build release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release ${{ github.ref }}
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: release
+        uses: actions/create-release@latest
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+      
+  linux:
+    name: Linux Binaries
+    needs: release
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      BUILDOPTS: $${{ matrix.options.buildopts }}
+    strategy:
+      matrix:
+        options:
+          - name: complete
+            buildopts: wrapmemcpy=yes CPPFLAGS='-fno-stack-protector -U_FORTIFY_SOURCE -D_GNU_SOURCE' DISTSUFFIX=-complete amalgamation=yes
+          - name: barebone
+            buildopts: wrapmemcpy=yes CPPFLAGS='-fno-stack-protector -U_FORTIFY_SOURCE -D_GNU_SOURCE' DISTSUFFIX=-barebone amalgamation=yes cairo=no 
+    runs-on: ubuntu-latest
+    container:
+      image: debian:stable
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install deps
+        run: |
+             apt update
+             apt -yq install build-essential libpango1.0-dev libcairo2-dev \
+                             ruby texlive-latex-base texlive-latex-extra \
+                             texlive-fonts-extra texlive-latex-recommended \
+                             texlive-fonts-recommended asciidoc-base
+      - name: Set up user
+        run: |
+             useradd -m -g users testuser
+             chown -R testuser:users .
+      - name: Build ${{ matrix.options.name }} with ${{ matrix.options.buildopts }}
+        run: |
+             su -c "make ${{ matrix.options.buildopts }} manuals manpages" testuser
+             su -c "make ${{ matrix.options.buildopts }} DISTDIR=./dist dist" testuser
+      - name: Upload Assets
+        id: upload_try1
+        continue-on-error: true
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          asset_path: "./dist/*tar.gz"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          overwrite: true
+      - name: Upload Assets (retry)
+        id: upload_try2
+        if: steps.upload_try1.outcome == 'failure'
+        continue-on-error: true
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          asset_path: "./dist/*tar.gz"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          overwrite: true
+
+  macos:
+    name: macOS Binaries
+    needs: release
+    env:
+      BUILDOPTS: $${{ matrix.options.buildopts }}
+    strategy:
+      matrix:
+        options:
+          - name: complete
+            buildopts: DISTSUFFIX=-complete amalgamation=yes
+          - name: barebone
+            buildopts: DISTSUFFIX=-barebone amalgamation=yes cairo=no
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install deps
+        run: |
+             brew install pango cairo libffi pkg-config texlive asciidoc libxslt
+      - name: Build ${{ matrix.options.name }} with ${{ matrix.options.buildopts }}
+        run: |
+             make ${{ matrix.options.buildopts }} manuals
+             make ${{ matrix.options.buildopts }} DISTDIR=./dist dist
+      - name: Upload Assets
+        id: upload_try1
+        continue-on-error: true
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          asset_path: "./dist/*tar.gz"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          overwrite: true
+      - name: Upload Assets (retry)
+        id: upload_try2
+        if: steps.upload_try1.outcome == 'failure'
+        continue-on-error: true
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          asset_path: "./dist/*tar.gz"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          overwrite: true
+
+  windows:
+    name: Windows Binaries
+    needs: release
+    strategy:
+      matrix:
+        mingw-arch:
+          - machine: i686
+            buildopts: fpic=no cairo=no sharedlib=no 64bit=no
+          - machine: x86_64
+            buildopts: fpic=no cairo=no sharedlib=no
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      CC: ${{ matrix.mingw-arch.machine }}-w64-mingw32-gcc
+      SYSTEM: Windows
+      MACHINE: ${{ matrix.mingw-arch.machine }}
+      AR: ${{ matrix.mingw-arch.machine }}-w64-mingw32-ar
+      CFLAGS: -Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize
+    runs-on: ubuntu-latest
+    container:
+      image: debian:buster
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install deps
+        run: |
+             apt update
+             apt -yq install build-essential ncbi-blast+ ruby \
+                     binutils-mingw-w64-i686 gcc-mingw-w64-i686 \
+                     binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 \
+                     texlive-latex-base texlive-latex-extra \
+                     texlive-fonts-extra texlive-latex-recommended \
+                     texlive-fonts-recommended asciidoc-base p7zip-full
+      - name: Build
+        run: |
+             make ${{ matrix.mingw-arch.buildopts }} DISTDIR=./dist dist
+      - name: Upload Assets
+        id: upload_try1
+        continue-on-error: true
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          asset_path: "./dist/*zip"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          overwrite: true
+      - name: Upload Assets (retry)
+        id: upload_try2
+        continue-on-error: true
+        uses: shogo82148/actions-upload-release-asset@v1
+        if: steps.upload_try1.outcome == 'failure'
+        with:
+          asset_path: "./dist/*zip"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          overwrite: true

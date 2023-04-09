@@ -115,7 +115,7 @@ BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
 SYSTEM?=$(shell uname -s)
-MACHINE:=$(shell uname -m)
+MACHINE?=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
   NO_STATIC_LINKING:=defined
@@ -896,7 +896,7 @@ endif
 	$(V_DO)cp $(CURDIR)/LICENSE $(GTDISTDIR)
 	$(V_DO)cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
 	$(V_DO)cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
-	$(V_DO)cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
+	$(V_DO)cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc || true
 	$(V_DO)cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	$(V_DO)cp -r $(CURDIR)/gtpython $(GTDISTDIR)
 	$(V_DO)cp -r $(CURDIR)/gtruby $(GTDISTDIR)
@@ -985,7 +985,7 @@ gt: bin/gt
 install: all
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
 ifeq ($(SYSTEM),Windows)
-	cp bin/gt $(prefix)/bin/gt.exe
+	cp bin/gt.exe $(prefix)/bin/gt.exe
 	$(STRIP) $(prefix)/bin/gt.exe
 else
 	cp bin/gt $(prefix)/bin
