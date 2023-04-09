@@ -97,6 +97,16 @@ child:add_child(newchild)
 assert(count_children(parent) == 4)
 parent:remove_leaf(newchild)
 assert(count_children(parent) == 3)
+-- testing removal of non-leaves, should trigger error
+parent = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
+child  = gt.feature_node_new("seqid", "mRNA", range:get_start(), range:get_end(), "+")
+newchild = gt.feature_node_new("seqid", "exon", range:get_start(), range:get_end(), "+")
+parent:add_child(child)
+child:add_child(newchild)
+assert(count_children(parent) == 3)
+rval, err = pcall(GenomeTools_genome_node.remove_leaf, parent, child)
+assert(not rval)
+assert(string.find(err, "must be a leaf"))
 
 -- testing get_children
 parent = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
