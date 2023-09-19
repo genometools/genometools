@@ -1,4 +1,4 @@
-changes in version 1.6.3 (2022-05-09)
+changes in version 1.6.3 (2023-09-19)
 
 - bugfixes
   - `gt gff3 --sortlines`: address issues with pseudo-features and
@@ -6,7 +6,12 @@ changes in version 1.6.3 (2022-05-09)
   - deduplicate pseudo node roots
   - ensure validity checks are done for orphan (out of order) nodes
   - fix failing assertion in `repeat_region`s without `LTR_retrotransposon`s
+  - fix quicksort segfault caused by integer overflows
+  - support BED files with zero length blocks
+- make `errorcheck` optional, no longer active by default
+- unify Python byte/string handling
 - various fixes to support newer compilers
+- update website structure to reflect new GitHub-based release process
 
 
 changes in version 1.6.2 (2021-06-23)
