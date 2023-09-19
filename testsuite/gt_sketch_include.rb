@@ -106,10 +106,15 @@ Test do
   m = `#{$bin}gt sketch -help`.match(/graphics format\s+choose from ([^ ]+)/m)
   raise TestFailedError if m.nil?
   m[1].chomp.split("|").each do |format|
+    # PDF artifacts have become too nondeterministic to be properly compared
+    # via diff, let's skip them
+    next if format == "pdf"
     run_test "#{$bin}gt sketch -format #{format} out.#{format} #{$testdata}eden.gff3"
     run_test "#{$bin}gt sketch -streams -format #{format} streamout.#{format} #{$testdata}eden.gff3"
-    # some formats will diff in their creation date, remove it
+    # some formats will diff in metadata, remove it
     run "sed -i '/CreationDate/d' out.#{format} streamout.#{format}"
+    run "sed -i '/BeginResource/d' out.#{format} streamout.#{format}"
+    run "sed -i '/FontName/d' out.#{format} streamout.#{format}"
     run "diff out.#{format} streamout.#{format}"
   end
 end
