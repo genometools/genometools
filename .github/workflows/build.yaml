@@ -21,9 +21,9 @@ jobs:
           - debian:testing
           - ubuntu:latest
         options:
-          - assert=no
-          - opt=no cairo=no
-          - amalgamation=yes
+          - assert=no errorcheck=yes
+          - opt=no cairo=no errorcheck=yes
+          - amalgamation=yes errorcheck=yes
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container }}
@@ -50,9 +50,9 @@ jobs:
     strategy:
       matrix:
         options:
-          - assert=no
-          - opt=no cairo=no
-          - amalgamation=yes
+          - assert=no errorcheck=yes
+          - opt=no cairo=no errorcheck=yes
+          - amalgamation=yes errorcheck=yes
     runs-on: macos-latest
     env:
       BUILDOPTS: $${{ matrix.options }}
@@ -69,14 +69,14 @@ jobs:
         run: |
              scripts/citest.rb
   windows-cross:
-    name: mingw-w64 (fpic=no cairo=no sharedlib=no, ${{ matrix.mingw-arch }})
+    name: mingw-w64 (fpic=no cairo=no sharedlib=no errorcheck=yes, ${{ matrix.mingw-arch }})
     strategy:
       matrix:
         mingw-arch:
           - machine: i686
-            buildopts: fpic=no cairo=no sharedlib=no 64bit=no
+            buildopts: fpic=no cairo=no sharedlib=no 64bit=no errorcheck=yes
           - machine: x86_64
-            buildopts: fpic=no cairo=no sharedlib=no
+            buildopts: fpic=no cairo=no sharedlib=no errorcheck=yes
     env:
       DEBIAN_FRONTEND: noninteractive
       CC: ${{ matrix.mingw-arch.machine }}-w64-mingw32-gcc
