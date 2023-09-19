@@ -61,7 +61,8 @@ table.padded-table td {
 <div id="menu">
 <ul>
 <li><a href="../index.html">Overview</a></li>
-<li><a href="../pub/">Download</a></li>
+<li><a href="https://github.com/genometools/genometools/releases">Releases</a></li>
+<li><a href="pub/">Archive</a></li>
 <li><a href="https://github.com/genometools/genometools">Browse source</a></li>
 <li><a href="http://github.com/genometools/genometools/issues/">Issue tracker</a></li>
 <li><a href="../documentation.html">Documentation</a></li>
@@ -78,7 +79,7 @@ END
 
 HTML_FOOTER = <<END
 <div id="footer">
-Copyright &copy; 2012 Sascha Steinbiss. Last update: 2015-01-25
+Copyright &copy; 2012-2023 Sascha Steinbiss. Last update: 2015-01-25
 </div>
 </div>
 </body>
