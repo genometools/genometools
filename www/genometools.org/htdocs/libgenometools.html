@@ -9,7 +9,8 @@
 <div id="menu">
 <ul>
 <li><a href="index.html">Overview</a></li>
-<li><a href="pub/">Download</a></li>
+<li><a href="https://github.com/genometools/genometools/releases">Releases</a></li>
+<li><a href="pub/">Archive</a></li>
 <li><a href="https://github.com/genometools/genometools">Browse source</a></li>
 <li><a href="http://github.com/genometools/genometools/issues/">Issue tracker</a></li>
 <li><a href="documentation.html">Documentation</a></li>
@@ -453,6 +454,15 @@ Helper function for (rare) tools which do not use the full <code>GtOutputFileInf
 Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
    success, a negative value otherwise. The message in <code>err</code> is set
    accordingly.
+</p>
+<hr>
+<a name="gt_dup_feature_stream_new"></a>
+
+<code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
+                                        const char *source_type)</code>
+<p>
+Duplicate internal feature nodes of type <code>source_type</code> as features with type
+   <code>dest_type</code>. The duplicated features does not inherit the children.
 </p>
 <hr>
 <a name="GtTrackSelectorFunc"></a>
@@ -11563,15 +11573,6 @@ Perform global chaining with overlaps of <code>num_of_fragments</code> many <cod
    ownership of the GtChain.
 </p>
 <hr>
-<a name="gt_dup_feature_stream_new"></a>
-
-<code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
-                                        const char *source_type)</code>
-<p>
-Duplicate internal feature nodes of type <code>source_type</code> as features with type
-   <code>dest_type</code>. The duplicated features does not inherit the children.
-</p>
-<hr>
 <a name="Grep"></a>
 <h2>Module Grep</h2>
 <a name="gt_grep"></a>
@@ -15475,7 +15476,7 @@ Return random number up to RAND_MAX.
 <div id="footer">
 Copyright &copy; 2008-2016
 The <i>GenomeTools</i> authors.
-Last update: 2020-12-07
+Last update: 2023-09-19
 </div>
 </div>
 </body>
