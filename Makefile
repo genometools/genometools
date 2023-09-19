@@ -531,7 +531,7 @@ endif
 
 GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
 
-ifneq ($(errorcheck),no)
+ifeq ($(errorcheck),yes)
   GT_CFLAGS += -Werror
 endif
 
