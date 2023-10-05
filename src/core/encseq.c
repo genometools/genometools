@@ -1761,8 +1761,7 @@ static void initSWtable(GtSWtable *swtable,
       swtable->st_uint32.numofpositionstostore = items;
       break;
     default:
-      fprintf(stderr, "initSWtable(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(sat));
+      fprintf(stderr, "initSWtable(sat = %d is undefined)\n",sat);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }

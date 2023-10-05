@@ -39,7 +39,7 @@ static bool read_fingerprints(GtMD5Tab *md5_tab,
                               bool use_file_locking)
 {
   bool reading_succeeded = true;
-  size_t len;
+  size_t len = 0;
   gt_assert(md5_tab && fingerprints_filename);
   /* open file */
   gt_assert(gt_file_exists(fingerprints_filename));
