@@ -30,7 +30,7 @@ stable version simply using apt, e.g.
 ```bash
 % apt-get install libgenometools0 libgenometools0-dev
 ```
-instead.
+instead. This is not required to just use the tools.
 
 #### macOS (via Homebrew)
 
