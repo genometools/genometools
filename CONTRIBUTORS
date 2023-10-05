@@ -1,5 +1,6 @@
 The following contributors helped to develop GenomeTools. Please drop a note to
-gordon@gremme.org I left someone out or missed something.
+gordon@gremme.org or sascha@steinbiss.name in case someone was left out
+something else is wrong.
 
 - Stefan Bienert (patches)
 - Joachim Bonnet (Huffman/Golomb/Elias coding, GtBit{In,Out}Stream)
