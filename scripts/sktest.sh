@@ -65,6 +65,6 @@ env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_packedindex' \
 
 cd ..
 
-sktest-match.sh
+scripts/sktest-match.sh
 echo "start at ${startdate}"
 echo "end at `date`"

@@ -10,7 +10,7 @@ class Sequence
 	end
 
 	def read_sequence(file)
-		if !File.exists?(file)
+		if !File.exist?(file)
 			raise "The specified file #{file} does not exist."
 		end
 		File.open(file) do |line|
@@ -42,7 +42,7 @@ class MSA
   attr_reader :seqs, :length, :cons
 
   def initialize(file)
-    if !File.exists?(file)
+    if !File.exist?(file)
       raise "The specified file #{file} does not exist."
     end
     @file = file

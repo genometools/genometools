@@ -431,7 +431,7 @@ Test do
       run "#{$scriptsdir}rmwildcard.rb #{$testdata}#{filename}"
       run_test "#{$bin}/gt suffixerator -db #{last_stdout} -dna -v -tis -sds no -des no -md5 no -indexname sfx"
       run_test "#{$bin}/gt dev sfxmap -ownencseq2file -esa sfx"
-      if File.exists?("sfx.ssp")
+      if File.exist?("sfx.ssp")
         run "cmp sfx.ssp sfx2.ssp"
       end
     end

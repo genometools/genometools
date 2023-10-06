@@ -211,7 +211,7 @@ module GT
       sa = StrArray.new
       files.each do |f|
         fn = f.to_s
-        if (!File.exists?(fn))
+        if (!File.exist?(fn))
           GT.gterror("file not found: #{fn}")
         end
         sa.add(fn)

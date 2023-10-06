@@ -430,7 +430,7 @@ if $gttestdata then
                "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm -- " + \
                "#{$gttestdata}ltrdigest/dmel_md5_4.gff3 ",
                :retval => 0, :maxtime => 12000
-      if File.exists?("result4_pdom_RVT_1.ali") then
+      if File.exist?("result4_pdom_RVT_1.ali") then
         raise TestFailed, "file \"result4_pdom_RVT_1.ali\" should not exist"
       end
       run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
@@ -439,7 +439,7 @@ if $gttestdata then
                "-aliout yes " + \
                "#{$gttestdata}ltrdigest/dmel_md5_4.gff3 ",
                :retval => 0, :maxtime => 12000
-      if !File.exists?("result4_pdom_RVT_1.ali") then
+      if !File.exist?("result4_pdom_RVT_1.ali") then
         raise TestFailed, "file \"result4_pdom_RVT_1.ali\" does not exist"
       end
     end
@@ -455,7 +455,7 @@ if $gttestdata then
                "-hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm -- " + \
                "#{$gttestdata}ltrdigest/dmel_md5_4.gff3 ",
                :retval => 0, :maxtime => 12000
-      if File.exists?("result4_pdom_RVT_1_aa.fas") then
+      if File.exist?("result4_pdom_RVT_1_aa.fas") then
         raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" should not exist"
       end
       run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
@@ -464,7 +464,7 @@ if $gttestdata then
                "-aaout yes " + \
                "#{$gttestdata}ltrdigest/dmel_md5_4.gff3 ",
                :retval => 0, :maxtime => 12000
-      if !File.exists?("result4_pdom_RVT_1_aa.fas") then
+      if !File.exist?("result4_pdom_RVT_1_aa.fas") then
         raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" does not exist"
       end
       if !(`grep ">" result4_pdom_RVT_1_aa.fas | wc -l`.to_i > 1) then
@@ -693,7 +693,7 @@ if $gttestdata then
                "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
                "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
                :retval => 0, :maxtime => 12000
-      if File.exists?("result4_pdom_RVT_1.ali") then
+      if File.exist?("result4_pdom_RVT_1.ali") then
         raise TestFailed, "file \"result4_pdom_RVT_1.ali\" should not exist"
       end
       run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
@@ -702,7 +702,7 @@ if $gttestdata then
                "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
                "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
                :retval => 0, :maxtime => 12000
-      if !File.exists?("result4_pdom_RVT_1.ali") then
+      if !File.exist?("result4_pdom_RVT_1.ali") then
         raise TestFailed, "file \"result4_pdom_RVT_1.ali\" does not exist"
       end
     end
@@ -718,7 +718,7 @@ if $gttestdata then
                "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
                "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
                :retval => 0, :maxtime => 12000
-      if File.exists?("result4_pdom_RVT_1_aa.fas") then
+      if File.exist?("result4_pdom_RVT_1_aa.fas") then
         raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" should not exist"
       end
       run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result4 " + \
@@ -727,7 +727,7 @@ if $gttestdata then
                "#{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted " + \
                "4_genomic_dmel_RELEASE3-1.FASTA.gz", \
                :retval => 0, :maxtime => 12000
-      if !File.exists?("result4_pdom_RVT_1_aa.fas") then
+      if !File.exist?("result4_pdom_RVT_1_aa.fas") then
         raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" does not exist"
       end
     end

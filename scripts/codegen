@@ -113,7 +113,7 @@ end
 def prepare_tool_c(path, basename)
   tools_dir = File.join(find_src_directory, "tools")
   gt_template_c = File.expand_path(File.join(tools_dir, "gt_template.c"))
-  CodeGen.perror("File #{gt_template_c} not found") if !File.exists?(gt_template_c)
+  CodeGen.perror("File #{gt_template_c} not found") if !File.exist?(gt_template_c)
   # skip license template:
   c_template = IO.read(gt_template_c)
   c_template =~ /(.*?)(#include.*)/m
@@ -127,7 +127,7 @@ end
 def prepare_tool_h(path, basename)
   tools_dir = File.join(find_src_directory, "tools")
   gt_template_h = File.expand_path(File.join(tools_dir, "gt_template.h"))
-  CodeGen.perror("File #{gt_template_h} not found") if !File.exists?(gt_template_h)
+  CodeGen.perror("File #{gt_template_h} not found") if !File.exist?(gt_template_h)
   h_template = IO.read(gt_template_h)
   # skip license template:
   h_template =~ /(.*?)(#ifndef.*)/m

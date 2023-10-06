@@ -220,7 +220,7 @@ def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
     matchlist = find_matchesinfile("#{destfile}.txt")
     ["esq","ssp"].each do |suffix|
       filename = "#{indexname}.#{suffix}"
-      if File.exists?(filename)
+      if File.exist?(filename)
         File.delete(filename)
       end
     end
@@ -231,7 +231,7 @@ end
 def runseedextend(mincoverage,inputdir,targetdir,weakends,withalignment,
                   seedlength,minidentity,length,seqnum,bias)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
-  if not File.exists?(inputfile + ".fas")
+  if not File.exist?(inputfile + ".fas")
     inputfile = makefilename(inputdir,minidentity,"rand-mult",length,seqnum)
   end
   destfile = makefilename(targetdir,minidentity,"gtout",length,seqnum)
@@ -244,7 +244,7 @@ end
 def rundaligner(mincoverage,inputdir,targetdir,seedlength,minidentity,length,
                 seqnum,tofile = true)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
-  if not File.exists?(inputfile + ".fas")
+  if not File.exist?(inputfile + ".fas")
     inputfile = makefilename(inputdir,minidentity,"rand-mult",length,seqnum)
   end
   destfile = makefilename(targetdir,minidentity,"daout",length,seqnum)
@@ -294,7 +294,7 @@ def rerun_seedextend(options,seedlength)
   inputfiledir = options.inputdir
   puts # "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
   inputfile = makefilename(inputfiledir,minidentity,"rand",length,seqnum)
-  if not File.exists?(inputfile + ".fas")
+  if not File.exist?(inputfile + ".fas")
     inputfile = makefilename(inputfiledir,minidentity,"rand-mult",length,seqnum)
   end
   puts "# inputfile=#{inputfile}.fas"

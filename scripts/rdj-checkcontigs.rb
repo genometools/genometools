@@ -34,7 +34,7 @@ endhelpmessage
 def get_template_index(templatefilename)
   indexname = "#{templatefilename}.vmatch"
   # the index is constructed only if necessary
-  unless File.exists?("#{indexname}.suf")
+  unless File.exist?("#{indexname}.suf")
     puts "# index #{indexname} not found, running mkvtree..."
     cmd = "mkvtree -dna -pl -allout -db #{templatefilename} "+
           "-indexname #{indexname}"

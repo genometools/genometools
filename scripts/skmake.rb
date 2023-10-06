@@ -109,7 +109,7 @@ def makecompilerflags(fp,options)
   end
 end
 
-if File.exists?('LocalMakefile')
+if File.exist?('LocalMakefile')
   FileUtils.mv('LocalMakefile','LocalMakefile.previous')
 end
 
@@ -119,7 +119,7 @@ File.open('LocalMakefile',"w") do |fp|
   makecompilerflags(fp,options)
 end
 
-if File.exists?('LocalMakefile.previous') and
+if File.exist?('LocalMakefile.previous') and
      not FileUtils.compare_file('LocalMakefile','LocalMakefile.previous')
   STDERR.puts "LocalMakefile and LocalMakefile.previous files differ: first " +
               "remove these"
