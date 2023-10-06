@@ -246,7 +246,6 @@ void gt_csvline_reader_dist_only_for_column(GtCsvlineReader *csvline_reader,
 void gt_csvline_reader_dist_check(const GtCsvlineReader *csvline_reader,
                                   const char *string,GtUword len)
 {
-  GtUword numchars = 0;
   GtUword idx, numchars = 0, dist_tab[UCHAR_MAX+1] = {0};
 
   for (idx = 0; idx < len; idx++)
