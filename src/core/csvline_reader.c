@@ -242,9 +242,11 @@ void gt_csvline_reader_dist_only_for_column(GtCsvlineReader *csvline_reader,
   csvline_reader->dist.alphabet.nextfreechar = write_idx;
 }
 
+#ifndef NDEBUG
 void gt_csvline_reader_dist_check(const GtCsvlineReader *csvline_reader,
                                   const char *string,GtUword len)
 {
+  GtUword numchars = 0;
   GtUword idx, numchars = 0, dist_tab[UCHAR_MAX+1] = {0};
 
   for (idx = 0; idx < len; idx++)
@@ -259,15 +261,14 @@ void gt_csvline_reader_dist_check(const GtCsvlineReader *csvline_reader,
       numchars++;
     }
   }
-#ifndef NDEBUG
   gt_assert(numchars == csvline_reader->dist.alphabet.nextfreechar);
   for (idx = 0; idx < numchars; idx++)
   {
     char cc = csvline_reader->dist.alphabet.spacechar[idx];
     gt_assert(csvline_reader->dist.charcount[(int) cc] > 0);
   }
-#endif
 }
+#endif
 
 void gt_csvline_reader_dist_show(const GtCsvlineReader *csvline_reader)
 {
