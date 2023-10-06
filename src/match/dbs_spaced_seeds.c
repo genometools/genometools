@@ -294,7 +294,6 @@ struct GtSpacedSeedSpec
 GtSpacedSeedSpec *gt_spaced_seed_spec_new(GtCodetype spacedseed)
 {
   uint8_t blocks_length[32] = {0}, shiftleft = 0, shiftright = 0;
-  int span = 1, weight = 1;
   GtCodetype ss_copy, last = (GtCodetype) 1, GT_UNUSED from_blocks = 0;
   GtUword idx, block_num = 0, spec_counter = 0;
   GtSpacedSeedSpec *seed_spec;
@@ -305,10 +304,6 @@ GtSpacedSeedSpec *gt_spaced_seed_spec_new(GtCodetype spacedseed)
   {
     GtCodetype current = ss_copy & (GtCodetype) 1;
 
-    if (current == (GtCodetype) 1)
-    {
-      weight++;
-    }
     if (current != last)
     {
       block_num++;
@@ -316,7 +311,6 @@ GtSpacedSeedSpec *gt_spaced_seed_spec_new(GtCodetype spacedseed)
     }
     gt_assert(block_num < sizeof blocks_length/sizeof blocks_length[0]);
     blocks_length[block_num]++;
-    span++;
   }
   block_num++;
   gt_assert(block_num % 2 == 1);

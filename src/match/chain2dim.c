@@ -1241,16 +1241,16 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
                                    bool gapsL1,
                                    unsigned int presortdim)
 {
-  GtUword xidx, startcount, endcount;
+  GtUword startcount, endcount;
   const unsigned int postsortdim = 1U - presortdim;
   bool addterminal = (chainmode->chainkind == GLOBALCHAINING) ? false : true;
 
   matchstore->dictroot = gt_rbtree_new(gt_chain2dim_cmpendMatchpoint2,
                                        gt_free_func, NULL);
-  for (xidx = 0, startcount = 0, endcount = 0;
+  for (startcount = 0, endcount = 0;
        startcount < matchtable->nextfree &&
        endcount < matchtable->nextfree;
-       xidx++)
+       /*Nothing*/)
   {
     if (comparestartandend(matchtable->matches + startcount,
                            matchtable->matches +
@@ -1283,7 +1283,6 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
                    startcount,
                    presortdim);
     startcount++;
-    xidx++;
   }
   while (endcount < matchtable->nextfree)
   {
@@ -1293,7 +1292,6 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
                                           endpointperm[endcount],
                                           postsortdim));
     endcount++;
-    xidx++;
   }
 }
 
@@ -1395,7 +1393,7 @@ static void makesortedendpointpermutation(GtUword *perm,
                                           GtChain2Dimmatchtable *matchtable,
                                           unsigned int presortdim)
 {
-  GtUword temp, *iptr, *jptr, i, moves = 0;
+  GtUword temp, *iptr, *jptr, i;
 
   for (i = 0; i < matchtable->nextfree; i++)
   {
@@ -1413,7 +1411,6 @@ static void makesortedendpointpermutation(GtUword *perm,
       temp = *(jptr-1);
       *(jptr-1) = *jptr;
       *jptr = temp;
-      moves++;
     }
   }
 }

@@ -850,7 +850,9 @@ int gt_spmfind_eqlen_process(void *data,
     GtUword spaceforbucketprocessing, GtError *err)
 {
   GtBUstate_spmeq *state = data;
+#ifdef GT_READJOINER_DEBUG
   unsigned int nof_w_parts = 0;
+#endif
   gt_assert(state != NULL);
   gt_assert(snrp != NULL);
   gt_assert(lcptab_bucket != NULL);
@@ -868,12 +870,14 @@ int gt_spmfind_eqlen_process(void *data,
     {
       return -1;
     }
+#ifdef GT_READJOINER_DEBUG
     if (state->w_overflow)
       nof_w_parts++;
+#endif
     state->w_offset += state->w_maxsize;
   } while (state->w_overflow);
 #ifdef GT_READJOINER_DEBUG
-  gt_log_log("bucket divided in %u parts", nof_w_parts);
+  gt_log_log("%s: bucket divided in %u parts", __func__, nof_w_parts);
 #endif
   return 0;
 }
@@ -898,7 +902,9 @@ int gt_spmfind_varlen_process(void *data,
     GtUword spaceforbucketprocessing, GtError *err)
 {
   GtBUstate_spmvar *state = data;
+#ifdef GT_READJOINER_DEBUG
   unsigned int nof_w_parts = 0;
+#endif
   gt_assert(state != NULL);
   gt_assert(snrp != NULL);
   gt_assert(lcptab_bucket != NULL);
@@ -916,9 +922,14 @@ int gt_spmfind_varlen_process(void *data,
     {
       return -1;
     }
+#ifdef GT_READJOINER_DEBUG
     if (state->w_overflow)
       nof_w_parts++;
+#endif
     state->w_offset += state->w_maxsize;
   } while (state->w_overflow);
+#ifdef GT_READJOINER_DEBUG
+  gt_log_log("%s: bucket divided in %u parts", __func__, nof_w_parts);
+#endif
   return 0;
 }

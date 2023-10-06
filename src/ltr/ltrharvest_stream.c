@@ -296,7 +296,6 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
                 difffromoldboundary1 = 0,
                 difffromoldboundary2 = 0;
   LTRMotifmismatches tmp_mm;
-  unsigned int hitcounter = 0;
   Repeat *rep;
 
   if (subrepeatinfo->repeats.nextfreeRepeat > 0)
@@ -380,7 +379,6 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
               min = GT_MIN(oldrightLTR_3, boundaries->rightLTR_3);
               difffromoldboundary2 = max - min;
 
-              hitcounter++;
             } else
             {
               GtUword max, min, difffromnewboundary1,
@@ -409,7 +407,6 @@ static void searchforbestTSDandormotifatborders(const SubRepeatInfo
 
                 difffromoldboundary1 = difffromnewboundary1;
                 difffromoldboundary2 = difffromnewboundary2;
-                hitcounter++;
               }
             }
           }

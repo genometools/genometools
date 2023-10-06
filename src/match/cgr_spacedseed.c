@@ -230,7 +230,6 @@ int gt_matchspacedseed(bool withesa,
     const GtUchar *query;
     GtUword querylen;
     char *desc = NULL;
-    uint64_t unitnum;
     int retval;
     Limdfsresources *limdfsresources = NULL;
     const AbstractDfstransformer *dfst;
@@ -256,7 +255,7 @@ int gt_matchspacedseed(bool withesa,
     {
       GtAlphabet *a = gt_encseq_alphabet(encseq);
       gt_seq_iterator_set_symbolmap(seqit, gt_alphabet_symbolmap(a));
-      for (unitnum = 0; /* Nothing */; unitnum++)
+      for (/*Nothing*/; /* Nothing */; /*Nothing*/)
       {
         retval = gt_seq_iterator_next(seqit,
                                      &query,

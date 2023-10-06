@@ -23,7 +23,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                     GtUword startpos,
                                     GtUword endpos)
 {
-  GtUword position, unitindex, relpos = 0;
+  GtUword position, unitindex;
+  GT_UNUSED GtUword relpos = 0;
   GtCodetype code, transcode;
   GtTwobitencoding currentencoding;
   unsigned int shiftright;
