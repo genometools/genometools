@@ -101,7 +101,8 @@ EXP_LDLIBS:=$(LIBS) -lm
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith -Wno-unknown-warning-option -Wno-unknown-pragmas
 # expat needs -DHAVE_MEMMOVE
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-EXT_FLAGS:= -Wno-deprecated-non-prototype -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
+# we also relax some other warnings in external sources
+EXT_FLAGS:= -Wno-deprecated-non-prototype -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN -Wno-unused-parameter
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
 GT_CXXFLAGS:=-g -pipe
