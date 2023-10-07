@@ -528,8 +528,7 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
 {
   GtEditscriptPos pos;
   GtBitsequence elem = 0;
-  GtUword vidx = 0,
-          uidx,
+  GtUword uidx,
           bufidx = 0;
   uint32_t j,
            elems_served = 0,
@@ -571,7 +570,6 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
             *buffer = gt_realloc(*buffer, sizeof (**buffer) * *bufsize);
           }
         }
-        vidx++;
         uidx++;
       }
       mismatch_or_deletion = elem == GT_EDITSCRIPT_MISDEL_SYM(editscript);
@@ -593,7 +591,6 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
               *buffer = gt_realloc(*buffer, sizeof (**buffer) * *bufsize);
             }
           }
-          vidx++;
         }
         if (mismatch_or_deletion) uidx++;
       }
@@ -604,7 +601,6 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
          j < (uint32_t) editscript->trailing_matches;
        ++j) {
     (*buffer)[bufidx++] = gt_encseq_get_encoded_char(encseq, uidx, dir);
-    vidx++;
     uidx++;
   }
   gt_assert(uidx == start + utopos + 1);

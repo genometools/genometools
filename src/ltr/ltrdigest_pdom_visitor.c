@@ -398,7 +398,7 @@ static int gt_ltrdigest_pdom_visitor_parse_domainhits(
                                                      GtError *err)
 {
   int had_err = 0;
-  GtUword i, nof_targets = 0, nof_hits = 0;
+  GtUword i, nof_hits = 0;
   gt_assert(lv && instream && status);
   gt_error_check(err);
 
@@ -418,7 +418,6 @@ static int gt_ltrdigest_pdom_visitor_parse_domainhits(
         for (i = 0UL; i < 2UL && !had_err; i++)
           had_err = pdom_parser_get_next_line(buf, instream, err);
       }
-      nof_targets++;
       nof_hits = 0UL;
       gt_hmmer_parse_status_mark_frame_finished(status);
     }

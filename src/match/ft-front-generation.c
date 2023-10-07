@@ -274,7 +274,7 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
                                          const GtFtPolished_point *pp)
 {
   GtUword distance, localoffset, globaloffset, remainingvalidfronts,
-          totalrunlength = 0, trimleft;
+          trimleft;
   GtWord diagonal;
   unsigned int row, lcs;
   uint8_t trace, preferred_eop = FT_EOP_MISMATCH;
@@ -310,7 +310,6 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
     }
     if (trace & preferred_eop)
     {
-      totalrunlength++;
       if (preferred_eop == FT_EOP_MISMATCH)
       {
         nextrowadd = 1;

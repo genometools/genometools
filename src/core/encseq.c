@@ -1761,8 +1761,7 @@ static void initSWtable(GtSWtable *swtable,
       swtable->st_uint32.numofpositionstostore = items;
       break;
     default:
-      fprintf(stderr, "initSWtable(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(sat));
+      fprintf(stderr, "initSWtable(sat = %d is undefined)\n",sat);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -5377,7 +5376,6 @@ static int countnumberofexceptionranges(const GtAlphabet *alpha,
 {
   int had_err = 0;
   GtSequenceBuffer *fb;
-  GtUword currentpos;
   if (plainformat)
     fb = gt_sequence_buffer_plain_new(filenametab);
   else
@@ -5393,7 +5391,7 @@ static int countnumberofexceptionranges(const GtAlphabet *alpha,
     GtUchar charcode;
 
     gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
-    for (currentpos = 0; /* Nothing */; currentpos++) {
+    for (/*Nothing*/; /* Nothing */; /*Nothing*/) {
       retval = gt_sequence_buffer_next_with_original_raw(fb, &charcode, &cc,
                                                           err);
       if (retval > 0) {
@@ -6272,7 +6270,6 @@ unsigned int gt_encseq_extract2bitencvector(
   GtEndofTwobitencoding etbecurrent;
   GtUword twobitencodingstoppos;
   unsigned int offset;
-  int idx;
   bool fwd;
 
   if (pos == encseq->totallength || pos == encseq->logicaltotallength ||
@@ -6306,7 +6303,7 @@ unsigned int gt_encseq_extract2bitencvector(
   if (GT_ISDIRREVERSE(readmode)) {
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
   }
-  for (idx = 0, offset = 0; /* Nothing */; idx++,
+  for (offset = 0; /* Nothing */;
        offset += (unsigned int) GT_UNITSIN2BITENC) {
     if (fwd) {
       if (pos == twobitencodingstoppos) {
@@ -6353,7 +6350,7 @@ unsigned int gt_encseq_relpos_extract2bitencvector(
 {
   GtEndofTwobitencoding etbecurrent;
   GtUword pos, twobitencodingstoppos;
-  unsigned int offset, idx;
+  unsigned int offset;
 
   if (seqnum < gt_encseq_num_of_sequences(encseq) - 1) {
     twobitencodingstoppos = gt_encseq_seqstartpos(encseq, seqnum + 1) - 1;
@@ -6367,7 +6364,7 @@ unsigned int gt_encseq_relpos_extract2bitencvector(
     if (twobitencodingstoppos > maxpos)
       twobitencodingstoppos = maxpos;
   }
-  for (idx = 0, offset = 0; /* Nothing */; idx++,
+  for (offset = 0; /* Nothing */;
        offset += (unsigned int) GT_UNITSIN2BITENC) {
     if (pos == twobitencodingstoppos) {
       return offset;
@@ -7878,11 +7875,9 @@ static int testfullscan(const GtStrArray *filenametab,
   int retval;
   bool haserr = false;
   GtEncseqReader *esr = NULL;
-  GtUint64 fullscanpbar = 0;
 
   gt_error_check(err);
   totallength = encseq->totallength;
-  /* gt_progressbar_start(&fullscanpbar, (GtUint64) totallength); */
   if (filenametab != NULL) {
     fb = gt_sequence_buffer_new_guess_type(filenametab, err);
     if (!fb)
@@ -7932,7 +7927,6 @@ static int testfullscan(const GtStrArray *filenametab,
         haserr = true;
         break;
       }
-      fullscanpbar++;
     }
     /* gt_progressbar_stop(); */
   }
