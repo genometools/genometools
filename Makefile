@@ -98,7 +98,7 @@ EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
-GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith -Wno-unknown-pragmas
+GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith -Wno-unknown-warning-option -Wno-unknown-pragmas
 # expat needs -DHAVE_MEMMOVE
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXT_FLAGS:= -Wno-deprecated-non-prototype -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
