@@ -28,6 +28,7 @@ else
 endif
 
 # add necessary shared lib dependencies instead of building them ourselves
+ZLIB_DIR:=src/external/zlib-1.3.0.1
 ifeq ($(useshared),yes)
   ifeq ($(HAS_PKGCONFIG),yes)
     DEPLIBS:=-lbz2 \
@@ -57,7 +58,7 @@ ifeq ($(useshared),yes)
   endif
 else
   DEPLIBS:=
-  INCLUDEOPT+=-I$(CURDIR)/src/external/zlib-1.2.8 \
+  INCLUDEOPT+=-I$(CURDIR)/${ZLIB_DIR} \
               -I$(CURDIR)/src/external/md5-1.2/src \
               -I$(CURDIR)/src/external/lua-5.1.5/src \
               -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
@@ -194,7 +195,6 @@ SQLITE3_SRC:=$(SQLITE3_DIR)/sqlite3.c
 SQLITE3_OBJ:=$(SQLITE3_SRC:%.c=obj/%.o)
 SQLITE3_DEP:=$(SQLITE3_SRC:%.c=obj/%.d)
 
-ZLIB_DIR:=src/external/zlib-1.2.8
 ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
           $(ZLIB_DIR)/gzclose.c $(ZLIB_DIR)/gzlib.c $(ZLIB_DIR)/gzread.c \
           $(ZLIB_DIR)/gzwrite.c $(ZLIB_DIR)/uncompr.c $(ZLIB_DIR)/deflate.c \
@@ -372,8 +372,8 @@ endif
 
 ifeq ($(findstring clang,$(CC)),clang)
   # do not complain about unnecessary options
-  GT_CFLAGS += -Qunused-arguments -Wno-parentheses -Wno-unknown-warning-option
-  GT_CPPFLAGS += -Qunused-arguments -Wno-parentheses -Wno-unknown-warning-option
+  GT_CFLAGS += -Qunused-arguments -Wno-parentheses
+  GT_CPPFLAGS += -Qunused-arguments -Wno-parentheses
   # do not complain about indentation in 3rdparty code
   GT_CFLAGS += -Wno-misleading-indentation
 endif
