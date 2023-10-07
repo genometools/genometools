@@ -2523,7 +2523,7 @@ end_usage_msg
         next
       end
       if !logtype
-        if (!File.exists?(a))
+        if (!File.exist?(a))
           g = Dir.glob("#{a}*")
           if (g.size == 1)
             a = g[0]

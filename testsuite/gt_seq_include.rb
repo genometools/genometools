@@ -39,10 +39,10 @@ Keywords "gt_seq"
 Test do
   run "cp  #{$testdata}gt_bioseq_succ_1.fas ./gt_bioseq_succ_1.fas"
   run_test "#{$bin}gt seq -recreate gt_bioseq_succ_1.fas"
-  if not File.exists?("gt_bioseq_succ_1.fas.esq") then
+  if not File.exist?("gt_bioseq_succ_1.fas.esq") then
     raise TestFailed, "file \"gt_bioseq_succ_1.fas.esq\" does not exist"
   end
-  if not File.exists?("gt_bioseq_succ_1.fas.esq") then
+  if not File.exist?("gt_bioseq_succ_1.fas.esq") then
     raise TestFailed, "file \"gt_bioseq_succ_1.fas.esq\" does not exist"
   end
   old_esq_mtime = File.mtime("gt_bioseq_succ_1.fas.esq")
@@ -68,10 +68,10 @@ Keywords "gt_seq"
 Test do
   run "cp  #{$testdata}gt_bioseq_succ_2.fas ./gt_bioseq_succ_2.fas"
   run_test "#{$bin}gt seq -recreate gt_bioseq_succ_2.fas"
-  if not File.exists?("gt_bioseq_succ_2.fas.esq") then
+  if not File.exist?("gt_bioseq_succ_2.fas.esq") then
     raise TestFailed, "file \"gt_bioseq_succ_2.fas.esq\" does not exist"
   end
-  if not File.exists?("gt_bioseq_succ_2.fas.des") then
+  if not File.exist?("gt_bioseq_succ_2.fas.des") then
     raise TestFailed, "file \"gt_bioseq_succ_2.fas.des\" does not exist"
   end
   old_esq_mtime = File.mtime("gt_bioseq_succ_2.fas.esq")

@@ -1249,7 +1249,7 @@ if $gttestdata
   # compare results with precalculated known results
   [700, 7000, 70000].each do |nofreads|
     readset="#{$gttestdata}/readjoiner/#{nofreads}x_100nt_reads"
-    if File.exists?(readset)
+    if File.exist?(readset)
       Name "gt readjoiner: #{nofreads}x100"
       Keywords "gt_readjoiner"
       Test do
@@ -1271,7 +1271,7 @@ if $gttestdata
 
     [161, 200, 300, 400, 600, 800, 1000].each do |len|
       reads = "#{$gttestdata}/readjoiner/#{nofreads}x_#{len}nt_reads"
-      if File.exists?(reads)
+      if File.exist?(reads)
         Name "gt readjoiner: #{nofreads}x#{len}"
         Keywords "gt_readjoiner"
         Test do

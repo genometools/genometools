@@ -5,7 +5,7 @@ Keywords "gt_splitfasta"
 Test do
   run "cp #{$testdata}U89959_genomic.fas ."
   run_test "#{$bin}gt splitfasta U89959_genomic.fas"
-  if not File.exists?("U89959_genomic.fas.1") then
+  if not File.exist?("U89959_genomic.fas.1") then
     raise TestFailed, "file 'U89959_genomic.fas.1' does not exist"
   end
 end
@@ -16,7 +16,7 @@ Test do
   run "cp #{$testdata}U89959_genomic.fas ."
   run "gzip U89959_genomic.fas"
   run_test "#{$bin}gt splitfasta U89959_genomic.fas.gz"
-  if not File.exists?("U89959_genomic.fas.1.gz") then
+  if not File.exist?("U89959_genomic.fas.1.gz") then
     raise TestFailed, "file 'U89959_genomic.fas.1.gz' does not exist"
   end
 end
@@ -26,13 +26,13 @@ Keywords "gt_splitfasta"
 Test do
   run "cp #{$testdata}U89959_ests.fas ."
   run_test "#{$bin}gt splitfasta -numfiles 8 U89959_ests.fas"
-  if not File.exists?("U89959_ests.fas.1") then
+  if not File.exist?("U89959_ests.fas.1") then
     raise TestFailed, "file 'U89959_ests.fas.1' does not exist"
   end
-  if not File.exists?("U89959_ests.fas.8") then
+  if not File.exist?("U89959_ests.fas.8") then
     raise TestFailed, "file 'U89959_ests.fas.8' does not exist"
   end
-  if File.exists?("U89959_ests.fas.9") then
+  if File.exist?("U89959_ests.fas.9") then
     raise TestFailed, "file 'U89959_ests.fas.9' does exist"
   end
 end
@@ -52,7 +52,7 @@ Test do
   run "cp #{$testdata}U89959_genomic.fas ."
   run "touch U89959_genomic.fas.1"
   run_test "#{$bin}gt splitfasta -force U89959_genomic.fas"
-  if not File.exists?("U89959_genomic.fas.1") then
+  if not File.exist?("U89959_genomic.fas.1") then
     raise TestFailed, "file 'U89959_genomic.fas.1' does not exist"
   end
 end
@@ -62,7 +62,7 @@ Keywords "gt_splitfasta"
 Test do
   run "cp #{$testdata}U89959_genomic.fas ."
   run_test "#{$bin}gt splitfasta -targetsize 1 U89959_genomic.fas"
-  if not File.exists?("U89959_genomic.fas.1") then
+  if not File.exist?("U89959_genomic.fas.1") then
     raise TestFailed, "file 'U89959_genomic.fas.1' does not exist"
   end
 end
@@ -96,10 +96,10 @@ Keywords "gt_splitfasta"
 Test do
   FileUtils.copy "#{$testdata}foobar.fas", "."
   run_test "#{$bin}gt splitfasta -splitdesc . foobar.fas"
-  if not File.exists?("foo.fas") then
+  if not File.exist?("foo.fas") then
     raise TestFailed, "file 'foo.fas' does not exist"
   end
-  if not File.exists?("bar.fas") then
+  if not File.exist?("bar.fas") then
     raise TestFailed, "file 'bar.fas' does not exist"
   end
 end
@@ -120,10 +120,10 @@ Test do
   FileUtils.copy "#{$testdata}foobar.fas", "."
   run "touch foo.fas"
   run_test "#{$bin}gt splitfasta -force -splitdesc . foobar.fas"
-  if not File.exists?("foo.fas") then
+  if not File.exist?("foo.fas") then
     raise TestFailed, "file 'foo.fas' does not exist"
   end
-  if not File.exists?("bar.fas") then
+  if not File.exist?("bar.fas") then
     raise TestFailed, "file 'bar.fas' does not exist"
   end
 end
@@ -134,10 +134,10 @@ Test do
   run "cp #{$testdata}foobar.fas ."
   run "gzip foobar.fas"
   run_test "#{$bin}gt splitfasta -splitdesc . foobar.fas.gz"
-  if not File.exists?("foo.fas.gz") then
+  if not File.exist?("foo.fas.gz") then
     raise TestFailed, "file 'foo.fas.gz' does not exist"
   end
-  if not File.exists?("bar.fas.gz") then
+  if not File.exist?("bar.fas.gz") then
     raise TestFailed, "file 'bar.fas.gz' does not exist"
   end
 end
@@ -150,7 +150,7 @@ if $gttestdata then
         "test.fas.gz"
     run_test("#{$bin}gt splitfasta -targetsize 2 test.fas.gz", :maxtime => 160)
     # check sample
-    if not File.exists?("test.fas.2.gz") then
+    if not File.exist?("test.fas.2.gz") then
       raise TestFailed, "file 'test.fas.2.gz' does not exist"
     end
   end
@@ -163,7 +163,7 @@ if $gttestdata then
     run "gunzip test.fas.gz"
     run_test "#{$bin}gt splitfasta -targetsize 2 test.fas"
     # check sample
-    if not File.exists?("test.fas.2") then
+    if not File.exist?("test.fas.2") then
       raise TestFailed, "file 'test.fas.2' does not exist"
     end
   end

@@ -42,7 +42,7 @@ if ENV.has_key?("GTTESTDATA")
 end
 
 test_files.each do |filename|
-  if not File.exists?(filename)
+  if not File.exist?(filename)
     STDERR.puts "#{filename} does not exist"
     exit 1
   else

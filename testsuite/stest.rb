@@ -101,7 +101,7 @@ class Test
   def setup_dir
     begin
       ds = "#{@@prefix}/test#{@id}"
-      if File.exists?(ds)
+      if File.exist?(ds)
         FileUtils.rm_r(ds)
       end
       FileUtils.mkdir_p(ds)

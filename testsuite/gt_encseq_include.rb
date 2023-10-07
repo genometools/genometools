@@ -246,7 +246,7 @@ emblfiles = fastafiles.collect{ |f| f.gsub(".fna",".embl") }
     Keywords "gt_encseq formats"
     Test do
       fasta = formatfile.gsub(/\.[a-z]+$/, ".fna")
-      if File.exists?("#{$testdata}#{fasta}") then
+      if File.exist?("#{$testdata}#{fasta}") then
         run "cp #{$testdata}#{formatfile} infile"
         run_test "#{$bin}gt encseq encode -v -indexname sfx infile"
         run_test "#{$bin}gt encseq decode -output concat sfx > sfx.seq"

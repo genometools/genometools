@@ -70,7 +70,7 @@ end
 
 val = create_es("foo")
 @idxsuffixes.each do |suf|
-  raise if !File.exists?("foo.#{suf}")
+  raise if !File.exist?("foo.#{suf}")
 end
 delete_idx("foo")
 

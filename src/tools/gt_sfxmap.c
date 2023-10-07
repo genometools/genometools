@@ -909,10 +909,12 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
       unsigned int bits2add = (unsigned int) bitsperentry,
                    remainingbits = 0;
       GtUword bitbuffer = 0,
-                    countentries = 0,
                     *suftabptr,
                     *suftab = gt_malloc(sizeof *suftab *
                                         (size_t) numberofentries);
+#ifndef NDEBUG
+      GtUword countentries = 0;
+#endif
 
       suftabptr = suftab;
       while (true)
@@ -940,7 +942,9 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
             *suftabptr++ = bitbuffer;
             bitbuffer = 0;
             bits2add = (unsigned int) bitsperentry;
+#ifndef NDEBUG
             countentries++;
+#endif
           } else
           {
             gt_assert(remainingbits < 64U);
@@ -989,7 +993,9 @@ static int gt_sfxmap_compresslcp(const char *indexname,
   }
   if (!haserr)
   {
+#ifndef NDEBUG
     GtUword elems = 0;
+#endif
     GT_UNUSED GtUword totallength
       = gt_Sequentialsuffixarrayreader_totallength(ssar);
     GtUword maxbranchdepth
@@ -1018,7 +1024,9 @@ static int gt_sfxmap_compresslcp(const char *indexname,
 
           SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
           gt_bitbuffer_write_fixed_bits_FILE (bitbuffer,currentlcp);
+#ifndef NDEBUG
           elems++;
+#endif
         }
       }
       if (!haserr)

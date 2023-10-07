@@ -27,7 +27,7 @@ further identifiers specified as optional arguments.
 
 end_usage
 
-if ARGV.size < 2 || !File.exists?(ARGV[0])
+if ARGV.size < 2 || !File.exist?(ARGV[0])
   puts usage
   exit
 end

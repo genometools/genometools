@@ -22,6 +22,5 @@
 #include "annotationsketch/custom_track.h"
 
 const GtCustomTrackClass* gt_custom_track_script_wrapper_class(void);
-GtCustomTrack*            gt_custom_track_script_wrapper_new();
 
 #endif

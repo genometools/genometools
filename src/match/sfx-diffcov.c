@@ -1311,7 +1311,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                           GtTimer *sfxprogress,
                                           bool withcheck)
 {
-  GtUword pos, sampleindex, posinserted, fullspecials = 0, specials = 0;
+  GtUword pos, sampleindex, fullspecials = 0, specials = 0;
   unsigned int modvalue, unitsnotspecial;
   Diffvalue *diffptr, *afterend;
   GtCodetype code;
@@ -1419,8 +1419,12 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   {
     gt_assert(dcov->sortedsample == NULL);
   }
-  posinserted = dc_derivespecialcodesonthefly(dcov,
-                                              withcheck ? &codelist : NULL);
+#ifndef NDEBUG
+  GtUword posinserted = 
+#else
+  (void)
+#endif
+  dc_derivespecialcodesonthefly(dcov,withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
@@ -1444,7 +1448,9 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                                           code);
         gt_assert(sampleindex < dcov->effectivesamplesize);
         dc_suffixptrset(dcov,sampleindex,pos);
+#ifndef NDEBUG
         posinserted++;
+#endif
       }
       diffptr++;
     }
