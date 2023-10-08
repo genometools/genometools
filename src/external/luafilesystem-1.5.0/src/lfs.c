@@ -663,7 +663,11 @@ static void push_st_blksize (lua_State *L, STAT_STRUCT *info) {
 	lua_pushnumber (L, (lua_Number)info->st_blksize);
 }
 #endif
-static void push_invalid (lua_State *L, STAT_STRUCT *info) {
+static void push_invalid (lua_State *L,
+#ifdef _WIN32
+                          __attribute__ ((unused))
+#endif
+                          STAT_STRUCT *info) {
   luaL_error(L, "invalid attribute name");
 #ifndef _WIN32
   info->st_blksize = 0; /* never reached */
