@@ -1,3 +1,12 @@
+changes in version 1.6.4 (2023-10-08)
+
+- build compatibility improvements (e.g. newer clang, GCC 13.2)
+- upgrade bundled zlib to v1.3.0.1
+- remove text README
+- adjust release documentation to new process
+- avoid use of deprecated `File.exists?()` in Ruby
+
+
 changes in version 1.6.3 (2023-09-19)
 
 - bugfixes
