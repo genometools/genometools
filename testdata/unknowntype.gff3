@@ -1,0 +1,4 @@
+##gff-version 3
+##sequence-region   ctg123 1 1497228
+ctg123	gth	something	106716	106973	0.847	+	.	ID=invalid
+

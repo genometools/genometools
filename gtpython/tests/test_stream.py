@@ -23,6 +23,21 @@ class StreamTest(unittest.TestCase):
 
         self.assertTrue('1877523' in fi.get_seqids())
 
+    def test_checker(self):
+        tc = gt.extended.TypeCheckerBuiltin()
+        self.ins.set_type_checker(tc)
+        self.ins.pull()
+
+    def test_checker_fail(self):
+        tc = gt.extended.TypeCheckerBuiltin()
+        gff_file = op.join(datadir, "unknowntype.gff3")
+        ins = gt.GFF3InStream(gff_file)
+        ins.set_type_checker(tc)
+        self.assertRaisesRegex(
+            gt.core.error.GTError,
+            'GenomeTools error: type "something" on line 3',
+            ins.pull)
+
 
 class TestDuplicateStream(unittest.TestCase):
 

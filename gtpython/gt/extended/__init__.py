@@ -39,6 +39,7 @@ from .node_visitor import *
 from .region_node import *
 from .sequence_node import *
 from .sort_stream import *
+from .type_checker import *
 
 from .rdb import *
 from .anno_db import *
@@ -66,6 +67,9 @@ NodeVisitor.register(gtlib)
 RegionNode.register(gtlib)
 SequenceNode.register(gtlib)
 SortStream.register(gtlib)
+TypeChecker.register(gtlib)
+TypeCheckerBuiltin.register(gtlib)
+TypeCheckerOBO.register(gtlib)
 try:
     AnnoDBSchema.register(gtlib)
     RDB.register(gtlib)
