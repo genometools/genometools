@@ -9,6 +9,11 @@ op = os.path
 datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
                              "testdata"))
 
+# This has two names, depending on Python version
+if not hasattr(unittest.TestCase, 'assertRaisesRegex'):
+    setattr(unittest.TestCase, 'assertRaisesRegex',
+            unittest.TestCase.assertRaisesRegexp)
+
 
 class StreamTest(unittest.TestCase):
 
@@ -37,6 +42,22 @@ class StreamTest(unittest.TestCase):
             gt.core.error.GTError,
             'GenomeTools error: type "something" on line 3',
             ins.pull)
+
+    def test_tidy_fail(self):
+        gff_file = op.join(datadir, "missing_gff3_header.gff3")
+        ins = gt.GFF3InStream(gff_file)
+        self.assertRaisesRegex(
+            gt.core.error.GTError,
+            'does not begin with "##gff-version" or "##gff-version"',
+            ins.pull)
+
+    def test_tidy_succ(self):
+        gff_file = op.join(datadir, "missing_gff3_header.gff3")
+        ins = gt.GFF3InStream(gff_file)
+        ins.enable_tidy_mode()
+        fi = gt.FeatureIndexMemory()
+        gt.FeatureStream(ins, fi).pull()
+        self.assertTrue('ctg123' in fi.get_seqids())
 
 
 class TestDuplicateStream(unittest.TestCase):
@@ -120,6 +141,7 @@ class TestCustomExample(unittest.TestCase):
             types.update([f.type])
             f = dfi.next()
         self.assertTrue('bar' in types, types)
+
 
 if __name__ == "__main__":
     unittest.main()
