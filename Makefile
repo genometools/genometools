@@ -230,7 +230,7 @@ EXP_LDLIBS += $(DEPLIBS)
 GTSHAREDLIB_LIBDEP += $(DEPLIBS)
 
 SERVER=satta@genometools.org
-WWWBASEDIR=/var/www/servers
+WWWBASEDIR=/var/www/
 
 # process arguments
 ifeq ($(assert),no)
