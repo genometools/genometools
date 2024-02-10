@@ -24,11 +24,11 @@ example, Linux, macOS, and OpenBSD.
 Debian and Ubuntu users can install the most recent
 stable version simply using apt, e.g.
 ```bash
-% apt-get install genometools
+apt-get install genometools
 ```
 (as root) to install the `gt` executable. To install the library and development headers, use
 ```bash
-% apt-get install libgenometools0 libgenometools0-dev
+apt-get install libgenometools0 libgenometools0-dev
 ```
 instead. This is not required to just use the tools.
 
@@ -37,7 +37,7 @@ instead. This is not required to just use the tools.
 If [Homebrew](https://brew.sh) is installed, GenomeTools can be installed on
 supported macOS versions using `brew`:
 ```bash
-$ brew install genometools
+brew install genometools
 ```
 
 #### Building from source
@@ -50,7 +50,7 @@ have a look at the
 [INSTALL](https://github.com/genometools/genometools/blob/master/INSTALL) file.
 In most cases (e.g. on a 64-bit Linux system) something like
 ```bash
-$ make -j4
+make -j4
 ```
 should suffice. On 32-bit systems, add the `32bit=yes` option. Add `cairo=no` if
 you do not have the Cairo libraries and their development headers installed.
@@ -59,7 +59,7 @@ When your binary has been built, use the `install` target and `prefix` option to
 install the compiled binary on your system. Make sure you repeat all the options
 from the original `make` run. So
 ```bash
-$ make -j4 install prefix=~/gt
+make -j4 install prefix=~/gt
 ```
 would install the software in the `gt` subdirectory in the current user's home
 directory. If no `prefix` option is given, the software will be installed
