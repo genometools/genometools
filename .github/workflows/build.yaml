@@ -85,7 +85,7 @@ jobs:
       AR: ${{ matrix.mingw-arch.machine }}-w64-mingw32-ar
       CFLAGS: -Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize
     runs-on: ubuntu-latest
-    container: debian:buster
+    container: debian:stable
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
