@@ -50,9 +50,9 @@ jobs:
     strategy:
       matrix:
         options:
-          - assert=no errorcheck=yes
-          - opt=no cairo=no errorcheck=yes
-          - amalgamation=yes errorcheck=yes
+          - assert=no errorcheck=yes verbose=yes
+          - opt=no cairo=no errorcheck=yes verbose=yes
+          - amalgamation=yes errorcheck=yes verbose=yes
     runs-on: macos-latest
     env:
       BUILDOPTS: $${{ matrix.options }}
