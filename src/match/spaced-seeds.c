@@ -60,7 +60,7 @@ static Limdfsconstinfo *spse_allocatedfsconstinfo(
 }
 
 static void spse_initdfsconstinfo(Limdfsconstinfo *mt,
-                                  unsigned int alphasize,
+                                  GT_UNUSED unsigned int alphasize,
                                   ...)
                                  /* Variable argument list is as follows:
                                     const GtUchar *pattern,
