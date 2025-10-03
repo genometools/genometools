@@ -28,7 +28,7 @@ else
 endif
 
 # add necessary shared lib dependencies instead of building them ourselves
-ZLIB_DIR:=src/external/zlib-1.3.0.1
+ZLIB_DIR:=src/external/zlib-1.3.1
 ifeq ($(useshared),yes)
   ifeq ($(HAS_PKGCONFIG),yes)
     DEPLIBS:=-lbz2 \
