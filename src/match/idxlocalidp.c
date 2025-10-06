@@ -496,7 +496,7 @@ static Limdfsconstinfo *locali_allocatedfsconstinfo (GT_UNUSED
 }
 
 static void locali_initdfsconstinfo (Limdfsconstinfo *lci,
-                                     unsigned int alphasize,...)
+                                     GT_UNUSED unsigned int alphasize, ...)
 {
   va_list ap;
 

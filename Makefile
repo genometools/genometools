@@ -28,7 +28,7 @@ else
 endif
 
 # add necessary shared lib dependencies instead of building them ourselves
-ZLIB_DIR:=src/external/zlib-1.3.0.1
+ZLIB_DIR:=src/external/zlib-1.3.1
 ifeq ($(useshared),yes)
   ifeq ($(HAS_PKGCONFIG),yes)
     DEPLIBS:=-lbz2 \
@@ -99,7 +99,7 @@ EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
-GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith -Wno-unknown-pragmas
+GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith -Wno-unknown-pragmas -Wno-macro-redefined
 # expat needs -DHAVE_MEMMOVE
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXT_FLAGS:= -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
@@ -371,10 +371,10 @@ ifeq ($(m64),yes)
 endif
 
 ifeq ($(findstring clang,$(CC)),clang)
-  # do not complain about unnecessary options
+  # do not complain about unnecessary options and more
   GT_CFLAGS += -Qunused-arguments -Wno-parentheses
   GT_CPPFLAGS += -Qunused-arguments -Wno-parentheses
-  # do not complain about indentation in 3rdparty code
+  # do not complain about indentation
   GT_CFLAGS += -Wno-misleading-indentation
 endif
 

@@ -29,7 +29,7 @@
 
 typedef struct {
   uint64_t l, h;
-} md5_t;
+} _md5_t;
 
 #define MD5_T_EQUAL(A, B) \
         ((A).l == (B).l && (A).h == (B).h)
@@ -83,7 +83,7 @@ static GtUword md5set_get_size(GtUword n)
 struct GtMD5Set
 {
   /* hash table */
-  md5_t    *table;
+  _md5_t    *table;
   GtUword  alloc;
   GtUword  fill;
   GtUword  maxfill;
@@ -110,7 +110,7 @@ enum MD5SetSearchResult
 };
 
 static inline enum MD5SetSearchResult md5set_search_pos(GtMD5Set *set,
-                                                        md5_t k,
+                                                        _md5_t k,
                                                         bool
                                                         insert_if_not_found,
                                                         GtUword i)
@@ -135,7 +135,7 @@ static inline enum MD5SetSearchResult md5set_search_pos(GtMD5Set *set,
 #define MD5SET_H2(MD5, TABLE_SIZE) \
         (((MD5).h % ((TABLE_SIZE) - 1)) + 1)
 
-static bool md5set_search(GtMD5Set *set, md5_t k, bool insert_if_not_found)
+static bool md5set_search(GtMD5Set *set, _md5_t k, bool insert_if_not_found)
 {
   GtUword i, c;
 #ifndef NDEBUG
@@ -163,7 +163,7 @@ static bool md5set_search(GtMD5Set *set, md5_t k, bool insert_if_not_found)
   }
 }
 
-static void md5set_rehash(GtMD5Set *set, md5_t *oldtable, GtUword oldsize)
+static void md5set_rehash(GtMD5Set *set, _md5_t *oldtable, GtUword oldsize)
 {
   GtUword i;
   set->fill = 0;
@@ -176,7 +176,7 @@ static void md5set_rehash(GtMD5Set *set, md5_t *oldtable, GtUword oldsize)
 
 static void md5set_alloc_table(GtMD5Set *set, GtUword newsize)
 {
-  md5_t *oldtable;
+  _md5_t *oldtable;
   GtUword oldsize;
 
   oldsize = set->alloc;
@@ -184,7 +184,7 @@ static void md5set_alloc_table(GtMD5Set *set, GtUword newsize)
   set->alloc = newsize;
   set->maxfill =
     (GtUword)((double)newsize * MD5SET_MAX_LOAD_FACTOR);
-  set->table = gt_calloc((size_t)newsize, sizeof (md5_t));
+  set->table = gt_calloc((size_t)newsize, sizeof (_md5_t));
   if (oldtable != NULL) {
     gt_log_log("rehashing " GT_WU " elements; old size: " GT_WU ", new size: "
                GT_WU "\n", set->fill, oldsize, newsize);
@@ -238,7 +238,7 @@ GtMD5SetStatus gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
                                       GtUword seqlen, bool both_strands,
                                       GtError *err)
 {
-  md5_t md5sum, md5sum_rc;
+  _md5_t md5sum, md5sum_rc;
   GtUword i;
   int retval = 0;
   bool found;

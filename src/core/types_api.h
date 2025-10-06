@@ -26,14 +26,14 @@
 #ifndef _WIN32
 #define GT_LLD "%lld"
 #else
-#define GT_LLD "%I64d"
+#define GT_LLD "%lld"
 #endif
 
 /* Define the conversion string for '%llu' in platform independent fashion. */
 #ifndef _WIN32
 #define GT_LLU "%llu"
 #else
-#define GT_LLU "%I64u"
+#define GT_LLU "%llu"
 #endif
 
 /* Define the conversion string for 'ld' in platform independent fashion. Note
@@ -43,8 +43,8 @@
 #define GT_WDS "ld"
 #define GT_WD "%ld"
 #else
-#define GT_WDS "I64d"
-#define GT_WD "%I64d"
+#define GT_WDS "lld"
+#define GT_WD "%lld"
 #endif
 
 /* Define the conversion string for 'lu' in platform independent fashion. Note
@@ -54,22 +54,22 @@
 #define GT_WUS "lu"
 #define GT_WU "%lu"
 #else
-#define GT_WUS "I64u"
-#define GT_WU "%I64u"
+#define GT_WUS "llu"
+#define GT_WU "%llu"
 #endif
 
 /* Define the conversion string for '%lX' in platform independent fashion. */
 #ifndef _WIN64
 #define GT_LX "%lX"
 #else
-#define GT_LX "%I64X"
+#define GT_LX "%llX"
 #endif
 
 /* Define the conversion string for '%zu' in platform independent fashion. */
 #if !defined(_WIN32)
 #define GT_ZU "%zu"
 #elif defined(_WIN64)
-#define GT_ZU "%I64u"
+#define GT_ZU "%llu"
 #else
 #define GT_ZU "%u"
 #endif

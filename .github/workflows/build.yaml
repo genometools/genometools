@@ -50,9 +50,9 @@ jobs:
     strategy:
       matrix:
         options:
-          - assert=no errorcheck=yes
-          - opt=no cairo=no errorcheck=yes
-          - amalgamation=yes errorcheck=yes
+          - assert=no errorcheck=yes verbose=yes
+          - opt=no cairo=no errorcheck=yes verbose=yes
+          - amalgamation=yes errorcheck=yes verbose=yes
     runs-on: macos-latest
     env:
       BUILDOPTS: $${{ matrix.options }}
@@ -85,7 +85,7 @@ jobs:
       AR: ${{ matrix.mingw-arch.machine }}-w64-mingw32-ar
       CFLAGS: -Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize
     runs-on: ubuntu-latest
-    container: debian:buster
+    container: debian:stable
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
