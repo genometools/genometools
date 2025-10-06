@@ -1,3 +1,15 @@
+changes in version 1.6.6 (2025-10-06)
+
+- Use `stable` containers instead of hard-coding the now-obsolete `buster` in the CI jobs.
+- Adjust some code details to enable building with GCC 15.
+- Update bundled zlib version to 1.3.1 to fix builds on recent macOS versions.
+- Adjust some build settings for clang.
+- Fix MinGW builds by addressing some portability issues:
+  - Format strings for integers and time
+  - Missing `drand48()` on Windows
+- Fix name clash for `md5_t` between `extended/md5set.c` and the Lua headers.
+
+
 changes in version 1.6.5 (2023-10-23)
 
 - add Python bindings for the `TypeChecker*` classes
