@@ -21,6 +21,8 @@
 #include "core/cstr_api.h"
 #include "core/dynalloc.h"
 #include "core/ensure_api.h"
+#include "core/fa_api.h"
+#include "core/file.h"
 #include "core/ma_api.h"
 #include "core/str_api.h"
 #include "core/unused_api.h"
@@ -256,6 +258,8 @@ GtStr* gt_str_ref(GtStr *s)
    gt_str_read_next_line uses gt_xfgetc while
    gt_str_read_next_line_generic uses gt_file_xfgetc
    Also gt_str_read_next_line_generic does not assert <fpin> != NULL
+   and takes a block-wise shortcut for files which have a read buffer, see
+   str_read_next_line_buffered() (which has to behave exactly the same).
 */
 
 int gt_str_read_next_line(GtStr *s, FILE *fpin)
@@ -317,11 +321,56 @@ int gt_str_read_next_line(GtStr *s, FILE *fpin)
   }
 }
 
+/* Same semantics as the character-wise loop in
+   gt_str_read_next_line_generic(), but works on whole blocks of the read buffer
+   of <fpin>. */
+static int str_read_next_line_buffered(GtStr *s, GtFile *fpin)
+{
+  const char *data, *nl, *cr;
+  size_t avail, len;
+  gt_assert(s && fpin);
+  for (;;) {
+    if (!(avail = gt_file_read_buffer_peek(fpin, &data)))
+      return EOF;
+    nl = memchr(data, '\n', avail);
+    len = nl ? (size_t) (nl - data) : avail;
+    if ((cr = memchr(data, '\r', len))) {
+      char nc;
+      /* append everything before the '\r' and look at the next character */
+      len = cr - data;
+      gt_str_append_cstr_nt(s, data, len);
+      gt_file_read_buffer_consume(fpin, len + 1);
+      if (!gt_file_read_buffer_peek(fpin, &data)) {
+        gt_str_append_char(s, '\r');
+        return EOF;
+      }
+      nc = data[0];
+      gt_file_read_buffer_consume(fpin, 1);
+      if (nc == '\n') { /* Windows newline "\r\n" */
+        s->cstr[s->length] = '\0';
+        return 0;
+      }
+      gt_str_append_char(s, '\r');
+      gt_str_append_char(s, nc);
+      continue;
+    }
+    gt_str_append_cstr_nt(s, data, len);
+    if (nl) {
+      gt_file_read_buffer_consume(fpin, len + 1);
+      s->cstr[s->length] = '\0';
+      return 0;
+    }
+    gt_file_read_buffer_consume(fpin, len);
+  }
+}
+
 int gt_str_read_next_line_generic(GtStr *s, GtFile *fpin)
 {
   int cc;
   char c;
   gt_assert(s);
+  if (gt_file_has_read_buffer(fpin))
+    return str_read_next_line_buffered(s, fpin);
   for (;;) {
     cc = gt_file_xfgetc(fpin);
     if (cc == EOF)
@@ -373,6 +422,100 @@ int gt_str_read_next_line_generic(GtStr *s, GtFile *fpin)
     }
     s->cstr[s->length++] = c;
   }
+}
+
+/* Read <path> line by line with gt_str_read_next_line_generic() (which uses
+   the read buffer of <GtFile>) and make sure the result is the same as with
+   the character-wise gt_str_read_next_line(). */
+static int str_read_next_line_test_file(const char *path, GtError *err)
+{
+  GtStr *line, *refline;
+  GtFile *file;
+  FILE *reffp;
+  int rval, refrval, cc, had_err = 0;
+  GtUword linenum = 0;
+  gt_error_check(err);
+  line = gt_str_new();
+  refline = gt_str_new();
+  reffp = gt_fa_xfopen(path, "rb");
+  file = gt_file_xopen(path, "rb");
+  do {
+    refrval = gt_str_read_next_line(refline, reffp);
+    if (linenum % 7 == 3) {
+      /* mix in character-wise access and gt_file_unget_char() */
+      if ((cc = gt_file_xfgetc(file)) != EOF)
+        gt_file_unget_char(file, cc);
+    }
+    rval = gt_str_read_next_line_generic(line, file);
+    gt_ensure(rval == refrval);
+    gt_ensure(gt_str_length(line) == gt_str_length(refline));
+    gt_ensure(!memcmp(gt_str_get(line), gt_str_get(refline),
+                      gt_str_length(refline)));
+    gt_str_reset(line);
+    gt_str_reset(refline);
+    linenum++;
+  } while (!had_err && refrval != EOF);
+  if (!had_err) {
+    /* the file has been read completely, try again after rewinding */
+    gt_ensure(gt_file_xfgetc(file) == EOF);
+    gt_file_xrewind(file);
+    rewind(reffp);
+    refrval = gt_str_read_next_line(refline, reffp);
+    rval = gt_str_read_next_line_generic(line, file);
+    gt_ensure(rval == refrval);
+    gt_ensure(gt_str_cmp(line, refline) == 0);
+  }
+  gt_file_delete(file);
+  gt_fa_xfclose(reffp);
+  gt_str_delete(refline);
+  gt_str_delete(line);
+  return had_err;
+}
+
+static int str_read_next_line_unit_test(GtError *err)
+{
+  /* line endings and special cases, the last entry of each array ends the
+     file */
+  static const char *endings[] = { "\n", "\r\n", "\n", "\r", "\r\r\n",
+                                   "\n\n", "\rx\n", "\r\r\r\n", "\n" },
+                    *file_ends[] = { "\n", "", "\r", "\r\n", "x\r\r" };
+  GtStr *tmpfilename;
+  FILE *tmpfp;
+  GtUword i, j, k, linelen, state = 42;
+  int had_err = 0;
+  gt_error_check(err);
+  for (i = 0; !had_err && i < sizeof (file_ends) / sizeof (file_ends[0]);
+       i++) {
+    tmpfilename = gt_str_new();
+    tmpfp = gt_xtmpfp(tmpfilename);
+    /* about 400 KB, so lines and line endings straddle the borders of the
+       read buffer many times; some lines are longer than the buffer */
+    for (j = 0; j < 4000; j++) {
+      state = state * 1103515245 + 12345;
+      linelen = (state >> 8) % 200;
+      if (j % 1000 == 500)
+        linelen = 70000 + j;
+      for (k = 0; k < linelen; k++)
+        gt_xfputc('a' + (int) ((j + k) % 26), tmpfp);
+      gt_xfputs(endings[(state >> 16) %
+                        (sizeof (endings) / sizeof (endings[0]))], tmpfp);
+    }
+    gt_xfputs(file_ends[i], tmpfp);
+    gt_fa_xfclose(tmpfp);
+    had_err = str_read_next_line_test_file(gt_str_get(tmpfilename), err);
+    gt_xremove(gt_str_get(tmpfilename));
+    gt_str_delete(tmpfilename);
+  }
+  if (!had_err) {
+    /* the empty file */
+    tmpfilename = gt_str_new();
+    tmpfp = gt_xtmpfp(tmpfilename);
+    gt_fa_xfclose(tmpfp);
+    had_err = str_read_next_line_test_file(gt_str_get(tmpfilename), err);
+    gt_xremove(gt_str_get(tmpfilename));
+    gt_str_delete(tmpfilename);
+  }
+  return had_err;
 }
 
 int gt_str_unit_test(GtError *err)
@@ -458,6 +601,10 @@ int gt_str_unit_test(GtError *err)
   gt_ensure(gt_str_cmp(s, s1) == 0);
   gt_str_delete(s);
   gt_str_delete(s1);
+
+  /* test gt_str_read_next_line_generic() */
+  if (!had_err)
+    had_err = str_read_next_line_unit_test(err);
 
   return had_err;
 }
