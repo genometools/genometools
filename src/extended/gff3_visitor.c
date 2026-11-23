@@ -45,7 +45,8 @@ struct GtGFF3Visitor {
             *feature_node_to_unique_id_str;
   GtUword fasta_width;
   GtFile *outfp;
-  GtStr *outstr;
+  GtStr *outstr,
+        *linebuf; /* used to build feature lines, if <outfp> is used */
   GtCstrTable *used_ids;
 };
 
@@ -56,7 +57,6 @@ typedef struct {
 
 typedef struct {
   bool *attribute_shown;
-  GtFile *outfp;
   GtStr *outstr;
 } ShowAttributeInfo;
 
@@ -90,6 +90,7 @@ static void gff3_visitor_free(GtNodeVisitor *nv)
   gt_hashmap_delete(gff3_visitor->feature_node_to_unique_id_str);
   gt_cstr_table_delete(gff3_visitor->used_ids);
   gt_str_delete(gff3_visitor->outstr);
+  gt_str_delete(gff3_visitor->linebuf);
   gt_file_delete(gff3_visitor->outfp);
 }
 
@@ -133,20 +134,13 @@ static void show_attribute(const char *attr_name, const char *attr_value,
   ShowAttributeInfo *info = (ShowAttributeInfo*) data;
   gt_assert(attr_name && attr_value && info);
   if (strcmp(attr_name, GT_GFF_ID) && strcmp(attr_name, GT_GFF_PARENT)) {
-    if (*info->attribute_shown) {
-      if (!info->outstr)
-        gt_file_xfputc(';', info->outfp);
-      else
-        gt_str_append_char(info->outstr, ';');
-    } else
+    if (*info->attribute_shown)
+      gt_str_append_char(info->outstr, ';');
+    else
       *info->attribute_shown = true;
-    if (!info->outstr)
-      gt_file_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
-    else {
-      gt_str_append_cstr(info->outstr, attr_name);
-      gt_str_append_char(info->outstr, '=');
-      gt_str_append_cstr(info->outstr, attr_value);
-    }
+    gt_str_append_cstr(info->outstr, attr_name);
+    gt_str_append_char(info->outstr, '=');
+    gt_str_append_cstr(info->outstr, attr_value);
   }
 }
 
@@ -158,82 +152,59 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
   GtArray *parent_features = NULL;
   ShowAttributeInfo info;
   GtUword i;
-  GtStr *id;
+  GtStr *id, *outstr;
 
   gt_error_check(err);
   gt_assert(fn && gff3_visitor);
 
+  /* If the output goes to a file, the line is built in a buffer first and
+     written at once. This is much faster than formatted output for each part
+     of the line. */
+  outstr = gff3_visitor->outstr ? gff3_visitor->outstr : gff3_visitor->linebuf;
+
   /* output leading part */
-  if (!gff3_visitor->outstr) {
-    gt_gff3_output_leading(fn, gff3_visitor->outfp);
-  } else {
-    gt_gff3_output_leading_str(fn, gff3_visitor->outstr);
-  }
+  gt_gff3_output_leading_str(fn, outstr);
 
   /* show unique id part of attributes */
   if ((id = gt_hashmap_get(gff3_visitor->feature_node_to_unique_id_str, fn))) {
-    if (!gff3_visitor->outstr)
-      gt_file_xprintf(gff3_visitor->outfp, "%s=%s", GT_GFF_ID, gt_str_get(id));
-    else {
-      gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_ID);
-      gt_str_append_char(gff3_visitor->outstr, '=');
-      gt_str_append_cstr(gff3_visitor->outstr, gt_str_get(id));
-    }
+    gt_str_append_cstr(outstr, GT_GFF_ID);
+    gt_str_append_char(outstr, '=');
+    gt_str_append_str(outstr, id);
     part_shown = true;
   }
 
   /* show parent part of attributes */
   parent_features = gt_hashmap_get(gff3_visitor->feature_node_to_id_array, fn);
   if (gt_array_size(parent_features)) {
-    if (part_shown) {
-      if (!gff3_visitor->outstr)
-        gt_file_xfputc(';', gff3_visitor->outfp);
-      else
-        gt_str_append_char(gff3_visitor->outstr, ';');
-    }
-    if (!gff3_visitor->outstr)
-      gt_file_xprintf(gff3_visitor->outfp, "%s=", GT_GFF_PARENT);
-    else {
-      gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_PARENT);
-      gt_str_append_char(gff3_visitor->outstr, '=');
-    }
+    if (part_shown)
+      gt_str_append_char(outstr, ';');
+    gt_str_append_cstr(outstr, GT_GFF_PARENT);
+    gt_str_append_char(outstr, '=');
     for (i = 0; i < gt_array_size(parent_features); i++) {
-      if (i) {
-        if (!gff3_visitor->outstr)
-          gt_file_xfputc(',', gff3_visitor->outfp);
-        else
-          gt_str_append_char(gff3_visitor->outstr, ',');
-      }
-      if (!gff3_visitor->outstr) {
-        gt_file_xprintf(gff3_visitor->outfp, "%s",
-                        *(char**) gt_array_get(parent_features, i));
-      } else {
-        gt_str_append_cstr(gff3_visitor->outstr,
-                           *(char**) gt_array_get(parent_features, i));
-      }
+      if (i)
+        gt_str_append_char(outstr, ',');
+      gt_str_append_cstr(outstr, *(char**) gt_array_get(parent_features, i));
     }
     part_shown = true;
   }
 
   /* show missing part of attributes */
   info.attribute_shown = &part_shown;
-  info.outfp = gff3_visitor->outfp;
-  info.outstr = gff3_visitor->outstr;
+  info.outstr = outstr;
   gt_feature_node_foreach_attribute(fn, show_attribute, &info);
 
   /* show dot if no attributes have been shown */
-  if (!part_shown) {
-    if (!gff3_visitor->outstr)
-      gt_file_xfputc('.', gff3_visitor->outfp);
-    else
-      gt_str_append_char(gff3_visitor->outstr, '.');
-  }
+  if (!part_shown)
+    gt_str_append_char(outstr, '.');
 
   /* show terminal newline */
-  if (!gff3_visitor->outstr)
-    gt_file_xfputc('\n', gff3_visitor->outfp);
-  else
-    gt_str_append_char(gff3_visitor->outstr, '\n');
+  gt_str_append_char(outstr, '\n');
+
+  if (!gff3_visitor->outstr) {
+    gt_file_xwrite(gff3_visitor->outfp, gt_str_get(outstr),
+                   gt_str_length(outstr));
+    gt_str_reset(outstr);
+  }
 
   return 0;
 }
@@ -382,7 +353,7 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   if (gt_feature_node_has_children(fn) ||
       (gff3_visitor->retain_ids && gt_feature_node_get_attribute(fn, "ID"))) {
     if (!gff3_visitor->outstr)
-      gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_TERMINATOR);
+      gt_file_xfputs(GT_GFF_TERMINATOR "\n", gff3_visitor->outfp);
     else {
       gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_TERMINATOR);
       gt_str_append_char(gff3_visitor->outstr, '\n');
@@ -540,6 +511,7 @@ GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
   gt_gff3_visitor_init(gff3_visitor);
   gff3_visitor->outfp = gt_file_ref(outfp);
   gff3_visitor->outstr = NULL;
+  gff3_visitor->linebuf = gt_str_new();
   return nv;
 }
 
@@ -550,6 +522,7 @@ GtNodeVisitor* gt_gff3_visitor_new_to_str(GtStr *outstr)
   gt_gff3_visitor_init(gff3_visitor);
   gff3_visitor->outfp = NULL;
   gff3_visitor->outstr = gt_str_ref(outstr);
+  gff3_visitor->linebuf = NULL;
   return nv;
 }
 
