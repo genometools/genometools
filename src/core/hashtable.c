@@ -39,6 +39,8 @@ union link_data
 #define mark_bit ((free_mark >> 1) + 1)
 enum {
   MIN_SIZE_LOG     =   4,
+  RESET_KEEP_SIZE_LOG = 8,      /**< up to this size a table is not shrunk by
+                                   gt_hashtable_reset() */
   FILL_DIVISOR     = 256,
   DEFAULT_LOW_MUL  =  32,       /**< will be used as quotient
                                    DEFAULT_LOW_MUL/FILL_DIVISOR */
@@ -633,8 +635,13 @@ void gt_hashtable_reset(GtHashtable *ht)
   if (free_elem_with_data)
     gt_ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
   ht->current_fill = 0;
-  gt_ht_reinit(ht, ht->table_info, MIN_SIZE_LOG, DEFAULT_HIGH_MUL,
-            DEFAULT_LOW_MUL);
+  /* A table which is reset is usually filled again. Therefore we keep its
+     size (if it is moderate) to avoid that it has to grow again step by step
+     each time. Large tables are shrunk to the minimum size to free memory. */
+  gt_ht_reinit(ht, ht->table_info,
+               ht->table_size_log <= RESET_KEEP_SIZE_LOG ? ht->table_size_log
+                                                         : MIN_SIZE_LOG,
+               DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
   gt_rwlock_unlock(ht->lock);
 }
 
