@@ -455,7 +455,7 @@ const GtSequenceBufferClass* gt_sequence_buffer_gb_class(void)
 
 bool gt_sequence_buffer_gb_guess(const char* txt)
 {
-  char *hit = NULL;
+  const char *hit = NULL;
   if (!(hit = strstr(txt, "LOCUS ")))
     return false;
   /* LOCUS keyword must be at beginning of line */
