@@ -134,7 +134,7 @@ static int test_single_escaping(char unescaped_char, const char *escaped_char,
 {
   GtStr *escaped_seq, *unescaped_seq;
   char unescaped_testseq[8],
-       escaped_testseq[10];
+       escaped_testseq[16]; /* "foo" + up to 9 chars + "bar" + NUL */
   int had_err = 0;
   gt_error_check(err);
   escaped_seq = gt_str_new();

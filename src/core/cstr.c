@@ -96,7 +96,7 @@ void gt_cstr_show(const char *cstr, GtUword length, FILE *fp)
 
 GtUword gt_cstr_length_up_to_char(const char *cstr, char c)
 {
-  char *suffix;
+  const char *suffix;
   gt_assert(cstr);
   suffix = strchr(cstr, c);
   if (suffix)

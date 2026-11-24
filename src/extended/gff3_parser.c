@@ -1673,13 +1673,13 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
   return had_err;
 }
 
-static int parse_first_gff3_line(const char *line, const char *filename,
+static int parse_first_gff3_line(char *line, const char *filename,
                                  GtQueue *genome_nodes, GtStr *filenamestr,
                                  GtUint64 *line_number,
                                  bool *gvf_mode,
                                  bool tidy, GtError *err)
 {
-  const char *directive = NULL;
+  char *directive = NULL;
   char *data = NULL;
   int had_err = 0;
   gt_error_check(err);
