@@ -112,19 +112,21 @@ void gt_dlist_add(GtDlist *dlist, void *data)
     gt_assert(dlist->first && dlist->last);
     if (dlist->cmp_func) {
       /* compare function defined -> find place to add new element */
-      if (dlist->cmp_func(data, dlist->first->data, dlist->data) < 0) {
+      if (dlist->cmp_func(dlist->last->data, data, dlist->data) <= 0) {
+        /* the new element is larger or equal then the last element (this
+           case is checked first, because it is the common one if the elements
+           are added in sorted order) */
+        gt_assert(!dlist->last->next);
+        dlist->last->next = newelem;
+        newelem->previous = dlist->last;
+        dlist->last = newelem;
+      }
+      else if (dlist->cmp_func(data, dlist->first->data, dlist->data) < 0) {
         /* the new element is smaller then the first element */
         gt_assert(!dlist->first->previous);
         dlist->first->previous = newelem;
         newelem->next = dlist->first;
         dlist->first = newelem;
-      }
-      else if (dlist->cmp_func(dlist->last->data, data, dlist->data) <= 0) {
-        /* the new element is larger or equal then the last element */
-        gt_assert(!dlist->last->next);
-        dlist->last->next = newelem;
-        newelem->previous = dlist->last;
-        dlist->last = newelem;
       }
       else {
         /* traverse list backwards to find a place to insert the new element */
