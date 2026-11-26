@@ -24,11 +24,25 @@
 #include "core/splitter.h"
 #include "core/xansi_api.h"
 
+/* number of tokens for which space is allocated at first, avoids repeated
+   reallocations for the common case of few tokens */
+#define SPLITTER_INITIAL_TOKENS  16
+
 struct GtSplitter {
   char **tokens;
   GtUword num_of_tokens;
   size_t allocated;
 };
+
+static void splitter_reserve(GtSplitter *s, GtUword num_of_tokens)
+{
+  if (num_of_tokens * sizeof (*s->tokens) > s->allocated) {
+    if (num_of_tokens < SPLITTER_INITIAL_TOKENS)
+      num_of_tokens = SPLITTER_INITIAL_TOKENS;
+    s->tokens = gt_dynalloc(s->tokens, &s->allocated,
+                            num_of_tokens * sizeof (*s->tokens));
+  }
+}
 
 GtSplitter* gt_splitter_new(void)
 {
@@ -48,17 +62,13 @@ void gt_splitter_split(GtSplitter *s, char *string, GtUword length,
          (end_of_token = strchr(string_index, delimiter))) {
     gt_assert(end_of_token);
     *end_of_token = '\0';
-    if ((s->num_of_tokens + 1) * sizeof (char*) > s->allocated)
-      s->tokens = gt_dynalloc(s->tokens, &s->allocated,
-                              (s->num_of_tokens + 1) * sizeof (char*));
+    splitter_reserve(s, s->num_of_tokens + 1);
     s->tokens[s->num_of_tokens++] = string_index;
     string_index = end_of_token + 1;
   }
 
   /* save last token */
-  if ((s->num_of_tokens + 2) * sizeof (char*) > s->allocated)
-    s->tokens = gt_dynalloc(s->tokens, &s->allocated,
-                            (s->num_of_tokens + 2) * sizeof (char*));
+  splitter_reserve(s, s->num_of_tokens + 2);
   s->tokens[s->num_of_tokens++] = string_index;
   s->tokens[s->num_of_tokens]   = NULL;
 
@@ -80,9 +90,7 @@ void gt_splitter_split_non_empty(GtSplitter *s, char *string, GtUword length,
     *end_of_token = '\0';
     /* skip empty token */
     if (end_of_token > string_index) {
-      if ((s->num_of_tokens + 2) * sizeof (*s->tokens) > s->allocated)
-        s->tokens = gt_dynalloc(s->tokens, &s->allocated,
-                                (s->num_of_tokens + 2) * sizeof (*s->tokens));
+      splitter_reserve(s, s->num_of_tokens + 2);
       s->tokens[s->num_of_tokens++] = string_index;
     }
     string_index = end_of_token + 1;
@@ -90,9 +98,7 @@ void gt_splitter_split_non_empty(GtSplitter *s, char *string, GtUword length,
 
   /* save last token if not empty*/
   if (string_index < string + length) {
-    if ((s->num_of_tokens + 2) * sizeof (*s->tokens) > s->allocated)
-      s->tokens = gt_dynalloc(s->tokens, &s->allocated,
-                              (s->num_of_tokens + 2) * sizeof (*s->tokens));
+    splitter_reserve(s, s->num_of_tokens + 2);
     s->tokens[s->num_of_tokens++] = string_index;
   }
   s->tokens[s->num_of_tokens] = NULL;

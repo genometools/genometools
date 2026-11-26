@@ -28,6 +28,7 @@
 #include "core/queue_api.h"
 #include "core/unused_api.h"
 #include "extended/eof_node_api.h"
+#include "extended/feature_node.h"
 #include "extended/genome_node_rep.h"
 #include "extended/gff3_defines.h"
 #include "extended/gff3_visitor_api.h"
@@ -86,6 +87,13 @@ static int compare_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
   void *rn_a, *rn_b, *sn_a, *sn_b, *en_a, *en_b;
   GtMetaNode *mn_a, *mn_b;
+
+  /* two feature nodes are by far the most common case and are equal with
+     respect to their type, do not go through all the casts below for them */
+  if (gn_a->c_class == gn_b->c_class &&
+      gn_a->c_class == gt_feature_node_class()) {
+    return 0;
+  }
 
   /* meta nodes first */
   mn_a = gt_meta_node_try_cast(gn_a);

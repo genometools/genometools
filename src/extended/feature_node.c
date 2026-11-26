@@ -867,14 +867,54 @@ static void add_parent(unsigned int *bit_field)
   }
 }
 
+/* The stack of nodes used by gt_feature_node_traverse_children(). As long as
+   it is small (the common case) no memory has to be allocated for it. */
+#define TRAVERSE_STACK_LOCAL_SIZE  32
+
+typedef struct {
+  GtFeatureNode *local_space[TRAVERSE_STACK_LOCAL_SIZE],
+                **nodes;
+  GtUword size,
+          allocated;
+} TraverseStack;
+
+static void traverse_stack_init(TraverseStack *stack)
+{
+  stack->nodes = stack->local_space;
+  stack->size = 0;
+  stack->allocated = TRAVERSE_STACK_LOCAL_SIZE;
+}
+
+static void traverse_stack_push(TraverseStack *stack, GtFeatureNode *fn)
+{
+  if (stack->size == stack->allocated) {
+    stack->allocated *= 2;
+    if (stack->nodes == stack->local_space) {
+      stack->nodes = gt_malloc(stack->allocated * sizeof *stack->nodes);
+      memcpy(stack->nodes, stack->local_space,
+             stack->size * sizeof *stack->nodes);
+    }
+    else {
+      stack->nodes = gt_realloc(stack->nodes,
+                                stack->allocated * sizeof *stack->nodes);
+    }
+  }
+  stack->nodes[stack->size++] = fn;
+}
+
+static void traverse_stack_free(TraverseStack *stack)
+{
+  if (stack->nodes != stack->local_space)
+    gt_free(stack->nodes);
+}
+
 int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
                                       GtFeatureNodeTraverseFunc traverse,
                                       bool traverse_only_once, GtError *err)
 {
-  GtArray *node_stack = NULL, *list_of_children;
+  TraverseStack node_stack;
   GtFeatureNode *fn, *fn_ref, *child_feature;
   GtDlistelem *dlistelem;
-  GtUword i;
   GtHashtable *traversed_nodes = NULL;
   bool has_node_with_multiple_parents = false;
   int had_err = 0;
@@ -886,60 +926,53 @@ int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
      freed by <traverse>) */
   fn_ref = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) feature_node);
 
-  node_stack = gt_array_new(sizeof (GtFeatureNode*));
+  traverse_stack_init(&node_stack);
   if (gt_feature_node_is_pseudo(feature_node)) {
     /* add the children backwards to traverse in order */
     for (dlistelem = gt_dlist_last(feature_node->children);
          dlistelem != NULL;
          dlistelem = gt_dlistelem_previous(dlistelem)) {
       child_feature = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
-      gt_array_add(node_stack, child_feature);
+      traverse_stack_push(&node_stack, child_feature);
     }
   }
   else
-    gt_array_add(node_stack, feature_node);
-  gt_assert(gt_array_size(node_stack));
-  list_of_children = gt_array_new(sizeof (GtFeatureNode*));
+    traverse_stack_push(&node_stack, feature_node);
+  gt_assert(node_stack.size);
 
-  if (traverse_only_once) {
-    static const HashElemInfo node_hashtype
-      = { gt_ht_ptr_elem_hash, { NULL }, sizeof (GtFeatureNode *),
-          gt_ht_ptr_elem_cmp, NULL, NULL };
-    traversed_nodes = gt_hashtable_new(node_hashtype);
-  }
-
-  while (gt_array_size(node_stack)) {
-    fn = *(GtFeatureNode**) gt_array_pop(node_stack);
-    gt_array_reset(list_of_children);
-    if (fn->children) {
-      /* a backup of the children array is necessary if traverse() frees the
-         node */
-      for (dlistelem = gt_dlist_first(fn->children); dlistelem != NULL;
-           dlistelem = gt_dlistelem_next(dlistelem)) {
-        child_feature = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
-        gt_array_add(list_of_children, child_feature);
-      }
-    }
+  while (node_stack.size) {
+    fn = node_stack.nodes[--node_stack.size];
     /* store the implications of <fn> to the tree status of <feature_node> */
     if (multiple_parents(fn->bit_field))
       has_node_with_multiple_parents = true;
+    /* The children of <fn> are put on the stack before traverse() is called,
+       because traverse() might free the node. We go backwards to traverse in
+       order. */
+    if (fn->children) {
+      for (dlistelem = gt_dlist_last(fn->children); dlistelem != NULL;
+           dlistelem = gt_dlistelem_previous(dlistelem)) {
+        child_feature = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
+        /* Only a node with multiple parents can be reached more than once,
+           therefore it is sufficient to keep track of these. That is, for
+           trees the hashtable is never created. */
+        if (traverse_only_once && multiple_parents(child_feature->bit_field)) {
+          if (!traversed_nodes) {
+            static const HashElemInfo node_hashtype
+              = { gt_ht_ptr_elem_hash, { NULL }, sizeof (GtFeatureNode *),
+                  gt_ht_ptr_elem_cmp, NULL, NULL };
+            traversed_nodes = gt_hashtable_new(node_hashtype);
+          }
+          if (gt_hashtable_get(traversed_nodes, &child_feature))
+            continue; /* feature has been traversed already */
+          gt_hashtable_add(traversed_nodes, &child_feature);
+        }
+        traverse_stack_push(&node_stack, child_feature);
+      }
+    }
     /* call traverse function */
     if (traverse) {
       if ((had_err = traverse(fn, data, err)))
         break;
-    }
-    for (i = 0; i < gt_array_size(list_of_children); i++) {
-      /* we go backwards to traverse in order */
-      child_feature = *(GtFeatureNode**) gt_array_get(list_of_children,
-                                       gt_array_size(list_of_children) - i - 1);
-      if (!traverse_only_once ||
-          !gt_hashtable_get(traversed_nodes, &child_feature)) {
-        /* feature has not been traversed or has to be traversed multiple
-           times */
-        gt_array_add(node_stack, child_feature);
-        if (traverse_only_once)
-          gt_hashtable_add(traversed_nodes, &child_feature);
-      }
     }
   }
 
@@ -957,10 +990,8 @@ int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
 
   /* free */
   gt_genome_node_delete((GtGenomeNode*) fn_ref);
-  if (traverse_only_once)
-    gt_hashtable_delete(traversed_nodes);
-  gt_array_delete(list_of_children);
-  gt_array_delete(node_stack);
+  gt_hashtable_delete(traversed_nodes);
+  traverse_stack_free(&node_stack);
 
   return had_err;
 }
