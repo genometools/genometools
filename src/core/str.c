@@ -16,6 +16,7 @@
 */
 
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
@@ -505,6 +506,42 @@ static int str_read_next_line_unit_test(GtError *err)
     had_err = str_read_next_line_test_file(gt_str_get(tmpfilename), err);
     gt_xremove(gt_str_get(tmpfilename));
     gt_str_delete(tmpfilename);
+  }
+  for (i = 0; !had_err && i < 2; i++) {
+    /* rewind compressed files; the 'w' in the file name makes sure a mix-up
+       of path and mode on reopening (bzip2) is detected */
+    GtFileMode file_mode = i == 0 ? GT_FILE_MODE_GZIP : GT_FILE_MODE_BZIP2;
+    GtFile *file;
+    GtStr *line = gt_str_new();
+    int rval;
+    tmpfilename = gt_str_new();
+    tmpfp = gt_xtmpfp(tmpfilename);
+    gt_fa_xfclose(tmpfp);
+    gt_xremove(gt_str_get(tmpfilename));
+    gt_str_append_cstr(tmpfilename, "w");
+    gt_str_append_cstr(tmpfilename, gt_file_mode_suffix(file_mode));
+    file = gt_file_xopen_file_mode(file_mode, gt_str_get(tmpfilename), "wb");
+    for (j = 0; j < 1000; j++)
+      gt_file_xprintf(file, "line" GT_WU "\n", j);
+    gt_file_delete(file);
+    file = gt_file_xopen_file_mode(file_mode, gt_str_get(tmpfilename), "rb");
+    for (k = 0; !had_err && k < 2; k++) {
+      for (j = 0; !had_err && j < 1000; j++) {
+        rval = gt_str_read_next_line_generic(line, file);
+        gt_ensure(rval == 0);
+        gt_ensure(gt_str_length(line) > 4
+                  && strtoul(gt_str_get(line) + 4, NULL, 10) == j);
+        gt_str_reset(line);
+      }
+      if (!had_err) {
+        gt_ensure(gt_str_read_next_line_generic(line, file) == EOF);
+        gt_file_xrewind(file);
+      }
+    }
+    gt_file_delete(file);
+    gt_xremove(gt_str_get(tmpfilename));
+    gt_str_delete(tmpfilename);
+    gt_str_delete(line);
   }
   if (!had_err) {
     /* the empty file */
