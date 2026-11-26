@@ -19,6 +19,7 @@
 #include <string.h>
 #include "core/cstr_api.h"
 #include "core/fa_api.h"
+#include "core/file.h"
 #include "core/ma_api.h"
 #include "core/xansi_api.h"
 #include "core/xbzlib.h"
@@ -36,8 +37,16 @@ struct GtFile {
        *orig_mode,
        unget_char;
   bool is_stdin,
-       unget_used;
+       unget_used,
+       read_buffer_allowed; /* file is owned by us and not interactive */
+  /* read buffer, filled lazily by gt_file_read_buffer_peek() */
+  char *rbuf;
+  size_t rbuf_pos,       /* position of next unread byte in <rbuf> */
+         rbuf_len,       /* number of valid bytes in <rbuf> */
+         rbuf_allocated;
 };
+
+#define GT_FILE_READ_BUFFER_SIZE  65536
 
 GtFileMode gt_file_mode_determine(const char *path)
 {
@@ -134,6 +143,7 @@ GtFile* gt_file_open(GtFileMode file_mode, const char *path, const char *mode,
         break;
       default: gt_assert(0);
     }
+    file->read_buffer_allowed = true;
   }
   else {
     gt_assert(file_mode == GT_FILE_MODE_UNCOMPRESSED);
@@ -166,6 +176,7 @@ GtFile* gt_file_xopen_file_mode(GtFileMode file_mode, const char *path,
         break;
       default: gt_assert(0);
     }
+    file->read_buffer_allowed = true;
   }
   else {
     gt_assert(file_mode == GT_FILE_MODE_UNCOMPRESSED);
@@ -206,6 +217,8 @@ int gt_file_xfgetc(GtFile *file)
       c = file->unget_char;
       file->unget_used = false;
     }
+    else if (file->rbuf_pos < file->rbuf_len)
+      c = (unsigned char) file->rbuf[file->rbuf_pos++];
     else {
       switch (file->mode) {
         case GT_FILE_MODE_UNCOMPRESSED:
@@ -235,6 +248,73 @@ void gt_file_unget_char(GtFile *file, char c)
   }
   else
     gt_xungetc(c, stdin);
+}
+
+static int file_xread_raw(GtFile *file, void *buf, size_t nbytes)
+{
+  int rval = -1;
+  gt_assert(file);
+  switch (file->mode) {
+    case GT_FILE_MODE_UNCOMPRESSED:
+      rval = gt_xfread(buf, 1, nbytes, file->fileptr.file);
+      break;
+    case GT_FILE_MODE_GZIP:
+      rval = gt_xgzread(file->fileptr.gzfile, buf, nbytes);
+      break;
+    case GT_FILE_MODE_BZIP2:
+      rval = gt_xbzread(file->fileptr.bzfile, buf, nbytes);
+      break;
+    default: gt_assert(0);
+  }
+  return rval;
+}
+
+bool gt_file_has_read_buffer(const GtFile *file)
+{
+  return file && file->read_buffer_allowed;
+}
+
+size_t gt_file_read_buffer_peek(GtFile *file, const char **data)
+{
+  gt_assert(file && data && file->read_buffer_allowed);
+  if (file->rbuf_pos == file->rbuf_len) {
+    /* buffer is empty -> refill it */
+    int rval;
+    if (!file->rbuf) {
+      file->rbuf_allocated = GT_FILE_READ_BUFFER_SIZE;
+      file->rbuf = gt_malloc(file->rbuf_allocated);
+    }
+    file->rbuf_pos = 0;
+    file->rbuf_len = 0;
+    /* leave room for a char which has been unget */
+    rval = file_xread_raw(file, file->rbuf + 1, GT_FILE_READ_BUFFER_SIZE - 1);
+    if (rval > 0) {
+      file->rbuf_pos = 1;
+      file->rbuf_len = (size_t) rval + 1;
+    }
+  }
+  if (file->unget_used) {
+    /* move the char which has been unget to the front of the buffer */
+    if (!file->rbuf_pos) {
+      if (file->rbuf_len == file->rbuf_allocated) {
+        file->rbuf_allocated *= 2;
+        file->rbuf = gt_realloc(file->rbuf, file->rbuf_allocated);
+      }
+      memmove(file->rbuf + 1, file->rbuf, file->rbuf_len);
+      file->rbuf_pos = 1;
+      file->rbuf_len++;
+    }
+    file->rbuf[--file->rbuf_pos] = file->unget_char;
+    file->unget_used = false;
+  }
+  *data = file->rbuf + file->rbuf_pos;
+  return file->rbuf_len - file->rbuf_pos;
+}
+
+void gt_file_read_buffer_consume(GtFile *file, size_t nbytes)
+{
+  gt_assert(file && nbytes <= file->rbuf_len - file->rbuf_pos);
+  file->rbuf_pos += nbytes;
 }
 
 static int vgzprintf(gzFile file, const char *format, va_list va, int buflen)
@@ -365,18 +445,21 @@ int gt_file_xread(GtFile *file, void *buf, size_t nbytes)
 {
   int rval = -1;
   if (file) {
-    switch (file->mode) {
-      case GT_FILE_MODE_UNCOMPRESSED:
-        rval = gt_xfread(buf, 1, nbytes, file->fileptr.file);
-        break;
-      case GT_FILE_MODE_GZIP:
-        rval = gt_xgzread(file->fileptr.gzfile, buf, nbytes);
-        break;
-      case GT_FILE_MODE_BZIP2:
-        rval = gt_xbzread(file->fileptr.bzfile, buf, nbytes);
-        break;
-      default: gt_assert(0);
+    size_t buffered = file->rbuf_len - file->rbuf_pos;
+    if (buffered) {
+      /* serve bytes which have already been read into the buffer first */
+      if (buffered > nbytes)
+        buffered = nbytes;
+      memcpy(buf, file->rbuf + file->rbuf_pos, buffered);
+      file->rbuf_pos += buffered;
+      rval = buffered;
+      if (buffered < nbytes) {
+        rval += file_xread_raw(file, (char*) buf + buffered,
+                               nbytes - buffered);
+      }
     }
+    else
+      rval = file_xread_raw(file, buf, nbytes);
   }
   else
     rval = gt_xfread(buf, 1, nbytes, stdin);
@@ -406,6 +489,8 @@ void gt_file_xwrite(GtFile *file, void *buf, size_t nbytes)
 void gt_file_xrewind(GtFile *file)
 {
   gt_assert(file);
+  file->rbuf_pos = 0;
+  file->rbuf_len = 0;
   switch (file->mode) {
     case GT_FILE_MODE_UNCOMPRESSED:
       rewind(file->fileptr.file);
@@ -425,6 +510,7 @@ void gt_file_delete_without_handle(GtFile *file)
   if (!file) return;
   gt_free(file->orig_path);
   gt_free(file->orig_mode);
+  gt_free(file->rbuf);
   gt_free(file);
 }
 
