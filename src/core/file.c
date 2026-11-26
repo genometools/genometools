@@ -139,7 +139,7 @@ GtFile* gt_file_open(GtFileMode file_mode, const char *path, const char *mode,
           return NULL;
         }
         file->orig_path = gt_cstr_dup(path);
-        file->orig_mode = gt_cstr_dup(path);
+        file->orig_mode = gt_cstr_dup(mode);
         break;
       default: gt_assert(0);
     }
@@ -172,7 +172,7 @@ GtFile* gt_file_xopen_file_mode(GtFileMode file_mode, const char *path,
       case GT_FILE_MODE_BZIP2:
         file->fileptr.bzfile = gt_fa_xbzopen(path, mode);
         file->orig_path = gt_cstr_dup(path);
-        file->orig_mode = gt_cstr_dup(path);
+        file->orig_mode = gt_cstr_dup(mode);
         break;
       default: gt_assert(0);
     }
@@ -499,7 +499,9 @@ void gt_file_xrewind(GtFile *file)
       gt_xgzrewind(file->fileptr.gzfile);
       break;
     case GT_FILE_MODE_BZIP2:
-      gt_xbzrewind(&file->fileptr.bzfile, file->orig_path, file->orig_mode);
+      /* simulate a rewind with close/open, keep the file allocator informed */
+      gt_fa_xbzclose(file->fileptr.bzfile);
+      file->fileptr.bzfile = gt_fa_xbzopen(file->orig_path, file->orig_mode);
       break;
     default: gt_assert(0);
   }
