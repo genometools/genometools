@@ -207,9 +207,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
 
-The source in src/external/zlib-1.2.8/* is covered by the following license:
+The source in src/external/zlib-1.4/* is covered by the following license:
 
-(C) 1995-2023 Jean-loup Gailly and Mark Adler
+(C) 1995-2026 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
