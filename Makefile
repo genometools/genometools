@@ -63,7 +63,7 @@ else
               -I$(CURDIR)/src/external/lua-5.1.5/src \
               -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
               -I$(CURDIR)/src/external/lpeg-0.10.2 \
-              -I$(CURDIR)/src/external/expat-2.0.1/lib \
+              -I$(CURDIR)/src/external/expat-2.7.5/lib \
               -I$(CURDIR)/src/external/bzip2-1.0.8 \
               -I$(CURDIR)/src/external/samtools-0.1.18 \
               -I$(CURDIR)/src/external/sqlite-3.54.1 \
@@ -100,9 +100,8 @@ EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith -Wno-unknown-pragmas -Wno-macro-redefined
-# expat needs -DHAVE_MEMMOVE
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-EXT_FLAGS:= -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
+EXT_FLAGS:= -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
 GT_CXXFLAGS:=-g -pipe
@@ -152,7 +151,7 @@ TOOLS_SRC:=$(sort $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
 
-EXPAT_DIR:=src/external/expat-2.0.1/lib
+EXPAT_DIR:=src/external/expat-2.7.5/lib
 LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
               $(EXPAT_DIR)/xmltok.c
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
