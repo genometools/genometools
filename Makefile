@@ -64,7 +64,7 @@ else
               -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
               -I$(CURDIR)/src/external/lpeg-0.10.2 \
               -I$(CURDIR)/src/external/expat-2.0.1/lib \
-              -I$(CURDIR)/src/external/bzip2-1.0.6 \
+              -I$(CURDIR)/src/external/bzip2-1.0.8 \
               -I$(CURDIR)/src/external/samtools-0.1.18 \
               -I$(CURDIR)/src/external/sqlite-3.33.0 \
               -I$(CURDIR)/src/external/tre/include
@@ -183,7 +183,7 @@ LUAMAIN_SRC:=src/external/lua-5.1.5/etc/all.c
 LUAMAIN_OBJ:=$(LUAMAIN_SRC:%.c=obj/%.o)
 LUAMAIN_DEP:=$(LUAMAIN_SRC:%.c=obj/%.d)
 
-BZ2_DIR:=src/external/bzip2-1.0.6
+BZ2_DIR:=src/external/bzip2-1.0.8
 LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
             $(BZ2_DIR)/randtable.c $(BZ2_DIR)/compress.c \
             $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c
